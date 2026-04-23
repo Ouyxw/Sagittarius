@@ -6,12 +6,13 @@ requires-python = ">=3.9"
 dependencies = [
     "juliacall",
     "numpy",
+    "pandas",
+    "matplotlib",
 ]
 
 [dependency-groups]
 dev = [
     "pytest",
-    "matplotlib",
 ]
 
 [build-system]

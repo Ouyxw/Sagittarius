@@ -5,3 +5,5 @@ Summary: A high-performance Neutral Atom quantum emulator
 Requires-Python: >=3.9
 Requires-Dist: juliacall
 Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: matplotlib

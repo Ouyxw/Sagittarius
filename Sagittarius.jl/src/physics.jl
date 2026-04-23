@@ -31,12 +31,12 @@ end
     RydbergOperator
 
 A matrix-free representation of the Rydberg Hamiltonian.
-H = Σ (Ω/2 σx_i) - Σ (Δ n_i) + Σ (V_ij n_i n_j)
+H = Σ (Ω_i/2 σx_i) - Σ (Δ_i n_i) + Σ (V_ij n_i n_j)
 """
 struct RydbergOperator
     N::Int
-    Ω::Float64
-    Δ::Float64
+    Ω::Vector{Float64} # Local Rabi frequency
+    Δ::Vector{Float64} # Local Detuning
     V::Matrix{Float64} # Interaction matrix
 end
 
@@ -44,7 +44,6 @@ end
 function Base.:*(op::RydbergOperator, ψ::Vector{ComplexF64})
     res = zero(ψ)
     N = op.N
-    half_Ω = op.Ω / 2.0
     
     for i in 0:(2^N - 1)
         if ψ[i+1] == 0 continue end
@@ -53,7 +52,7 @@ function Base.:*(op::RydbergOperator, ψ::Vector{ComplexF64})
         diagonal = 0.0
         for j in 1:N
             if (i & (1 << (j-1))) != 0
-                diagonal -= op.Δ  # Detuning
+                diagonal -= op.Δ[j]  # Local Detuning
                 
                 # Interaction V_jk n_j n_k
                 for k in j+1:N
@@ -69,7 +68,7 @@ function Base.:*(op::RydbergOperator, ψ::Vector{ComplexF64})
         for j in 1:N
             # Flip the j-th bit to find the coupled state
             target = i ⊻ (1 << (j-1))
-            res[target+1] += half_Ω * ψ[i+1]
+            res[target+1] += (op.Ω[j] / 2.0) * ψ[i+1]
         end
     end
     return res
@@ -84,8 +83,8 @@ A Hamiltonian operator that acts on a truncated Hilbert space.
 """
 struct ReducedRydbergOperator
     N::Int
-    Ω::Float64
-    Δ::Float64
+    Ω::Vector{Float64}
+    Δ::Vector{Float64}
     V::Matrix{Float64}
     basis::Vector{Int}
     mapping::Dict{Int, Int}
@@ -138,7 +137,6 @@ end
 
 function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})
     res = zero(ψ)
-    half_Ω = op.Ω / 2.0
     N = op.N
 
     # We iterate only over the valid basis states
@@ -146,11 +144,11 @@ function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})
         if ψ[idx] == 0 continue end
 
         # 1. Diagonal terms (Detuning & Interaction)
-        # Interaction is only for pairs NOT blockaded (which still have some V_ij)
+        # Interaction is only for pairs NOT blockade (which still have some V_ij)
         diagonal = 0.0
         for j in 1:N
             if (state & (1 << (j-1))) != 0
-                diagonal -= op.Δ
+                diagonal -= op.Δ[j]
                 for k in j+1:N
                     if (state & (1 << (k-1))) != 0
                         diagonal += op.V[j, k]
@@ -166,7 +164,7 @@ function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})
             # Only transition if the target state is in our reduced basis
             if haskey(op.mapping, target_state)
                 target_idx = op.mapping[target_state]
-                res[target_idx] += half_Ω * ψ[idx]
+                res[target_idx] += (op.Ω[j] / 2.0) * ψ[idx]
             end
         end
     end
@@ -183,11 +181,15 @@ function RydbergHamiltonian(reg::Register, Ω, Δ; blockade_radius=0.0)
     V = interaction_matrix(reg)
     N = length(reg.atoms)
     
+    # Expand scalars to vectors if necessary
+    v_Ω = (Ω isa AbstractVector) ? convert(Vector{Float64}, Ω) : fill(float(Ω), N)
+    v_Δ = (Δ isa AbstractVector) ? convert(Vector{Float64}, Δ) : fill(float(Δ), N)
+    
     if blockade_radius > 0.0
         basis, mapping = generate_reduced_basis(reg, blockade_radius)
-        return ReducedRydbergOperator(N, float(Ω), float(Δ), V, basis, mapping)
+        return ReducedRydbergOperator(N, v_Ω, v_Δ, V, basis, mapping)
     else
-        return RydbergOperator(N, float(Ω), float(Δ), V)
+        return RydbergOperator(N, v_Ω, v_Δ, V)
     end
 end
 
@@ -195,7 +197,7 @@ end
     build_hamiltonian_func(reg, Ω_func, Δ_func; blockade_radius=0.0)
 
 Returns a highly optimized closure `t -> Operator` for use in ODE solvers,
-where `Ω_func` and `Δ_func` are functions of time.
+where `Ω_func` and `Δ_func` are functions of time returning a Vector{Float64}.
 """
 function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius=0.0)
     V = interaction_matrix(reg)
@@ -203,9 +205,9 @@ function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius
     
     if blockade_radius > 0.0
         basis, mapping = generate_reduced_basis(reg, blockade_radius)
-        return t -> ReducedRydbergOperator(N, float(Ω_func(t)), float(Δ_func(t)), V, basis, mapping)
+        return t -> ReducedRydbergOperator(N, convert(Vector{Float64}, Ω_func(t)), convert(Vector{Float64}, Δ_func(t)), V, basis, mapping)
     else
-        return t -> RydbergOperator(N, float(Ω_func(t)), float(Δ_func(t)), V)
+        return t -> RydbergOperator(N, convert(Vector{Float64}, Ω_func(t)), convert(Vector{Float64}, Δ_func(t)), V)
     end
 end
 

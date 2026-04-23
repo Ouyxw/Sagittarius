@@ -1,4 +1,9 @@
 import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from dataclasses import dataclass, field
+from typing import Optional, Dict, Union, Any, List
 from juliacall import Main as jl
 
 # Path to the Julia core
@@ -30,67 +35,156 @@ class Register:
     def jl_obj(self):
         return self._register
 
+@dataclass
+class SolverConfig:
+    reltol: float = 1e-8
+    abstol: float = 1e-8
+    blockade_radius: float = 0.0
+    method: str = "Tsit5"
+
+@dataclass
+class PulseSequence:
+    omega: Any = 1.0
+    delta: Any = 0.0
+
+class SimulationResult:
+    def __init__(self, data: Dict[str, List[float]]):
+        self.data = data
+        self.t = np.array(data.get('t', []))
+    
+    def to_pandas(self) -> pd.DataFrame:
+        return pd.DataFrame(self.data)
+    
+    def plot(self, show: bool = True):
+        plt.figure(figsize=(10, 6))
+        for key, values in self.data.items():
+            if key == 't':
+                continue
+            plt.plot(self.t, values, label=key)
+        plt.xlabel("Time (μs)")
+        plt.ylabel("Observable Value")
+        plt.title("Simulation Results")
+        plt.legend()
+        plt.grid(True)
+        if show:
+            plt.show()
+
+class Simulation:
+    def __init__(self, register: Register, sequence: PulseSequence, config: Optional[SolverConfig] = None):
+        self.register = register
+        self.sequence = sequence
+        self.config = config or SolverConfig()
+        self._basis = None
+    
+    def validate(self):
+        N = len(self.register.jl_obj.atoms)
+        if self.config.blockade_radius <= 0:
+            basis_size = 2**N
+            if basis_size > 10000:
+                print(f"Warning: Large Hilbert space (size {basis_size}) without blockade pruning.")
+        else:
+            # We pre-calculate basis to validate size and reuse in run()
+            self._basis, _ = phys.generate_reduced_basis(self.register.jl_obj, float(self.config.blockade_radius))
+            basis_size = len(self._basis)
+        
+        return basis_size
+
+    def _get_compiled_func(self, p_config, N):
+        is_pulse = lambda x: hasattr(x, 'jl_obj')
+        if isinstance(p_config, dict):
+            # Local addressing
+            compiled_funcs = []
+            for i in range(N):
+                p = p_config.get(i, 0.0)
+                if is_pulse(p):
+                    compiled_funcs.append(sgr.compile_pulse(p.jl_obj))
+                else:
+                    v = float(p)
+                    compiled_funcs.append(sgr.compile_pulse(sgr.ConstantPulse(v, 1e12)))
+
+            # Atom 0 corresponds to bit 0, but Julia's 1-indexing and 
+            # our bitwise mapping requires careful alignment.
+            # Empirical evidence shows a reversal is needed for Python-Julia bridge.
+            compiled_funcs.reverse()
+            
+            jl_vec = jl.Vector[jl.Any](compiled_funcs)
+            return jl.seval("funcs -> (t -> Float64[f(t) for f in funcs])")(jl_vec)
+        else:
+            # Global addressing
+            if is_pulse(p_config):
+                f = sgr.compile_pulse(p_config.jl_obj)
+                # Correctly handle global pulse by creating N identical Julia functions
+                jl_vec = jl.Vector[jl.Any]([f for _ in range(N)])
+                return jl.seval("funcs -> (t -> Float64[f(t) for f in funcs])")(jl_vec)
+            else:
+                v = float(p_config)
+                return sgr.create_const_vec_func(v, N)
+
+    def run(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, int]] = None) -> SimulationResult:
+        N = len(self.register.jl_obj.atoms)
+        basis_size = self.validate()
+        
+        if len(psi0) != basis_size:
+            raise ValueError(f"Initial state psi0 must have size {basis_size} (current basis size)")
+
+        # 1. Compile pulses
+        omega_func = self._get_compiled_func(self.sequence.omega, N)
+        delta_func = self._get_compiled_func(self.sequence.delta, N)
+
+        # 2. Build Hamiltonian
+        H_func = phys.build_hamiltonian_func(
+            self.register.jl_obj, 
+            omega_func, 
+            delta_func, 
+            blockade_radius=float(self.config.blockade_radius)
+        )
+
+        # 3. Handle observables
+        jl_obs = None
+        if observables:
+            if self.config.blockade_radius > 0:
+                basis = self._basis
+                def make_pop_tracker(atom_idx):
+                    mask = 1 << atom_idx
+                    indices = [i for i, state in enumerate(basis) if (state & mask) != 0]
+                    return lambda ψ, t, integrator: sum(abs(ψ[idx])**2 for idx in indices)
+                
+                jl_obs = jl.Dict[jl.String, jl.Any]({name: make_pop_tracker(idx) for name, idx in observables.items()})
+            else:
+                jl_obs = jl.Dict[jl.String, jl.Any]({name: solv.RydbergPopulation(idx + 1, N) for name, idx in observables.items()})
+
+        # 4. Solve
+        jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
+        # Handle solver method mapping if needed, but for now we pass it as a symbol or use default
+        result = solv.solve_schrodinger(
+            jl_psi0, 
+            H_func, 
+            jl.SVector(float(t_start), float(t_end)), 
+            observables=jl_obs
+        )
+        
+        if jl_obs:
+            sol, saved = result
+            times = list(saved.t)
+            data = {name: [v[i] for v in saved.saveval] for i, name in enumerate(observables.keys())}
+            data['t'] = times
+            return SimulationResult(data)
+        
+        return result
+
 def solve(register, psi0, t_start, t_end, omega=1.0, delta=0.0, blockade_radius=0.0, observables=None):
     """
-    Solves the dynamics. 
-    If blockade_radius > 0, automatically prunes the Hilbert space.
-    omega and delta can be constant floats or PulseNode objects.
+    Backward compatible solve function.
     """
-    N = len(register.jl_obj.atoms)
+    config = SolverConfig(blockade_radius=blockade_radius)
+    sequence = PulseSequence(omega=omega, delta=delta)
+    sim = Simulation(register, sequence, config)
     
-    # 1. Compile pulses or create constant functions
-    # Avoid circular imports by doing lazy import or checking type name
-    is_pulse = lambda x: hasattr(x, 'jl_obj') and type(x).__name__ in ('Constant', 'Ramp', 'Piecewise')
+    res = sim.run(psi0, t_start, t_end, observables=observables)
     
-    if is_pulse(omega):
-        omega_func = sgr.compile_pulse(omega.jl_obj)
-    else:
-        # Constant wrapper
-        v_omega = float(omega)
-        omega_func = jl.seval(f"t -> {v_omega}")
-        
-    if is_pulse(delta):
-        delta_func = sgr.compile_pulse(delta.jl_obj)
-    else:
-        v_delta = float(delta)
-        delta_func = jl.seval(f"t -> {v_delta}")
-
-    # 2. Build the optimized H(t) closure
-    H_func = phys.build_hamiltonian_func(register.jl_obj, omega_func, delta_func, blockade_radius=float(blockade_radius))
-    
-    # We still need to know the basis size for psi0 validation
-    if blockade_radius > 0:
-        basis, _ = phys.generate_reduced_basis(register.jl_obj, float(blockade_radius))
-        basis_size = len(basis)
-    else:
-        basis_size = 2**N
-
-    jl_obs = None
-    if observables:
-        if blockade_radius > 0:
-            def make_pop_tracker(atom_idx):
-                mask = 1 << atom_idx
-                indices = [i for i, state in enumerate(basis) if (state & mask) != 0]
-                return lambda ψ, t, integrator: sum(abs(ψ[idx])**2 for idx in indices)
-            
-            jl_obs = jl.Dict[jl.String, jl.Any]({name: make_pop_tracker(idx) for name, idx in observables.items()})
-        else:
-            jl_obs = jl.Dict[jl.String, jl.Any]({name: solv.RydbergPopulation(idx + 1, N) for name, idx in observables.items()})
-        
-    if len(psi0) != basis_size:
-        raise ValueError(f"Initial state psi0 must have size {basis_size} (current basis size)")
-
-    jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
-    result = solv.solve_schrodinger(jl_psi0, H_func, jl.SVector(float(t_start), float(t_end)), observables=jl_obs)
-    
-    if jl_obs:
-        sol, saved = result
-        times = list(saved.t)
-        data = {name: [v[i] for v in saved.saveval] for i, name in enumerate(observables.keys())}
-        data['t'] = times
-        return data
-    
-    return result
+    if isinstance(res, SimulationResult):
+        return res.data
+    return res
 
 def get_basis(register, blockade_radius):
     res = phys.generate_reduced_basis(register.jl_obj, float(blockade_radius))

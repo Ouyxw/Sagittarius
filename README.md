@@ -11,8 +11,11 @@ By leveraging **Bit-Manipulation**, **Graph-based Hilbert Space Pruning**, and *
 *   **🚀 High-Performance Julia Backend**: Core physics and solvers written in Julia for C-level performance with mathematical elegance.
 *   **🧠 Intelligent Basis Pruning**: Automatically detects "Rydberg Blockade" regions using graph theory to truncate the Hilbert space, enabling simulation of 20+ atoms.
 *   **⚡ Matrix-Free Evolution**: Employs bitwise operations to apply Hamiltonian terms on-the-fly, avoiding the memory overhead of $2^N \times 2^N$ matrices.
-*   **🎭 Pulse AST DSL**: Define complex, time-dependent pulse sequences (Ramps, Piecewise, Constants) in Python that compile directly to optimized machine code.
+*   **🎭 Pulse Library & AST**: Define complex, time-dependent pulse sequences (**Gaussian, Blackman, Sinc, Ramps**) via a unified `Pulse` factory.
+*   **📍 Local Addressing**: Support per-atom Rabi frequencies ($\Omega_i$) and detunings ($\Delta_i$) for simulating quantum gates and spatial landscapes.
 *   **📊 Real-time Observables**: Track Rydberg populations and other physical quantities during simulation with zero-copy overhead.
+*   **🧪 Object-Oriented SDK**: Encapsulate simulations, sequences, and configurations into reusable Python objects.
+*   **📊 Data-Centric Results**: Integrated plotting and Pandas support for seamless scientific workflows.
 *   **🐍 Seamless Python SDK**: Fully managed environment via `uv` and `juliapkg`. No Julia knowledge required for end-users.
 
 ---
@@ -33,46 +36,37 @@ uv run python -m juliapkg resolve
 
 ---
 
-## 🚀 Quick Start: Rydberg Blockade
+## 🚀 Quick Start: Local Addressing & Pulse Library
 
-The following example simulates two atoms in the **blockade regime**, where the strong interaction prevents both atoms from being excited simultaneously.
+The following example demonstrates how to use the **Pulse Library** to drive a specific atom with a **Gaussian pulse** while detuning its neighbor.
 
 ```python
 import numpy as np
-from sagittarius import Atom, Register, solve, Constant, Ramp, Piecewise
+from sagittarius import Atom, Register, Simulation, PulseSequence, Pulse
 
 # 1. Define the Atomic Register
-# Atoms at distance 1.0 with a strong C6 coefficient
-reg = Register([
-    Atom(0.0, 0.0), 
-    Atom(1.0, 0.0)
-], C6=100.0)
+reg = Register([Atom(0,0), Atom(10,0)], C6=100.0)
 
-# 2. Design a Pulse Sequence (AST)
-# Ramp Omega from 0 to 2π, then hold constant
-omega_pulse = Piecewise([
-    Ramp(0.0, 2*np.pi, duration=1.0),
-    Constant(2*np.pi, duration=1.0)
-])
-
-# 3. Initial State: Both atoms in Ground State |gg>
-# For 2 atoms, the basis is [|gg>, |rg>, |gr>, |rr>]
-psi0 = np.array([1, 0, 0, 0], dtype=complex)
-
-# 4. Run the Simulation
-results = solve(
-    reg, 
-    psi0, 
-    t_start=0.0, 
-    t_end=2.0, 
-    omega=omega_pulse, 
-    delta=0.0,
-    observables={"atom1": 0, "atom2": 1}
+# 2. Design a Local Pulse Sequence
+# Drive Atom 0 with a Gaussian pulse, keep Atom 1 detuned
+seq = PulseSequence(
+    omega={0: Pulse.gaussian(amplitude=2*np.pi, sigma=0.1, duration=1.0)},
+    delta={1: 100.0} 
 )
 
-# 5. Analyze Results
-print(f"Max Total Rydberg Population: {max(np.array(results['atom1']) + np.array(results['atom2'])):.4f}")
-# Expected: Value near 1.0 due to Rydberg Blockade
+# 3. Initialize and Run the Simulation
+sim = Simulation(reg, seq)
+psi0 = np.array([1, 0, 0, 0], dtype=complex) # |gg>
+
+results = sim.run(
+    psi0, 
+    t_start=0.0, 
+    t_end=1.0, 
+    observables={"atom0": 0, "atom1": 1}
+)
+
+# 4. Analyze Results
+results.plot()
 ```
 
 ---
