@@ -1,0 +1,19 @@
+[project]
+name = "sagittarius-py"
+version = "0.1.0"
+description = "A high-performance Neutral Atom quantum emulator"
+requires-python = ">=3.9"
+dependencies = [
+    "juliacall",
+    "numpy",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "matplotlib",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
