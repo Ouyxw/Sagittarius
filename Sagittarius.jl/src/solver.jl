@@ -128,7 +128,7 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
     end
 
     # Jump condition: norm(ψ)^2 < r
-    condition(u, t, integrator) = norm(u)^2 - integrator.p[1]
+    condition(u, t, integrator) = norm(u)^2 - integrator.p[1] + 1e-15
     
     function affect!(integrator)
         ψ = integrator.u
@@ -156,7 +156,13 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
         integrator.p[1] = rand()
     end
 
-    cb_jump = ContinuousCallback(condition, affect!)
+    # Renormalization after each step is required for MCWF because 
+    # the effective Hamiltonian is non-Hermitian and reduces the norm.
+    function after_step!(integrator)
+        integrator.u /= norm(integrator.u)
+    end
+
+    cb_jump = ContinuousCallback(condition, affect!, save_positions=(false, false))
     
     # We use EnsembleProblem to run multiple trajectories
     prob = ODEProblem(f, ψ0, tspan, [rand()])
@@ -175,7 +181,7 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
         
         # Define output_func to extract observables at t_vals
         function output_func(sol, i)
-            # Interpolate solution at t_vals
+            # Interpolate and NORMALIZE at t_vals
             res = [ [func(sol(t) / norm(sol(t)), t, nothing) for func in values(observables)] for t in t_vals ]
             return (res, false)
         end
