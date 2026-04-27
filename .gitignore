@@ -1,2 +1,7 @@
 __pycache__/
 *.pyc
+*.egg-info/
+.venv/
+*.json
+*.csv
+*.png
