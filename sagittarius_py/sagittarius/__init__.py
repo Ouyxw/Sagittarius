@@ -1,4 +1,4 @@
-from .api import Atom, Register, solve, get_basis, Simulation, SimulationResult, PulseSequence, SolverConfig
+from .api import Atom, Register, solve, get_basis, Simulation, SimulationResult, PulseSequence, SolverConfig, load_result
 from .pulse import Constant, Ramp, Piecewise, Gaussian, Blackman, Sinc, Pulse
 
 __all__ = [

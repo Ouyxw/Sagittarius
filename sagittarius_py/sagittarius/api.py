@@ -51,6 +51,8 @@ class PulseSequence:
     omega: Any = 1.0
     delta: Any = 0.0
 
+import json
+
 class SimulationResult:
     def __init__(self, data: Dict[str, List[float]]):
         self.data = data
@@ -59,6 +61,21 @@ class SimulationResult:
     def to_pandas(self) -> pd.DataFrame:
         return pd.DataFrame(self.data)
     
+    def save(self, filepath: str):
+        """Save results to a JSON file."""
+        # Convert numpy arrays to lists for JSON serialization
+        serializable_data = {k: list(v) if isinstance(v, (np.ndarray, list)) else v 
+                             for k, v in self.data.items()}
+        with open(filepath, 'w') as f:
+            json.dump(serializable_data, f)
+    
+    @classmethod
+    def load(cls, filepath: str):
+        """Load results from a JSON file."""
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+        return cls(data)
+
     def plot(self, show: bool = True):
         plt.figure(figsize=(10, 6))
         for key, values in self.data.items():
@@ -248,3 +265,7 @@ def solve(register, psi0, t_start, t_end, omega=1.0, delta=0.0, blockade_radius=
 def get_basis(register, blockade_radius):
     res = phys.generate_reduced_basis(register.jl_obj, float(blockade_radius))
     return list(res[0])
+
+def load_result(filepath: str) -> SimulationResult:
+    """Load a SimulationResult from a file."""
+    return SimulationResult.load(filepath)
