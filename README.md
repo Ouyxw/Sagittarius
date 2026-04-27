@@ -14,6 +14,7 @@ By leveraging **Bit-Manipulation**, **Graph-based Hilbert Space Pruning**, and *
 *   **🎭 Pulse Library & AST**: Define complex, time-dependent pulse sequences (**Gaussian, Blackman, Sinc, Ramps**) via a unified `Pulse` factory.
 *   **📍 Local Addressing**: Support per-atom Rabi frequencies ($\Omega_i$) and detunings ($\Delta_i$) for simulating quantum gates and spatial landscapes.
 *   **📊 Real-time Observables**: Track Rydberg populations and other physical quantities during simulation with zero-copy overhead.
+*   **🫧 Open Quantum Systems**: Support for decoherence ($T_1$ decay and $T_2$ dephasing) via a high-performance Lindblad Master Equation solver.
 *   **🧪 Object-Oriented SDK**: Encapsulate simulations, sequences, and configurations into reusable Python objects.
 *   **📊 Data-Centric Results**: Integrated plotting and Pandas support for seamless scientific workflows.
 *   **🐍 Seamless Python SDK**: Fully managed environment via `uv` and `juliapkg`. No Julia knowledge required for end-users.
@@ -69,6 +70,24 @@ results = sim.run(
 results.plot()
 ```
 
+### 🫧 Simulating Decoherence ($T_1, T_2$ Noise)
+
+Sagittarius makes it easy to move from ideal physics to experimental realism by adding noise parameters to the `SolverConfig`.
+
+```python
+from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig
+
+reg = Register([Atom(0,0)], C6=0.0)
+seq = PulseSequence(omega=2*np.pi * 1.0) # 1 MHz Rabi drive
+
+# Add T1 decay (gamma) and T2 dephasing (gamma_phi)
+config = SolverConfig(gamma=0.1, gamma_phi=0.05) 
+
+sim = Simulation(reg, seq, config)
+results = sim.run(np.array([1, 0], dtype=complex), 0.0, 5.0, observables={"pop": 0})
+results.plot()
+```
+
 ---
 
 ## 🏗️ Architecture
@@ -77,7 +96,7 @@ Sagittarius follows a **Three-Layer Design** for maximum elegance and speed:
 
 1.  **Frontend (Python)**: A declarative SDK where users describe *what* to simulate (Atoms, Pulses, Measurements).
 2.  **Middle-end (AST/IR)**: A symbolic representation of the pulse sequence and blockade graph.
-3.  **Backend (Julia)**: Uses `OrdinaryDiffEq.jl` to integrate the Time-Dependent Schrödinger Equation (TDSE) using high-order adaptive solvers (Tsit5/Vern9).
+3.  **Backend (Julia)**: Uses `OrdinaryDiffEq.jl` to integrate the **Time-Dependent Schrödinger Equation (TDSE)** or the **Lindblad Master Equation** using high-order adaptive solvers (Tsit5/Vern9).
 
 ---
 

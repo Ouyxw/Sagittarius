@@ -3,20 +3,46 @@ module Solver
 using OrdinaryDiffEq
 using LinearAlgebra
 using DiffEqCallbacks
+using SparseArrays
 
-export solve_schrodinger, RydbergPopulation
+export solve_schrodinger, solve_lindblad, RydbergPopulation
 
 """
-    RydbergPopulation(atom_idx)
+    RydbergPopulation(atom_idx, N_atoms; basis=nothing)
 Returns a function that calculates the population of the Rydberg state for atom `atom_idx`.
+Works for both state vectors (Schrodinger) and density matrices (Lindblad).
 """
-function RydbergPopulation(atom_idx, N_atoms)
+function RydbergPopulation(atom_idx, N_atoms; basis=nothing)
     mask = 1 << (atom_idx - 1)
-    return (ψ, t, integrator) -> begin
+    return (state, t, integrator) -> begin
         pop = 0.0
-        for i in 0:(2^N_atoms - 1)
-            if (i & mask) != 0
-                pop += abs2(ψ[i + 1])
+        if state isa Vector
+            if isnothing(basis)
+                for i in 0:(2^N_atoms - 1)
+                    if (i & mask) != 0
+                        pop += abs2(state[i + 1])
+                    end
+                end
+            else
+                for (idx, bstate) in enumerate(basis)
+                    if (bstate & mask) != 0
+                        pop += abs2(state[idx])
+                    end
+                end
+            end
+        else # Matrix (Density Matrix)
+            if isnothing(basis)
+                for i in 0:(2^N_atoms - 1)
+                    if (i & mask) != 0
+                        pop += real(state[i + 1, i + 1])
+                    end
+                end
+            else
+                for (idx, bstate) in enumerate(basis)
+                    if (bstate & mask) != 0
+                        pop += real(state[idx, idx])
+                    end
+                end
             end
         end
         return pop
@@ -24,26 +50,59 @@ function RydbergPopulation(atom_idx, N_atoms)
 end
 
 """
-    solve_schrodinger(ψ0, H_func, tspan; observables=nothing)
+    solve_schrodinger(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
 
 Solves the TDSE: i dψ/dt = H(t)ψ. 
-`observables` can be a Dict of label => function(ψ, t, integrator).
 """
-function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing)
-    # Corrected order: (H * ψ) * -1im
+function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
     f(ψ, p, t) = (H_func(t) * ψ) .* (-1im)
     
-    # Setup callback for saving observables if provided
     saved_values = SavedValues(Float64, Any)
     cb = nothing
     if !isnothing(observables)
-        # Create a function that evaluates all observables at once
         save_func = (ψ, t, integrator) -> [func(ψ, t, integrator) for func in values(observables)]
         cb = SavingCallback(save_func, saved_values)
     end
 
     prob = ODEProblem(f, ψ0, tspan)
-    sol = solve(prob, Tsit5(), reltol=1e-8, abstol=1e-8, callback=cb)
+    sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    
+    return isnothing(observables) ? sol : (sol, saved_values)
+end
+
+"""
+    solve_lindblad(ρ0, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
+
+Solves the Lindblad Master Equation: dρ/dt = -i[H, ρ] + Σ (JρJ† - 0.5{J†J, ρ}).
+"""
+function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
+    # Pre-calculate J†J terms
+    J_dagger_J = [J' * J for J in J_ops]
+    J_dagger = [sparse(J') for J in J_ops] # Pre-cache J† as sparse
+
+    f(ρ, p, t) = begin
+        H = sparse(H_func(t))
+        # -i[H, ρ]
+        dρ = -1im * (H * ρ - ρ * H)
+        for i in 1:length(J_ops)
+            J = J_ops[i]
+            J_dag = J_dagger[i]
+            J_dag_J = J_dagger_J[i]
+            # Lindblad term: JρJ† - 0.5(J†Jρ + ρJ†J)
+            dρ += J * ρ * J_dag - 0.5 * (J_dag_J * ρ + ρ * J_dag_J)
+        end
+        return dρ
+    end
+
+    saved_values = SavedValues(Float64, Any)
+    cb = nothing
+    if !isnothing(observables)
+        save_func = (ρ, t, integrator) -> [func(ρ, t, integrator) for func in values(observables)]
+        cb = SavingCallback(save_func, saved_values)
+    end
+
+    prob = ODEProblem(f, ρ0, tspan)
+    sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
     
     return isnothing(observables) ? sol : (sol, saved_values)
 end

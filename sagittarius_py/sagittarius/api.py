@@ -41,6 +41,8 @@ class SolverConfig:
     abstol: float = 1e-8
     blockade_radius: float = 0.0
     method: str = "Tsit5"
+    gamma: Union[float, List[float]] = 0.0      # T1 decay rate
+    gamma_phi: Union[float, List[float]] = 0.0  # T2 dephasing rate
 
 @dataclass
 class PulseSequence:
@@ -75,6 +77,7 @@ class Simulation:
         self.sequence = sequence
         self.config = config or SolverConfig()
         self._basis = None
+        self._mapping = None
     
     def validate(self):
         N = len(self.register.jl_obj.atoms)
@@ -84,7 +87,9 @@ class Simulation:
                 print(f"Warning: Large Hilbert space (size {basis_size}) without blockade pruning.")
         else:
             # We pre-calculate basis to validate size and reuse in run()
-            self._basis, _ = phys.generate_reduced_basis(self.register.jl_obj, float(self.config.blockade_radius))
+            res = phys.generate_reduced_basis(self.register.jl_obj, float(self.config.blockade_radius))
+            self._basis = res[0]
+            self._mapping = res[1]
             basis_size = len(self._basis)
         
         return basis_size
@@ -143,25 +148,52 @@ class Simulation:
         jl_obs = None
         if observables:
             if self.config.blockade_radius > 0:
-                basis = self._basis
-                def make_pop_tracker(atom_idx):
-                    mask = 1 << atom_idx
-                    indices = [i for i, state in enumerate(basis) if (state & mask) != 0]
-                    return lambda ψ, t, integrator: sum(abs(ψ[idx])**2 for idx in indices)
-                
-                jl_obs = jl.Dict[jl.String, jl.Any]({name: make_pop_tracker(idx) for name, idx in observables.items()})
+                jl_obs = jl.Dict[jl.String, jl.Any]({
+                    name: solv.RydbergPopulation(idx + 1, N, basis=self._basis) 
+                    for name, idx in observables.items()
+                })
             else:
-                jl_obs = jl.Dict[jl.String, jl.Any]({name: solv.RydbergPopulation(idx + 1, N) for name, idx in observables.items()})
+                jl_obs = jl.Dict[jl.String, jl.Any]({
+                    name: solv.RydbergPopulation(idx + 1, N) 
+                    for name, idx in observables.items()
+                })
 
-        # 4. Solve
-        jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
-        # Handle solver method mapping if needed, but for now we pass it as a symbol or use default
-        result = solv.solve_schrodinger(
-            jl_psi0, 
-            H_func, 
-            jl.SVector(float(t_start), float(t_end)), 
-            observables=jl_obs
-        )
+        # 4. Determine if we use Lindblad or Schrodinger
+        is_noisy = (np.any(np.array(self.config.gamma) > 0) or 
+                    np.any(np.array(self.config.gamma_phi) > 0))
+
+        if is_noisy:
+            # Solve Lindblad Master Equation
+            rho0 = np.outer(psi0, psi0.conj())
+            jl_rho0 = jl.convert(jl.Matrix[jl.ComplexF64], rho0)
+            
+            # Get jump operators
+            if self.config.blockade_radius > 0:
+                j_ops = phys.get_jump_operators(N, self.config.gamma, self.config.gamma_phi, 
+                                               basis=self._basis, mapping=self._mapping)
+            else:
+                j_ops = phys.get_jump_operators(N, self.config.gamma, self.config.gamma_phi)
+                
+            result = solv.solve_lindblad(
+                jl_rho0,
+                H_func,
+                j_ops,
+                jl.SVector(float(t_start), float(t_end)),
+                observables=jl_obs,
+                reltol=float(self.config.reltol),
+                abstol=float(self.config.abstol)
+            )
+        else:
+            # Solve Schrodinger Equation
+            jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
+            result = solv.solve_schrodinger(
+                jl_psi0, 
+                H_func, 
+                jl.SVector(float(t_start), float(t_end)), 
+                observables=jl_obs,
+                reltol=float(self.config.reltol),
+                abstol=float(self.config.abstol)
+            )
         
         if jl_obs:
             sol, saved = result

@@ -4,7 +4,7 @@ using LinearAlgebra
 using SparseArrays
 using StaticArrays
 
-export Atom, Register, RydbergHamiltonian, generate_reduced_basis, ReducedRydbergOperator, build_hamiltonian_func
+export Atom, Register, RydbergHamiltonian, generate_reduced_basis, ReducedRydbergOperator, build_hamiltonian_func, get_jump_operators
 
 struct Atom{N}
     coords::SVector{N, Float64}
@@ -72,6 +72,39 @@ function Base.:*(op::RydbergOperator, ψ::Vector{ComplexF64})
         end
     end
     return res
+end
+
+function SparseArrays.sparse(op::RydbergOperator)
+    N = op.N
+    dim = 2^N
+    I = Int[]
+    J = Int[]
+    V = ComplexF64[]
+    
+    for i in 0:(dim - 1)
+        # 1. Diagonal terms
+        diag = 0.0
+        for j in 1:N
+            if (i & (1 << (j-1))) != 0
+                diag -= op.Δ[j]
+                for k in j+1:N
+                    if (i & (1 << (k-1))) != 0
+                        diag += op.V[j, k]
+                    end
+                end
+            end
+        end
+        if diag != 0
+            push!(I, i+1); push!(J, i+1); push!(V, diag)
+        end
+        
+        # 2. Driving
+        for j in 1:N
+            target = i ⊻ (1 << (j-1))
+            push!(I, target+1); push!(J, i+1); push!(V, op.Ω[j] / 2.0)
+        end
+    end
+    return sparse(I, J, V, dim, dim)
 end
 
 """
@@ -169,6 +202,123 @@ function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})
         end
     end
     return res
+end
+
+function SparseArrays.sparse(op::ReducedRydbergOperator)
+    dim = length(op.basis)
+    N = op.N
+    I = Int[]
+    J = Int[]
+    V = ComplexF64[]
+    
+    for (idx, state) in enumerate(op.basis)
+        # 1. Diagonal
+        diag = 0.0
+        for j in 1:N
+            if (state & (1 << (j-1))) != 0
+                diag -= op.Δ[j]
+                for k in j+1:N
+                    if (state & (1 << (k-1))) != 0
+                        diag += op.V[j, k]
+                    end
+                end
+            end
+        end
+        if diag != 0
+            push!(I, idx); push!(J, idx); push!(V, diag)
+        end
+        
+        # 2. Off-diagonal
+        for j in 1:N
+            target_state = state ⊻ (1 << (j-1))
+            if haskey(op.mapping, target_state)
+                target_idx = op.mapping[target_state]
+                push!(I, target_idx); push!(J, idx); push!(V, op.Ω[j] / 2.0)
+            end
+        end
+    end
+    return sparse(I, J, V, dim, dim)
+end
+
+"""
+    get_jump_operators(N, γ, γ_phi; basis=nothing, mapping=nothing)
+
+Returns a list of sparse jump operators for Lindblad simulation.
+γ and γ_phi can be scalars or vectors of length N.
+"""
+function get_jump_operators(N::Int, γ, γ_phi; basis=nothing, mapping=nothing)
+    v_γ = (γ isa AbstractVector) ? convert(Vector{Float64}, γ) : fill(float(γ), N)
+    v_γp = (γ_phi isa AbstractVector) ? convert(Vector{Float64}, γ_phi) : fill(float(γ_phi), N)
+    
+    J_ops = SparseMatrixCSC{ComplexF64, Int}[]
+    
+    # 1. Decay operators (T1): sqrt(γ) * |g><r|
+    for i in 1:N
+        if v_γ[i] > 0
+            push!(J_ops, jump_sigma_minus(N, i, sqrt(v_γ[i]); basis=basis, mapping=mapping))
+        end
+    end
+    
+    # 2. Dephasing operators (T2): sqrt(γ_phi) * |r><r|
+    for i in 1:N
+        if v_γp[i] > 0
+            push!(J_ops, jump_n(N, i, sqrt(v_γp[i]); basis=basis, mapping=mapping))
+        end
+    end
+    
+    return J_ops
+end
+
+function jump_sigma_minus(N, atom_idx, weight; basis=nothing, mapping=nothing)
+    mask = 1 << (atom_idx - 1)
+    I = Int[]
+    J = Int[]
+    V = ComplexF64[]
+    
+    if isnothing(basis)
+        for state in 0:(2^N - 1)
+            if (state & mask) != 0
+                target = state ⊻ mask
+                push!(I, target + 1); push!(J, state + 1); push!(V, weight)
+            end
+        end
+        return sparse(I, J, V, 2^N, 2^N)
+    else
+        for (idx, state) in enumerate(basis)
+            if (state & mask) != 0
+                target_state = state ⊻ mask
+                if haskey(mapping, target_state)
+                    push!(I, mapping[target_state]); push!(J, idx); push!(V, weight)
+                end
+            end
+        end
+        dim = length(basis)
+        return sparse(I, J, V, dim, dim)
+    end
+end
+
+function jump_n(N, atom_idx, weight; basis=nothing, mapping=nothing)
+    mask = 1 << (atom_idx - 1)
+    I = Int[]
+    J = Int[]
+    V = ComplexF64[]
+    
+    if isnothing(basis)
+        for state in 0:(2^N - 1)
+            if (state & mask) != 0
+                push!(I, state + 1); push!(J, state + 1); push!(V, weight)
+            end
+        end
+        return sparse(I, J, V, 2^N, 2^N)
+    else
+        for (idx, state) in enumerate(basis)
+            if (state & mask) != 0
+                push!(I, idx); push!(J, idx); push!(V, weight)
+            end
+        end
+        dim = length(basis)
+        return sparse(I, J, V, dim, dim)
+    end
 end
 
 """

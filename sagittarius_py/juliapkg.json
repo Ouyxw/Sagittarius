@@ -1,8 +1,14 @@
 {
     "julia": "1.9",
     "packages": {
-        "OrdinaryDiffEq": "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed",
-        "DiffEqCallbacks": "459566f4-90b8-5000-8ac3-15dfb0a30def",
-        "StaticArrays": "90137ffa-7385-5640-81b9-e52037218182"
+        "OrdinaryDiffEq": {
+            "uuid": "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+        },
+        "DiffEqCallbacks": {
+            "uuid": "459566f4-90b8-5000-8ac3-15dfb0a30def"
+        },
+        "StaticArrays": {
+            "uuid": "90137ffa-7385-5640-81b9-e52037218182"
+        }
     }
 }
