@@ -54,6 +54,15 @@ class MWIS_AQC:
         """
         Runs the simulation and returns the final bitstring (Independent Set).
         """
+        bitstring, _, _ = self.solve_full(config, duration)
+        return bitstring
+
+    def solve_full(self, config: SolverConfig = None, duration: float = 10.0) -> Tuple[np.ndarray, np.ndarray, List[int]]:
+        """
+        Runs the simulation and returns (best_bitstring, probabilities, basis).
+        probabilities is an array of size 2^N (or basis size).
+        basis is a list of bitstrings as integers.
+        """
         if config is None:
             config = SolverConfig(blockade_radius=self.R)
         
@@ -71,6 +80,7 @@ class MWIS_AQC:
         best_idx = np.argmax(probs)
         
         basis = list(sim._basis)
-        best_bitstring = basis[best_idx]
+        best_bitstring_val = basis[best_idx]
+        best_bitstring = np.array([(best_bitstring_val >> i) & 1 for i in range(self.N)])
         
-        return np.array([(best_bitstring >> i) & 1 for i in range(self.N)])
+        return best_bitstring, probs, basis

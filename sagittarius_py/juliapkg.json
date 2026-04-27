@@ -16,14 +16,11 @@
         "CUDA": {
             "uuid": "052768ef-5323-5732-b1bb-66c8b64840ba"
         },
-        "Distributed": {
-            "uuid": "8bb1440f-4735-579b-a046-d74ba1240c16"
-        },
         "AMDGPU": {
-            "uuid": "21141c5a-9bab-5743-81c7-303126ed876e"
+            "uuid": "21141c5a-9bdb-4563-92ae-f87d6854732e"
         },
         "Metal": {
-            "uuid": "dde4f866-770c-40af-b2ee-7497ad0ad848"
+            "uuid": "dde4c033-4e86-420c-a63e-0dd931031962"
         }
     }
 }

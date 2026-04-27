@@ -43,8 +43,8 @@ def run_example():
     print(f"AQC Weight: {weight_aqc:.2f}, Valid IS: {valid_aqc}")
     
     # 3. Solve Classically (Exact)
-    bitstring_exact, weight_exact = get_mwis_classical(G)
-    print(f"Exact Weight: {weight_exact:.2f}")
+    bitstring_exact, weight_exact, stats = get_mwis_classical(G)
+    print(f"Exact Weight: {weight_exact:.2f}, Hardness H: {stats['h_param']:.2f}")
     
     # 4. Visualize
     plt.figure(figsize=(8, 6))

@@ -9,6 +9,8 @@ dependencies = [
     "pandas",
     "matplotlib",
     "networkx",
+    "docplex>=2.32.264",
+    "pulp>=3.3.0",
 ]
 
 [dependency-groups]
