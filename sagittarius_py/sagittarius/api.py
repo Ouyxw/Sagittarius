@@ -10,7 +10,7 @@ from juliacall import Main as jl
 pkg_path = os.path.join(os.path.dirname(__file__), "..", "..", "Sagittarius.jl")
 
 # Pre-load dependencies into Main
-jl.seval("using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays")
+jl.seval("using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase")
 
 # Manually include the Sagittarius module
 jl.include(os.path.join(pkg_path, "src", "Sagittarius.jl"))
@@ -43,6 +43,8 @@ class SolverConfig:
     method: str = "Tsit5"
     gamma: Union[float, List[float]] = 0.0      # T1 decay rate
     gamma_phi: Union[float, List[float]] = 0.0  # T2 dephasing rate
+    use_mc: bool = False                        # Use Monte Carlo Trajectories instead of Lindblad
+    n_trajectories: int = 100                   # Number of trajectories for Monte Carlo
 
 @dataclass
 class PulseSequence:
@@ -158,31 +160,56 @@ class Simulation:
                     for name, idx in observables.items()
                 })
 
-        # 4. Determine if we use Lindblad or Schrodinger
+        # 4. Determine if we use Lindblad, MC, or Schrodinger
         is_noisy = (np.any(np.array(self.config.gamma) > 0) or 
                     np.any(np.array(self.config.gamma_phi) > 0))
 
         if is_noisy:
-            # Solve Lindblad Master Equation
-            rho0 = np.outer(psi0, psi0.conj())
-            jl_rho0 = jl.convert(jl.Matrix[jl.ComplexF64], rho0)
-            
             # Get jump operators
             if self.config.blockade_radius > 0:
                 j_ops = phys.get_jump_operators(N, self.config.gamma, self.config.gamma_phi, 
                                                basis=self._basis, mapping=self._mapping)
             else:
                 j_ops = phys.get_jump_operators(N, self.config.gamma, self.config.gamma_phi)
+
+            if self.config.use_mc:
+                # Solve Monte Carlo Trajectories
+                jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
+                result = solv.solve_mc_trajectories(
+                    jl_psi0,
+                    H_func,
+                    j_ops,
+                    jl.SVector(float(t_start), float(t_end)),
+                    n_trajectories=int(self.config.n_trajectories),
+                    observables=jl_obs,
+                    reltol=float(self.config.reltol),
+                    abstol=float(self.config.abstol)
+                )
                 
-            result = solv.solve_lindblad(
-                jl_rho0,
-                H_func,
-                j_ops,
-                jl.SVector(float(t_start), float(t_end)),
-                observables=jl_obs,
-                reltol=float(self.config.reltol),
-                abstol=float(self.config.abstol)
-            )
+                if jl_obs:
+                    t_vals, avg_res = result
+                    times = list(t_vals)
+                    # avg_res is a Vector of Vectors in Julia
+                    data = {name: [avg_res[t_idx][i] for t_idx in range(len(times))] 
+                            for i, name in enumerate(observables.keys())}
+                    data['t'] = times
+                    return SimulationResult(data)
+                return result
+
+            else:
+                # Solve Lindblad Master Equation
+                rho0 = np.outer(psi0, psi0.conj())
+                jl_rho0 = jl.convert(jl.Matrix[jl.ComplexF64], rho0)
+                
+                result = solv.solve_lindblad(
+                    jl_rho0,
+                    H_func,
+                    j_ops,
+                    jl.SVector(float(t_start), float(t_end)),
+                    observables=jl_obs,
+                    reltol=float(self.config.reltol),
+                    abstol=float(self.config.abstol)
+                )
         else:
             # Solve Schrodinger Equation
             jl_psi0 = jl.Vector[jl.ComplexF64](psi0)

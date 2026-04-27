@@ -9,6 +9,9 @@
         },
         "StaticArrays": {
             "uuid": "90137ffa-7385-5640-81b9-e52037218182"
+        },
+        "SciMLBase": {
+            "uuid": "0bca4576-84f4-4d90-8ffe-ffa030f20462"
         }
     }
 }
