@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import json
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Union, Any, List
 from juliacall import Main as jl
@@ -33,22 +34,25 @@ sgr = jl.Sagittarius
 phys = sgr.Physics  # Direct access to the Physics module
 solv = sgr.Solver   # Direct access to the Solver module
 
+@dataclass
 class Atom:
-    def __init__(self, x, y, z=0.0):
-        self._atom = phys.Atom(jl.SVector(float(x), float(y), float(z)))
-    
-    @property
-    def jl_obj(self):
-        return self._atom
+    x: float
+    y: float
+    z: float = 0.0
 
-class Register:
-    def __init__(self, atoms, C6=1.0):
-        jl_atoms = jl.Vector[phys.Atom[3]]([a.jl_obj for a in atoms])
-        self._register = phys.Register(jl_atoms, float(C6))
-    
     @property
     def jl_obj(self):
-        return self._register
+        return phys.Atom(jl.SVector(float(self.x), float(self.y), float(self.z)))
+
+@dataclass
+class Register:
+    atoms: List[Atom]
+    C6: float = 1.0
+
+    @property
+    def jl_obj(self):
+        jl_atoms = jl.Vector[phys.Atom]([a.jl_obj for a in self.atoms])
+        return phys.Register(jl_atoms, float(self.C6))
 
 @dataclass
 class SolverConfig:
@@ -67,8 +71,6 @@ class SolverConfig:
 class PulseSequence:
     omega: Any = 1.0
     delta: Any = 0.0
-
-import json
 
 class SimulationResult:
     def __init__(self, data: Dict[str, List[float]]):
@@ -108,53 +110,49 @@ class SimulationResult:
             plt.show()
 
 class Simulation:
-    def __init__(self, register: Register, sequence: PulseSequence, config: Optional[SolverConfig] = None):
+    def __init__(self, register: Register, sequence: PulseSequence, config: SolverConfig = SolverConfig()):
         self.register = register
         self.sequence = sequence
-        self.config = config or SolverConfig()
+        self.config = config
         self._basis = None
         self._mapping = None
-    
-    def validate(self):
-        N = len(self.register.jl_obj.atoms)
-        if self.config.blockade_radius <= 0:
-            basis_size = 2**N
-            if basis_size > 10000:
-                print(f"Warning: Large Hilbert space (size {basis_size}) without blockade pruning.")
-        else:
-            # We pre-calculate basis to validate size and reuse in run()
+
+    def validate(self) -> int:
+        """Returns the size of the Hilbert space after pruning."""
+        if self.config.blockade_radius > 0:
             res = phys.generate_reduced_basis(self.register.jl_obj, float(self.config.blockade_radius))
             self._basis = res[0]
             self._mapping = res[1]
-            basis_size = len(self._basis)
-        
-        return basis_size
+            return len(self._basis)
+        else:
+            return 2**len(self.register.atoms)
 
-    def _get_compiled_func(self, p_config, N):
-        is_pulse = lambda x: hasattr(x, 'jl_obj')
-        if isinstance(p_config, dict):
+    def _get_compiled_func(self, p_config: Any, N: int) -> Any:
+        """Compiles a pulse configuration into a Julia-side closure t -> Vector{Float64}."""
+        from .pulse import is_pulse
+
+        if callable(p_config):
+            # Use pyconvert to bridge the Py -> Float64 gap for each element
+            return jl.seval("f -> (t -> [pyconvert(Float64, x) for x in f(t)])")(p_config)
+
+        if isinstance(p_config, (dict, list)):
             # Local addressing
             compiled_funcs = []
             for i in range(N):
-                p = p_config.get(i, 0.0)
+                p = p_config.get(i, 0.0) if isinstance(p_config, dict) else p_config[i]
                 if is_pulse(p):
                     compiled_funcs.append(sgr.compile_pulse(p.jl_obj))
                 else:
                     v = float(p)
                     compiled_funcs.append(sgr.compile_pulse(sgr.ConstantPulse(v, 1e12)))
 
-            # Atom 0 corresponds to bit 0, but Julia's 1-indexing and 
-            # our bitwise mapping requires careful alignment.
-            # Empirical evidence shows a reversal is needed for Python-Julia bridge.
             compiled_funcs.reverse()
-            
             jl_vec = jl.Vector[jl.Any](compiled_funcs)
             return jl.seval("funcs -> (t -> Float64[f(t) for f in funcs])")(jl_vec)
         else:
             # Global addressing
             if is_pulse(p_config):
                 f = sgr.compile_pulse(p_config.jl_obj)
-                # Correctly handle global pulse by creating N identical Julia functions
                 jl_vec = jl.Vector[jl.Any]([f for _ in range(N)])
                 return jl.seval("funcs -> (t -> Float64[f(t) for f in funcs])")(jl_vec)
             else:
@@ -224,7 +222,6 @@ class Simulation:
                 if jl_obs:
                     t_vals, avg_res = result
                     times = list(t_vals)
-                    # avg_res is a Vector of Vectors in Julia
                     data = {name: [avg_res[t_idx][i] for t_idx in range(len(times))] 
                             for i, name in enumerate(observables.keys())}
                     data['t'] = times
@@ -252,7 +249,6 @@ class Simulation:
                 if backend == "CUDA":
                     jl_psi0 = jl.CUDA.CuVector[jl.ComplexF64](psi0)
                 elif backend == "AMDGPU":
-                    # Dynamic pre-loading if needed
                     jl.seval("using AMDGPU")
                     jl_psi0 = jl.AMDGPU.ROCVector[jl.ComplexF64](psi0)
                 elif backend == "METAL":
@@ -289,15 +285,14 @@ class Simulation:
         
         return result
 
-def solve(register, psi0, t_start, t_end, omega=1.0, delta=0.0, blockade_radius=0.0, observables=None):
-    """
-    Backward compatible solve function.
-    """
-    config = SolverConfig(blockade_radius=blockade_radius)
-    sequence = PulseSequence(omega=omega, delta=delta)
+def solve(register, sequence, config=SolverConfig(), psi0=None, t_start=0.0, t_end=1.0, observables=None):
     sim = Simulation(register, sequence, config)
+    if psi0 is None:
+        dim = sim.validate()
+        psi0 = np.zeros(dim, dtype=complex)
+        psi0[0] = 1.0
     
-    res = sim.run(psi0, t_start, t_end, observables=observables)
+    res = sim.run(psi0, t_start, t_end, observables)
     
     if isinstance(res, SimulationResult):
         return res.data

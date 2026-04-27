@@ -8,12 +8,12 @@ using CUDA.CUSPARSE
 
 export Atom, Register, RydbergHamiltonian, generate_reduced_basis, ReducedRydbergOperator, build_hamiltonian_func, get_jump_operators
 
-struct Atom{N}
-    coords::SVector{N, Float64}
+struct Atom
+    coords::SVector{3, Float64}
 end
 
-struct Register{N}
-    atoms::Vector{Atom{N}}
+struct Register
+    atoms::Vector{Atom}
     C6::Float64
 end
 

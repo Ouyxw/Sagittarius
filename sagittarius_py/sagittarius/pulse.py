@@ -102,3 +102,6 @@ class Pulse:
 def compile_pulse(pulse: PulseNode):
     """Compiles a Python Pulse AST into a Julia callable function."""
     return sgr.compile_pulse(pulse.jl_obj)
+
+def is_pulse(obj):
+    return isinstance(obj, PulseNode)
