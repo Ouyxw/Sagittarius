@@ -10,7 +10,21 @@ from juliacall import Main as jl
 pkg_path = os.path.join(os.path.dirname(__file__), "..", "..", "Sagittarius.jl")
 
 # Pre-load dependencies into Main
-jl.seval("using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase")
+jl.seval("""
+using Pkg
+function ensure_pkg(pkg_name)
+    if !haskey(Pkg.project().dependencies, pkg_name)
+        Pkg.add(pkg_name)
+    end
+end
+
+ensure_pkg("SciMLBase")
+ensure_pkg("CUDA")
+# We don't auto-install AMDGPU/Metal yet to avoid heavy downloads unless needed
+# but we ensure the environment is ready for them.
+
+using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase, CUDA
+""")
 
 # Manually include the Sagittarius module
 jl.include(os.path.join(pkg_path, "src", "Sagittarius.jl"))
@@ -45,6 +59,8 @@ class SolverConfig:
     gamma_phi: Union[float, List[float]] = 0.0  # T2 dephasing rate
     use_mc: bool = False                        # Use Monte Carlo Trajectories instead of Lindblad
     n_trajectories: int = 100                   # Number of trajectories for Monte Carlo
+    use_gpu: bool = False                       # Use GPU acceleration
+    gpu_backend: str = "CUDA"                   # GPU backend: "CUDA", "AMDGPU", or "Metal"
 
 @dataclass
 class PulseSequence:
@@ -160,7 +176,8 @@ class Simulation:
             self.register.jl_obj, 
             omega_func, 
             delta_func, 
-            blockade_radius=float(self.config.blockade_radius)
+            blockade_radius=float(self.config.blockade_radius),
+            use_gpu=bool(self.config.use_gpu)
         )
 
         # 3. Handle observables
@@ -229,15 +246,38 @@ class Simulation:
                 )
         else:
             # Solve Schrodinger Equation
-            jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
-            result = solv.solve_schrodinger(
-                jl_psi0, 
-                H_func, 
-                jl.SVector(float(t_start), float(t_end)), 
-                observables=jl_obs,
-                reltol=float(self.config.reltol),
-                abstol=float(self.config.abstol)
-            )
+            if self.config.use_gpu:
+                backend = self.config.gpu_backend.upper()
+                if backend == "CUDA":
+                    jl_psi0 = jl.CUDA.CuVector[jl.ComplexF64](psi0)
+                elif backend == "AMDGPU":
+                    # Dynamic pre-loading if needed
+                    jl.seval("using AMDGPU")
+                    jl_psi0 = jl.AMDGPU.ROCVector[jl.ComplexF64](psi0)
+                elif backend == "METAL":
+                    jl.seval("using Metal")
+                    jl_psi0 = jl.Metal.MtlVector[jl.ComplexF64](psi0)
+                else
+                    raise ValueError(f"Unsupported GPU backend: {backend}")
+
+                result = solv.solve_schrodinger_gpu(
+                    jl_psi0,
+                    H_func,
+                    jl.SVector(float(t_start), float(t_end)),
+                    observables=jl_obs,
+                    reltol=float(self.config.reltol),
+                    abstol=float(self.config.abstol)
+                )
+            else:
+                jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
+                result = solv.solve_schrodinger(
+                    jl_psi0, 
+                    H_func, 
+                    jl.SVector(float(t_start), float(t_end)), 
+                    observables=jl_obs,
+                    reltol=float(self.config.reltol),
+                    abstol=float(self.config.abstol)
+                )
         
         if jl_obs:
             sol, saved = result

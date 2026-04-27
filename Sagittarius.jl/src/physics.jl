@@ -3,6 +3,8 @@ module Physics
 using LinearAlgebra
 using SparseArrays
 using StaticArrays
+using CUDA
+using CUDA.CUSPARSE
 
 export Atom, Register, RydbergHamiltonian, generate_reduced_basis, ReducedRydbergOperator, build_hamiltonian_func, get_jump_operators
 
@@ -114,13 +116,20 @@ A Hamiltonian operator that acts on a truncated Hilbert space.
 `basis` is a Vector of bitstrings (Int) representing valid states.
 `mapping` is a Dictionary (or lookup table) from bitstring to its index in the reduced basis.
 """
-struct ReducedRydbergOperator
+mutable struct ReducedRydbergOperator
     N::Int
     Ω::Vector{Float64}
     Δ::Vector{Float64}
     V::Matrix{Float64}
     basis::Vector{Int}
     mapping::Dict{Int, Int}
+    use_gpu::Bool
+    cached_sparse_H::Union{Nothing, SparseMatrixCSC{ComplexF64, Int}, CuSparseMatrixCSC{ComplexF64, Int}}
+end
+
+# Constructor with default values
+function ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping; use_gpu=false)
+    return ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping, use_gpu, nothing)
 end
 
 function generate_reduced_basis(reg::Register, blockade_radius::Float64)
@@ -327,7 +336,7 @@ end
 Returns either a full or reduced Rydberg operator. 
 If blockade_radius > 0, the Hilbert space is truncated.
 """
-function RydbergHamiltonian(reg::Register, Ω, Δ; blockade_radius=0.0)
+function RydbergHamiltonian(reg::Register, Ω, Δ; blockade_radius=0.0, use_gpu=false)
     V = interaction_matrix(reg)
     N = length(reg.atoms)
     
@@ -337,7 +346,7 @@ function RydbergHamiltonian(reg::Register, Ω, Δ; blockade_radius=0.0)
     
     if blockade_radius > 0.0
         basis, mapping = generate_reduced_basis(reg, blockade_radius)
-        return ReducedRydbergOperator(N, v_Ω, v_Δ, V, basis, mapping)
+        return ReducedRydbergOperator(N, v_Ω, v_Δ, V, basis, mapping, use_gpu=use_gpu)
     else
         return RydbergOperator(N, v_Ω, v_Δ, V)
     end
@@ -349,14 +358,15 @@ end
 Returns a highly optimized closure `t -> Operator` for use in ODE solvers,
 where `Ω_func` and `Δ_func` are functions of time returning a Vector{Float64}.
 """
-function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius=0.0)
+function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius=0.0, use_gpu=false)
     V = interaction_matrix(reg)
     N = length(reg.atoms)
     
     if blockade_radius > 0.0
         basis, mapping = generate_reduced_basis(reg, blockade_radius)
-        return t -> ReducedRydbergOperator(N, convert(Vector{Float64}, Ω_func(t)), convert(Vector{Float64}, Δ_func(t)), V, basis, mapping)
+        return t -> ReducedRydbergOperator(N, convert(Vector{Float64}, Ω_func(t)), convert(Vector{Float64}, Δ_func(t)), V, basis, mapping, use_gpu=use_gpu)
     else
+        # Full operator (GPU version not yet fully optimized with its own struct, using generic for now)
         return t -> RydbergOperator(N, convert(Vector{Float64}, Ω_func(t)), convert(Vector{Float64}, Δ_func(t)), V)
     end
 end
