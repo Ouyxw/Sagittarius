@@ -1,4 +1,0 @@
-juliacall
-numpy
-pandas
-matplotlib
