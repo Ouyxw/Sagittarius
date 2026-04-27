@@ -20,10 +20,11 @@ end
 
 ensure_pkg("SciMLBase")
 ensure_pkg("CUDA")
+ensure_pkg("Distributed")
 # We don't auto-install AMDGPU/Metal yet to avoid heavy downloads unless needed
 # but we ensure the environment is ready for them.
 
-using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase, CUDA
+using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase, CUDA, Distributed
 """)
 
 # Manually include the Sagittarius module
@@ -257,7 +258,7 @@ class Simulation:
                 elif backend == "METAL":
                     jl.seval("using Metal")
                     jl_psi0 = jl.Metal.MtlVector[jl.ComplexF64](psi0)
-                else
+                else:
                     raise ValueError(f"Unsupported GPU backend: {backend}")
 
                 result = solv.solve_schrodinger_gpu(
