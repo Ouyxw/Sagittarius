@@ -17,9 +17,16 @@ By leveraging **Bit-Manipulation**, **Graph-based Hilbert Space Pruning**, and *
 *   **📍 Local Addressing**: Support per-atom Rabi frequencies ($\Omega_i$) and detunings ($\Delta_i$) for simulating quantum gates.
 *   **🫧 Open Quantum Systems**: High-performance **Lindblad** and **Monte Carlo Trajectory (MCWF)** solvers for decoherence.
 *   **🧪 Object-Oriented SDK**: Reusable Python components for simulations, sequences, and configurations.
-*   **💾 Easy Serialization**: Save and load results via JSON for long-running experiments.
-*   **⚖️ Scientific Integrity**: Rigorous verification against physical invariants and analytic benchmarks.
 *   **🐍 Seamless Python SDK**: Fully managed environment via `uv` and `juliapkg`.
+
+---
+
+## 🎯 Use Case: Combinatorial Optimization (MWIS)
+
+Sagittarius is uniquely suited for solving NP-hard problems like **Maximum Weighted Independent Set (MWIS)** on Unit-Disk Graphs.
+- **Physics-to-Problem Mapping**: Atoms represent vertices; Rydberg blockade enforces independent set constraints; local detunings encode node weights.
+- **Performance**: Achieving up to **17x speedup** on **NVIDIA RTX 5070 Ti** compared to multi-threaded CPU solvers for 20-atom instances.
+- **Implementation**: See the [MWIS-UDG Project](sagittarius_py/projects/mwis_udg/README.md).
 
 ---
 

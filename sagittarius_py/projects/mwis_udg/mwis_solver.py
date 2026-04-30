@@ -32,23 +32,21 @@ class MWIS_AQC:
                                   omega_max: float = 2*np.pi * 1.0, 
                                   duration: float = 10.0) -> PulseSequence:
         """
-        Constructs an adiabatic ramp.
+        Constructs an adiabatic ramp using native Julia pulse shapes.
         """
-        def omega_func(t):
-            # Smooth sin^2 pulse
-            val = omega_max * np.sin(np.pi * t / duration)**2
-            return [val] * self.N
+        # Optimized: Use native SinSquared pulse
+        omega = Pulse.sin_squared(amplitude=omega_max, duration=duration)
             
+        # Optimized: Use native Ramp pulses for each atom
         weights = np.array([self.G.nodes[n].get('weight', 1.0) for n in self.nodes])
+        start_delta = -2.0 * omega_max
         
-        def delta_func(t):
-            # Global ramp from negative to weight-proportional values
-            progress = t / duration
-            start_delta = -2.0 * omega_max
-            vals = (1 - progress) * start_delta + progress * weights * (2*np.pi)
-            return list(vals)
+        delta = []
+        for i in range(self.N):
+            end_delta = weights[i] * (2*np.pi)
+            delta.append(Pulse.ramp(start=start_delta, end=float(end_delta), duration=duration))
             
-        return PulseSequence(omega=omega_func, delta=delta_func)
+        return PulseSequence(omega=omega, delta=delta)
 
     def solve(self, config: SolverConfig = None, duration: float = 10.0) -> np.ndarray:
         """
