@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from sagittarius import Atom, Register, solve, Constant, Ramp, Piecewise
+from sagittarius import Atom, Register, solve, PulseSequence, SolverConfig, Constant, Ramp, Piecewise
 
 def test_single_atom_rabi():
     """Verify single atom oscillates correctly under a constant Omega."""
@@ -10,7 +10,8 @@ def test_single_atom_rabi():
     # Omega = 2pi * 1.0 (Rabi freq of 1.0 Hz)
     # At t = 0.5s, we expect full inversion to |r>
     omega = 2.0 * np.pi * 1.0
-    results = solve(reg, psi0, 0.0, 0.5, omega=omega, observables={"pop": 0})
+    seq = PulseSequence(omega=omega, delta=0.0)
+    results = solve(reg, seq, psi0=psi0, t_start=0.0, t_end=0.5, observables={"pop": 0})
     
     final_pop_rydberg = results["pop"][-1]
     # At t=0.5, Rydberg population should be 1.0
@@ -26,7 +27,9 @@ def test_two_atom_blockade():
     psi0 = np.array([1, 0, 0], dtype=complex)
     
     omega = 2.0 * np.pi * 1.0
-    results = solve(reg, psi0, 0.0, 1.0, omega=omega, blockade_radius=1.0, observables={"a1": 0, "a2": 1})
+    seq = PulseSequence(omega=omega, delta=0.0)
+    config = SolverConfig(blockade_radius=1.0)
+    results = solve(reg, seq, config=config, psi0=psi0, t_start=0.0, t_end=1.0, observables={"a1": 0, "a2": 1})
     
     p1 = np.array(results["a1"])
     p2 = np.array(results["a2"])
@@ -47,7 +50,8 @@ def test_piecewise_pulse_transition():
         Constant(2.0 * np.pi * 1.0, duration=0.5)
     ])
     
-    results = solve(reg, psi0, 0.0, 1.5, omega=pulse, observables={"pop": 0})
+    seq = PulseSequence(omega=pulse, delta=0.0)
+    results = solve(reg, seq, psi0=psi0, t_start=0.0, t_end=1.5, observables={"pop": 0})
     
     # Check that at t=1.0, Rydberg population is still 0.0 (no excitation during zero pulse)
     t = np.array(results["t"])
@@ -56,3 +60,9 @@ def test_piecewise_pulse_transition():
     
     # Check that at t=1.5 (after 0.5s of driving), Rydberg population is high (~1.0)
     assert results["pop"][-1] > 0.95
+
+if __name__ == "__main__":
+    test_single_atom_rabi()
+    test_two_atom_blockade()
+    test_piecewise_pulse_transition()
+    print("All physics tests passed!")

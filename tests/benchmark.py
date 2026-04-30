@@ -1,6 +1,6 @@
 import time
 import numpy as np
-from sagittarius import Atom, Register, solve, get_basis
+from sagittarius import Atom, Register, solve, get_basis, PulseSequence, SolverConfig
 
 def benchmark_scaling():
     print("="*40)
@@ -26,7 +26,9 @@ def benchmark_scaling():
         
         start = time.time()
         # Integrate for 1.0s (adaptive steps handled by Julia)
-        solve(reg, psi0, 0.0, 1.0, omega=2.0*np.pi*1.0, delta=0.0, blockade_radius=radius)
+        seq = PulseSequence(omega=2.0*np.pi*1.0, delta=0.0)
+        config = SolverConfig(blockade_radius=radius)
+        solve(reg, seq, config=config, psi0=psi0, t_start=0.0, t_end=1.0)
         dt = time.time() - start
         
         print(f"{n:<8} | {2**n:<12} | {basis_size:<8} | {dt:.4f}")

@@ -1,5 +1,5 @@
 import numpy as np
-from sagittarius import Atom, Register, solve, Constant, Ramp, Piecewise
+from sagittarius import Atom, Register, solve, PulseSequence, SolverConfig, Constant, Ramp, Piecewise
 
 def test_pulses():
     print("Testing AST-based Time-Dependent Pulses")
@@ -27,7 +27,8 @@ def test_pulses():
     start = time.time()
     
     # Total time is 2.0s
-    results = solve(reg, psi0, 0.0, 2.0, omega=omega_pulse, delta=delta, observables=obs)
+    seq = PulseSequence(omega=omega_pulse, delta=delta)
+    results = solve(reg, seq, psi0=psi0, t_start=0.0, t_end=2.0, observables=obs)
     
     end = time.time()
     print(f"Simulation completed in {end - start:.4f} seconds.")
