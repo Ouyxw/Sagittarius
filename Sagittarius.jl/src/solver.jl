@@ -41,23 +41,22 @@ function RydbergPopulation(atom_idx, N_atoms; basis=nothing)
             end
             return pop
         elseif state isa CuVector
-            return Float64(CUDA.@allowscalar begin
-                p = 0.0
-                if isnothing(basis)
-                    for i in 0:(2^N_atoms - 1)
-                        if (i & mask) != 0
-                            p += abs2(state[i + 1])
-                        end
-                    end
-                else
-                    for (idx, bstate) in enumerate(basis)
-                        if (bstate & mask) != 0
-                            p += abs2(state[idx])
-                        end
-                    end
+            # Optimized GPU implementation using broadcasting and reduction
+            # Avoids @allowscalar which is extremely slow
+            if isnothing(basis)
+                # Full Hilbert space: population is sum of abs2(state[i]) where bit is set
+                # We create a bitmask on the fly or use a pre-calculated index map
+                # For simplicity and performance, we'll use a functional approach that 
+                # can be fused into a single GPU kernel call.
+                return Float64(sum(abs2, state[[(i & mask) != 0 for i in 1:length(state)]]))
+            else
+                # Pruned basis: similar logic
+                indices = findall(bstate -> (bstate & mask) != 0, basis)
+                if isempty(indices)
+                    return 0.0
                 end
-                p
-            end)
+                return Float64(sum(abs2, state[indices]))
+            end
         else # Generic fallback for other GPU arrays or matrices
             # This is slow but safe
             return 0.0 # Implementation depends on specific GPU array type

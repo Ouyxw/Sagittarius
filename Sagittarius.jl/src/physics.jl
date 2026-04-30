@@ -124,7 +124,7 @@ mutable struct ReducedRydbergOperator
     basis::Vector{Int}
     mapping::Dict{Int, Int}
     use_gpu::Bool
-    cached_sparse_H::Union{Nothing, SparseMatrixCSC{ComplexF64, Int}, CuSparseMatrixCSC{ComplexF64, Int}}
+    cached_sparse_H::Any
 end
 
 # Constructor with default values
@@ -364,7 +364,22 @@ function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius
     
     if blockade_radius > 0.0
         basis, mapping = generate_reduced_basis(reg, blockade_radius)
-        return t -> ReducedRydbergOperator(N, convert(Vector{Float64}, Ω_func(t)), convert(Vector{Float64}, Δ_func(t)), V, basis, mapping, use_gpu=use_gpu)
+        # Create a single operator object to be reused
+        op = ReducedRydbergOperator(N, fill(NaN, N), fill(NaN, N), V, basis, mapping, use_gpu=use_gpu)
+        
+        return t -> begin
+            # Get current pulse values
+            cur_Ω = convert(Vector{Float64}, Ω_func(t))
+            cur_Δ = convert(Vector{Float64}, Δ_func(t))
+            
+            # Only update and invalidate cache if values have changed
+            if op.Ω != cur_Ω || op.Δ != cur_Δ
+                copyto!(op.Ω, cur_Ω)
+                copyto!(op.Δ, cur_Δ)
+                op.cached_sparse_H = nothing
+            end
+            return op
+        end
     else
         # Full operator (GPU version not yet fully optimized with its own struct, using generic for now)
         return t -> RydbergOperator(N, convert(Vector{Float64}, Ω_func(t)), convert(Vector{Float64}, Δ_func(t)), V)
