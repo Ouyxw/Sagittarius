@@ -1,6 +1,6 @@
 module Program
 
-export PulseNode, ConstantPulse, RampPulse, PiecewisePulse, GaussianPulse, BlackmanPulse, SincPulse, compile_pulse, create_vec_func, create_const_vec_func
+export PulseNode, ConstantPulse, RampPulse, PiecewisePulse, GaussianPulse, BlackmanPulse, SincPulse, SinSquaredPulse, compile_pulse, create_vec_func, create_const_vec_func
 
 abstract type PulseNode end
 
@@ -34,6 +34,11 @@ end
 struct SincPulse <: PulseNode
     amplitude::Float64
     width::Float64
+    duration::Float64
+end
+
+struct SinSquaredPulse <: PulseNode
+    amplitude::Float64
     duration::Float64
 end
 
@@ -83,6 +88,12 @@ function compile_pulse(pulse::SincPulse)
         end
         return 0.0
     end
+end
+
+function compile_pulse(pulse::SinSquaredPulse)
+    a = pulse.amplitude
+    d = pulse.duration
+    return t -> (0 <= t <= d) ? a * sin(π * t / d)^2 : 0.0
 end
 
 function compile_pulse(seq::PiecewisePulse)

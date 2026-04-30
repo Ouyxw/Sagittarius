@@ -73,6 +73,15 @@ class Sinc(PulseNode):
     def jl_obj(self):
         return sgr.SincPulse(self.amplitude, self.width, self.duration)
 
+class SinSquared(PulseNode):
+    def __init__(self, amplitude: float, duration: float):
+        self.amplitude = float(amplitude)
+        self.duration = float(duration)
+        
+    @property
+    def jl_obj(self):
+        return sgr.SinSquaredPulse(self.amplitude, self.duration)
+
 class Pulse:
     """Factory class for all pulse forms used in cold atom experiments."""
     @staticmethod
@@ -98,6 +107,10 @@ class Pulse:
     @staticmethod
     def sinc(amplitude: float, width: float, duration: float) -> Sinc:
         return Sinc(amplitude, width, duration)
+
+    @staticmethod
+    def sin_squared(amplitude: float, duration: float) -> SinSquared:
+        return SinSquared(amplitude, duration)
 
 def compile_pulse(pulse: PulseNode):
     """Compiles a Python Pulse AST into a Julia callable function."""
