@@ -5,7 +5,7 @@ from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig
 from juliacall import Main as jl
 
 def benchmark_gpu(n_range=[10, 12, 14, 16, 18, 20]):
-    print("Benchmarking GPU vs CPU speedup...")
+    print("Benchmarking GPU vs CPU speedup (with Observables)...")
     results = []
     
     # Warmup everything (CPU and GPU) to avoid JIT in timing
@@ -16,8 +16,8 @@ def benchmark_gpu(n_range=[10, 12, 14, 16, 18, 20]):
     sim_w_gpu = Simulation(reg_w, seq_w, SolverConfig(blockade_radius=3.0, use_gpu=True))
     psi0_w = np.zeros(sim_w_cpu.validate(), dtype=complex)
     psi0_w[0] = 1.0
-    sim_w_cpu.run(psi0_w, 0.0, 0.1)
-    sim_w_gpu.run(psi0_w, 0.0, 0.1)
+    sim_w_cpu.run(psi0_w, 0.0, 0.1, observables={"pop0": 0})
+    sim_w_gpu.run(psi0_w, 0.0, 0.1, observables={"pop0": 0})
     jl.seval("CUDA.synchronize()")
 
     for n in n_range:
@@ -32,7 +32,7 @@ def benchmark_gpu(n_range=[10, 12, 14, 16, 18, 20]):
         psi0[0] = 1.0
         
         start = time.time()
-        sim_cpu.run(psi0, 0.0, 1.0)
+        sim_cpu.run(psi0, 0.0, 1.0, observables={"pop0": 0})
         t_cpu = time.time() - start
         
         # 2. GPU
@@ -40,11 +40,11 @@ def benchmark_gpu(n_range=[10, 12, 14, 16, 18, 20]):
         sim_gpu = Simulation(reg, seq, config_gpu)
         
         # Warmup for this N
-        sim_gpu.run(psi0, 0.0, 0.1)
+        sim_gpu.run(psi0, 0.0, 0.1, observables={"pop0": 0})
         jl.seval("CUDA.synchronize()")
         
         start = time.time()
-        sim_gpu.run(psi0, 0.0, 1.0)
+        sim_gpu.run(psi0, 0.0, 1.0, observables={"pop0": 0})
         jl.seval("CUDA.synchronize()")
         t_gpu = time.time() - start
         
