@@ -46,6 +46,14 @@ uv run python -m juliapkg resolve
 
 ---
 
+## 📦 Containerized Development
+
+Sagittarius supports **VS Code Dev Containers** for a seamless, GPU-optimized development experience. This ensures all Julia and Python dependencies are correctly configured with CUDA support out of the box.
+
+For setup instructions, see the [Containerization Guide](docs/CONTAINERIZATION.md).
+
+---
+
 ## 🚀 Performance & Scale
 
 ### 🔥 GPU Acceleration
