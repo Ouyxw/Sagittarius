@@ -1,0 +1,34 @@
+{
+    "name": "Sagittarius GPU Dev Environment",
+    "image": "ghcr.io/ouyxw/sagittarius:latest",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python",
+                "julia.environmentPath": "/workspaces/Sagittarius/Sagittarius.jl",
+                "python.analysis.extraPaths": ["/workspaces/Sagittarius/sagittarius_py"]
+            },
+            "extensions": [
+                "julialang.language-julia",
+                "ms-python.python",
+                "ms-toolsai.jupyter",
+                "charliermarsh.ruff"
+            ]
+        }
+    },
+    "runArgs": [
+        "--runtime=nvidia",
+        "--gpus", "all",
+        "--shm-size", "2gb"
+    ],
+    "containerEnv": {
+        "JULIA_NUM_THREADS": "auto",
+        "PYTHONPATH": "/workspaces/Sagittarius/sagittarius_py",
+        "PYTHON_JULIAPKG_EXE": "julia",
+        "PYTHON_JULIAPKG_OFFLINE": "yes",
+        "JULIA_CUDA_RUNTIME": "local",
+        "PYTHON_JULIACALL_HANDLE_SIGNALS": "yes"
+    },
+    "postCreateCommand": "cd sagittarius_py && uv sync",
+    "remoteUser": "root"
+}
