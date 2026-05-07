@@ -1,5 +1,5 @@
 from .api import Atom, Register, solve, get_basis, Simulation, SimulationResult, PulseSequence, SolverConfig, load_result
-from .pulse import Constant, Ramp, Piecewise, Gaussian, Blackman, Sinc, Pulse
+from .pulse import Constant, Ramp, Piecewise, Gaussian, Blackman, Sinc, SinSquared, Pulse
 from .cluster import ParallelSimulation
 
 __all__ = [
@@ -18,6 +18,7 @@ __all__ = [
     "Gaussian",
     "Blackman",
     "Sinc",
+    "SinSquared",
     "Pulse",
     "ParallelSimulation"
 ]

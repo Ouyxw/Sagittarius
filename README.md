@@ -11,7 +11,7 @@ By leveraging **Bit-Manipulation**, **Graph-based Hilbert Space Pruning**, and *
 *   **🚀 High-Performance Julia Backend**: Core physics and solvers written in Julia for C-level performance.
 *   **🧠 Intelligent Basis Pruning**: Automatically detects "Rydberg Blockade" regions using graph theory to truncate the Hilbert space, enabling simulation of 20+ atoms.
 *   **⚡ Matrix-Free Evolution**: Employs bitwise operations to apply Hamiltonian terms on-the-fly, avoiding the memory overhead of $2^N \times 2^N$ matrices.
-*   **🔥 GPU Acceleration**: Support for **CUDA**, **AMDGPU**, and **Metal** backends to offload heavy numerical integration.
+*   **🔥 GPU Acceleration**: CUDA backend for offloading heavy numerical integration; AMDGPU and Metal are planned/experimental.
 *   **📡 Clustered Solvers**: Distributed simulation for high-throughput parameter sweeps using Julia's cluster management.
 *   **🎭 Pulse Library & AST**: Define complex pulse sequences (**Gaussian, Blackman, Sinc, Ramps**) via a unified `Pulse` factory.
 *   **📍 Local Addressing**: Support per-atom Rabi frequencies ($\Omega_i$) and detunings ($\Delta_i$) for simulating quantum gates.
@@ -64,7 +64,7 @@ For setup instructions, see the [Containerization Guide](docs/CONTAINERIZATION.m
 ## 🚀 Performance & Scale
 
 ### 🔥 GPU Acceleration
-Sagittarius can offload simulations to your GPU. Supported backends include `CUDA` (NVIDIA), `AMDGPU` (AMD), and `Metal` (Apple).
+Sagittarius can offload simulations to NVIDIA GPUs through the `CUDA` backend. AMDGPU and Metal are planned/experimental and are not wired through the optimized Python solver yet.
 
 ```python
 from sagittarius import Simulation, SolverConfig

@@ -19,7 +19,7 @@ This directory contains the comprehensive test suite for the Sagittarius Python 
 - **Dissipation**: Checks Rydberg decay and dephasing dynamics.
 
 ### 3. 🚀 Performance & Scale (\`test_gpu_acceleration.py\`, \`test_cluster.py\`)
-- **GPU Parity**: Ensures that GPU backends (CUDA/AMDGPU/Metal) yield identical results to the CPU.
+- **GPU Parity**: Ensures that the CUDA backend yields results consistent with the CPU path. AMDGPU and Metal are experimental extension targets.
 - **Cluster Connectivity**: Verifies worker orchestration and \`pmap\` distribution.
 
 ### 4. 📍 Advanced Features (\`test_local_pulses.py\`, \`test_api_v2.py\`)

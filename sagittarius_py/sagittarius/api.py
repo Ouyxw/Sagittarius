@@ -3,28 +3,31 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
-from dataclasses import dataclass, field
+from numbers import Integral
+from dataclasses import dataclass
 from typing import Optional, Dict, Union, Any, List
 from juliacall import Main as jl
 
-# Path to the Julia core
-pkg_path = os.path.join(os.path.dirname(__file__), "..", "..", "Sagittarius.jl")
+def _julia_package_path() -> str:
+    env_path = os.environ.get("SAGITTARIUS_JL_PATH")
+    candidates = [
+        env_path,
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "Sagittarius.jl")),
+    ]
+    for candidate in candidates:
+        if candidate and os.path.isfile(os.path.join(candidate, "src", "Sagittarius.jl")):
+            return candidate
+    raise RuntimeError(
+        "Could not find Sagittarius.jl. Set SAGITTARIUS_JL_PATH to the Julia package directory "
+        "or run from the source checkout."
+    )
 
-# Pre-load dependencies into Main
+
+pkg_path = _julia_package_path()
+
+# Pre-load Julia dependencies. juliapkg.json owns dependency resolution; imports
+# should not mutate the user's Julia environment.
 jl.seval("""
-using Pkg
-function ensure_pkg(pkg_name)
-    if !haskey(Pkg.project().dependencies, pkg_name)
-        Pkg.add(pkg_name)
-    end
-end
-
-ensure_pkg("SciMLBase")
-ensure_pkg("CUDA")
-ensure_pkg("Distributed")
-# We don't auto-install AMDGPU/Metal yet to avoid heavy downloads unless needed
-# but we ensure the environment is ready for them.
-
 using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase, CUDA, Distributed
 """)
 
@@ -110,21 +113,27 @@ class SimulationResult:
             plt.show()
 
 class Simulation:
-    def __init__(self, register: Register, sequence: PulseSequence, config: SolverConfig = SolverConfig()):
+    def __init__(self, register: Register, sequence: PulseSequence, config: Optional[SolverConfig] = None):
         self.register = register
         self.sequence = sequence
-        self.config = config
+        self.config = config or SolverConfig()
         self._basis = None
         self._mapping = None
 
     def validate(self) -> int:
         """Returns the size of the Hilbert space after pruning."""
+        if not self.register.atoms:
+            raise ValueError("Register must contain at least one atom")
+        if self.config.blockade_radius < 0:
+            raise ValueError("blockade_radius must be non-negative")
         if self.config.blockade_radius > 0:
             res = phys.generate_reduced_basis(self.register.jl_obj, float(self.config.blockade_radius))
             self._basis = res[0]
             self._mapping = res[1]
             return len(self._basis)
         else:
+            self._basis = None
+            self._mapping = None
             return 2**len(self.register.atoms)
 
     def _get_compiled_func(self, p_config: Any, N: int) -> Any:
@@ -137,6 +146,8 @@ class Simulation:
 
         if isinstance(p_config, (dict, list)):
             # Local addressing
+            if isinstance(p_config, list) and len(p_config) != N:
+                raise ValueError(f"Local pulse list must have length {N}")
             compiled_funcs = []
             for i in range(N):
                 p = p_config.get(i, 0.0) if isinstance(p_config, dict) else p_config[i]
@@ -159,10 +170,41 @@ class Simulation:
                 v = float(p_config)
                 return sgr.create_const_vec_func(v, N)
 
+    def _validate_config(self):
+        supported_methods = {"TSIT5", "DP5", "VERN7", "VERN9"}
+        method = str(self.config.method).upper()
+        if method not in supported_methods:
+            raise ValueError(
+                f"Unsupported solver method: {self.config.method}. "
+                "Supported methods: Tsit5, DP5, Vern7, Vern9."
+            )
+        if self.config.n_trajectories < 1:
+            raise ValueError("n_trajectories must be at least 1")
+        if self.config.reltol <= 0 or self.config.abstol <= 0:
+            raise ValueError("reltol and abstol must be positive")
+        if self.config.use_gpu and self.config.gpu_backend.upper() != "CUDA":
+            raise NotImplementedError(
+                "Only CUDA is currently wired through the optimized GPU solver. "
+                "AMDGPU and Metal remain experimental Julia dependencies."
+            )
+
+    def _validate_observables(self, observables: Optional[Dict[str, int]], N: int):
+        if observables is None:
+            return
+        for name, idx in observables.items():
+            if not isinstance(name, str):
+                raise ValueError("Observable names must be strings")
+            if not isinstance(idx, Integral) or idx < 0 or idx >= N:
+                raise ValueError(f"Observable '{name}' atom index must be an integer in [0, {N - 1}]")
+
     def run(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, int]] = None) -> SimulationResult:
+        self._validate_config()
+        if t_end <= t_start:
+            raise ValueError("t_end must be greater than t_start")
         N = len(self.register.jl_obj.atoms)
         basis_size = self.validate()
-        
+        self._validate_observables(observables, N)
+        psi0 = np.asarray(psi0, dtype=np.complex128)
         if len(psi0) != basis_size:
             raise ValueError(f"Initial state psi0 must have size {basis_size} (current basis size)")
 
@@ -216,7 +258,8 @@ class Simulation:
                     n_trajectories=int(self.config.n_trajectories),
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
-                    abstol=float(self.config.abstol)
+                    abstol=float(self.config.abstol),
+                    method=str(self.config.method)
                 )
                 
                 if jl_obs:
@@ -240,7 +283,8 @@ class Simulation:
                     jl.SVector(float(t_start), float(t_end)),
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
-                    abstol=float(self.config.abstol)
+                    abstol=float(self.config.abstol),
+                    method=str(self.config.method)
                 )
         else:
             # Solve Schrodinger Equation
@@ -248,12 +292,6 @@ class Simulation:
                 backend = self.config.gpu_backend.upper()
                 if backend == "CUDA":
                     jl_psi0 = jl.CUDA.CuVector[jl.ComplexF64](psi0)
-                elif backend == "AMDGPU":
-                    jl.seval("using AMDGPU")
-                    jl_psi0 = jl.AMDGPU.ROCVector[jl.ComplexF64](psi0)
-                elif backend == "METAL":
-                    jl.seval("using Metal")
-                    jl_psi0 = jl.Metal.MtlVector[jl.ComplexF64](psi0)
                 else:
                     raise ValueError(f"Unsupported GPU backend: {backend}")
 
@@ -263,7 +301,8 @@ class Simulation:
                     jl.SVector(float(t_start), float(t_end)),
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
-                    abstol=float(self.config.abstol)
+                    abstol=float(self.config.abstol),
+                    method=str(self.config.method)
                 )
             else:
                 jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
@@ -273,7 +312,8 @@ class Simulation:
                     jl.SVector(float(t_start), float(t_end)), 
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
-                    abstol=float(self.config.abstol)
+                    abstol=float(self.config.abstol),
+                    method=str(self.config.method)
                 )
         
         if jl_obs:
@@ -285,7 +325,7 @@ class Simulation:
         
         return result
 
-def solve(register, sequence, config=SolverConfig(), psi0=None, t_start=0.0, t_end=1.0, observables=None):
+def solve(register, sequence, config=None, psi0=None, t_start=0.0, t_end=1.0, observables=None):
     sim = Simulation(register, sequence, config)
     if psi0 is None:
         dim = sim.validate()

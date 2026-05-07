@@ -68,15 +68,15 @@ uv run python check_env.py
 2. 将 `SolverConfig(use_gpu=True)` 修改为 `False`。
 
 ### 4.3 跨平台 GPU 支持
-- **Apple Silicon (Mac)**: 支持 `gpu_backend="Metal"`。
-- **AMD GPU**: 支持 `gpu_backend="AMDGPU"`。
+- **Apple Silicon (Mac)**: `gpu_backend="Metal"` 目前是预留/实验性接口，尚未接入优化后的 Python 求解路径。
+- **AMD GPU**: `gpu_backend="AMDGPU"` 目前是预留/实验性接口，尚未接入优化后的 Python 求解路径。
 
 ## 5. GPU 性能优化细节
 
 为了实现最佳吞吐量，代码层面对 GPU 进行了以下优化：
 - **无损观测值计算**: `RydbergPopulation` 已移除 `CUDA.@allowscalar`。所有观测值计算都在 GPU 显存内通过向量化操作（broadcasting/mapreduce）完成。
 - **算子缓存**: `solve_schrodinger_gpu` 会自动缓存 `CuSparseMatrixCSC` 形式的哈密顿量算子。
-- **多后端兼容**: 容器环境支持 CUDA，并为 AMDGPU 和 Metal 留出了扩展接口。
+- **多后端兼容**: 容器环境支持 CUDA，并为 AMDGPU 和 Metal 留出了后续扩展接口。
 
 ## 5. 常见问题 (FAQ)
 

@@ -17,6 +17,21 @@ using CUDA.CUSPARSE
 export solve_schrodinger, solve_lindblad, solve_mc_trajectories, RydbergPopulation
 export solve_schrodinger_gpu
 
+function solver_algorithm(method::AbstractString)
+    normalized = uppercase(strip(method))
+    if normalized == "TSIT5"
+        return Tsit5()
+    elseif normalized == "DP5"
+        return DP5()
+    elseif normalized == "VERN7"
+        return Vern7()
+    elseif normalized == "VERN9"
+        return Vern9()
+    else
+        throw(ArgumentError("Unsupported solver method: $(method). Supported methods: Tsit5, DP5, Vern7, Vern9."))
+    end
+end
+
 """
     RydbergPopulation(atom_idx, N_atoms; basis=nothing)
 Returns a function that calculates the population of the Rydberg state for atom \`atom_idx\`.
@@ -75,7 +90,7 @@ function RydbergPopulation(atom_idx, N_atoms; basis=nothing)
     end
 end
 
-function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
+function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, method="Tsit5")
     f(ψ, p, t) = (H_func(t) * ψ) .* (-1im)
     saved_values = SavedValues(Float64, Any)
     cb = nothing
@@ -84,11 +99,11 @@ function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=n
         cb = SavingCallback(save_func, saved_values)
     end
     prob = ODEProblem(f, ψ0, tspan)
-    sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    sol = solve(prob, solver_algorithm(method), reltol=reltol, abstol=abstol, callback=cb)
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
-function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
+function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, method="Tsit5")
     function f(ψ, p, t)
         op = H_func(t)
         # Check for our cached sparse matrix
@@ -121,11 +136,11 @@ function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1
         cb = SavingCallback(save_func, saved_values)
     end
     prob = ODEProblem(f, ψ0, tspan)
-    sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    sol = solve(prob, solver_algorithm(method), reltol=reltol, abstol=abstol, callback=cb)
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
-function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
+function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, method="Tsit5")
     J_dagger_J = [J' * J for J in J_ops]
     J_dagger = [sparse(J') for J in J_ops]
     f(ρ, p, t) = begin
@@ -146,13 +161,13 @@ function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observabl
         cb = SavingCallback(save_func, saved_values)
     end
     prob = ODEProblem(f, ρ0, tspan)
-    sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    sol = solve(prob, solver_algorithm(method), reltol=reltol, abstol=abstol, callback=cb)
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
 function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan; 
                                n_trajectories=100, observables=nothing, 
-                               reltol=1e-8, abstol=1e-8)
+                               reltol=1e-8, abstol=1e-8, method="Tsit5")
     J_dagger_J = [J' * J for J in J_ops]
     sum_J_dagger_J = isempty(J_ops) ? spzeros(ComplexF64, length(ψ0), length(ψ0)) : sum(J_dagger_J)
     f(ψ, p, t) = begin
@@ -194,7 +209,7 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
             return (res, false)
         end
         ensemble_prob = EnsembleProblem(prob, prob_func=prob_func, output_func=output_func)
-        sim = solve(ensemble_prob, Tsit5(), EnsembleThreads(), trajectories=n_trajectories, 
+        sim = solve(ensemble_prob, solver_algorithm(method), EnsembleThreads(), trajectories=n_trajectories, 
                     callback=cb_jump, reltol=reltol, abstol=abstol, saveat=t_vals)
         n_obs = length(observables)
         avg_res = [zeros(n_obs) for _ in 1:length(t_vals)]
@@ -208,7 +223,7 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
         end
         return (t_vals, avg_res)
     else
-        return solve(ensemble_prob, Tsit5(), EnsembleThreads(), trajectories=n_trajectories, 
+        return solve(ensemble_prob, solver_algorithm(method), EnsembleThreads(), trajectories=n_trajectories, 
                      callback=cb_jump, reltol=reltol, abstol=abstol)
     end
 end
