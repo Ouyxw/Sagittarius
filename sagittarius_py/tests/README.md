@@ -22,9 +22,11 @@ This directory contains the comprehensive test suite for the Sagittarius Python 
 - **GPU Parity**: Ensures that GPU backends (CUDA/AMDGPU/Metal) yield identical results to the CPU.
 - **Cluster Connectivity**: Verifies worker orchestration and `pmap` distribution.
 
-### 4. 📍 Advanced Features (`test_local_pulses.py`, `test_api_v2.py`)
+### 4. 📍 Advanced Features (`test_local_pulses.py`, `test_api_v2.py`, `test_pulse.py`, `test_physics.py`)
 - **Local Addressing**: Verifies per-atom pulse sequence alignment.
 - **API Ergonomics**: Validates `Simulation` and `SimulationResult` object behavior.
+- **Pulse Shapes**: Tests complex waveforms (Piecewise, Ramp, Gaussian).
+- **Functional Physics**: Quick checks for blockade and basic dynamics.
 
 ### 5. 💾 Operations (`test_serialization.py`)
 - **Persistence**: Verifies JSON save/load cycles for `SimulationResult` objects.
