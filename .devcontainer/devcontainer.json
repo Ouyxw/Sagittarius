@@ -1,6 +1,9 @@
 {
     "name": "Sagittarius GPU Dev Environment",
-    "image": "ghcr.io/ouyxw/sagittarius:latest",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
     "customizations": {
         "vscode": {
             "settings": {
@@ -25,6 +28,7 @@
         "JULIA_NUM_THREADS": "auto",
         "PYTHONPATH": "/workspaces/Sagittarius/sagittarius_py",
         "PYTHON_JULIAPKG_EXE": "julia",
+        "PYTHON_JULIAPKG_PROJECT": "/root/.julia/environments/Sagittarius_Env",
         "PYTHON_JULIAPKG_OFFLINE": "yes",
         "JULIA_CUDA_RUNTIME": "local",
         "PYTHON_JULIACALL_HANDLE_SIGNALS": "yes"
