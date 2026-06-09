@@ -1,5 +1,6 @@
 # 使用 NVIDIA CUDA 12.4 基础镜像以更好地支持高版本驱动 (CUDA 13.1)
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+# FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+FROM nvcr.io/nvidia/cuda:12.4.1-devel-ubuntu22.04
 
 # 设置非交互模式
 ENV DEBIAN_FRONTEND=noninteractive
