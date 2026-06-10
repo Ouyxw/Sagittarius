@@ -32,10 +32,10 @@ This document outlines the development lifecycle of Sagittarius, from a function
 ## 🚧 Phase 5: Production Hardening (Planned)
 | Requirement | Priority | Description |
 | :--- | :---: | :--- |
-| **Lazy Backend Initialization** | High | Importing `sagittarius` must not install packages, resolve Julia dependencies, or eagerly load heavy GPU stacks. Dependency setup should be an explicit command or install step. |
-| **Backend Capability Detection** | High | Add clear runtime checks and error messages for Julia, CUDA, AMDGPU, Metal, and optional solver dependencies. |
+| **Lazy Backend Initialization** | High | Importing `sagittarius` must remain lightweight even inside Docker/devcontainer workflows. Julia, GPU runtimes, and optional solver stacks should initialize only when a backend is selected or an explicit setup/doctor command is run. |
+| **Backend Capability Detection** | High | Provide a formal `doctor`/backend inspection path that reports actual runtime availability inside or outside Docker, including missing GPU passthrough, driver/runtime mismatches, and optional backend dependencies. |
 | **GPU Maturity Matrix** | High | Document each backend as `stable`, `experimental`, or `planned`; CUDA, AMDGPU, and Metal must not be presented as equally mature unless parity tests exist. |
-| **Package Versioning** | Medium | Add explicit Python and Julia package versions and expose them through the public API for reproducibility. |
+| **Package Versioning** | Medium | Expose Python, Julia, backend, solver, CUDA/AMDGPU/Metal, and container/build metadata through the public API and simulation artifacts for reproducibility. |
 | **Repository Cleanup** | Medium | Remove temporary files such as `api.py-FIX`, move debug scripts into `examples/` or `scripts/`, and verify that referenced license files exist. |
 
 ## 🚀 Phase 6: Core Performance Improvements (Planned)
