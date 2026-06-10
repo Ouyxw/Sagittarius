@@ -36,6 +36,8 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Backend Capability Detection** | High | Provide a formal `doctor`/backend inspection path that reports actual runtime availability inside or outside Docker, including missing GPU passthrough, driver/runtime mismatches, and optional backend dependencies. |
 | **GPU Maturity Matrix** | High | Document each backend as `stable`, `experimental`, or `planned`; CUDA, AMDGPU, and Metal must not be presented as equally mature unless parity tests exist. |
 | **Package Versioning** | Medium | Expose Python, Julia, backend, solver, CUDA/AMDGPU/Metal, and container/build metadata through the public API and simulation artifacts for reproducibility. |
+| **Structured Logging** | High | Provide configurable Python and Julia logging with stable event names, levels, and optional JSON output for import/setup, backend selection, basis generation, solver start/finish, GPU allocation, and failure diagnostics. |
+| **Runtime Diagnostics Log** | High | Capture environment and backend diagnostics from `doctor`/simulation runs, including container status, GPU passthrough, driver/runtime versions, selected solver, tolerances, basis size, and reduced-basis pruning ratio. |
 | **Repository Cleanup** | Medium | Remove temporary files such as `api.py-FIX`, move debug scripts into `examples/` or `scripts/`, and verify that referenced license files exist. |
 
 ## 🚀 Phase 6: Core Performance Improvements (Planned)
@@ -69,6 +71,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **MWIS Batch Verification** | Medium | Compare AQC output against exact ILP solutions across randomized UDG/MWIS instances. |
 | **Ablation Benchmarks** | High | Benchmark full dense, full sparse, reduced matrix-free, reduced sparse, and reduced sparse GPU-cached execution paths. |
 | **Reproducible Benchmark Artifacts** | High | Benchmark scripts should emit JSON/CSV with hardware, Julia/Python/CUDA versions, parameters, timings, memory usage, and generated markdown tables. |
+| **Simulation Run Manifest** | High | Persist a machine-readable run manifest alongside saved results and benchmarks, including random seeds, register geometry, pulse configuration, solver options, backend diagnostics, package versions, and relevant log event IDs. |
 
 ## 📚 Phase 9: Documentation & Patent Readiness (Planned)
 | Requirement | Priority | Description |
