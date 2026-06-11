@@ -174,7 +174,7 @@ print(backend_maturity())
 print(doctor(backend="CUDA"))
 ```
 
-`doctor()` reports container detection, backend maturity, runtime versions, and basic GPU visibility. Pass `initialize_backend=True` to also attempt Julia backend loading. Simulation results expose `metadata` and `diagnostics`; `SimulationResult.save()` persists those fields when they are present.
+`doctor()` reports container detection, backend maturity, runtime versions, basic GPU visibility, structured `issue_details`, and schema version `doctor/v2.1`. Pass `initialize_backend=True` to also attempt Julia backend loading and return a `backend-probe/v2.1` payload with `checks`, `versions`, `devices`, `driver`, `runtime`, and `errors`. Simulation results expose `metadata` and `diagnostics`; `SimulationResult.save()` persists those fields when they are present.
 
 ## MWIS Example
 
@@ -254,7 +254,7 @@ For roadmap context, see [REQUIREMENTS.md](REQUIREMENTS.md). For container setup
 
 - The public API is still changing.
 - Python imports are intended to stay lightweight; Julia and GPU runtimes initialize when a backend operation, simulation, pulse compilation, cluster setup, or explicit backend initialization needs them.
-- GPU backend maturity is not uniform across CUDA, AMDGPU, and Metal; see `docs/BACKENDS.md`.
+- GPU backend maturity is not uniform across CUDA, AMDGPU, and Metal; see `docs/BACKENDS.md`. Hardware-backed parity validation and full backend-specific ABI reporting are still in progress.
 - Cross-language Python/Julia parity tests are planned as part of the dual SDK work.
 - Benchmark claims should be tied to reproducible scripts and recorded environment metadata.
 

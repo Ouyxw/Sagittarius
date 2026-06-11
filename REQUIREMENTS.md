@@ -33,14 +33,25 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Lazy Backend Initialization** | High | Done | `import sagittarius` stays lightweight; Julia, CUDA, and cluster workers initialize only when simulation, pulse compilation, cluster setup, GPU execution, or explicit backend initialization needs them. |
-| **Backend Capability Detection** | High | Partial | Public `doctor()` reports runtime metadata, container detection, backend maturity, CUDA driver visibility via `nvidia-smi`, and unsupported/planned backend issues without initializing Julia by default. Deeper Julia package and driver/runtime compatibility checks remain planned. |
+| **Backend Capability Detection** | High | Partial | Public `doctor()` reports runtime metadata, container detection, backend maturity, CUDA driver/device visibility, structured diagnostics, and actionable failure codes. Initialized probes cover backend package loading, device visibility/allocation, and sparse backend checks where available. Remaining work: hardware-backed parity validation, fuller backend-specific ABI reporting, and remediation docs. |
 | **GPU Maturity Matrix** | High | Done | Backend maturity is documented in `docs/BACKENDS.md` and exposed through `backend_maturity()`: CPU `stable`, CUDA `experimental`, AMDGPU/Metal `planned`. |
-| **Package Versioning** | Medium | Partial | `version_info()` exposes Python package, Python runtime, platform, container status, Sagittarius.jl version, and Julia version once loaded. Simulation artifacts persist metadata when present. Backend package/build metadata remains planned. |
-| **Structured Logging** | High | Partial | Python-side configurable structured logging exists through `configure_logging()` and stable events for backend initialization, doctor reports, solver start/finish, and cluster setup. Julia-side structured logging and full GPU allocation events remain planned. |
-| **Runtime Diagnostics Log** | High | Partial | `doctor()` and observable simulation results capture runtime/backend diagnostics, selected solver settings, tolerances, basis size, and reduced-basis pruning ratio. A full standalone run-manifest schema remains planned for Phase 8. |
+| **Package Versioning** | Medium | Partial | `version_info()` exposes Python package, Python runtime, platform, container status, Sagittarius.jl version, and Julia version once loaded. Full build/container metadata is tracked in Phase 6. |
+| **Basic Runtime Logging** | High | Partial | Python-side configurable logging exists for backend initialization, doctor reports, solver start/finish, and cluster setup. Full cross-language observability is tracked in Phase 6. |
+| **Basic Runtime Diagnostics** | High | Partial | `doctor()` and observable simulation results capture runtime/backend diagnostics, structured issue details, selected solver settings, tolerances, basis size, and reduced-basis pruning ratio. Full run manifests are tracked in Phase 6. |
 | **Repository Cleanup** | Medium | Done | Removed `api.py-FIX`, moved root debug scripts into `scripts/`, added `LICENSE`, and updated backend documentation references. |
 
-## 🚀 Phase 6: Core Performance Improvements (Planned)
+## 📈 Phase 6: Observability & Reproducibility (Planned)
+| Requirement | Priority | Description |
+| :--- | :---: | :--- |
+| **Structured Python/Julia Logging** | High | Define stable event names, levels, and optional JSON output across Python and Julia for backend initialization, backend selection, basis generation, Hamiltonian construction, solver start/finish, GPU allocation, and failure diagnostics. |
+| **Event Taxonomy** | High | Maintain a documented event catalog with stable IDs, payload fields, severity conventions, and compatibility rules. |
+| **Run Manifest Schema** | High | Persist a machine-readable manifest alongside saved results and benchmarks, including random seeds, register geometry, pulse configuration, solver options, backend diagnostics, package versions, and relevant log event IDs. |
+| **Result Artifact Envelope** | Medium | Standardize the saved result envelope for data, metadata, diagnostics, manifests, and schema versions across Python and Julia workflows. |
+| **Benchmark Artifact Metadata** | High | Benchmark scripts should emit JSON/CSV with hardware, Julia/Python/CUDA versions, parameters, timings, memory usage, generated markdown tables, and linked diagnostic manifests. |
+| **Version and Build Metadata** | Medium | Record Python, Julia, solver, backend package, CUDA/AMDGPU/Metal, container image, and build metadata in diagnostics, manifests, and benchmark artifacts. |
+| **Failure Diagnostics Normalization** | High | Normalize backend, solver, validation, and serialization failures into actionable error codes and remediation messages. |
+
+## 🚀 Phase 7: Core Performance Improvements (Planned)
 | Requirement | Priority | Description |
 | :--- | :---: | :--- |
 | **Reduced Basis Cache** | High | Cache blockade-reduced bases by an adjacency/register hash, blockade radius, and atom count to avoid repeated basis generation. |
@@ -48,9 +59,9 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Sparse Pattern Reuse** | High | Reuse Hamiltonian sparse row/column structure and update only values when time-dependent pulses change $\Omega$ or $\Delta$. |
 | **GPU Buffer Reuse** | High | Preallocate and reuse GPU sparse/value buffers to reduce repeated host-to-device transfers and sparse matrix construction. |
 | **Observable/Jumps Basis Sharing** | Medium | Ensure observables, Lindblad jump operators, MCWF trajectories, and Hamiltonian evolution share the same reduced-basis mapping consistently. |
-| **Specialized Register Constructors** | Medium | Add optimized constructors for common 1D chains, 2D lattices, and UDG instances, including pruning-ratio diagnostics. |
+| **Specialized Register Constructors** | Medium | Add optimized constructors for common 1D chains, 2D lattices, and UDG instances, with pruning-ratio data exposed through the Phase 6 diagnostics schema. |
 
-## 🧩 Phase 7: API & Data Model Refinement (Planned)
+## 🧩 Phase 8: API & Data Model Refinement (Planned)
 | Requirement | Priority | Description |
 | :--- | :---: | :--- |
 | **Explicit Pulse Types** | High | Replace ambiguous scalar/list/dict/callable handling with validated `GlobalPulse`, `LocalPulseVector`, and `CallablePulse` style inputs or equivalent typed wrappers. |
@@ -60,9 +71,9 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Julia Native Developer API** | High | Maintain a first-class Julia API for users who need direct access to Hamiltonians, bases, pulse objects, solvers, backend controls, and performance-critical internals. |
 | **Python SDK Parity Contract** | High | Define which simulation semantics, defaults, result fields, and error behaviors must remain equivalent between the Python SDK and Julia SDK. |
 | **Cross-Language Golden Tests** | High | Add shared Python/Julia test cases that verify equivalent Hamiltonians, observables, solver outputs, serialization, and benchmark fixtures within documented tolerances. |
-| **Shared Result Schema** | Medium | Define a stable language-neutral result format for simulations, benchmark artifacts, and hardware-demo handoff workflows. |
+| **Shared Result Schema** | Medium | Define stable language-neutral simulation result fields and semantics; artifact envelopes and manifests are tracked in Phase 6. |
 
-## 🧪 Phase 8: Scientific Verification & Benchmarks (Planned)
+## 🧪 Phase 9: Scientific Verification & Benchmarks (Planned)
 | Requirement | Priority | Description |
 | :--- | :---: | :--- |
 | **Dense-vs-Reduced Validation** | High | For small systems, compare full dense Hamiltonian evolution with reduced-basis projected evolution. |
@@ -70,20 +81,18 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **CPU/GPU Parity Suite** | High | Run deterministic CPU/GPU parity tests with fixed tolerances and seeded random components where applicable. |
 | **MWIS Batch Verification** | Medium | Compare AQC output against exact ILP solutions across randomized UDG/MWIS instances. |
 | **Ablation Benchmarks** | High | Benchmark full dense, full sparse, reduced matrix-free, reduced sparse, and reduced sparse GPU-cached execution paths. |
-| **Reproducible Benchmark Artifacts** | High | Benchmark scripts should emit JSON/CSV with hardware, Julia/Python/CUDA versions, parameters, timings, memory usage, and generated markdown tables. |
-| **Simulation Run Manifest** | High | Persist a machine-readable run manifest alongside saved results and benchmarks, including random seeds, register geometry, pulse configuration, solver options, backend diagnostics, package versions, and relevant log event IDs. |
 
-## 📚 Phase 9: Documentation & Patent Readiness (Planned)
+## 📚 Phase 10: Documentation & Patent Readiness (Planned)
 | Requirement | Priority | Description |
 | :--- | :---: | :--- |
 | **Known Limitations** | High | Document current scale limits, backend limitations, numerical assumptions, and unsupported scenarios. |
-| **Verifiable Performance Claims** | High | Replace broad marketing claims with benchmark-backed statements that name hardware, versions, problem size, and configuration. |
+| **Verifiable Performance Claims** | High | Replace broad marketing claims with benchmark-backed statements that reference Phase 6 benchmark artifacts and name hardware, versions, problem size, and configuration. |
 | **Minimal Examples with Expected Output** | Medium | Add short examples with expected basis size, observable values, or solver output for quick user verification. |
 | **Dual SDK Documentation** | Medium | Provide parallel Python and Julia examples for algorithm prototyping, experiment-style pulse simulation, baseline validation, and hardware-demo preparation. |
 | **Prior-Art-Aware Technical Notes** | Medium | Maintain internal notes distinguishing Sagittarius-specific execution optimizations from known Rydberg/MWIS mappings and existing neutral-atom simulators. |
 | **Disclosure Control** | Medium | Track dates for public releases, benchmark reports, and technical disclosures that may affect patent filing strategy. |
 
-## 🔬 Phase 10: HPC & Advanced Deployment (Future)
+## 🔬 Phase 11: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
 - **C++ FFI**: Direct bindings for C++ applications to leverage the Julia engine.
