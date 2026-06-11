@@ -1,0 +1,149 @@
+# Minimal Examples with Expected Output
+
+These examples are intended for quick user verification. Examples marked **backend-free** should run without initializing Julia. Examples marked **Julia-backed** require a working Julia/PythonCall environment.
+
+## 1. Runtime Diagnostics Shape (backend-free)
+
+```python
+from sagittarius import doctor
+
+report = doctor()
+print(report["schema_version"])
+print(report["requested_backend"])
+print(report["available"])
+print(report["backend_probe"])
+```
+
+Expected output shape:
+
+```text
+doctor/v2.1
+CPU
+True
+None
+```
+
+`doctor()` does not initialize Julia unless `initialize_backend=True` is passed.
+
+## 2. Local Addressing Validation (backend-free)
+
+```python
+from sagittarius import Atom, Register, Simulation, PulseSequence
+
+reg = Register([Atom(0, 0, 0), Atom(5, 0, 0)])
+sim = Simulation(reg, PulseSequence(omega=[1.0]))
+
+try:
+    sim.validate_inputs(sample_time=0.0)
+except ValueError as exc:
+    print(exc)
+```
+
+Expected output:
+
+```text
+PulseSequence.omega list length 1 does not match 2 atoms
+```
+
+Local pulse lists must have one entry per atom in `Register.atoms` order.
+
+## 3. Local Indexing Semantics (backend-free)
+
+```python
+from sagittarius import Atom, Register, Simulation, PulseSequence
+
+reg = Register([Atom(0, 0, 0), Atom(5, 0, 0)])
+sim = Simulation(reg, PulseSequence(omega={0: 1.0, 1: 0.0}))
+sim.validate_inputs(sample_time=0.0, observables={"atom0": 0, "atom1": 1})
+print("valid")
+```
+
+Expected output:
+
+```text
+valid
+```
+
+Python atom indices are zero-based and follow `Register.atoms` order. Julia boundary calls convert to one-based indices internally.
+
+## 4. One-Atom Rabi Flip (Julia-backed)
+
+```python
+import numpy as np
+from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig
+
+reg = Register([Atom(0.0, 0.0, 0.0)], C6=0.0)
+seq = PulseSequence(omega=2.0 * np.pi, delta=0.0)
+cfg = SolverConfig(reltol=1e-7, abstol=1e-7)
+
+sim = Simulation(reg, seq, cfg)
+psi0 = np.array([1.0, 0.0], dtype=complex)
+result = sim.run(psi0, 0.0, 0.5, observables={"pop_atom_0": 0})
+
+print(round(result.data["pop_atom_0"][-1], 3))
+```
+
+Expected output:
+
+```text
+1.0
+```
+
+This is a half-period Rabi flip for a single atom with `omega = 2π`. Small numerical variation is expected if solver tolerances change.
+
+## 5. Three-Atom Blockade Basis Size (Julia-backed)
+
+```python
+from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig
+
+reg = Register([
+    Atom(0.0, 0.0, 0.0),
+    Atom(0.5, 0.0, 0.0),
+    Atom(1.0, 0.0, 0.0),
+], C6=100.0)
+
+sim = Simulation(
+    reg,
+    PulseSequence(omega=1.0, delta=0.0),
+    SolverConfig(blockade_radius=0.6),
+)
+
+print(sim.validate())
+```
+
+Expected output:
+
+```text
+5
+```
+
+The nearest-neighbor blockade removes states where adjacent atoms are simultaneously excited.
+
+## 6. Serialization Envelope (backend-free)
+
+```python
+import json
+import tempfile
+from sagittarius import SimulationResult, load_result
+
+result = SimulationResult(
+    {"t": [0.0, 1.0], "pop": [0.0, 1.0]},
+    metadata={"example": "minimal"},
+    diagnostics={"backend": "CPU"},
+)
+
+with tempfile.NamedTemporaryFile(suffix=".json") as f:
+    result.save(f.name)
+    loaded = load_result(f.name)
+    print(loaded.data["pop"][-1])
+    print(loaded.metadata["example"])
+    print(loaded.diagnostics["backend"])
+```
+
+Expected output:
+
+```text
+1.0
+minimal
+CPU
+```

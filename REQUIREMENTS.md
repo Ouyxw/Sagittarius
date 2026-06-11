@@ -87,7 +87,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | :--- | :---: | :---: | :--- |
 | **Known Limitations** | High | Done | Document current scale limits, backend limitations, numerical assumptions, reproducibility gaps, and unsupported scenarios in `docs/KNOWN_LIMITATIONS.md`. |
 | **Verifiable Performance Claims** | High | Planned | Replace broad marketing claims with benchmark-backed statements that reference Phase 6 benchmark artifacts and name hardware, versions, problem size, and configuration. |
-| **Minimal Examples with Expected Output** | Medium | Planned | Add short examples with expected basis size, observable values, or solver output for quick user verification. |
+| **Minimal Examples with Expected Output** | Medium | Done | Add short examples with expected diagnostics shape, validation errors, indexing behavior, basis size, observable values, and serialization output in `docs/MINIMAL_EXAMPLES.md`. |
 | **Dual SDK Documentation** | Medium | Planned | Provide parallel Python and Julia examples for algorithm prototyping, experiment-style pulse simulation, baseline validation, and hardware-demo preparation. |
 | **Prior-Art-Aware Technical Notes** | Medium | Planned | Maintain internal notes distinguishing Sagittarius-specific execution optimizations from known Rydberg/MWIS mappings and existing neutral-atom simulators. |
 | **Disclosure Control** | Medium | Planned | Track dates for public releases, benchmark reports, and technical disclosures that may affect patent filing strategy. |
