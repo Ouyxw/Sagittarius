@@ -1,7 +1,7 @@
 from typing import List, Callable, Any, Dict
 import numpy as np
 from .api import Simulation, SimulationResult
-from juliacall import Main as jl
+from .runtime import get_julia, log_event
 
 class ParallelSimulation:
     """
@@ -11,8 +11,11 @@ class ParallelSimulation:
     
     def __init__(self, n_workers: int = 4):
         self.n_workers = n_workers
-        # Initialize workers and load Sagittarius
-        jl.Sagittarius.Cluster.setup_workers(n_workers)
+        # Initialize workers and load Sagittarius only when cluster execution is requested.
+        jl, sgr = get_julia()
+        log_event("cluster_setup_start", n_workers=n_workers)
+        sgr.Cluster.setup_workers(n_workers)
+        log_event("cluster_setup_finish", n_workers=n_workers)
         
     def map(self, sim_func: str, params: List[Any]) -> List[Any]:
         """
@@ -23,6 +26,7 @@ class ParallelSimulation:
         params: List of parameters (must be serializable to Julia).
         """
         # We call pmap via Distributed module
+        jl, _ = get_julia()
         results = list(jl.Distributed.pmap(jl.seval(sim_func), params))
         return results
 

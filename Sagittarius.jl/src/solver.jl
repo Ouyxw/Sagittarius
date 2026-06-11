@@ -6,8 +6,6 @@ using DiffEqCallbacks
 using SparseArrays
 using Random
 using SciMLBase
-using CUDA
-using CUDA.CUSPARSE
 
 # Optional dependencies handled via requires or dynamic checks in real packages,
 # but for this prototype we'll assume they are available if selected.
@@ -57,7 +55,7 @@ function RydbergPopulation(atom_idx, N_atoms; basis=nothing)
                 end
             end
             return pop
-        elseif state isa CuVector
+        elseif isdefined(@__MODULE__, :CUDA) && state isa CUDA.CuVector
             # Optimized GPU implementation using broadcasting and reduction
             if isnothing(basis)
                 # Correcting for 1-based indexing: (i-1) is the bitstring
@@ -89,14 +87,16 @@ function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=n
 end
 
 function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
+    @eval using CUDA
+    @eval using CUDA.CUSPARSE
     function f(ψ, p, t)
         op = H_func(t)
         # Check for our cached sparse matrix
         if hasproperty(op, :use_gpu) && op.use_gpu
             if isnothing(op.cached_sparse_H)
                 # Determine which GPU array type to use
-                if ψ isa CuVector
-                    op.cached_sparse_H = CuSparseMatrixCSC(sparse(op))
+                if ψ isa CUDA.CuVector
+                    op.cached_sparse_H = CUDA.CUSPARSE.CuSparseMatrixCSC(sparse(op))
                 else
                     # Fallback or other backends
                     return (sparse(op) * ψ) .* (-1im)
@@ -106,8 +106,8 @@ function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1
         else
             # Dynamic conversion (slow)
             H_sparse = sparse(op)
-            if ψ isa CuVector
-                return (CuSparseMatrixCSC(H_sparse) * ψ) .* (-1im)
+            if ψ isa CUDA.CuVector
+                return (CUDA.CUSPARSE.CuSparseMatrixCSC(H_sparse) * ψ) .* (-1im)
             else
                 return (H_sparse * ψ) .* (-1im)
             end

@@ -1,12 +1,6 @@
-from juliacall import Main as jl
 from typing import List, Optional
 
-# Ensure Sagittarius is loaded in Main before accessing sgr
-try:
-    sgr = jl.Sagittarius
-except AttributeError:
-    # If not loaded yet (e.g. imported directly), we fall back to api.py's loading
-    from .api import sgr
+from .runtime import get_julia
 
 class PulseNode:
     """Base class for Pulse AST nodes."""
@@ -21,6 +15,7 @@ class Constant(PulseNode):
         
     @property
     def jl_obj(self):
+        _, sgr = get_julia()
         return sgr.ConstantPulse(self.value, self.duration)
 
 class Ramp(PulseNode):
@@ -31,6 +26,7 @@ class Ramp(PulseNode):
         
     @property
     def jl_obj(self):
+        _, sgr = get_julia()
         return sgr.RampPulse(self.start_val, self.end_val, self.duration)
 
 class Piecewise(PulseNode):
@@ -40,6 +36,7 @@ class Piecewise(PulseNode):
     @property
     def jl_obj(self):
         # Convert to a Julia Vector of PulseNode
+        jl, sgr = get_julia()
         jl_pulses = jl.Vector[sgr.PulseNode]([p.jl_obj for p in self.pulses])
         return sgr.PiecewisePulse(jl_pulses)
 
@@ -52,6 +49,7 @@ class Gaussian(PulseNode):
         
     @property
     def jl_obj(self):
+        _, sgr = get_julia()
         return sgr.GaussianPulse(self.amplitude, self.sigma, self.mu, self.duration)
 
 class Blackman(PulseNode):
@@ -61,6 +59,7 @@ class Blackman(PulseNode):
         
     @property
     def jl_obj(self):
+        _, sgr = get_julia()
         return sgr.BlackmanPulse(self.amplitude, self.duration)
 
 class Sinc(PulseNode):
@@ -71,6 +70,7 @@ class Sinc(PulseNode):
         
     @property
     def jl_obj(self):
+        _, sgr = get_julia()
         return sgr.SincPulse(self.amplitude, self.width, self.duration)
 
 class SinSquared(PulseNode):
@@ -80,6 +80,7 @@ class SinSquared(PulseNode):
         
     @property
     def jl_obj(self):
+        _, sgr = get_julia()
         return sgr.SinSquaredPulse(self.amplitude, self.duration)
 
 class Pulse:
@@ -114,6 +115,7 @@ class Pulse:
 
 def compile_pulse(pulse: PulseNode):
     """Compiles a Python Pulse AST into a Julia callable function."""
+    _, sgr = get_julia()
     return sgr.compile_pulse(pulse.jl_obj)
 
 def is_pulse(obj):

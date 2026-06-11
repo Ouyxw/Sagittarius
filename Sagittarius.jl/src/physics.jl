@@ -3,8 +3,6 @@ module Physics
 using LinearAlgebra
 using SparseArrays
 using StaticArrays
-using CUDA
-using CUDA.CUSPARSE
 
 export Atom, Register, RydbergHamiltonian, generate_reduced_basis, ReducedRydbergOperator, build_hamiltonian_func, get_jump_operators
 

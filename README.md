@@ -41,7 +41,9 @@ Implemented or partially implemented capabilities include:
 - Global and local pulse controls for Rabi frequency and detuning.
 - Pulse helpers including constant, ramp, piecewise, Gaussian, Blackman, and sinc shapes.
 - Schrodinger, Lindblad, and Monte Carlo trajectory workflows.
-- JSON serialization for simulation results.
+- JSON serialization for simulation results, including metadata and diagnostics when present.
+- Lightweight Python imports with lazy Julia/GPU initialization.
+- Runtime diagnostics through `doctor()`, `version_info()`, and `backend_maturity()`.
 - GPU execution paths for supported backends, with CUDA as the primary containerized development target.
 - Distributed parameter sweeps through `ParallelSimulation`.
 - MWIS/UDG example workflows with classical baselines.
@@ -60,12 +62,14 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for the current development roadmap and p
 |   |-- sagittarius/
 |   |-- tests/
 |   `-- projects/mwis_udg/
-|-- docs/                    # Development and deployment notes
+|-- docs/                    # Development, deployment, and backend notes
+|-- scripts/                 # Development/debug helper scripts
+|-- LICENSE                  # MIT license
 |-- REQUIREMENTS.md          # Roadmap and production requirements
 `-- README.md
 ```
 
-Some repository cleanup is still planned. In particular, temporary debug scripts and scratch files may move into `examples/`, `scripts/`, or test fixtures as the project hardens.
+Development/debug helper scripts that are not part of the public SDK live under `scripts/`.
 
 ## Installation
 
@@ -87,7 +91,7 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-The Python package currently depends on Julia through `juliacall`. The first run may resolve Julia packages and precompile dependencies.
+The Python package depends on Julia through `juliacall`, but importing `sagittarius` is designed to stay lightweight. Julia package resolution and precompilation happen when a backend operation, simulation, pulse compilation, cluster setup, or explicit backend initialization needs Julia.
 
 ### Containerized Development
 
@@ -100,7 +104,7 @@ cd sagittarius_py
 uv run python check_env.py
 ```
 
-A container image does not guarantee that a GPU backend is available at runtime. GPU passthrough, host drivers, and backend-specific Julia packages still need to be checked on the running machine.
+A container image does not guarantee that a GPU backend is available at runtime. GPU passthrough, host drivers, and backend-specific Julia packages still need to be checked on the running machine. Use `doctor(backend="CUDA")` for a lightweight check and `doctor(backend="CUDA", initialize_backend=True)` when you also want to validate Julia startup.
 
 ## Quick Start
 
@@ -156,7 +160,21 @@ from sagittarius import SolverConfig
 cfg = SolverConfig(use_gpu=True, gpu_backend="CUDA")
 ```
 
-Supported backend names are currently `CUDA`, `AMDGPU`, and `Metal`, but maturity and test coverage are not identical across backends. CUDA is the main target of the provided container workflow. Backend capability detection and clearer maturity documentation are part of the production hardening roadmap.
+Supported backend names are currently `CUDA`, `AMDGPU`, and `Metal`, but maturity and test coverage are not identical across backends. CUDA is the main target of the provided container workflow. See [docs/BACKENDS.md](docs/BACKENDS.md) for the current maturity matrix, and use `doctor(backend="CUDA")` before enabling GPU execution on a machine or container.
+
+## Runtime Diagnostics
+
+The diagnostics API is safe to call before Julia is initialized:
+
+```python
+from sagittarius import backend_maturity, doctor, version_info
+
+print(version_info())
+print(backend_maturity())
+print(doctor(backend="CUDA"))
+```
+
+`doctor()` reports container detection, backend maturity, runtime versions, and basic GPU visibility. Pass `initialize_backend=True` to also attempt Julia backend loading. Simulation results expose `metadata` and `diagnostics`; `SimulationResult.save()` persists those fields when they are present.
 
 ## MWIS Example
 
@@ -224,6 +242,10 @@ For environment diagnostics:
 ```bash
 cd sagittarius_py
 uv run python check_env.py
+uv run python - <<'PY'
+from sagittarius import doctor
+print(doctor(backend="CUDA"))
+PY
 ```
 
 For roadmap context, see [REQUIREMENTS.md](REQUIREMENTS.md). For container setup, see [docs/CONTAINERIZATION.md](docs/CONTAINERIZATION.md).
@@ -231,11 +253,11 @@ For roadmap context, see [REQUIREMENTS.md](REQUIREMENTS.md). For container setup
 ## Known Limitations
 
 - The public API is still changing.
-- Lazy backend initialization and formal backend capability detection are planned but not complete.
-- GPU backend maturity is not uniform across CUDA, AMDGPU, and Metal.
+- Python imports are intended to stay lightweight; Julia and GPU runtimes initialize when a backend operation, simulation, pulse compilation, cluster setup, or explicit backend initialization needs them.
+- GPU backend maturity is not uniform across CUDA, AMDGPU, and Metal; see `docs/BACKENDS.md`.
 - Cross-language Python/Julia parity tests are planned as part of the dual SDK work.
 - Benchmark claims should be tied to reproducible scripts and recorded environment metadata.
 
 ## License
 
-The existing project documentation states that Sagittarius is distributed under the MIT License. Add or verify the repository license file before public distribution.
+Sagittarius is distributed under the MIT License. See [LICENSE](LICENSE).

@@ -26,19 +26,19 @@ This document outlines the development lifecycle of Sagittarius, from a function
 ## ✅ Phase 4: Performance & Scale (Completed)
 | Feature | Status | Description |
 | :--- | :---: | :--- |
-| **GPU Acceleration** | Done | Support for CUDA, AMDGPU, and Metal backends. |
+| **GPU Acceleration** | Done | GPU execution path exists, with CUDA as the primary tested target and AMDGPU/Metal tracked by the maturity matrix. |
 | **Clustered Solvers** | Done | Distributed parameter sweeps via `ParallelSimulation`. |
 
-## 🚧 Phase 5: Production Hardening (Planned)
-| Requirement | Priority | Description |
-| :--- | :---: | :--- |
-| **Lazy Backend Initialization** | High | Importing `sagittarius` must remain lightweight even inside Docker/devcontainer workflows. Julia, GPU runtimes, and optional solver stacks should initialize only when a backend is selected or an explicit setup/doctor command is run. |
-| **Backend Capability Detection** | High | Provide a formal `doctor`/backend inspection path that reports actual runtime availability inside or outside Docker, including missing GPU passthrough, driver/runtime mismatches, and optional backend dependencies. |
-| **GPU Maturity Matrix** | High | Document each backend as `stable`, `experimental`, or `planned`; CUDA, AMDGPU, and Metal must not be presented as equally mature unless parity tests exist. |
-| **Package Versioning** | Medium | Expose Python, Julia, backend, solver, CUDA/AMDGPU/Metal, and container/build metadata through the public API and simulation artifacts for reproducibility. |
-| **Structured Logging** | High | Provide configurable Python and Julia logging with stable event names, levels, and optional JSON output for import/setup, backend selection, basis generation, solver start/finish, GPU allocation, and failure diagnostics. |
-| **Runtime Diagnostics Log** | High | Capture environment and backend diagnostics from `doctor`/simulation runs, including container status, GPU passthrough, driver/runtime versions, selected solver, tolerances, basis size, and reduced-basis pruning ratio. |
-| **Repository Cleanup** | Medium | Remove temporary files such as `api.py-FIX`, move debug scripts into `examples/` or `scripts/`, and verify that referenced license files exist. |
+## 🚧 Phase 5: Production Hardening (In Progress)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Lazy Backend Initialization** | High | Done | `import sagittarius` stays lightweight; Julia, CUDA, and cluster workers initialize only when simulation, pulse compilation, cluster setup, GPU execution, or explicit backend initialization needs them. |
+| **Backend Capability Detection** | High | Partial | Public `doctor()` reports runtime metadata, container detection, backend maturity, CUDA driver visibility via `nvidia-smi`, and unsupported/planned backend issues without initializing Julia by default. Deeper Julia package and driver/runtime compatibility checks remain planned. |
+| **GPU Maturity Matrix** | High | Done | Backend maturity is documented in `docs/BACKENDS.md` and exposed through `backend_maturity()`: CPU `stable`, CUDA `experimental`, AMDGPU/Metal `planned`. |
+| **Package Versioning** | Medium | Partial | `version_info()` exposes Python package, Python runtime, platform, container status, Sagittarius.jl version, and Julia version once loaded. Simulation artifacts persist metadata when present. Backend package/build metadata remains planned. |
+| **Structured Logging** | High | Partial | Python-side configurable structured logging exists through `configure_logging()` and stable events for backend initialization, doctor reports, solver start/finish, and cluster setup. Julia-side structured logging and full GPU allocation events remain planned. |
+| **Runtime Diagnostics Log** | High | Partial | `doctor()` and observable simulation results capture runtime/backend diagnostics, selected solver settings, tolerances, basis size, and reduced-basis pruning ratio. A full standalone run-manifest schema remains planned for Phase 8. |
+| **Repository Cleanup** | Medium | Done | Removed `api.py-FIX`, moved root debug scripts into `scripts/`, added `LICENSE`, and updated backend documentation references. |
 
 ## 🚀 Phase 6: Core Performance Improvements (Planned)
 | Requirement | Priority | Description |
@@ -92,5 +92,6 @@ This document outlines the development lifecycle of Sagittarius, from a function
 ---
 
 ## 🛠️ Maintenance & Verification
-All features are verified via the `tests/` and `sagittarius_py/tests/` suites. 
+All features are verified via the `tests/` and `sagittarius_py/tests/` suites.
 Run the full verification: `cd sagittarius_py && uv run python -m pytest tests/`
+For Phase 5 lightweight runtime checks: `cd sagittarius_py && uv run python -m pytest tests/test_runtime_hardening.py tests/test_serialization.py`

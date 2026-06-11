@@ -1,38 +1,8 @@
-import os
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional, Dict, Union, Any, List
-from juliacall import Main as jl
-
-# Path to the Julia core
-pkg_path = os.path.join(os.path.dirname(__file__), "..", "..", "Sagittarius.jl")
-
-# Pre-load dependencies into Main
-jl.seval("""
-using Pkg
-function ensure_pkg(pkg_name)
-    if !haskey(Pkg.project().dependencies, pkg_name)
-        Pkg.add(pkg_name)
-    end
-end
-
-ensure_pkg("SciMLBase")
-ensure_pkg("CUDA")
-ensure_pkg("Distributed")
-# We don't auto-install AMDGPU/Metal yet to avoid heavy downloads unless needed
-# but we ensure the environment is ready for them.
-
-using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase, CUDA, Distributed
-""")
-
-# Manually include the Sagittarius module
-jl.include(os.path.join(pkg_path, "src", "Sagittarius.jl"))
-sgr = jl.Sagittarius
-phys = sgr.Physics  # Direct access to the Physics module
-solv = sgr.Solver   # Direct access to the Solver module
+from .runtime import doctor, get_julia, get_modules, log_event, version_info
 
 @dataclass
 class Atom:
@@ -42,6 +12,7 @@ class Atom:
 
     @property
     def jl_obj(self):
+        jl, _, phys, _ = get_modules()
         return phys.Atom(jl.SVector(float(self.x), float(self.y), float(self.z)))
 
 @dataclass
@@ -51,6 +22,7 @@ class Register:
 
     @property
     def jl_obj(self):
+        jl, _, phys, _ = get_modules()
         jl_atoms = jl.Vector[phys.Atom]([a.jl_obj for a in self.atoms])
         return phys.Register(jl_atoms, float(self.C6))
 
@@ -73,11 +45,20 @@ class PulseSequence:
     delta: Any = 0.0
 
 class SimulationResult:
-    def __init__(self, data: Dict[str, List[float]]):
+    def __init__(
+        self,
+        data: Dict[str, List[float]],
+        metadata: Optional[Dict[str, Any]] = None,
+        diagnostics: Optional[Dict[str, Any]] = None,
+    ):
         self.data = data
+        self.metadata = metadata or {}
+        self.diagnostics = diagnostics or {}
         self.t = np.array(data.get('t', []))
     
-    def to_pandas(self) -> pd.DataFrame:
+    def to_pandas(self):
+        import pandas as pd
+
         return pd.DataFrame(self.data)
     
     def save(self, filepath: str):
@@ -85,6 +66,12 @@ class SimulationResult:
         # Convert numpy arrays to lists for JSON serialization
         serializable_data = {k: list(v) if isinstance(v, (np.ndarray, list)) else v 
                              for k, v in self.data.items()}
+        if self.metadata or self.diagnostics:
+            serializable_data = {
+                "data": serializable_data,
+                "metadata": self.metadata,
+                "diagnostics": self.diagnostics,
+            }
         with open(filepath, 'w') as f:
             json.dump(serializable_data, f)
     
@@ -93,9 +80,13 @@ class SimulationResult:
         """Load results from a JSON file."""
         with open(filepath, 'r') as f:
             data = json.load(f)
+        if isinstance(data, dict) and "data" in data:
+            return cls(data["data"], metadata=data.get("metadata"), diagnostics=data.get("diagnostics"))
         return cls(data)
 
     def plot(self, show: bool = True):
+        import matplotlib.pyplot as plt
+
         plt.figure(figsize=(10, 6))
         for key, values in self.data.items():
             if key == 't':
@@ -120,6 +111,7 @@ class Simulation:
     def validate(self) -> int:
         """Returns the size of the Hilbert space after pruning."""
         if self.config.blockade_radius > 0:
+            _, _, phys, _ = get_modules()
             res = phys.generate_reduced_basis(self.register.jl_obj, float(self.config.blockade_radius))
             self._basis = res[0]
             self._mapping = res[1]
@@ -130,6 +122,7 @@ class Simulation:
     def _get_compiled_func(self, p_config: Any, N: int) -> Any:
         """Compiles a pulse configuration into a Julia-side closure t -> Vector{Float64}."""
         from .pulse import is_pulse
+        jl, sgr = get_julia()
 
         if callable(p_config):
             # Use pyconvert to bridge the Py -> Float64 gap for each element
@@ -160,8 +153,29 @@ class Simulation:
                 return sgr.create_const_vec_func(v, N)
 
     def run(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, int]] = None) -> SimulationResult:
+        jl, sgr, phys, solv = get_modules()
+        backend_report = doctor(backend=self.config.gpu_backend if self.config.use_gpu else "CPU")
+        log_event(
+            "solver_start",
+            backend=backend_report["requested_backend"],
+            use_gpu=self.config.use_gpu,
+            reltol=self.config.reltol,
+            abstol=self.config.abstol,
+            blockade_radius=self.config.blockade_radius,
+        )
         N = len(self.register.jl_obj.atoms)
         basis_size = self.validate()
+        diagnostics = dict(backend_report)
+        diagnostics["simulation"] = {
+            "solver_method": self.config.method,
+            "reltol": self.config.reltol,
+            "abstol": self.config.abstol,
+            "basis_size": basis_size,
+            "full_basis_size": 2**N,
+            "reduced_basis_pruning_ratio": 1.0 - (basis_size / (2**N)),
+            "use_gpu": self.config.use_gpu,
+            "use_mc": self.config.use_mc,
+        }
         
         if len(psi0) != basis_size:
             raise ValueError(f"Initial state psi0 must have size {basis_size} (current basis size)")
@@ -225,7 +239,9 @@ class Simulation:
                     data = {name: [avg_res[t_idx][i] for t_idx in range(len(times))] 
                             for i, name in enumerate(observables.keys())}
                     data['t'] = times
-                    return SimulationResult(data)
+                    log_event("solver_finish", result_type="mcwf_observables", basis_size=basis_size)
+                    return SimulationResult(data, metadata=version_info(), diagnostics=diagnostics)
+                log_event("solver_finish", result_type="raw_mcwf", basis_size=basis_size)
                 return result
 
             else:
@@ -247,6 +263,7 @@ class Simulation:
             if self.config.use_gpu:
                 backend = self.config.gpu_backend.upper()
                 if backend == "CUDA":
+                    jl.seval("using CUDA")
                     jl_psi0 = jl.CUDA.CuVector[jl.ComplexF64](psi0)
                 elif backend == "AMDGPU":
                     jl.seval("using AMDGPU")
@@ -281,8 +298,10 @@ class Simulation:
             times = list(saved.t)
             data = {name: [v[i] for v in saved.saveval] for i, name in enumerate(observables.keys())}
             data['t'] = times
-            return SimulationResult(data)
+            log_event("solver_finish", result_type="observables", basis_size=basis_size)
+            return SimulationResult(data, metadata=version_info(), diagnostics=diagnostics)
         
+        log_event("solver_finish", result_type="raw", basis_size=basis_size)
         return result
 
 def solve(register, sequence, config=SolverConfig(), psi0=None, t_start=0.0, t_end=1.0, observables=None):
@@ -299,6 +318,7 @@ def solve(register, sequence, config=SolverConfig(), psi0=None, t_start=0.0, t_e
     return res
 
 def get_basis(register, blockade_radius):
+    _, _, phys, _ = get_modules()
     res = phys.generate_reduced_basis(register.jl_obj, float(blockade_radius))
     return list(res[0])
 
