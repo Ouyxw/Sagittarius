@@ -197,7 +197,7 @@ The project includes exact and heuristic classical baselines, benchmark scripts,
 | Interaction coefficient | rad / microsecond * micrometer^6 | Van der Waals `C6` convention. |
 | Decay and dephasing rates | 1 / microsecond | Open-system rates. |
 
-Python atom indices are zero-based in user-facing APIs. Julia internals are one-based. Indexing semantics are a documented roadmap item because cross-language consistency matters for local addressing, observables, and reduced-basis mappings.
+Python atom indices are zero-based in user-facing APIs and follow `Register.atoms` order. Julia internals are one-based, and the Python SDK performs boundary conversion without reversing local pulse vectors. See [docs/PULSE_CONTRACT.md](docs/PULSE_CONTRACT.md) for local addressing validation, indexing semantics, and pulse input behavior.
 
 ## Verification
 
@@ -252,11 +252,7 @@ For roadmap context, see [REQUIREMENTS.md](REQUIREMENTS.md). For container setup
 
 ## Known Limitations
 
-- The public API is still changing.
-- Python imports are intended to stay lightweight; Julia and GPU runtimes initialize when a backend operation, simulation, pulse compilation, cluster setup, or explicit backend initialization needs them.
-- GPU backend maturity is not uniform across CUDA, AMDGPU, and Metal; see `docs/BACKENDS.md`. Hardware-backed parity validation and full backend-specific ABI reporting are still in progress.
-- Cross-language Python/Julia parity tests are planned as part of the dual SDK work.
-- Benchmark claims should be tied to reproducible scripts and recorded environment metadata.
+Sagittarius is an early research SDK. Important limitations include evolving APIs, Julia/PythonCall backend dependency, non-uniform GPU maturity, exponential full-basis scaling, incomplete CPU/GPU parity coverage, and benchmark reproducibility work still in progress. See [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) for the detailed list.
 
 ## License
 

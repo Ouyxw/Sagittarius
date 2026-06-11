@@ -61,17 +61,17 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Observable/Jumps Basis Sharing** | Medium | Ensure observables, Lindblad jump operators, MCWF trajectories, and Hamiltonian evolution share the same reduced-basis mapping consistently. |
 | **Specialized Register Constructors** | Medium | Add optimized constructors for common 1D chains, 2D lattices, and UDG instances, with pruning-ratio data exposed through the Phase 6 diagnostics schema. |
 
-## 🧩 Phase 8: API & Data Model Refinement (Planned)
-| Requirement | Priority | Description |
-| :--- | :---: | :--- |
-| **Explicit Pulse Types** | High | Replace ambiguous scalar/list/dict/callable handling with validated `GlobalPulse`, `LocalPulseVector`, and `CallablePulse` style inputs or equivalent typed wrappers. |
-| **Local Addressing Validation** | High | Validate local pulse vector length, dictionary keys, atom index ordering, and callable return dimensions before simulation starts. |
-| **Indexing Semantics** | High | Document and test Python-to-Julia atom ordering, including any reversal or 1-based/0-based translation. |
-| **Pulse Compilation Contract** | Medium | Define the expected behavior for Python callbacks, AST pulse nodes, piecewise pulses, and native Julia pulse compilation. |
-| **Julia Native Developer API** | High | Maintain a first-class Julia API for users who need direct access to Hamiltonians, bases, pulse objects, solvers, backend controls, and performance-critical internals. |
-| **Python SDK Parity Contract** | High | Define which simulation semantics, defaults, result fields, and error behaviors must remain equivalent between the Python SDK and Julia SDK. |
-| **Cross-Language Golden Tests** | High | Add shared Python/Julia test cases that verify equivalent Hamiltonians, observables, solver outputs, serialization, and benchmark fixtures within documented tolerances. |
-| **Shared Result Schema** | Medium | Define stable language-neutral simulation result fields and semantics; artifact envelopes and manifests are tracked in Phase 6. |
+## 🧩 Phase 8: API & Data Model Refinement (In Progress)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Explicit Pulse Types** | High | Planned | Replace ambiguous scalar/list/dict/callable handling with validated `GlobalPulse`, `LocalPulseVector`, and `CallablePulse` style inputs or equivalent typed wrappers. |
+| **Local Addressing Validation** | High | Done | Validate local pulse vector length, dictionary keys, atom index ranges, pulse value types, observable indices, and callable return dimensions before backend initialization. |
+| **Indexing Semantics** | High | Done | Python atom indices are zero-based in `Register.atoms` order; Julia boundary calls convert to one-based indices, and local pulse vectors are not reversed. Documented in `docs/PULSE_CONTRACT.md` and covered by tests. |
+| **Pulse Compilation Contract** | Medium | Done | Define scalar, list, dict, callable, and Pulse AST behavior, including callable vector dimensions and local addressing defaults. Documented in `docs/PULSE_CONTRACT.md` and covered by validation tests. |
+| **Julia Native Developer API** | High | Planned | Maintain a first-class Julia API for users who need direct access to Hamiltonians, bases, pulse objects, solvers, backend controls, and performance-critical internals. |
+| **Python SDK Parity Contract** | High | Planned | Define which simulation semantics, defaults, result fields, and error behaviors must remain equivalent between the Python SDK and Julia SDK. |
+| **Cross-Language Golden Tests** | High | Planned | Add shared Python/Julia test cases that verify equivalent Hamiltonians, observables, solver outputs, serialization, and benchmark fixtures within documented tolerances. |
+| **Shared Result Schema** | Medium | Planned | Define stable language-neutral simulation result fields and semantics; artifact envelopes and manifests are tracked in Phase 6. |
 
 ## 🧪 Phase 9: Scientific Verification & Benchmarks (Planned)
 | Requirement | Priority | Description |
@@ -82,15 +82,15 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **MWIS Batch Verification** | Medium | Compare AQC output against exact ILP solutions across randomized UDG/MWIS instances. |
 | **Ablation Benchmarks** | High | Benchmark full dense, full sparse, reduced matrix-free, reduced sparse, and reduced sparse GPU-cached execution paths. |
 
-## 📚 Phase 10: Documentation & Patent Readiness (Planned)
-| Requirement | Priority | Description |
-| :--- | :---: | :--- |
-| **Known Limitations** | High | Document current scale limits, backend limitations, numerical assumptions, and unsupported scenarios. |
-| **Verifiable Performance Claims** | High | Replace broad marketing claims with benchmark-backed statements that reference Phase 6 benchmark artifacts and name hardware, versions, problem size, and configuration. |
-| **Minimal Examples with Expected Output** | Medium | Add short examples with expected basis size, observable values, or solver output for quick user verification. |
-| **Dual SDK Documentation** | Medium | Provide parallel Python and Julia examples for algorithm prototyping, experiment-style pulse simulation, baseline validation, and hardware-demo preparation. |
-| **Prior-Art-Aware Technical Notes** | Medium | Maintain internal notes distinguishing Sagittarius-specific execution optimizations from known Rydberg/MWIS mappings and existing neutral-atom simulators. |
-| **Disclosure Control** | Medium | Track dates for public releases, benchmark reports, and technical disclosures that may affect patent filing strategy. |
+## 📚 Phase 10: Documentation & Patent Readiness (In Progress)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Known Limitations** | High | Done | Document current scale limits, backend limitations, numerical assumptions, reproducibility gaps, and unsupported scenarios in `docs/KNOWN_LIMITATIONS.md`. |
+| **Verifiable Performance Claims** | High | Planned | Replace broad marketing claims with benchmark-backed statements that reference Phase 6 benchmark artifacts and name hardware, versions, problem size, and configuration. |
+| **Minimal Examples with Expected Output** | Medium | Planned | Add short examples with expected basis size, observable values, or solver output for quick user verification. |
+| **Dual SDK Documentation** | Medium | Planned | Provide parallel Python and Julia examples for algorithm prototyping, experiment-style pulse simulation, baseline validation, and hardware-demo preparation. |
+| **Prior-Art-Aware Technical Notes** | Medium | Planned | Maintain internal notes distinguishing Sagittarius-specific execution optimizations from known Rydberg/MWIS mappings and existing neutral-atom simulators. |
+| **Disclosure Control** | Medium | Planned | Track dates for public releases, benchmark reports, and technical disclosures that may affect patent filing strategy. |
 
 ## 🔬 Phase 11: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.

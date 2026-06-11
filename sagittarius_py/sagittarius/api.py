@@ -1,7 +1,10 @@
-import numpy as np
 import json
+import numbers
+from collections.abc import Sequence as ABCSequence
 from dataclasses import dataclass
 from typing import Optional, Dict, Union, Any, List
+
+import numpy as np
 from .runtime import doctor, get_julia, get_modules, log_event, version_info
 
 @dataclass
@@ -43,6 +46,97 @@ class SolverConfig:
 class PulseSequence:
     omega: Any = 1.0
     delta: Any = 0.0
+
+
+def _is_bool(value: Any) -> bool:
+    return isinstance(value, (bool, np.bool_))
+
+
+def _is_numeric_scalar(value: Any) -> bool:
+    return isinstance(value, numbers.Real) and not _is_bool(value)
+
+
+def _validate_atom_index(index: Any, N: int, *, context: str) -> int:
+    if _is_bool(index) or not isinstance(index, (int, np.integer)):
+        raise ValueError(f"{context} atom index must be an integer in [0, {N - 1}], got {index!r}")
+    idx = int(index)
+    if idx < 0 or idx >= N:
+        raise ValueError(f"{context} atom index {idx} is out of range for {N} atoms")
+    return idx
+
+
+def _validate_pulse_value(value: Any, *, field_name: str, atom_index: Optional[int] = None) -> None:
+    from .pulse import is_pulse
+
+    if is_pulse(value) or _is_numeric_scalar(value):
+        return
+
+    suffix = "" if atom_index is None else f" for atom {atom_index}"
+    raise ValueError(
+        f"PulseSequence.{field_name}{suffix} must be a numeric scalar or Pulse node, got {type(value).__name__}"
+    )
+
+
+def _coerce_callable_vector(values: Any, N: int, *, field_name: str) -> List[float]:
+    if isinstance(values, np.ndarray):
+        raw_values = values.tolist()
+    elif isinstance(values, ABCSequence) and not isinstance(values, (str, bytes, bytearray)):
+        raw_values = list(values)
+    else:
+        raise ValueError(
+            f"Callable PulseSequence.{field_name} must return a sequence of {N} numeric values, "
+            f"got {type(values).__name__}"
+        )
+
+    if len(raw_values) != N:
+        raise ValueError(
+            f"Callable PulseSequence.{field_name} returned {len(raw_values)} values for {N} atoms"
+        )
+
+    coerced = []
+    for i, value in enumerate(raw_values):
+        if not _is_numeric_scalar(value):
+            raise ValueError(
+                f"Callable PulseSequence.{field_name} value for atom {i} must be numeric, got {type(value).__name__}"
+            )
+        coerced.append(float(value))
+    return coerced
+
+
+def _validate_pulse_config(p_config: Any, N: int, *, field_name: str, sample_time: Optional[float] = None) -> None:
+    from .pulse import is_pulse
+
+    if callable(p_config):
+        if sample_time is not None:
+            _coerce_callable_vector(p_config(float(sample_time)), N, field_name=field_name)
+        return
+
+    if isinstance(p_config, dict):
+        for key, value in p_config.items():
+            idx = _validate_atom_index(key, N, context=f"PulseSequence.{field_name}")
+            _validate_pulse_value(value, field_name=field_name, atom_index=idx)
+        return
+
+    if isinstance(p_config, list):
+        if len(p_config) != N:
+            raise ValueError(f"PulseSequence.{field_name} list length {len(p_config)} does not match {N} atoms")
+        for idx, value in enumerate(p_config):
+            _validate_pulse_value(value, field_name=field_name, atom_index=idx)
+        return
+
+    if is_pulse(p_config) or _is_numeric_scalar(p_config):
+        return
+
+    raise ValueError(
+        f"PulseSequence.{field_name} must be a scalar, Pulse node, list, dict, or callable; "
+        f"got {type(p_config).__name__}"
+    )
+
+
+def _local_pulse_values_in_register_order(p_config: Union[Dict[int, Any], List[Any]], N: int) -> List[Any]:
+    if isinstance(p_config, dict):
+        return [p_config.get(i, 0.0) for i in range(N)]
+    return list(p_config)
 
 class SimulationResult:
     def __init__(
@@ -108,6 +202,16 @@ class Simulation:
         self._basis = None
         self._mapping = None
 
+    def validate_inputs(self, *, sample_time: Optional[float] = None, observables: Optional[Dict[str, int]] = None) -> None:
+        N = len(self.register.atoms)
+        _validate_pulse_config(self.sequence.omega, N, field_name="omega", sample_time=sample_time)
+        _validate_pulse_config(self.sequence.delta, N, field_name="delta", sample_time=sample_time)
+        if observables:
+            for name, idx in observables.items():
+                if not isinstance(name, str):
+                    raise ValueError(f"Observable names must be strings, got {type(name).__name__}")
+                _validate_atom_index(idx, N, context=f"Observable {name!r}")
+
     def validate(self) -> int:
         """Returns the size of the Hilbert space after pruning."""
         if self.config.blockade_radius > 0:
@@ -125,21 +229,25 @@ class Simulation:
         jl, sgr = get_julia()
 
         if callable(p_config):
-            # Use pyconvert to bridge the Py -> Float64 gap for each element
-            return jl.seval("f -> (t -> [pyconvert(Float64, x) for x in f(t)])")(p_config)
+            # Callable pulses return one numeric value per Python atom index, in Register.atoms order.
+            return jl.seval("""
+                (f, n) -> (t -> begin
+                    vals = [pyconvert(Float64, x) for x in f(t)]
+                    length(vals) == n || throw(ArgumentError("callable pulse returned $(length(vals)) values for $n atoms"))
+                    vals
+                end)
+            """)(p_config, int(N))
 
         if isinstance(p_config, (dict, list)):
-            # Local addressing
+            # Local addressing follows Python's 0-based Register.atoms order.
             compiled_funcs = []
-            for i in range(N):
-                p = p_config.get(i, 0.0) if isinstance(p_config, dict) else p_config[i]
+            for i, p in enumerate(_local_pulse_values_in_register_order(p_config, N)):
                 if is_pulse(p):
                     compiled_funcs.append(sgr.compile_pulse(p.jl_obj))
                 else:
                     v = float(p)
                     compiled_funcs.append(sgr.compile_pulse(sgr.ConstantPulse(v, 1e12)))
 
-            compiled_funcs.reverse()
             jl_vec = jl.Vector[jl.Any](compiled_funcs)
             return jl.seval("funcs -> (t -> Float64[f(t) for f in funcs])")(jl_vec)
         else:
@@ -153,6 +261,7 @@ class Simulation:
                 return sgr.create_const_vec_func(v, N)
 
     def run(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, int]] = None) -> SimulationResult:
+        self.validate_inputs(sample_time=float(t_start), observables=observables)
         jl, sgr, phys, solv = get_modules()
         backend_report = doctor(backend=self.config.gpu_backend if self.config.use_gpu else "CPU")
         log_event(
