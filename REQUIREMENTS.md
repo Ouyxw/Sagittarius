@@ -40,16 +40,16 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Basic Runtime Diagnostics** | High | Partial | `doctor()` and observable simulation results capture runtime/backend diagnostics, structured issue details, selected solver settings, tolerances, basis size, and reduced-basis pruning ratio. Full run manifests are tracked in Phase 6. |
 | **Repository Cleanup** | Medium | Done | Removed `api.py-FIX`, moved root debug scripts into `scripts/`, added `LICENSE`, and updated backend documentation references. |
 
-## 📈 Phase 6: Observability & Reproducibility (Planned)
-| Requirement | Priority | Description |
-| :--- | :---: | :--- |
-| **Structured Python/Julia Logging** | High | Define stable event names, levels, and optional JSON output across Python and Julia for backend initialization, backend selection, basis generation, Hamiltonian construction, solver start/finish, GPU allocation, and failure diagnostics. |
-| **Event Taxonomy** | High | Maintain a documented event catalog with stable IDs, payload fields, severity conventions, and compatibility rules. |
-| **Run Manifest Schema** | High | Persist a machine-readable manifest alongside saved results and benchmarks, including random seeds, register geometry, pulse configuration, solver options, backend diagnostics, package versions, and relevant log event IDs. |
-| **Result Artifact Envelope** | Medium | Standardize the saved result envelope for data, metadata, diagnostics, manifests, and schema versions across Python and Julia workflows. |
-| **Benchmark Artifact Metadata** | High | Benchmark scripts should emit JSON/CSV with hardware, Julia/Python/CUDA versions, parameters, timings, memory usage, generated markdown tables, and linked diagnostic manifests. |
-| **Version and Build Metadata** | Medium | Record Python, Julia, solver, backend package, CUDA/AMDGPU/Metal, container image, and build metadata in diagnostics, manifests, and benchmark artifacts. |
-| **Failure Diagnostics Normalization** | High | Normalize backend, solver, validation, and serialization failures into actionable error codes and remediation messages. |
+## 📈 Phase 6: Observability & Reproducibility (In Progress)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Structured Python/Julia Logging** | High | Partial | Python logs now enrich cataloged events with stable event IDs, schema version, default severity, and optional JSON output. Julia emitters and full cross-language parity remain planned. |
+| **Event Taxonomy** | High | Done | Stable catalog implemented in `sagittarius.events`, exposed through `event_taxonomy()` / `get_event_spec()`, documented in `docs/EVENT_TAXONOMY.md`, and covered by tests for IDs, payload fields, severity conventions, and compatibility rules. |
+| **Run Manifest Schema** | High | Planned | Persist a machine-readable manifest alongside saved results and benchmarks, including random seeds, register geometry, pulse configuration, solver options, backend diagnostics, package versions, and relevant log event IDs. |
+| **Result Artifact Envelope** | Medium | Planned | Standardize the saved result envelope for data, metadata, diagnostics, manifests, and schema versions across Python and Julia workflows. |
+| **Benchmark Artifact Metadata** | High | Planned | Benchmark scripts should emit JSON/CSV with hardware, Julia/Python/CUDA versions, parameters, timings, memory usage, generated markdown tables, and linked diagnostic manifests. |
+| **Version and Build Metadata** | Medium | Planned | Record Python, Julia, solver, backend package, CUDA/AMDGPU/Metal, container image, and build metadata in diagnostics, manifests, and benchmark artifacts. |
+| **Failure Diagnostics Normalization** | High | Planned | Normalize backend, solver, validation, and serialization failures into actionable error codes and remediation messages. |
 
 ## 🚀 Phase 7: Core Performance Improvements (Planned)
 | Requirement | Priority | Description |

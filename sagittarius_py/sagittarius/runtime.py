@@ -12,6 +12,8 @@ from importlib import metadata
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from .events import EVENT_CATALOG, EVENT_TAXONOMY_SCHEMA_VERSION, SEVERITY_LEVELS, validate_event_payload
+
 
 LOGGER_NAME = "sagittarius"
 DOCTOR_SCHEMA_VERSION = "doctor/v2.1"
@@ -79,13 +81,26 @@ def configure_logging(level: int | str = logging.INFO, *, json_output: bool = Fa
         _logger.addHandler(handler)
 
 
-def log_event(event: str, level: int = logging.INFO, **fields: Any) -> None:
-    payload = {"event": event, **fields}
+def log_event(event: str, level: Optional[int] = None, **fields: Any) -> None:
+    validate_event_payload(event, fields)
+    spec = EVENT_CATALOG.get(event)
+    severity = spec.severity if spec is not None else logging.getLevelName(level or logging.INFO).lower()
+    log_level = level if level is not None else SEVERITY_LEVELS.get(severity, logging.INFO)
+    payload = {
+        "event": event,
+        "event_id": spec.event_id if spec is not None else None,
+        "event_schema": EVENT_TAXONOMY_SCHEMA_VERSION if spec is not None else None,
+        "severity": severity,
+        **fields,
+    }
     if _json_logging:
-        _logger.log(level, json.dumps(payload, sort_keys=True, default=str))
+        _logger.log(log_level, json.dumps(payload, sort_keys=True, default=str))
     else:
-        detail = " ".join(f"{key}={value}" for key, value in sorted(fields.items()))
-        _logger.log(level, "%s%s", event, f" {detail}" if detail else "")
+        detail_fields = dict(fields)
+        if spec is not None:
+            detail_fields = {"event_id": spec.event_id, "severity": severity, **detail_fields}
+        detail = " ".join(f"{key}={value}" for key, value in sorted(detail_fields.items()))
+        _logger.log(log_level, "%s%s", event, f" {detail}" if detail else "")
 
 
 def backend_maturity() -> Dict[str, Dict[str, str]]:
