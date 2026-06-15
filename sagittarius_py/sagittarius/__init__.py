@@ -29,6 +29,14 @@ from .runtime import (
 from .events import event_taxonomy, get_event_spec
 from .pulse import Constant, Ramp, Piecewise, Gaussian, Blackman, Sinc, Pulse
 from .cluster import ParallelSimulation
+from .benchmarking import (
+    BENCHMARK_ARTIFACT_SCHEMA_VERSION,
+    BENCHMARK_ARTIFACT_TYPE,
+    current_memory_usage,
+    make_benchmark_artifact,
+    markdown_table,
+    write_benchmark_artifacts,
+)
 
 __all__ = [
     "RESULT_ARTIFACT_SCHEMA_VERSION",
@@ -54,6 +62,12 @@ __all__ = [
     "Sinc",
     "Pulse",
     "ParallelSimulation",
+    "BENCHMARK_ARTIFACT_SCHEMA_VERSION",
+    "BENCHMARK_ARTIFACT_TYPE",
+    "current_memory_usage",
+    "make_benchmark_artifact",
+    "markdown_table",
+    "write_benchmark_artifacts",
     "SagittariusRuntimeError",
     "SagittariusSerializationError",
     "SagittariusSolverError",

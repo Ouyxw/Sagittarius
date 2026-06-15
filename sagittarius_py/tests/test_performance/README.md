@@ -29,3 +29,6 @@ uv run python benchmark_cluster.py
 
 ## 📈 Output
 Each script generates a `.csv` file with the results, suitable for analysis in Pandas or visualization in Matplotlib.
+
+## Artifact Metadata
+Each benchmark writes a `benchmark-artifact/v1` JSON envelope plus companion CSV and Markdown files. The JSON captures parameters, timings, process memory usage, `version_info()` metadata, backend diagnostics, and linked run manifests when a benchmark run produces `SimulationResult` objects.
