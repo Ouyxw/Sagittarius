@@ -1,8 +1,8 @@
 import json
 import numbers
 from collections.abc import Sequence as ABCSequence
-from dataclasses import dataclass
-from typing import Optional, Dict, Union, Any, List
+from dataclasses import dataclass, field
+from typing import Optional, Dict, Union, Any, List, Tuple
 
 import numpy as np
 RESULT_ARTIFACT_SCHEMA_VERSION = "result-artifact/v1"
@@ -22,6 +22,75 @@ from .runtime import (
     version_info,
 )
 
+def _constructor_error(code: str, message: str, remediation: str) -> SagittariusValidationError:
+    return SagittariusValidationError(make_issue(code, message, remediation))
+
+
+def _coerce_xyz(value: Any, *, field_name: str) -> Tuple[float, float, float]:
+    if isinstance(value, np.ndarray):
+        raw = value.tolist()
+    elif isinstance(value, ABCSequence) and not isinstance(value, (str, bytes, bytearray)):
+        raw = list(value)
+    else:
+        raise _constructor_error(
+            "VALIDATION_REGISTER_COORDINATE_TYPE",
+            f"{field_name} must be a 2D or 3D coordinate sequence, got {type(value).__name__}",
+            "Provide coordinates as (x, y) or (x, y, z) numeric sequences.",
+        )
+
+    if len(raw) == 2:
+        raw.append(0.0)
+    if len(raw) != 3:
+        raise _constructor_error(
+            "VALIDATION_REGISTER_COORDINATE_DIMENSION",
+            f"{field_name} must contain 2 or 3 values, got {len(raw)}",
+            "Provide coordinates as (x, y) or (x, y, z) numeric sequences.",
+        )
+    try:
+        return (float(raw[0]), float(raw[1]), float(raw[2]))
+    except (TypeError, ValueError) as exc:
+        raise _constructor_error(
+            "VALIDATION_REGISTER_COORDINATE_VALUE",
+            f"{field_name} must contain numeric coordinate values.",
+            "Convert coordinate values to real numbers before constructing the register.",
+        ) from exc
+
+
+def _positive_int(value: Any, *, field_name: str) -> int:
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
+        raise _constructor_error(
+            "VALIDATION_REGISTER_SIZE_TYPE",
+            f"{field_name} must be a positive integer, got {value!r}",
+            "Use a positive integer atom count or lattice dimension.",
+        )
+    value = int(value)
+    if value <= 0:
+        raise _constructor_error(
+            "VALIDATION_REGISTER_SIZE_VALUE",
+            f"{field_name} must be positive, got {value}",
+            "Use at least one atom in specialized register constructors.",
+        )
+    return value
+
+
+def _positive_float(value: Any, *, field_name: str) -> float:
+    try:
+        value = float(value)
+    except (TypeError, ValueError) as exc:
+        raise _constructor_error(
+            "VALIDATION_REGISTER_SPACING_TYPE",
+            f"{field_name} must be a positive numeric value.",
+            "Use a positive numeric spacing or blockade radius.",
+        ) from exc
+    if value <= 0.0:
+        raise _constructor_error(
+            "VALIDATION_REGISTER_SPACING_VALUE",
+            f"{field_name} must be positive, got {value}",
+            "Use a positive numeric spacing or blockade radius.",
+        )
+    return value
+
+
 @dataclass
 class Atom:
     x: float
@@ -37,6 +106,137 @@ class Atom:
 class Register:
     atoms: List[Atom]
     C6: float = 1.0
+    topology: Dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def chain(
+        cls,
+        n: int,
+        *,
+        spacing: float = 1.0,
+        C6: float = 1.0,
+        origin: Any = (0.0, 0.0, 0.0),
+        axis: str = "x",
+    ) -> "Register":
+        n = _positive_int(n, field_name="n")
+        spacing = _positive_float(spacing, field_name="spacing")
+        ox, oy, oz = _coerce_xyz(origin, field_name="origin")
+        axes = {"x": (spacing, 0.0, 0.0), "y": (0.0, spacing, 0.0), "z": (0.0, 0.0, spacing)}
+        if axis not in axes:
+            raise _constructor_error(
+                "VALIDATION_REGISTER_AXIS",
+                f"axis must be one of 'x', 'y', or 'z', got {axis!r}",
+                "Choose an axis from {'x', 'y', 'z'} for Register.chain().",
+            )
+        dx, dy, dz = axes[axis]
+        atoms = [Atom(ox + i * dx, oy + i * dy, oz + i * dz) for i in range(n)]
+        return cls(atoms, C6=C6, topology={"kind": "chain", "n": n, "spacing": spacing, "axis": axis, "origin": [ox, oy, oz]})
+
+    @classmethod
+    def square_lattice(
+        cls,
+        rows: int,
+        cols: int,
+        *,
+        spacing: float = 1.0,
+        C6: float = 1.0,
+        origin: Any = (0.0, 0.0, 0.0),
+        plane: str = "xy",
+    ) -> "Register":
+        rows = _positive_int(rows, field_name="rows")
+        cols = _positive_int(cols, field_name="cols")
+        spacing = _positive_float(spacing, field_name="spacing")
+        ox, oy, oz = _coerce_xyz(origin, field_name="origin")
+        planes = {
+            "xy": ((spacing, 0.0, 0.0), (0.0, spacing, 0.0)),
+            "xz": ((spacing, 0.0, 0.0), (0.0, 0.0, spacing)),
+            "yz": ((0.0, spacing, 0.0), (0.0, 0.0, spacing)),
+        }
+        if plane not in planes:
+            raise _constructor_error(
+                "VALIDATION_REGISTER_PLANE",
+                f"plane must be one of 'xy', 'xz', or 'yz', got {plane!r}",
+                "Choose a plane from {'xy', 'xz', 'yz'} for Register.square_lattice().",
+            )
+        row_step, col_step = planes[plane]
+        atoms = []
+        for r in range(rows):
+            for c in range(cols):
+                atoms.append(Atom(
+                    ox + r * row_step[0] + c * col_step[0],
+                    oy + r * row_step[1] + c * col_step[1],
+                    oz + r * row_step[2] + c * col_step[2],
+                ))
+        return cls(
+            atoms,
+            C6=C6,
+            topology={"kind": "square_lattice", "rows": rows, "cols": cols, "spacing": spacing, "plane": plane, "origin": [ox, oy, oz]},
+        )
+
+    @classmethod
+    def udg(
+        cls,
+        points: Optional[Any] = None,
+        *,
+        graph: Optional[Any] = None,
+        position_attr: str = "pos",
+        C6: float = 1.0,
+        blockade_radius: Optional[float] = None,
+    ) -> "Register":
+        if graph is not None and points is not None:
+            raise _constructor_error(
+                "VALIDATION_REGISTER_UDG_SOURCE",
+                "Register.udg() accepts either points or graph, not both.",
+                "Pass coordinate points directly or pass a graph with node position attributes.",
+            )
+        node_order = None
+        if graph is not None:
+            node_order = list(graph.nodes())
+            raw_points = [graph.nodes[node].get(position_attr, (0.0, 0.0)) for node in node_order]
+        elif points is not None:
+            raw_points = list(points)
+        else:
+            raise _constructor_error(
+                "VALIDATION_REGISTER_UDG_SOURCE",
+                "Register.udg() requires points or graph.",
+                "Pass coordinate points directly or pass a graph with node position attributes.",
+            )
+        coords = [_coerce_xyz(point, field_name=f"points[{i}]") for i, point in enumerate(raw_points)]
+        if not coords:
+            raise _constructor_error(
+                "VALIDATION_REGISTER_SIZE_VALUE",
+                "Register.udg() requires at least one point.",
+                "Pass at least one 2D or 3D coordinate.",
+            )
+        topology: Dict[str, Any] = {"kind": "udg", "n": len(coords)}
+        if node_order is not None:
+            topology["node_order"] = [str(node) for node in node_order]
+            topology["position_attr"] = position_attr
+        if blockade_radius is not None:
+            topology["blockade_radius"] = _positive_float(blockade_radius, field_name="blockade_radius")
+        return cls([Atom(x, y, z) for x, y, z in coords], C6=C6, topology=topology)
+
+    @classmethod
+    def from_udg_graph(cls, graph: Any, *, position_attr: str = "pos", C6: float = 1.0, blockade_radius: Optional[float] = None) -> "Register":
+        return cls.udg(graph=graph, position_attr=position_attr, C6=C6, blockade_radius=blockade_radius)
+
+    def geometry_summary(self, *, blockade_radius: Optional[float] = None, include_edges: bool = True) -> Dict[str, Any]:
+        summary: Dict[str, Any] = {
+            "atom_count": len(self.atoms),
+            "topology": dict(self.topology),
+        }
+        if blockade_radius is not None and blockade_radius > 0:
+            edges = []
+            coords = np.array([[atom.x, atom.y, atom.z] for atom in self.atoms], dtype=float)
+            for i in range(len(self.atoms)):
+                for j in range(i + 1, len(self.atoms)):
+                    if float(np.linalg.norm(coords[i] - coords[j])) < float(blockade_radius):
+                        edges.append([i, j])
+            summary["blockade_radius"] = float(blockade_radius)
+            summary["blockade_edge_count"] = len(edges)
+            if include_edges:
+                summary["blockade_edges"] = edges
+        return summary
 
     @property
     def jl_obj(self):
@@ -458,6 +658,7 @@ class Simulation:
             "use_gpu": self.config.use_gpu,
             "use_mc": self.config.use_mc,
         }
+        diagnostics["register"] = self.register.geometry_summary(blockade_radius=self.config.blockade_radius, include_edges=False)
         
         if len(psi0) != basis_size:
             raise _validation_error(

@@ -52,14 +52,14 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Failure Diagnostics Normalization** | High | Done | Backend, solver, validation, and serialization failures normalize to actionable diagnostic issue codes, remediation messages, and `failure_diagnostic` log events while preserving compatible Python exception types. |
 
 ## 🚀 Phase 7: Core Performance Improvements (Planned)
-| Requirement | Priority | Description |
-| :--- | :---: | :--- |
-| **Reduced Basis Cache** | High | Cache blockade-reduced bases by an adjacency/register hash, blockade radius, and atom count to avoid repeated basis generation. |
-| **Fast Basis Mapping** | High | Evaluate faster lookup structures than `Dict{Int, Int}` for bitstring-to-basis-index mapping on hot Hamiltonian paths. |
-| **Sparse Pattern Reuse** | High | Reuse Hamiltonian sparse row/column structure and update only values when time-dependent pulses change $\Omega$ or $\Delta$. |
-| **GPU Buffer Reuse** | High | Preallocate and reuse GPU sparse/value buffers to reduce repeated host-to-device transfers and sparse matrix construction. |
-| **Observable/Jumps Basis Sharing** | Medium | Ensure observables, Lindblad jump operators, MCWF trajectories, and Hamiltonian evolution share the same reduced-basis mapping consistently. |
-| **Specialized Register Constructors** | Medium | Add optimized constructors for common 1D chains, 2D lattices, and UDG instances, with pruning-ratio data exposed through the Phase 6 diagnostics schema. |
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Reduced Basis Cache** | High | Planned | Cache blockade-reduced bases by an adjacency/register hash, blockade radius, and atom count to avoid repeated basis generation. |
+| **Fast Basis Mapping** | High | Planned | Evaluate faster lookup structures than `Dict{Int, Int}` for bitstring-to-basis-index mapping on hot Hamiltonian paths. |
+| **Sparse Pattern Reuse** | High | Planned | Reuse Hamiltonian sparse row/column structure and update only values when time-dependent pulses change $\Omega$ or $\Delta$. |
+| **GPU Buffer Reuse** | High | Planned | Preallocate and reuse GPU sparse/value buffers to reduce repeated host-to-device transfers and sparse matrix construction. |
+| **Observable/Jumps Basis Sharing** | Medium | Planned | Ensure observables, Lindblad jump operators, MCWF trajectories, and Hamiltonian evolution share the same reduced-basis mapping consistently. |
+| **Specialized Register Constructors** | Medium | Done | Python `Register.chain()`, `Register.square_lattice()`, `Register.udg()`, and `Register.from_udg_graph()` construct common geometries with topology metadata; simulation diagnostics include register geometry and reduced-basis pruning-ratio data. |
 
 ## 🧩 Phase 8: API & Data Model Refinement (In Progress)
 | Requirement | Priority | Status | Description |

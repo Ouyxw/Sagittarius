@@ -38,6 +38,7 @@ Implemented or partially implemented capabilities include:
 - Julia backend using SciML/OrdinaryDiffEq-based numerical integration.
 - Python SDK with `Atom`, `Register`, `Simulation`, `PulseSequence`, `SolverConfig`, and `SimulationResult`.
 - Rydberg blockade basis reduction for constrained Hilbert spaces.
+- Specialized register constructors for 1D chains, 2D square lattices, and unit-disk graph instances.
 - Global and local pulse controls for Rabi frequency and detuning.
 - Pulse helpers including constant, ramp, piecewise, Gaussian, Blackman, and sinc shapes.
 - Schrodinger, Lindblad, and Monte Carlo trajectory workflows.
@@ -130,13 +131,9 @@ For a blockade-reduced simulation, set `blockade_radius` in `SolverConfig` and s
 
 ```python
 import numpy as np
-from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig
+from sagittarius import Register, Simulation, PulseSequence, SolverConfig
 
-reg = Register([
-    Atom(0.0, 0.0, 0.0),
-    Atom(0.5, 0.0, 0.0),
-    Atom(1.0, 0.0, 0.0),
-], C6=100.0)
+reg = Register.chain(3, spacing=0.5, C6=100.0)
 
 sim = Simulation(
     reg,

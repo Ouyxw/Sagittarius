@@ -1,7 +1,7 @@
 import numpy as np
 import networkx as nx
 from typing import Dict, List, Tuple
-from sagittarius import Atom, Register, Simulation, PulseSequence, Pulse, SolverConfig
+from sagittarius import Register, Simulation, PulseSequence, Pulse, SolverConfig
 
 class MWIS_AQC:
     """
@@ -20,13 +20,7 @@ class MWIS_AQC:
         self.N = len(self.nodes)
         
         # 1. Create Register
-        atoms = []
-        for node in self.nodes:
-            pos = G.nodes[node].get('pos', (0.0, 0.0))
-            # Atom expects SVector{3} now
-            atoms.append(Atom(pos[0], pos[1], 0.0))
-        
-        self.register = Register(atoms, C6=1.0)
+        self.register = Register.from_udg_graph(G, C6=1.0, blockade_radius=blockade_radius)
         
     def create_adiabatic_sequence(self, 
                                   omega_max: float = 2*np.pi * 1.0, 
