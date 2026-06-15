@@ -20,7 +20,7 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 - Full Hilbert-space simulation scales as `2^N`; practical atom counts are limited by memory, solver cost, and observable collection.
 - Blockade-reduced bases can reduce state space substantially, but basis generation and Hamiltonian construction are not yet fully cached or pattern-reused.
 - GPU execution paths are still maturing. Buffer reuse, sparse pattern reuse, and CPU/GPU parity suites are planned work.
-- Benchmark results are only meaningful with the exact hardware, package versions, backend settings, solver tolerances, and problem configuration used to produce them.
+- Benchmark results are only meaningful with the exact hardware, `version-info/v1` metadata, backend settings, solver tolerances, and problem configuration used to produce them.
 
 ## Physics and Numerics
 
@@ -32,7 +32,7 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 ## Data and Reproducibility
 
 - Python `SimulationResult.save()` persists a `result-artifact/v1` envelope with data, metadata, diagnostics, and a validated `run-manifest/v1` manifest for SDK-generated simulation results. Cross-language Julia parity is still tracked under shared result schema work.
-- Benchmark scripts are not yet a finalized reproducible artifact pipeline. JSON/CSV outputs, markdown tables, linked diagnostics, and build/container metadata are planned.
+- Benchmark scripts are not yet a finalized reproducible artifact pipeline. JSON/CSV outputs, markdown tables, and linked diagnostics are planned; runtime build/container metadata is available through `version_info()` and simulation manifests.
 
 ## Unsupported or Future Scenarios
 

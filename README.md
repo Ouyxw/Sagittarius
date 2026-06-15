@@ -45,7 +45,7 @@ Implemented or partially implemented capabilities include:
 - Schrodinger, Lindblad, and Monte Carlo trajectory workflows.
 - JSON serialization for simulation results using the `result-artifact/v1` envelope with data, metadata, diagnostics, and validated `run-manifest/v1` fields.
 - Lightweight Python imports with lazy Julia/GPU initialization.
-- Runtime diagnostics through `doctor()`, `version_info()`, and `backend_maturity()`.
+- Runtime diagnostics through `doctor()`, `version_info()`, and `backend_maturity()`, including `version-info/v1` package, build, container, and backend toolchain metadata.
 - GPU execution paths for supported backends, with CUDA as the primary containerized development target.
 - Distributed parameter sweeps through `ParallelSimulation`.
 - MWIS/UDG example workflows with classical baselines.
@@ -173,7 +173,7 @@ print(backend_maturity())
 print(doctor(backend="CUDA"))
 ```
 
-`doctor()` reports container detection, backend maturity, runtime versions, basic GPU visibility, structured `issue_details`, and schema version `doctor/v2.1`. Pass `initialize_backend=True` to also attempt Julia backend loading and return a `backend-probe/v2.1` payload with `checks`, `versions`, `devices`, `driver`, `runtime`, and `errors`. Simulation results expose `metadata`, `diagnostics`, and a validated `run-manifest/v1` manifest; `SimulationResult.save()` always writes the `result-artifact/v1` envelope. Use `validate_run_manifest(result.manifest)` to check the manifest contract explicitly.
+`doctor()` reports container detection, backend maturity, runtime versions, build/source metadata, package versions, backend toolchain probes, basic GPU visibility, structured `issue_details`, and schema version `doctor/v2.1`. `version_info()` returns schema `version-info/v1` while retaining compatibility fields such as `package_version`, `julia_version`, and `in_container`. Pass `initialize_backend=True` to also attempt Julia backend loading and return a `backend-probe/v2.1` payload with `checks`, `versions`, `devices`, `driver`, `runtime`, and `errors`. Simulation results expose `metadata`, `diagnostics`, and a validated `run-manifest/v1` manifest; `SimulationResult.save()` always writes the `result-artifact/v1` envelope. Use `validate_run_manifest(result.manifest)` to check the manifest contract explicitly.
 
 ## MWIS Example
 
@@ -215,7 +215,7 @@ Performance scripts live under:
 sagittarius_py/tests/test_performance/
 ```
 
-Benchmark results should be interpreted with the exact hardware, Julia/Python versions, solver settings, and backend configuration used to generate them.
+Benchmark results should be interpreted with the exact hardware, `version-info/v1` metadata, solver settings, and backend configuration used to generate them.
 
 ## Architecture
 

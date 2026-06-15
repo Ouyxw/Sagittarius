@@ -19,6 +19,21 @@ LOGGER_NAME = "sagittarius"
 DOCTOR_SCHEMA_VERSION = "doctor/v2.1"
 BACKEND_PROBE_SCHEMA_VERSION = "backend-probe/v2.1"
 FAILURE_DIAGNOSTIC_SCHEMA_VERSION = "failure-diagnostic/v1"
+VERSION_INFO_SCHEMA_VERSION = "version-info/v1"
+
+PYTHON_PACKAGE_VERSION_FIELDS = (
+    "sagittarius-py",
+    "juliacall",
+    "juliapkg",
+    "numpy",
+    "scipy",
+    "pandas",
+    "matplotlib",
+    "networkx",
+    "docplex",
+    "pulp",
+    "seaborn",
+)
 
 BACKEND_MATURITY: Dict[str, Dict[str, str]] = {
     "CPU": {
@@ -47,12 +62,18 @@ _sgr = None
 
 @dataclass
 class RuntimeInfo:
+    schema_version: str
     python_version: str
     package_version: str
     julia_version: Optional[str]
     sagittarius_julia_version: Optional[str]
     platform: str
     in_container: bool
+    python: Dict[str, Any]
+    julia: Dict[str, Any]
+    build: Dict[str, Any]
+    container: Dict[str, Any]
+    backend_toolchains: Dict[str, Any]
 
 
 @dataclass
@@ -203,6 +224,81 @@ def _in_container() -> bool:
     except OSError:
         return False
     return any(token in cgroup for token in ("docker", "kubepods", "containerd", "podman"))
+
+
+def _metadata_command(command: list[str], *, timeout: int = 3) -> Dict[str, Any]:
+    if not shutil.which(command[0]):
+        return {"ok": False, "missing": True, "returncode": None, "output": None}
+    try:
+        completed = subprocess.run(command, check=False, capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "missing": False, "returncode": None, "output": None, "error": "timeout"}
+    except OSError as exc:
+        return {"ok": False, "missing": False, "returncode": None, "output": None, "error": str(exc)}
+    output = (completed.stdout or completed.stderr).strip()
+    return {
+        "ok": completed.returncode == 0,
+        "missing": False,
+        "returncode": completed.returncode,
+        "output": output.splitlines()[0] if output else None,
+        "raw_output": output,
+    }
+
+
+def _installed_package_versions(names: tuple[str, ...]) -> Dict[str, Optional[str]]:
+    versions: Dict[str, Optional[str]] = {}
+    for name in names:
+        try:
+            versions[name] = metadata.version(name)
+        except metadata.PackageNotFoundError:
+            versions[name] = package_version() if name == "sagittarius-py" else None
+    return versions
+
+
+def _source_metadata() -> Dict[str, Any]:
+    root = Path(__file__).resolve().parents[2]
+    result: Dict[str, Any] = {"root": str(root)}
+    head = _metadata_command(["git", "-C", str(root), "rev-parse", "HEAD"])
+    short = _metadata_command(["git", "-C", str(root), "rev-parse", "--short", "HEAD"])
+    branch = _metadata_command(["git", "-C", str(root), "rev-parse", "--abbrev-ref", "HEAD"])
+    status = _metadata_command(["git", "-C", str(root), "status", "--porcelain"])
+    result.update({
+        "git_commit": head.get("output") if head.get("ok") else None,
+        "git_commit_short": short.get("output") if short.get("ok") else None,
+        "git_branch": branch.get("output") if branch.get("ok") else None,
+        "git_dirty": bool(status.get("raw_output")) if status.get("ok") else None,
+    })
+    return result
+
+
+def _container_metadata() -> Dict[str, Any]:
+    image = (
+        os.environ.get("SAGITTARIUS_CONTAINER_IMAGE")
+        or os.environ.get("IMAGE_NAME")
+        or os.environ.get("CONTAINER_IMAGE")
+    )
+    return {
+        "detected": _in_container(),
+        "image": image,
+        "id": os.environ.get("HOSTNAME") if _in_container() else None,
+        "devcontainer": bool(os.environ.get("REMOTE_CONTAINERS") or os.environ.get("DEVCONTAINER")),
+    }
+
+
+def _backend_toolchain_metadata() -> Dict[str, Any]:
+    nvidia_smi = _metadata_command(["nvidia-smi", "--query-gpu=name,driver_version,memory.total", "--format=csv,noheader,nounits"])
+    nvcc = _metadata_command(["nvcc", "--version"])
+    rocm_smi = _metadata_command(["rocm-smi", "--showdriverversion"])
+    metal = _metadata_command(["xcrun", "--find", "metal"]) if sys.platform == "darwin" else {"ok": False, "missing": True, "returncode": None, "output": None}
+    return {
+        "CUDA": {
+            "nvidia_smi": nvidia_smi,
+            "nvcc": nvcc,
+            "devices": _parse_nvidia_smi_csv(nvidia_smi.get("raw_output") or nvidia_smi.get("output")),
+        },
+        "AMDGPU": {"rocm_smi": rocm_smi},
+        "METAL": {"metal_compiler": metal},
+    }
 
 
 def _issue(code: str, message: str, remediation: str, *, severity: str = "error") -> Dict[str, str]:
@@ -406,34 +502,45 @@ def version_info(*, initialize_backend: bool = False) -> Dict[str, Any]:
         jl, _ = get_julia()
         julia_version = str(jl.VERSION)
 
+    python_version = sys.version.split()[0]
+    packages = _installed_package_versions(PYTHON_PACKAGE_VERSION_FIELDS)
+    sagittarius_julia_version = _julia_project_version()
+    container = _container_metadata()
+    source = _source_metadata()
+    build = {
+        "source": source,
+        "ci": bool(os.environ.get("CI")),
+        "build_id": os.environ.get("BUILD_ID") or os.environ.get("GITHUB_RUN_ID"),
+        "build_number": os.environ.get("BUILD_NUMBER") or os.environ.get("GITHUB_RUN_NUMBER"),
+    }
     info = RuntimeInfo(
-        python_version=sys.version.split()[0],
+        schema_version=VERSION_INFO_SCHEMA_VERSION,
+        python_version=python_version,
         package_version=package_version(),
         julia_version=julia_version,
-        sagittarius_julia_version=_julia_project_version(),
+        sagittarius_julia_version=sagittarius_julia_version,
         platform=platform.platform(),
-        in_container=_in_container(),
+        in_container=bool(container["detected"]),
+        python={
+            "version": python_version,
+            "implementation": platform.python_implementation(),
+            "executable": sys.executable,
+            "packages": packages,
+        },
+        julia={
+            "version": julia_version,
+            "sagittarius_julia_version": sagittarius_julia_version,
+            "project_path": str(_project_path()),
+        },
+        build=build,
+        container=container,
+        backend_toolchains=_backend_toolchain_metadata(),
     )
     return asdict(info)
 
 
 def _run_command(command: list[str], *, timeout: int = 5) -> Dict[str, Any]:
-    if not shutil.which(command[0]):
-        return {"ok": False, "missing": True, "returncode": None, "output": None}
-    try:
-        completed = subprocess.run(command, check=False, capture_output=True, text=True, timeout=timeout)
-    except subprocess.TimeoutExpired:
-        return {"ok": False, "missing": False, "returncode": None, "output": None, "error": "timeout"}
-    except OSError as exc:
-        return {"ok": False, "missing": False, "returncode": None, "output": None, "error": str(exc)}
-    output = (completed.stdout or completed.stderr).strip()
-    return {
-        "ok": completed.returncode == 0,
-        "missing": False,
-        "returncode": completed.returncode,
-        "output": output.splitlines()[0] if output else None,
-        "raw_output": output,
-    }
+    return _metadata_command(command, timeout=timeout)
 
 
 def _command_version(command: list[str]) -> Optional[str]:
@@ -521,7 +628,7 @@ def doctor(*, backend: str = "CPU", initialize_backend: bool = False) -> Dict[st
         "runtime": version_info(initialize_backend=False),
         "requested_backend": requested,
         "backend_maturity": maturity,
-        "container": {"detected": _in_container()},
+        "container": _container_metadata(),
         "gpu": {},
         "backend_probe": None,
         "available": True,

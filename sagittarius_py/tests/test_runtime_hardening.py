@@ -26,6 +26,59 @@ def test_doctor_cpu_without_backend_initialization(monkeypatch):
     assert version_info()["julia_version"] is None
 
 
+
+def test_version_info_records_build_and_backend_metadata(monkeypatch):
+    import sagittarius.runtime as runtime
+    from sagittarius import VERSION_INFO_SCHEMA_VERSION, version_info
+
+    def fake_command(command, *, timeout=3):
+        joined = " ".join(command)
+        if "rev-parse HEAD" in joined:
+            return {"ok": True, "missing": False, "returncode": 0, "output": "abc123def", "raw_output": "abc123def"}
+        if "rev-parse --short HEAD" in joined:
+            return {"ok": True, "missing": False, "returncode": 0, "output": "abc123", "raw_output": "abc123"}
+        if "rev-parse --abbrev-ref HEAD" in joined:
+            return {"ok": True, "missing": False, "returncode": 0, "output": "main", "raw_output": "main"}
+        if "status --porcelain" in joined:
+            return {"ok": True, "missing": False, "returncode": 0, "output": None, "raw_output": ""}
+        if command[0] == "nvidia-smi":
+            return {"ok": True, "missing": False, "returncode": 0, "output": "NVIDIA A100, 550.54.14, 40960", "raw_output": "NVIDIA A100, 550.54.14, 40960"}
+        if command[0] == "nvcc":
+            return {"ok": True, "missing": False, "returncode": 0, "output": "Cuda compilation tools, release 12.1", "raw_output": "Cuda compilation tools, release 12.1"}
+        return {"ok": False, "missing": True, "returncode": None, "output": None}
+
+    monkeypatch.setattr(runtime, "_metadata_command", fake_command)
+    monkeypatch.setattr(runtime, "_in_container", lambda: True)
+    monkeypatch.setenv("SAGITTARIUS_CONTAINER_IMAGE", "sagittarius:test")
+    monkeypatch.setenv("GITHUB_RUN_ID", "12345")
+
+    info = version_info()
+
+    assert info["schema_version"] == VERSION_INFO_SCHEMA_VERSION
+    assert info["package_version"] == info["python"]["packages"]["sagittarius-py"]
+    assert info["julia"]["sagittarius_julia_version"] == info["sagittarius_julia_version"]
+    assert info["build"]["source"]["git_commit"] == "abc123def"
+    assert info["build"]["source"]["git_dirty"] is False
+    assert info["build"]["build_id"] == "12345"
+    assert info["container"]["detected"] is True
+    assert info["container"]["image"] == "sagittarius:test"
+    assert "devcontainer" in info["container"]
+    assert info["backend_toolchains"]["CUDA"]["devices"][0]["driver_version"] == "550.54.14"
+    assert info["backend_toolchains"]["CUDA"]["nvcc"]["output"] == "Cuda compilation tools, release 12.1"
+
+
+def test_doctor_runtime_includes_version_metadata(monkeypatch):
+    import sagittarius.runtime as runtime
+
+    monkeypatch.setattr(runtime, "_metadata_command", lambda command, *, timeout=3: {"ok": False, "missing": True, "returncode": None, "output": None})
+
+    report = runtime.doctor()
+
+    assert report["runtime"]["schema_version"] == "version-info/v1"
+    assert {"python", "julia", "build", "container", "backend_toolchains"} <= set(report["runtime"])
+    assert report["container"] == report["runtime"]["container"]
+
+
 def test_doctor_unknown_backend_has_actionable_issue():
     from sagittarius import doctor
 
