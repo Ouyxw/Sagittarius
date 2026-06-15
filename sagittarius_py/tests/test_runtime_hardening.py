@@ -11,8 +11,12 @@ def test_import_does_not_initialize_juliacall():
     assert sagittarius.backend_maturity()["CUDA"]["status"] == "experimental"
 
 
-def test_doctor_cpu_without_backend_initialization():
+def test_doctor_cpu_without_backend_initialization(monkeypatch):
+    import sagittarius.runtime as runtime
     from sagittarius import doctor, version_info
+
+    monkeypatch.setattr(runtime, "_jl", None)
+    monkeypatch.setattr(runtime, "_sgr", None)
 
     report = doctor()
 

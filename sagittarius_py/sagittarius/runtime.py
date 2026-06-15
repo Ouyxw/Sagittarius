@@ -160,6 +160,41 @@ def _julia_project_version() -> Optional[str]:
     return None
 
 
+def _configure_juliacall_environment() -> None:
+    """Fill JuliaCall env vars when juliapkg/juliaup auto-detection is incomplete."""
+    if all(os.environ.get(name) for name in ("PYTHON_JULIACALL_EXE", "PYTHON_JULIACALL_PROJECT", "PYTHON_JULIACALL_BINDIR")):
+        return
+
+    try:
+        import juliapkg
+
+        exe = os.environ.get("PYTHON_JULIACALL_EXE") or shutil.which(juliapkg.executable()) or juliapkg.executable()
+        project = os.environ.get("PYTHON_JULIACALL_PROJECT") or juliapkg.project()
+    except Exception:
+        return
+
+    if exe and project:
+        os.environ.setdefault("PYTHON_JULIACALL_EXE", exe)
+        os.environ.setdefault("PYTHON_JULIACALL_PROJECT", project)
+
+    if os.environ.get("PYTHON_JULIACALL_BINDIR"):
+        return
+
+    try:
+        completed = subprocess.run(
+            [exe, "--startup-file=no", "-e", "print(Sys.BINDIR)"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return
+    bindir = completed.stdout.strip()
+    if completed.returncode == 0 and bindir and os.path.exists(bindir):
+        os.environ.setdefault("PYTHON_JULIACALL_BINDIR", bindir)
+
+
 def _in_container() -> bool:
     if os.path.exists("/.dockerenv") or os.path.exists("/run/.containerenv"):
         return True
@@ -329,6 +364,7 @@ def get_julia(*, setup: bool = True):
 
     log_event("backend_init_start", setup=setup)
     try:
+        _configure_juliacall_environment()
         from juliacall import Main as jl
 
         if setup:
