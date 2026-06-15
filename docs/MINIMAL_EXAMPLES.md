@@ -134,7 +134,10 @@ result = SimulationResult(
 
 with tempfile.NamedTemporaryFile(suffix=".json") as f:
     result.save(f.name)
+    with open(f.name) as saved:
+        envelope = json.load(saved)
     loaded = load_result(f.name)
+    print(envelope["schema_version"])
     print(loaded.data["pop"][-1])
     print(loaded.metadata["example"])
     print(loaded.diagnostics["backend"])
@@ -143,6 +146,7 @@ with tempfile.NamedTemporaryFile(suffix=".json") as f:
 Expected output:
 
 ```text
+result-artifact/v1
 1.0
 minimal
 CPU

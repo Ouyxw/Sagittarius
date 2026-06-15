@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from typing import Optional, Dict, Union, Any, List
 
 import numpy as np
+RESULT_ARTIFACT_SCHEMA_VERSION = "result-artifact/v1"
+RESULT_ARTIFACT_TYPE = "sagittarius.simulation_result"
+
 from .runtime import (
     SagittariusError,
     SagittariusSerializationError,
@@ -74,6 +77,18 @@ def _validation_error(code: str, message: str, remediation: str) -> SagittariusV
 
 def _serialization_error(code: str, message: str, remediation: str) -> SagittariusSerializationError:
     return SagittariusSerializationError(make_issue(code, message, remediation))
+
+
+def _json_compatible(value: Any) -> Any:
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, dict):
+        return {str(k): _json_compatible(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_compatible(v) for v in value]
+    return value
 
 
 def _validate_atom_index(index: Any, N: int, *, context: str) -> int:
@@ -194,11 +209,24 @@ class SimulationResult:
         data: Dict[str, List[float]],
         metadata: Optional[Dict[str, Any]] = None,
         diagnostics: Optional[Dict[str, Any]] = None,
+        manifest: Optional[Dict[str, Any]] = None,
     ):
         self.data = data
         self.metadata = metadata or {}
         self.diagnostics = diagnostics or {}
+        self.manifest = manifest or {}
         self.t = np.array(data.get('t', []))
+
+    def to_envelope(self) -> Dict[str, Any]:
+        """Return the stable JSON artifact envelope for this result."""
+        return {
+            "schema_version": RESULT_ARTIFACT_SCHEMA_VERSION,
+            "artifact_type": RESULT_ARTIFACT_TYPE,
+            "data": _json_compatible(self.data),
+            "metadata": _json_compatible(self.metadata),
+            "diagnostics": _json_compatible(self.diagnostics),
+            "manifest": _json_compatible(self.manifest),
+        }
     
     def to_pandas(self):
         import pandas as pd
@@ -206,18 +234,9 @@ class SimulationResult:
         return pd.DataFrame(self.data)
     
     def save(self, filepath: str):
-        """Save results to a JSON file."""
+        """Save results to a JSON artifact envelope."""
         try:
-            serializable_data = {
-                k: list(v) if isinstance(v, (np.ndarray, list)) else v
-                for k, v in self.data.items()
-            }
-            if self.metadata or self.diagnostics:
-                serializable_data = {
-                    "data": serializable_data,
-                    "metadata": self.metadata,
-                    "diagnostics": self.diagnostics,
-                }
+            serializable_data = self.to_envelope()
             with open(filepath, "w") as f:
                 json.dump(serializable_data, f)
         except TypeError as exc:
@@ -260,6 +279,39 @@ class SimulationResult:
             emit_failure_diagnostic(err.issue)
             raise err from exc
 
+        if isinstance(data, dict) and data.get("schema_version") == RESULT_ARTIFACT_SCHEMA_VERSION:
+            if data.get("artifact_type") != RESULT_ARTIFACT_TYPE:
+                err = _serialization_error(
+                    "SERIALIZATION_SCHEMA_INVALID",
+                    "Result artifact envelope has an unsupported artifact_type.",
+                    f"Expected artifact_type {RESULT_ARTIFACT_TYPE!r} for SimulationResult.load().",
+                )
+                emit_failure_diagnostic(err.issue)
+                raise err
+            if not isinstance(data.get("data"), dict):
+                err = _serialization_error(
+                    "SERIALIZATION_SCHEMA_INVALID",
+                    "SimulationResult envelope field 'data' must be a JSON object.",
+                    "Regenerate the result artifact with SimulationResult.save().",
+                )
+                emit_failure_diagnostic(err.issue)
+                raise err
+            return cls(
+                data["data"],
+                metadata=data.get("metadata"),
+                diagnostics=data.get("diagnostics"),
+                manifest=data.get("manifest"),
+            )
+
+        if isinstance(data, dict) and "schema_version" in data:
+            err = _serialization_error(
+                "SERIALIZATION_SCHEMA_UNSUPPORTED",
+                f"Unsupported SimulationResult artifact schema_version: {data.get('schema_version')!r}.",
+                f"Use artifacts with schema_version {RESULT_ARTIFACT_SCHEMA_VERSION!r} or convert the file before loading.",
+            )
+            emit_failure_diagnostic(err.issue)
+            raise err
+
         if isinstance(data, dict) and "data" in data:
             if not isinstance(data["data"], dict):
                 err = _serialization_error(
@@ -269,7 +321,7 @@ class SimulationResult:
                 )
                 emit_failure_diagnostic(err.issue)
                 raise err
-            return cls(data["data"], metadata=data.get("metadata"), diagnostics=data.get("diagnostics"))
+            return cls(data["data"], metadata=data.get("metadata"), diagnostics=data.get("diagnostics"), manifest=data.get("manifest"))
         if not isinstance(data, dict):
             err = _serialization_error(
                 "SERIALIZATION_SCHEMA_INVALID",
