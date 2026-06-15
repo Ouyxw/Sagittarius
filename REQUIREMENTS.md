@@ -80,7 +80,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Open-System Sanity Checks** | High | Planned | Add Lindblad trace-preservation, positivity sanity checks, and MCWF-vs-Lindblad ensemble comparisons. |
 | **CPU/GPU Parity Suite** | High | Done | Opt-in CUDA parity suite compares deterministic CPU/GPU observable trajectories across global drive, local addressing, and blockade-reduced seeded-state cases with fixed tolerances. |
 | **MWIS Batch Verification** | Medium | Planned | Compare AQC output against exact ILP solutions across randomized UDG/MWIS instances. |
-| **Ablation Benchmarks** | High | Planned | Benchmark full dense, full sparse, reduced matrix-free, reduced sparse, and reduced sparse GPU-cached execution paths. |
+| **Ablation Benchmarks** | High | Done | `benchmark_ablation.py` emits `benchmark-artifact/v1` results for full dense, full sparse, reduced matrix-free, reduced sparse, and opt-in reduced sparse CUDA-cached execution paths. |
 
 ## 📚 Phase 10: Documentation & Patent Readiness (In Progress)
 | Requirement | Priority | Status | Description |

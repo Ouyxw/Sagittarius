@@ -19,12 +19,18 @@ This directory contains scripts for profiling and benchmarking the Sagittarius n
 - **Metric**: Execution time vs number of workers.
 - **Sweep Logic**: Rabi frequency ($\Omega$) sweep over multiple processes.
 
+### 4. `benchmark_ablation.py`
+- **Goal**: Compare Hamiltonian execution path representations.
+- **Metric**: Time per repeated matvec for full dense, full sparse, reduced matrix-free, and reduced sparse CPU paths; optional CUDA cached sparse solve timing.
+- **GPU Gate**: Pass `--include-gpu` only on a machine where CUDA diagnostics pass.
+
 ## 🛠️ Execution
 ```bash
 cd sagittarius_py/tests/test_performance
 uv run python benchmark_scaling.py
 uv run python benchmark_gpu.py
 uv run python benchmark_cluster.py
+uv run python benchmark_ablation.py
 ```
 
 ## 📈 Output
