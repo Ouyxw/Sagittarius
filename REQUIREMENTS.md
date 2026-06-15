@@ -78,7 +78,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | :--- | :---: | :---: | :--- |
 | **Dense-vs-Reduced Validation** | High | Done | Backend-free `dense_vs_reduced_validation()` compares small-system full dense Hamiltonians projected onto the blockade basis with reduced-basis Hamiltonian evolution, reporting basis sizes, pruning ratio, and max errors. |
 | **Open-System Sanity Checks** | High | Planned | Add Lindblad trace-preservation, positivity sanity checks, and MCWF-vs-Lindblad ensemble comparisons. |
-| **CPU/GPU Parity Suite** | High | Planned | Run deterministic CPU/GPU parity tests with fixed tolerances and seeded random components where applicable. |
+| **CPU/GPU Parity Suite** | High | Done | Opt-in CUDA parity suite compares deterministic CPU/GPU observable trajectories across global drive, local addressing, and blockade-reduced seeded-state cases with fixed tolerances. |
 | **MWIS Batch Verification** | Medium | Planned | Compare AQC output against exact ILP solutions across randomized UDG/MWIS instances. |
 | **Ablation Benchmarks** | High | Planned | Benchmark full dense, full sparse, reduced matrix-free, reduced sparse, and reduced sparse GPU-cached execution paths. |
 

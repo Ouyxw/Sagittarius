@@ -19,7 +19,7 @@ This directory contains the comprehensive test suite for the Sagittarius Python 
 - **Dissipation**: Checks Rydberg decay and dephasing dynamics.
 
 ### 3. 🚀 Performance & Scale (`test_gpu_acceleration.py`, `test_cluster.py`)
-- **GPU Parity**: Ensures that GPU backends (CUDA/AMDGPU/Metal) yield identical results to the CPU.
+- **GPU Parity**: Opt-in CUDA tests compare CPU/GPU observable trajectories for global drives, local addressing, and blockade-reduced seeded states with fixed tolerances. AMDGPU/Metal remain maturity-tracked but not parity-tested.
 - **Cluster Connectivity**: Verifies worker orchestration and `pmap` distribution.
 
 ### 4. 📍 Advanced Features (`test_local_pulses.py`, `test_api_v2.py`, `test_pulse.py`, `test_physics.py`)
@@ -50,4 +50,4 @@ cd sagittarius_py
 uv run python -m pytest tests/
 ```
 
-Tests marked `requires_julia_backend` exercise the Julia/PythonCall runtime and are skipped when the backend cannot initialize. To repair a local backend environment, run `uv run python -m juliapkg resolve` and instantiate the Julia project before rerunning the suite.
+Tests marked `requires_julia_backend` exercise the Julia/PythonCall runtime and are skipped when the backend cannot initialize. CUDA parity tests additionally require `SAGITTARIUS_ENABLE_GPU_TESTS=1` and a passing `doctor(backend="CUDA", initialize_backend=True)` probe. To repair a local backend environment, run `uv run python -m juliapkg resolve` and instantiate the Julia project before rerunning the suite.
