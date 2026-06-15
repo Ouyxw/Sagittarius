@@ -158,6 +158,73 @@ def test_reduced_sparse_pattern_reuses_structure_when_pulses_change():
     assert report["values_changed"] is True
     assert report["matches_fresh"] is True
 
+
+def test_gpu_sparse_value_copy_reuses_existing_value_buffer():
+    from sagittarius.runtime import get_julia
+
+    jl, _ = get_julia()
+    report = jl.seval("""
+    begin
+        using SparseArrays
+        mutable struct FakeGpuSparseForReuseTest
+            nzVal::Vector{ComplexF64}
+        end
+
+        cpu_sparse = sparse(ComplexF64[1 0; 2 3])
+        fake = FakeGpuSparseForReuseTest(zeros(ComplexF64, length(cpu_sparse.nzval)))
+        value_buffer_id = objectid(fake.nzVal)
+        updated = Sagittarius.Solver._copy_sparse_values_to_gpu!(fake, cpu_sparse)
+
+        Dict(
+            "same_object" => updated === fake,
+            "same_value_buffer" => objectid(fake.nzVal) == value_buffer_id,
+            "values_match" => fake.nzVal == cpu_sparse.nzval,
+        )
+    end
+    """)
+
+    assert report["same_object"] is True
+    assert report["same_value_buffer"] is True
+    assert report["values_match"] is True
+
+
+def test_reduced_gpu_sparse_cache_survives_value_only_pulse_updates():
+    from sagittarius.runtime import get_julia
+
+    jl, _ = get_julia()
+    report = jl.seval("""
+    begin
+        using StaticArrays
+        sentinel = Ref("gpu-buffer-sentinel")
+        reg = Sagittarius.Physics.Register([
+            Sagittarius.Physics.Atom(SVector(0.0, 0.0, 0.0)),
+            Sagittarius.Physics.Atom(SVector(0.5, 0.0, 0.0)),
+            Sagittarius.Physics.Atom(SVector(1.0, 0.0, 0.0)),
+        ], 10.0)
+        H_func = Sagittarius.Physics.build_hamiltonian_func(
+            reg,
+            t -> [1.0 + t, 2.0, 3.0],
+            t -> [0.0, t, 0.2];
+            blockade_radius=0.75,
+            use_gpu=true,
+        )
+
+        op = H_func(0.0)
+        op.cached_sparse_H = sentinel
+        H_func(0.5)
+
+        Dict(
+            "same_gpu_cache" => op.cached_sparse_H === sentinel,
+            "omega_updated" => op.Ω == [1.5, 2.0, 3.0],
+            "delta_updated" => op.Δ == [0.0, 0.5, 0.2],
+        )
+    end
+    """)
+
+    assert report["same_gpu_cache"] is True
+    assert report["omega_updated"] is True
+    assert report["delta_updated"] is True
+
 if __name__ == "__main__":
     test_single_atom_rabi()
     test_two_atom_blockade()

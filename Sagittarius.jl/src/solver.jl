@@ -86,25 +86,44 @@ function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=n
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
+function _copy_sparse_values_to_gpu!(gpu_sparse, cpu_sparse)
+    if hasproperty(gpu_sparse, :nzVal)
+        copyto!(gpu_sparse.nzVal, cpu_sparse.nzval)
+        return gpu_sparse
+    elseif hasproperty(gpu_sparse, :nzval)
+        copyto!(gpu_sparse.nzval, cpu_sparse.nzval)
+        return gpu_sparse
+    end
+    return nothing
+end
+
+function _cached_gpu_sparse!(op)
+    @eval using CUDA
+    @eval using CUDA.CUSPARSE
+    cpu_sparse = sparse(op)
+    if isnothing(op.cached_sparse_H)
+        op.cached_sparse_H = CUDA.CUSPARSE.CuSparseMatrixCSC(cpu_sparse)
+    else
+        updated = _copy_sparse_values_to_gpu!(op.cached_sparse_H, cpu_sparse)
+        if isnothing(updated)
+            op.cached_sparse_H = CUDA.CUSPARSE.CuSparseMatrixCSC(cpu_sparse)
+        end
+    end
+    return op.cached_sparse_H
+end
+
 function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
     @eval using CUDA
     @eval using CUDA.CUSPARSE
     function f(ψ, p, t)
         op = H_func(t)
-        # Check for our cached sparse matrix
         if hasproperty(op, :use_gpu) && op.use_gpu
-            if isnothing(op.cached_sparse_H)
-                # Determine which GPU array type to use
-                if ψ isa CUDA.CuVector
-                    op.cached_sparse_H = CUDA.CUSPARSE.CuSparseMatrixCSC(sparse(op))
-                else
-                    # Fallback or other backends
-                    return (sparse(op) * ψ) .* (-1im)
-                end
+            if ψ isa CUDA.CuVector
+                return (_cached_gpu_sparse!(op) * ψ) .* (-1im)
+            else
+                return (sparse(op) * ψ) .* (-1im)
             end
-            return (op.cached_sparse_H * ψ) .* (-1im)
         else
-            # Dynamic conversion (slow)
             H_sparse = sparse(op)
             if ψ isa CUDA.CuVector
                 return (CUDA.CUSPARSE.CuSparseMatrixCSC(H_sparse) * ψ) .* (-1im)

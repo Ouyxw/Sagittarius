@@ -458,11 +458,9 @@ function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius
             cur_Ω = convert(Vector{Float64}, Ω_func(t))
             cur_Δ = convert(Vector{Float64}, Δ_func(t))
             
-            # Only update and invalidate cache if values have changed
             if op.Ω != cur_Ω || op.Δ != cur_Δ
                 copyto!(op.Ω, cur_Ω)
                 copyto!(op.Δ, cur_Δ)
-                op.cached_sparse_H = nothing
             end
             return op
         end

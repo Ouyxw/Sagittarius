@@ -56,8 +56,8 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | :--- | :---: | :---: | :--- |
 | **Reduced Basis Cache** | High | Planned | Cache blockade-reduced bases by an adjacency/register hash, blockade radius, and atom count to avoid repeated basis generation. |
 | **Fast Basis Mapping** | High | Planned | Evaluate faster lookup structures than `Dict{Int, Int}` for bitstring-to-basis-index mapping on hot Hamiltonian paths. |
-| **Sparse Pattern Reuse** | High | Done | Full and reduced-basis Hamiltonians cache their CSC sparse row/column structure and update only stored values when time-dependent $\Omega$ or $\Delta$ changes; GPU sparse caches are invalidated only when values change. |
-| **GPU Buffer Reuse** | High | Planned | Preallocate and reuse GPU sparse/value buffers to reduce repeated host-to-device transfers and sparse matrix construction. |
+| **Sparse Pattern Reuse** | High | Done | Full and reduced-basis Hamiltonians cache their CSC sparse row/column structure and update only stored values when time-dependent $\Omega$ or $\Delta$ changes; CUDA sparse buffers are retained across value-only pulse updates. |
+| **GPU Buffer Reuse** | High | Done | CUDA reduced-basis execution reuses the cached `CuSparseMatrixCSC` and copies updated Hamiltonian values into the existing device value buffer instead of rebuilding GPU sparse structure on value-only pulse changes. |
 | **Observable/Jumps Basis Sharing** | Medium | Planned | Ensure observables, Lindblad jump operators, MCWF trajectories, and Hamiltonian evolution share the same reduced-basis mapping consistently. |
 | **Specialized Register Constructors** | Medium | Done | Python `Register.chain()`, `Register.square_lattice()`, `Register.udg()`, and `Register.from_udg_graph()` construct common geometries with topology metadata; simulation diagnostics include register geometry and reduced-basis pruning-ratio data. |
 

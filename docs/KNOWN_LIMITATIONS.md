@@ -19,7 +19,7 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 
 - Full Hilbert-space simulation scales as `2^N`; practical atom counts are limited by memory, solver cost, and observable collection.
 - Blockade-reduced bases can reduce state space substantially. Basis generation is not yet cached; full and reduced sparse Hamiltonians reuse their CSC pattern once constructed.
-- GPU execution paths are still maturing. Sparse pattern reuse and CPU/GPU parity tests exist; GPU buffer reuse remains planned work.
+- GPU execution paths are still maturing. Sparse pattern reuse, CUDA sparse value-buffer reuse, and CPU/GPU parity tests exist; broader backend buffer reuse remains planned work.
 - Benchmark results are only meaningful with the exact hardware, `version-info/v1` metadata, backend settings, solver tolerances, and problem configuration used to produce them.
 
 ## Physics and Numerics
