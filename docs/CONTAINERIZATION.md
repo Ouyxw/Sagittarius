@@ -20,7 +20,7 @@
 - **基础镜像**: `nvidia/cuda:12.8.0-devel-ubuntu22.04`，作为 CUDA 12.8+ 和 Blackwell/RTX 50 系列开发基线。
 - **运行时**: 集成 Julia 1.11 系列和 Python 3.11。
 - **包管理器**: 使用 `uv` 加速 Python 依赖同步。
-- **CUDA.jl**: 容器构建固定安装 `CUDA.jl 6.2.0`，并设置 `CUDA.set_runtime_version!(local_toolkit=true)` 使用容器内 CUDA toolkit。
+- **CUDA.jl**: 容器构建固定安装 `CUDA.jl 6.2.0`，并设置 `CUDA.set_runtime_version!(local_toolkit=true)` 使用容器内 CUDA toolkit。该 devcontainer 是 CUDA-only parity 环境，不默认安装 AMDGPU/Metal，因为当前这些 planned backend 包与 CUDA.jl 6.2.x 的 GPUCompiler/CUDACore 约束存在冲突。
 - **优化**: 构建时预编译 Julia GPU 环境，减少首次运行 GPU 任务的延迟。
 
 ### 2.2 devcontainer.json
@@ -78,15 +78,15 @@ uv run python check_env.py
 3. 将应用代码中的 `SolverConfig(use_gpu=True)` 修改为 `False`。
 
 ### 4.3 跨平台 GPU 支持
-- **Apple Silicon (Mac)**: 支持 `gpu_backend="Metal"`。
-- **AMD GPU**: 支持 `gpu_backend="AMDGPU"`。
+- **Apple Silicon (Mac)**: API 名称支持 `gpu_backend="Metal"`，但需要单独的 macOS/Metal 实验环境安装 Metal.jl；不要在 CUDA parity 容器中默认安装。
+- **AMD GPU**: API 名称支持 `gpu_backend="AMDGPU"`，但需要单独的 ROCm/AMDGPU 实验环境安装 AMDGPU.jl；不要在 CUDA parity 容器中默认安装。
 
 ## 5. GPU 性能优化细节
 
 为了实现最佳吞吐量，代码层面对 GPU 进行了以下优化：
 - **无损观测值计算**: `RydbergPopulation` 已移除 `CUDA.@allowscalar`。所有观测值计算都在 GPU 显存内通过向量化操作（broadcasting/mapreduce）完成。
 - **算子缓存**: `solve_schrodinger_gpu` 会自动缓存 `CuSparseMatrixCSC` 形式的哈密顿量算子。
-- **多后端兼容**: 容器环境支持 CUDA，并为 AMDGPU 和 Metal 留出了扩展接口。
+- **多后端策略**: 容器环境固定为 CUDA-only，用于可重复的 CUDA parity 和 benchmark。AMDGPU/Metal 保留 API 和 maturity matrix 入口，但应在独立实验环境中验证。
 
 ## 5. 常见问题 (FAQ)
 

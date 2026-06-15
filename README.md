@@ -159,7 +159,7 @@ from sagittarius import SolverConfig
 cfg = SolverConfig(use_gpu=True, gpu_backend="CUDA")
 ```
 
-Supported backend names are currently `CUDA`, `AMDGPU`, and `Metal`, but maturity and test coverage are not identical across backends. CUDA is the main target of the provided container workflow; the devcontainer uses CUDA 12.8 and pins CUDA.jl 6.2.x for CUDA 12.8+/Blackwell compatibility. See [docs/BACKENDS.md](docs/BACKENDS.md) for the current maturity matrix, and use `doctor(backend="CUDA", initialize_backend=True)` before enabling GPU execution on a machine or container.
+Supported backend names are currently `CUDA`, `AMDGPU`, and `Metal`, but maturity and test coverage are not identical across backends. CUDA is the main target of the provided container workflow; the devcontainer uses CUDA 12.8 and pins CUDA.jl 6.2.x for CUDA 12.8+/Blackwell compatibility. See [docs/BACKENDS.md](docs/BACKENDS.md) for the current maturity matrix, and use `doctor(backend="CUDA", initialize_backend=True)` before enabling GPU execution on a machine or container. The default container/PythonCall environment is CUDA-only; install AMDGPU.jl or Metal.jl only in separate backend-specific experimental environments.
 
 ## Runtime Diagnostics
 

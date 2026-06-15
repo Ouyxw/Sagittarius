@@ -17,12 +17,6 @@
             "uuid": "052768ef-5323-5732-b1bb-66c8b64840ba",
             "version": "6.2.0"
         },
-        "AMDGPU": {
-            "uuid": "21141c5a-9bdb-4563-92ae-f87d6854732e"
-        },
-        "Metal": {
-            "uuid": "dde4c033-4e86-420c-a63e-0dd931031962"
-        },
         "PythonCall": {
             "uuid": "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
         },

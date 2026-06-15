@@ -42,12 +42,13 @@ WORKDIR /workspaces/Sagittarius
 COPY Sagittarius.jl/Project.toml ./Sagittarius.jl/
 COPY sagittarius_py/pyproject.toml sagittarius_py/uv.lock* sagittarius_py/juliapkg.json ./sagittarius_py/
 
-# 强制重新生成项目环境，并锁定使用本地 CUDA 运行时。
+# 强制重新生成 CUDA-only 项目环境，并锁定使用本地 CUDA 运行时。
 # CUDA.jl 6.2.x includes current CUDA 13.x runtime selection fixes while remaining compatible with CUDA 12.8+ driver/toolkit workflows.
+# AMDGPU/Metal are intentionally not installed in this CUDA parity environment because their current dependency bounds conflict with CUDA.jl 6.2.x.
 RUN JULIA_PKG_PRECOMPILE_AUTO=0 julia -e 'using Pkg; \
     Pkg.Registry.add("General"); \
     Pkg.activate("Sagittarius_Env", shared=true); \
-    Pkg.add(["OrdinaryDiffEq", "StaticArrays", "DiffEqCallbacks", "SciMLBase", "AMDGPU", "Metal", "LinearAlgebra", "SparseArrays", "Random", "Distributed", "PythonCall", "CondaPkg", "PrecompileTools", "JSON", "Parsers"]); \
+    Pkg.add(["OrdinaryDiffEq", "StaticArrays", "DiffEqCallbacks", "SciMLBase", "LinearAlgebra", "SparseArrays", "Random", "Distributed", "PythonCall", "CondaPkg", "PrecompileTools", "JSON", "Parsers"]); \
     Pkg.add(Pkg.PackageSpec(name="CUDA", version="6.2.0")); \
     Pkg.instantiate(); \
     using CUDA; CUDA.set_runtime_version!(local_toolkit=true); \
