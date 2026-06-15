@@ -33,11 +33,16 @@ end
 A matrix-free representation of the Rydberg Hamiltonian.
 H = Σ (Ω_i/2 σx_i) - Σ (Δ_i n_i) + Σ (V_ij n_i n_j)
 """
-struct RydbergOperator
+mutable struct RydbergOperator
     N::Int
     Ω::Vector{Float64} # Local Rabi frequency
     Δ::Vector{Float64} # Local Detuning
     V::Matrix{Float64} # Interaction matrix
+    cached_sparse_cpu::Union{Nothing, SparseMatrixCSC{ComplexF64, Int}}
+end
+
+function RydbergOperator(N, Ω, Δ, V)
+    return RydbergOperator(N, Ω, Δ, V, nothing)
 end
 
 # Define how this operator acts on a vector ψ
@@ -74,37 +79,79 @@ function Base.:*(op::RydbergOperator, ψ::Vector{ComplexF64})
     return res
 end
 
-function SparseArrays.sparse(op::RydbergOperator)
-    N = op.N
-    dim = 2^N
-    I = Int[]
-    J = Int[]
-    V = ComplexF64[]
-    
-    for i in 0:(dim - 1)
-        # 1. Diagonal terms
-        diag = 0.0
-        for j in 1:N
-            if (i & (1 << (j-1))) != 0
-                diag -= op.Δ[j]
-                for k in j+1:N
-                    if (i & (1 << (k-1))) != 0
-                        diag += op.V[j, k]
-                    end
+function _full_diagonal_value(op::RydbergOperator, state::Int)
+    diagonal = 0.0
+    for j in 1:op.N
+        if (state & (1 << (j-1))) != 0
+            diagonal -= op.Δ[j]
+            for k in j+1:op.N
+                if (state & (1 << (k-1))) != 0
+                    diagonal += op.V[j, k]
                 end
             end
         end
-        if diag != 0
-            push!(I, i+1); push!(J, i+1); push!(V, diag)
+    end
+    return diagonal
+end
+
+function _full_sparse_value(op::RydbergOperator, row_idx::Int, col_idx::Int)
+    col_state = col_idx - 1
+    row_state = row_idx - 1
+    if row_idx == col_idx
+        return ComplexF64(_full_diagonal_value(op, col_state))
+    end
+
+    flipped = row_state ⊻ col_state
+    if flipped != 0 && (flipped & (flipped - 1)) == 0
+        atom_idx = trailing_zeros(flipped) + 1
+        return ComplexF64(op.Ω[atom_idx] / 2.0)
+    end
+    return 0.0 + 0.0im
+end
+
+function _build_full_sparse_cache(op::RydbergOperator)
+    dim = 2^op.N
+    colptr = Vector{Int}(undef, dim + 1)
+    rowval = Int[]
+    nzval = ComplexF64[]
+    colptr[1] = 1
+
+    for col_idx in 1:dim
+        state = col_idx - 1
+        rows = Int[col_idx]
+        for j in 1:op.N
+            push!(rows, (state ⊻ (1 << (j-1))) + 1)
         end
-        
-        # 2. Driving
-        for j in 1:N
-            target = i ⊻ (1 << (j-1))
-            push!(I, target+1); push!(J, i+1); push!(V, op.Ω[j] / 2.0)
+        sort!(rows)
+        unique!(rows)
+        for row_idx in rows
+            push!(rowval, row_idx)
+            push!(nzval, _full_sparse_value(op, row_idx, col_idx))
+        end
+        colptr[col_idx + 1] = length(rowval) + 1
+    end
+
+    return SparseMatrixCSC(dim, dim, colptr, rowval, nzval)
+end
+
+function _update_full_sparse_cache!(op::RydbergOperator)
+    H = op.cached_sparse_cpu
+    isnothing(H) && return
+    for col_idx in 1:size(H, 2)
+        for ptr in H.colptr[col_idx]:(H.colptr[col_idx + 1] - 1)
+            row_idx = H.rowval[ptr]
+            H.nzval[ptr] = _full_sparse_value(op, row_idx, col_idx)
         end
     end
-    return sparse(I, J, V, dim, dim)
+end
+
+function SparseArrays.sparse(op::RydbergOperator)
+    if isnothing(op.cached_sparse_cpu)
+        op.cached_sparse_cpu = _build_full_sparse_cache(op)
+    else
+        _update_full_sparse_cache!(op)
+    end
+    return op.cached_sparse_cpu
 end
 
 """
@@ -123,11 +170,12 @@ mutable struct ReducedRydbergOperator
     mapping::Dict{Int, Int}
     use_gpu::Bool
     cached_sparse_H::Any
+    cached_sparse_cpu::Union{Nothing, SparseMatrixCSC{ComplexF64, Int}}
 end
 
 # Constructor with default values
 function ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping; use_gpu=false)
-    return ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping, use_gpu, nothing)
+    return ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping, use_gpu, nothing, nothing)
 end
 
 function generate_reduced_basis(reg::Register, blockade_radius::Float64)
@@ -211,40 +259,80 @@ function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})
     return res
 end
 
-function SparseArrays.sparse(op::ReducedRydbergOperator)
-    dim = length(op.basis)
-    N = op.N
-    I = Int[]
-    J = Int[]
-    V = ComplexF64[]
-    
-    for (idx, state) in enumerate(op.basis)
-        # 1. Diagonal
-        diag = 0.0
-        for j in 1:N
-            if (state & (1 << (j-1))) != 0
-                diag -= op.Δ[j]
-                for k in j+1:N
-                    if (state & (1 << (k-1))) != 0
-                        diag += op.V[j, k]
-                    end
+function _reduced_diagonal_value(op::ReducedRydbergOperator, state::Int)
+    diagonal = 0.0
+    for j in 1:op.N
+        if (state & (1 << (j-1))) != 0
+            diagonal -= op.Δ[j]
+            for k in j+1:op.N
+                if (state & (1 << (k-1))) != 0
+                    diagonal += op.V[j, k]
                 end
             end
         end
-        if diag != 0
-            push!(I, idx); push!(J, idx); push!(V, diag)
-        end
-        
-        # 2. Off-diagonal
-        for j in 1:N
+    end
+    return diagonal
+end
+
+function _reduced_sparse_value(op::ReducedRydbergOperator, row_idx::Int, col_idx::Int)
+    if row_idx == col_idx
+        return ComplexF64(_reduced_diagonal_value(op, op.basis[col_idx]))
+    end
+
+    flipped = op.basis[row_idx] ⊻ op.basis[col_idx]
+    if flipped != 0 && (flipped & (flipped - 1)) == 0
+        atom_idx = trailing_zeros(flipped) + 1
+        return ComplexF64(op.Ω[atom_idx] / 2.0)
+    end
+    return 0.0 + 0.0im
+end
+
+function _build_reduced_sparse_cache(op::ReducedRydbergOperator)
+    dim = length(op.basis)
+    colptr = Vector{Int}(undef, dim + 1)
+    rowval = Int[]
+    nzval = ComplexF64[]
+    colptr[1] = 1
+
+    for (col_idx, state) in enumerate(op.basis)
+        rows = Int[col_idx]  # keep an explicit diagonal slot even when its value is zero
+        for j in 1:op.N
             target_state = state ⊻ (1 << (j-1))
-            if haskey(op.mapping, target_state)
-                target_idx = op.mapping[target_state]
-                push!(I, target_idx); push!(J, idx); push!(V, op.Ω[j] / 2.0)
+            target_idx = get(op.mapping, target_state, 0)
+            if target_idx != 0
+                push!(rows, target_idx)
             end
         end
+        sort!(rows)
+        unique!(rows)
+        for row_idx in rows
+            push!(rowval, row_idx)
+            push!(nzval, _reduced_sparse_value(op, row_idx, col_idx))
+        end
+        colptr[col_idx + 1] = length(rowval) + 1
     end
-    return sparse(I, J, V, dim, dim)
+
+    return SparseMatrixCSC(dim, dim, colptr, rowval, nzval)
+end
+
+function _update_reduced_sparse_cache!(op::ReducedRydbergOperator)
+    H = op.cached_sparse_cpu
+    isnothing(H) && return
+    for col_idx in 1:size(H, 2)
+        for ptr in H.colptr[col_idx]:(H.colptr[col_idx + 1] - 1)
+            row_idx = H.rowval[ptr]
+            H.nzval[ptr] = _reduced_sparse_value(op, row_idx, col_idx)
+        end
+    end
+end
+
+function SparseArrays.sparse(op::ReducedRydbergOperator)
+    if isnothing(op.cached_sparse_cpu)
+        op.cached_sparse_cpu = _build_reduced_sparse_cache(op)
+    else
+        _update_reduced_sparse_cache!(op)
+    end
+    return op.cached_sparse_cpu
 end
 
 """
@@ -379,8 +467,16 @@ function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius
             return op
         end
     else
-        # Full operator (GPU version not yet fully optimized with its own struct, using generic for now)
-        return t -> RydbergOperator(N, convert(Vector{Float64}, Ω_func(t)), convert(Vector{Float64}, Δ_func(t)), V)
+        op = RydbergOperator(N, fill(NaN, N), fill(NaN, N), V)
+        return t -> begin
+            cur_Ω = convert(Vector{Float64}, Ω_func(t))
+            cur_Δ = convert(Vector{Float64}, Δ_func(t))
+            if op.Ω != cur_Ω || op.Δ != cur_Δ
+                copyto!(op.Ω, cur_Ω)
+                copyto!(op.Δ, cur_Δ)
+            end
+            return op
+        end
     end
 end
 

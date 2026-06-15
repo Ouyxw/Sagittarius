@@ -61,6 +61,103 @@ def test_piecewise_pulse_transition():
     # Check that at t=1.5 (after 0.5s of driving), Rydberg population is high (~1.0)
     assert results["pop"][-1] > 0.95
 
+
+def test_full_sparse_pattern_reuses_structure_when_pulses_change():
+    from sagittarius.runtime import get_julia
+
+    jl, _ = get_julia()
+    report = jl.seval("""
+    begin
+        using SparseArrays
+        using StaticArrays
+        reg = Sagittarius.Physics.Register([
+            Sagittarius.Physics.Atom(SVector(0.0, 0.0, 0.0)),
+            Sagittarius.Physics.Atom(SVector(1.5, 0.0, 0.0)),
+        ], 2.0)
+        H_func = Sagittarius.Physics.build_hamiltonian_func(
+            reg,
+            t -> [1.0 + t, 2.0],
+            t -> [0.0, t];
+            blockade_radius=0.0,
+        )
+
+        op = H_func(0.0)
+        H1 = sparse(op)
+        matrix_id = objectid(H1)
+        colptr_id = objectid(H1.colptr)
+        rowval_id = objectid(H1.rowval)
+        old_values = copy(H1.nzval)
+
+        H_func(0.5)
+        H2 = sparse(op)
+        fresh = sparse(Sagittarius.Physics.RydbergHamiltonian(reg, [1.5, 2.0], [0.0, 0.5]))
+
+        Dict(
+            "same_matrix" => objectid(H2) == matrix_id,
+            "same_colptr" => objectid(H2.colptr) == colptr_id,
+            "same_rowval" => objectid(H2.rowval) == rowval_id,
+            "values_changed" => old_values != H2.nzval,
+            "matches_fresh" => Matrix(H2) ≈ Matrix(fresh),
+        )
+    end
+    """)
+
+    assert report["same_matrix"] is True
+    assert report["same_colptr"] is True
+    assert report["same_rowval"] is True
+    assert report["values_changed"] is True
+    assert report["matches_fresh"] is True
+
+
+def test_reduced_sparse_pattern_reuses_structure_when_pulses_change():
+    from sagittarius.runtime import get_julia
+
+    jl, _ = get_julia()
+    report = jl.seval("""
+    begin
+        using SparseArrays
+        using StaticArrays
+        reg = Sagittarius.Physics.Register([
+            Sagittarius.Physics.Atom(SVector(0.0, 0.0, 0.0)),
+            Sagittarius.Physics.Atom(SVector(0.5, 0.0, 0.0)),
+            Sagittarius.Physics.Atom(SVector(1.0, 0.0, 0.0)),
+        ], 10.0)
+        H_func = Sagittarius.Physics.build_hamiltonian_func(
+            reg,
+            t -> [1.0 + t, 2.0, 3.0],
+            t -> [0.0, t, 0.2];
+            blockade_radius=0.75,
+        )
+
+        op = H_func(0.0)
+        H1 = sparse(op)
+        matrix_id = objectid(H1)
+        colptr_id = objectid(H1.colptr)
+        rowval_id = objectid(H1.rowval)
+        old_values = copy(H1.nzval)
+
+        H_func(0.5)
+        H2 = sparse(op)
+        fresh = sparse(Sagittarius.Physics.RydbergHamiltonian(
+            reg, [1.5, 2.0, 3.0], [0.0, 0.5, 0.2]; blockade_radius=0.75
+        ))
+
+        Dict(
+            "same_matrix" => objectid(H2) == matrix_id,
+            "same_colptr" => objectid(H2.colptr) == colptr_id,
+            "same_rowval" => objectid(H2.rowval) == rowval_id,
+            "values_changed" => old_values != H2.nzval,
+            "matches_fresh" => Matrix(H2) ≈ Matrix(fresh),
+        )
+    end
+    """)
+
+    assert report["same_matrix"] is True
+    assert report["same_colptr"] is True
+    assert report["same_rowval"] is True
+    assert report["values_changed"] is True
+    assert report["matches_fresh"] is True
+
 if __name__ == "__main__":
     test_single_atom_rabi()
     test_two_atom_blockade()
