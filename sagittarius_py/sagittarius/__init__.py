@@ -9,6 +9,7 @@ from .api import (
     SimulationResult,
     PulseSequence,
     SolverConfig,
+    dense_vs_reduced_validation,
     load_result,
 )
 from .runtime import (
@@ -36,6 +37,7 @@ __all__ = [
     "SimulationResult",
     "PulseSequence",
     "SolverConfig",
+    "dense_vs_reduced_validation",
     "load_result",
     "Constant",
     "Ramp",

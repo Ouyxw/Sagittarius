@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import numbers
 from collections.abc import Sequence as ABCSequence
@@ -402,6 +404,175 @@ def _local_pulse_values_in_register_order(p_config: Union[Dict[int, Any], List[A
     if isinstance(p_config, dict):
         return [p_config.get(i, 0.0) for i in range(N)]
     return list(p_config)
+
+def _constant_vector(value: Any, N: int, *, field_name: str) -> List[float]:
+    from .pulse import is_pulse
+
+    if callable(value) or is_pulse(value):
+        raise _validation_error(
+            "VALIDATION_DENSE_REDUCED_PULSE_UNSUPPORTED",
+            f"dense-vs-reduced validation currently requires time-independent numeric PulseSequence.{field_name} values.",
+            "Use numeric scalar, list, or dict pulse values for dense_vs_reduced_validation().",
+        )
+    if isinstance(value, dict):
+        return [float(v) for v in _local_pulse_values_in_register_order(value, N)]
+    if isinstance(value, list):
+        if len(value) != N:
+            raise _validation_error(
+                "VALIDATION_PULSE_LIST_LENGTH",
+                f"PulseSequence.{field_name} list length {len(value)} does not match {N} atoms",
+                "Provide one pulse value per atom for dense-vs-reduced validation.",
+            )
+        return [float(v) for v in value]
+    if _is_numeric_scalar(value):
+        return [float(value) for _ in range(N)]
+    raise _validation_error(
+        "VALIDATION_DENSE_REDUCED_PULSE_UNSUPPORTED",
+        f"dense-vs-reduced validation does not support PulseSequence.{field_name} value of type {type(value).__name__}.",
+        "Use numeric scalar, list, or dict pulse values for dense_vs_reduced_validation().",
+    )
+
+
+def _interaction_matrix_python(register: Register) -> np.ndarray:
+    n_atoms = len(register.atoms)
+    matrix = np.zeros((n_atoms, n_atoms), dtype=float)
+    for i in range(n_atoms):
+        ci = np.array([register.atoms[i].x, register.atoms[i].y, register.atoms[i].z], dtype=float)
+        for j in range(i + 1, n_atoms):
+            cj = np.array([register.atoms[j].x, register.atoms[j].y, register.atoms[j].z], dtype=float)
+            distance = float(np.linalg.norm(ci - cj))
+            value = 0.0 if distance == 0.0 else float(register.C6) / distance**6
+            matrix[i, j] = value
+            matrix[j, i] = value
+    return matrix
+
+
+def _dense_hamiltonian_matrix(register: Register, omega: List[float], delta: List[float]) -> np.ndarray:
+    n_atoms = len(register.atoms)
+    dim = 2**n_atoms
+    interactions = _interaction_matrix_python(register)
+    matrix = np.zeros((dim, dim), dtype=np.complex128)
+    for state in range(dim):
+        diagonal = 0.0
+        for j in range(n_atoms):
+            if state & (1 << j):
+                diagonal -= delta[j]
+                for k in range(j + 1, n_atoms):
+                    if state & (1 << k):
+                        diagonal += interactions[j, k]
+        matrix[state, state] = diagonal
+        for j in range(n_atoms):
+            target = state ^ (1 << j)
+            matrix[target, state] += omega[j] / 2.0
+    return matrix
+
+
+def _reduced_hamiltonian_matrix(register: Register, omega: List[float], delta: List[float], basis: List[int]) -> np.ndarray:
+    n_atoms = len(register.atoms)
+    interactions = _interaction_matrix_python(register)
+    mapping = {state: idx for idx, state in enumerate(basis)}
+    matrix = np.zeros((len(basis), len(basis)), dtype=np.complex128)
+    for idx, state in enumerate(basis):
+        diagonal = 0.0
+        for j in range(n_atoms):
+            if state & (1 << j):
+                diagonal -= delta[j]
+                for k in range(j + 1, n_atoms):
+                    if state & (1 << k):
+                        diagonal += interactions[j, k]
+        matrix[idx, idx] = diagonal
+        for j in range(n_atoms):
+            target = state ^ (1 << j)
+            target_idx = mapping.get(target)
+            if target_idx is not None:
+                matrix[target_idx, idx] += omega[j] / 2.0
+    return matrix
+
+
+def _reduced_basis_python(register: Register, blockade_radius: float) -> List[int]:
+    n_atoms = len(register.atoms)
+    coords = np.array([[atom.x, atom.y, atom.z] for atom in register.atoms], dtype=float)
+    adjacency = [[] for _ in range(n_atoms)]
+    for i in range(n_atoms):
+        for j in range(i + 1, n_atoms):
+            if float(np.linalg.norm(coords[i] - coords[j])) < blockade_radius:
+                adjacency[i].append(j)
+                adjacency[j].append(i)
+
+    basis: List[int] = []
+
+    def visit(atom_idx: int, state: int) -> None:
+        if atom_idx >= n_atoms:
+            basis.append(state)
+            return
+        visit(atom_idx + 1, state)
+        if all(neighbor >= atom_idx or not (state & (1 << neighbor)) for neighbor in adjacency[atom_idx]):
+            visit(atom_idx + 1, state | (1 << atom_idx))
+
+    visit(0, 0)
+    return sorted(basis)
+
+
+def dense_vs_reduced_validation(
+    register: Register,
+    sequence: PulseSequence,
+    *,
+    blockade_radius: float,
+    duration: float = 1.0,
+    psi0: Optional[np.ndarray] = None,
+    atol: float = 1e-10,
+) -> Dict[str, Any]:
+    """Compare projected full dense evolution with reduced-basis evolution for a small static system."""
+    from scipy.linalg import expm
+
+    n_atoms = len(register.atoms)
+    if n_atoms > 10:
+        raise _validation_error(
+            "VALIDATION_DENSE_REDUCED_SYSTEM_TOO_LARGE",
+            f"dense-vs-reduced validation is limited to <= 10 atoms, got {n_atoms}.",
+            "Use this validation on small systems because the full dense Hilbert space scales as 2**N.",
+        )
+    blockade_radius = _positive_float(blockade_radius, field_name="blockade_radius")
+    duration = float(duration)
+    omega = _constant_vector(sequence.omega, n_atoms, field_name="omega")
+    delta = _constant_vector(sequence.delta, n_atoms, field_name="delta")
+    full_h = _dense_hamiltonian_matrix(register, omega, delta)
+    basis = _reduced_basis_python(register, blockade_radius)
+    reduced_h = _reduced_hamiltonian_matrix(register, omega, delta, basis)
+
+    if psi0 is None:
+        psi0_reduced = np.zeros(len(basis), dtype=np.complex128)
+        psi0_reduced[0] = 1.0
+    else:
+        psi0_reduced = np.asarray(psi0, dtype=np.complex128)
+        if psi0_reduced.shape != (len(basis),):
+            raise _validation_error(
+                "VALIDATION_INITIAL_STATE_SIZE",
+                f"Initial state psi0 must have size {len(basis)} (current reduced basis size)",
+                "Provide a reduced-basis initial state for dense_vs_reduced_validation().",
+            )
+
+    projected_h = full_h[np.ix_(basis, basis)]
+    projected_state = expm(-1j * projected_h * duration) @ psi0_reduced
+    reduced_state = expm(-1j * reduced_h * duration) @ psi0_reduced
+    hamiltonian_error = float(np.max(np.abs(projected_h - reduced_h))) if reduced_h.size else 0.0
+    state_error = float(np.max(np.abs(projected_state - reduced_state))) if reduced_state.size else 0.0
+    full_dim = 2**n_atoms
+    return {
+        "schema_version": "dense-vs-reduced-validation/v1",
+        "ok": bool(hamiltonian_error <= atol and state_error <= atol),
+        "atol": float(atol),
+        "atom_count": n_atoms,
+        "blockade_radius": blockade_radius,
+        "full_basis_size": full_dim,
+        "reduced_basis_size": len(basis),
+        "reduced_basis_pruning_ratio": 1.0 - (len(basis) / full_dim),
+        "basis": basis,
+        "max_hamiltonian_error": hamiltonian_error,
+        "max_state_error": state_error,
+        "duration": duration,
+    }
+
 
 class SimulationResult:
     def __init__(

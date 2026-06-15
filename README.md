@@ -39,6 +39,7 @@ Implemented or partially implemented capabilities include:
 - Python SDK with `Atom`, `Register`, `Simulation`, `PulseSequence`, `SolverConfig`, and `SimulationResult`.
 - Rydberg blockade basis reduction for constrained Hilbert spaces.
 - Specialized register constructors for 1D chains, 2D square lattices, and unit-disk graph instances.
+- Backend-free dense-vs-reduced validation for small blockade systems.
 - Global and local pulse controls for Rabi frequency and detuning.
 - Pulse helpers including constant, ramp, piecewise, Gaussian, Blackman, and sinc shapes.
 - Schrodinger, Lindblad, and Monte Carlo trajectory workflows.

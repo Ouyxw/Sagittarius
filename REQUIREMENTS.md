@@ -73,14 +73,14 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Cross-Language Golden Tests** | High | Planned | Add shared Python/Julia test cases that verify equivalent Hamiltonians, observables, solver outputs, serialization, and benchmark fixtures within documented tolerances. |
 | **Shared Result Schema** | Medium | Planned | Define stable language-neutral simulation result fields and semantics; artifact envelopes and manifests are tracked in Phase 6. |
 
-## 🧪 Phase 9: Scientific Verification & Benchmarks (Planned)
-| Requirement | Priority | Description |
-| :--- | :---: | :--- |
-| **Dense-vs-Reduced Validation** | High | For small systems, compare full dense Hamiltonian evolution with reduced-basis projected evolution. |
-| **Open-System Sanity Checks** | High | Add Lindblad trace-preservation, positivity sanity checks, and MCWF-vs-Lindblad ensemble comparisons. |
-| **CPU/GPU Parity Suite** | High | Run deterministic CPU/GPU parity tests with fixed tolerances and seeded random components where applicable. |
-| **MWIS Batch Verification** | Medium | Compare AQC output against exact ILP solutions across randomized UDG/MWIS instances. |
-| **Ablation Benchmarks** | High | Benchmark full dense, full sparse, reduced matrix-free, reduced sparse, and reduced sparse GPU-cached execution paths. |
+## 🧪 Phase 9: Scientific Verification & Benchmarks (In Progress)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Dense-vs-Reduced Validation** | High | Done | Backend-free `dense_vs_reduced_validation()` compares small-system full dense Hamiltonians projected onto the blockade basis with reduced-basis Hamiltonian evolution, reporting basis sizes, pruning ratio, and max errors. |
+| **Open-System Sanity Checks** | High | Planned | Add Lindblad trace-preservation, positivity sanity checks, and MCWF-vs-Lindblad ensemble comparisons. |
+| **CPU/GPU Parity Suite** | High | Planned | Run deterministic CPU/GPU parity tests with fixed tolerances and seeded random components where applicable. |
+| **MWIS Batch Verification** | Medium | Planned | Compare AQC output against exact ILP solutions across randomized UDG/MWIS instances. |
+| **Ablation Benchmarks** | High | Planned | Benchmark full dense, full sparse, reduced matrix-free, reduced sparse, and reduced sparse GPU-cached execution paths. |
 
 ## 📚 Phase 10: Documentation & Patent Readiness (In Progress)
 | Requirement | Priority | Status | Description |
