@@ -49,3 +49,5 @@ A test is considered passed if:
 cd sagittarius_py
 uv run python -m pytest tests/
 ```
+
+Tests marked `requires_julia_backend` exercise the Julia/PythonCall runtime and are skipped when the backend cannot initialize. To repair a local backend environment, run `uv run python -m juliapkg resolve` and instantiate the Julia project before rerunning the suite.
