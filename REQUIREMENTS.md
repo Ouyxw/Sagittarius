@@ -49,7 +49,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Result Artifact Envelope** | Medium | Planned | Standardize the saved result envelope for data, metadata, diagnostics, manifests, and schema versions across Python and Julia workflows. |
 | **Benchmark Artifact Metadata** | High | Planned | Benchmark scripts should emit JSON/CSV with hardware, Julia/Python/CUDA versions, parameters, timings, memory usage, generated markdown tables, and linked diagnostic manifests. |
 | **Version and Build Metadata** | Medium | Planned | Record Python, Julia, solver, backend package, CUDA/AMDGPU/Metal, container image, and build metadata in diagnostics, manifests, and benchmark artifacts. |
-| **Failure Diagnostics Normalization** | High | Planned | Normalize backend, solver, validation, and serialization failures into actionable error codes and remediation messages. |
+| **Failure Diagnostics Normalization** | High | Done | Backend, solver, validation, and serialization failures normalize to actionable diagnostic issue codes, remediation messages, and `failure_diagnostic` log events while preserving compatible Python exception types. |
 
 ## 🚀 Phase 7: Core Performance Improvements (Planned)
 | Requirement | Priority | Description |

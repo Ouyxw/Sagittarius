@@ -1,5 +1,14 @@
 from .api import Atom, Register, solve, get_basis, Simulation, SimulationResult, PulseSequence, SolverConfig, load_result
-from .runtime import SagittariusRuntimeError, backend_maturity, configure_logging, doctor, version_info
+from .runtime import (
+    SagittariusRuntimeError,
+    SagittariusSerializationError,
+    SagittariusSolverError,
+    SagittariusValidationError,
+    backend_maturity,
+    configure_logging,
+    doctor,
+    version_info,
+)
 from .events import event_taxonomy, get_event_spec
 from .pulse import Constant, Ramp, Piecewise, Gaussian, Blackman, Sinc, Pulse
 from .cluster import ParallelSimulation
@@ -23,6 +32,9 @@ __all__ = [
     "Pulse",
     "ParallelSimulation",
     "SagittariusRuntimeError",
+    "SagittariusSerializationError",
+    "SagittariusSolverError",
+    "SagittariusValidationError",
     "backend_maturity",
     "configure_logging",
     "doctor",

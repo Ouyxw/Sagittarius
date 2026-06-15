@@ -151,7 +151,6 @@ EVENT_CATALOG: Dict[str, EventSpec] = {
         description="A normalized failure diagnostic was emitted.",
         required_fields=("code", "message", "remediation"),
         optional_fields=("backend", "severity"),
-        status="reserved",
     ),
 }
 

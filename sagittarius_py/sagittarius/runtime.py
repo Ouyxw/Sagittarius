@@ -18,6 +18,7 @@ from .events import EVENT_CATALOG, EVENT_TAXONOMY_SCHEMA_VERSION, SEVERITY_LEVEL
 LOGGER_NAME = "sagittarius"
 DOCTOR_SCHEMA_VERSION = "doctor/v2.1"
 BACKEND_PROBE_SCHEMA_VERSION = "backend-probe/v2.1"
+FAILURE_DIAGNOSTIC_SCHEMA_VERSION = "failure-diagnostic/v1"
 
 BACKEND_MATURITY: Dict[str, Dict[str, str]] = {
     "CPU": {
@@ -62,8 +63,38 @@ class DiagnosticIssue:
     severity: str = "error"
 
 
-class SagittariusRuntimeError(RuntimeError):
+class SagittariusError(Exception):
+    """Base class for Sagittarius exceptions that carry a normalized issue."""
+
+    issue: DiagnosticIssue
+
+
+class SagittariusRuntimeError(RuntimeError, SagittariusError):
     """Raised when a Sagittarius runtime backend cannot be initialized."""
+
+    def __init__(self, issue: DiagnosticIssue):
+        super().__init__(f"{issue.code}: {issue.message} {issue.remediation}")
+        self.issue = issue
+
+
+class SagittariusValidationError(ValueError, SagittariusError):
+    """Raised when user inputs fail validation with an actionable diagnostic."""
+
+    def __init__(self, issue: DiagnosticIssue):
+        super().__init__(f"{issue.code}: {issue.message} {issue.remediation}")
+        self.issue = issue
+
+
+class SagittariusSolverError(RuntimeError, SagittariusError):
+    """Raised when solver execution fails with an actionable diagnostic."""
+
+    def __init__(self, issue: DiagnosticIssue):
+        super().__init__(f"{issue.code}: {issue.message} {issue.remediation}")
+        self.issue = issue
+
+
+class SagittariusSerializationError(RuntimeError, SagittariusError):
+    """Raised when result persistence fails with an actionable diagnostic."""
 
     def __init__(self, issue: DiagnosticIssue):
         super().__init__(f"{issue.code}: {issue.message} {issue.remediation}")
@@ -141,6 +172,23 @@ def _in_container() -> bool:
 
 def _issue(code: str, message: str, remediation: str, *, severity: str = "error") -> Dict[str, str]:
     return asdict(DiagnosticIssue(code=code, message=message, remediation=remediation, severity=severity))
+
+
+def make_issue(code: str, message: str, remediation: str, *, severity: str = "error") -> DiagnosticIssue:
+    return DiagnosticIssue(code=code, message=message, remediation=remediation, severity=severity)
+
+
+def emit_failure_diagnostic(issue: DiagnosticIssue | Dict[str, str], *, backend: Optional[str] = None) -> None:
+    detail = asdict(issue) if isinstance(issue, DiagnosticIssue) else dict(issue)
+    fields: Dict[str, Any] = {
+        "code": detail["code"],
+        "message": detail["message"],
+        "remediation": detail["remediation"],
+        "severity": detail.get("severity", "error"),
+    }
+    if backend is not None:
+        fields["backend"] = backend
+    log_event("failure_diagnostic", level=SEVERITY_LEVELS.get(fields["severity"], logging.ERROR), **fields)
 
 
 def _append_issue(report: Dict[str, Any], code: str, message: str, remediation: str, *, severity: str = "error") -> None:

@@ -5,7 +5,19 @@ from dataclasses import dataclass
 from typing import Optional, Dict, Union, Any, List
 
 import numpy as np
-from .runtime import doctor, get_julia, get_modules, log_event, version_info
+from .runtime import (
+    SagittariusError,
+    SagittariusSerializationError,
+    SagittariusSolverError,
+    SagittariusValidationError,
+    doctor,
+    emit_failure_diagnostic,
+    get_julia,
+    get_modules,
+    log_event,
+    make_issue,
+    version_info,
+)
 
 @dataclass
 class Atom:
@@ -56,12 +68,28 @@ def _is_numeric_scalar(value: Any) -> bool:
     return isinstance(value, numbers.Real) and not _is_bool(value)
 
 
+def _validation_error(code: str, message: str, remediation: str) -> SagittariusValidationError:
+    return SagittariusValidationError(make_issue(code, message, remediation))
+
+
+def _serialization_error(code: str, message: str, remediation: str) -> SagittariusSerializationError:
+    return SagittariusSerializationError(make_issue(code, message, remediation))
+
+
 def _validate_atom_index(index: Any, N: int, *, context: str) -> int:
     if _is_bool(index) or not isinstance(index, (int, np.integer)):
-        raise ValueError(f"{context} atom index must be an integer in [0, {N - 1}], got {index!r}")
+        raise _validation_error(
+            "VALIDATION_ATOM_INDEX_TYPE",
+            f"{context} atom index must be an integer in [0, {N - 1}], got {index!r}",
+            "Use zero-based integer atom indices matching Register.atoms order.",
+        )
     idx = int(index)
     if idx < 0 or idx >= N:
-        raise ValueError(f"{context} atom index {idx} is out of range for {N} atoms")
+        raise _validation_error(
+            "VALIDATION_ATOM_INDEX_OUT_OF_RANGE",
+            f"{context} atom index {idx} is out of range for {N} atoms",
+            "Use an atom index in the inclusive range [0, atom_count - 1].",
+        )
     return idx
 
 
@@ -72,8 +100,10 @@ def _validate_pulse_value(value: Any, *, field_name: str, atom_index: Optional[i
         return
 
     suffix = "" if atom_index is None else f" for atom {atom_index}"
-    raise ValueError(
-        f"PulseSequence.{field_name}{suffix} must be a numeric scalar or Pulse node, got {type(value).__name__}"
+    raise _validation_error(
+        "VALIDATION_PULSE_VALUE_TYPE",
+        f"PulseSequence.{field_name}{suffix} must be a numeric scalar or Pulse node, got {type(value).__name__}",
+        "Use a real numeric scalar or a sagittarius Pulse node for local pulse values.",
     )
 
 
@@ -83,21 +113,27 @@ def _coerce_callable_vector(values: Any, N: int, *, field_name: str) -> List[flo
     elif isinstance(values, ABCSequence) and not isinstance(values, (str, bytes, bytearray)):
         raw_values = list(values)
     else:
-        raise ValueError(
+        raise _validation_error(
+            "VALIDATION_CALLABLE_PULSE_RETURN_TYPE",
             f"Callable PulseSequence.{field_name} must return a sequence of {N} numeric values, "
-            f"got {type(values).__name__}"
+            f"got {type(values).__name__}",
+            "Return a list, tuple, or numpy array with one numeric value per atom.",
         )
 
     if len(raw_values) != N:
-        raise ValueError(
-            f"Callable PulseSequence.{field_name} returned {len(raw_values)} values for {N} atoms"
+        raise _validation_error(
+            "VALIDATION_CALLABLE_PULSE_LENGTH",
+            f"Callable PulseSequence.{field_name} returned {len(raw_values)} values for {N} atoms",
+            "Return exactly one pulse value for each atom in Register.atoms order.",
         )
 
     coerced = []
     for i, value in enumerate(raw_values):
         if not _is_numeric_scalar(value):
-            raise ValueError(
-                f"Callable PulseSequence.{field_name} value for atom {i} must be numeric, got {type(value).__name__}"
+            raise _validation_error(
+                "VALIDATION_CALLABLE_PULSE_VALUE_TYPE",
+                f"Callable PulseSequence.{field_name} value for atom {i} must be numeric, got {type(value).__name__}",
+                "Return only real numeric scalar values from callable pulse functions.",
             )
         coerced.append(float(value))
     return coerced
@@ -108,7 +144,15 @@ def _validate_pulse_config(p_config: Any, N: int, *, field_name: str, sample_tim
 
     if callable(p_config):
         if sample_time is not None:
-            _coerce_callable_vector(p_config(float(sample_time)), N, field_name=field_name)
+            try:
+                values = p_config(float(sample_time))
+            except Exception as exc:
+                raise _validation_error(
+                    "VALIDATION_CALLABLE_PULSE_FAILED",
+                    f"Callable PulseSequence.{field_name} failed during validation: {exc}",
+                    "Make callable pulse functions total for the sampled time range and return one numeric value per atom.",
+                ) from exc
+            _coerce_callable_vector(values, N, field_name=field_name)
         return
 
     if isinstance(p_config, dict):
@@ -119,7 +163,11 @@ def _validate_pulse_config(p_config: Any, N: int, *, field_name: str, sample_tim
 
     if isinstance(p_config, list):
         if len(p_config) != N:
-            raise ValueError(f"PulseSequence.{field_name} list length {len(p_config)} does not match {N} atoms")
+            raise _validation_error(
+                "VALIDATION_PULSE_LIST_LENGTH",
+                f"PulseSequence.{field_name} list length {len(p_config)} does not match {N} atoms",
+                "Provide one pulse value per atom, or use a dict for sparse local addressing.",
+            )
         for idx, value in enumerate(p_config):
             _validate_pulse_value(value, field_name=field_name, atom_index=idx)
         return
@@ -127,9 +175,11 @@ def _validate_pulse_config(p_config: Any, N: int, *, field_name: str, sample_tim
     if is_pulse(p_config) or _is_numeric_scalar(p_config):
         return
 
-    raise ValueError(
+    raise _validation_error(
+        "VALIDATION_PULSE_CONFIG_TYPE",
         f"PulseSequence.{field_name} must be a scalar, Pulse node, list, dict, or callable; "
-        f"got {type(p_config).__name__}"
+        f"got {type(p_config).__name__}",
+        "Use a supported pulse input shape documented in docs/PULSE_CONTRACT.md.",
     )
 
 
@@ -157,25 +207,77 @@ class SimulationResult:
     
     def save(self, filepath: str):
         """Save results to a JSON file."""
-        # Convert numpy arrays to lists for JSON serialization
-        serializable_data = {k: list(v) if isinstance(v, (np.ndarray, list)) else v 
-                             for k, v in self.data.items()}
-        if self.metadata or self.diagnostics:
+        try:
             serializable_data = {
-                "data": serializable_data,
-                "metadata": self.metadata,
-                "diagnostics": self.diagnostics,
+                k: list(v) if isinstance(v, (np.ndarray, list)) else v
+                for k, v in self.data.items()
             }
-        with open(filepath, 'w') as f:
-            json.dump(serializable_data, f)
+            if self.metadata or self.diagnostics:
+                serializable_data = {
+                    "data": serializable_data,
+                    "metadata": self.metadata,
+                    "diagnostics": self.diagnostics,
+                }
+            with open(filepath, "w") as f:
+                json.dump(serializable_data, f)
+        except TypeError as exc:
+            err = _serialization_error(
+                "SERIALIZATION_NOT_JSON_COMPATIBLE",
+                "SimulationResult contains values that cannot be encoded as JSON.",
+                "Convert result data, metadata, and diagnostics to JSON-compatible scalars, lists, and dicts before saving.",
+            )
+            emit_failure_diagnostic(err.issue)
+            raise err from exc
+        except OSError as exc:
+            err = _serialization_error(
+                "SERIALIZATION_WRITE_FAILED",
+                f"Could not write SimulationResult to {filepath!r}.",
+                "Check that the parent directory exists and is writable, then retry save().",
+            )
+            emit_failure_diagnostic(err.issue)
+            raise err from exc
     
     @classmethod
     def load(cls, filepath: str):
         """Load results from a JSON file."""
-        with open(filepath, 'r') as f:
-            data = json.load(f)
+        try:
+            with open(filepath, "r") as f:
+                data = json.load(f)
+        except json.JSONDecodeError as exc:
+            err = _serialization_error(
+                "SERIALIZATION_INVALID_JSON",
+                f"Could not parse SimulationResult JSON from {filepath!r}.",
+                "Regenerate the result artifact or repair the JSON before calling load_result().",
+            )
+            emit_failure_diagnostic(err.issue)
+            raise err from exc
+        except OSError as exc:
+            err = _serialization_error(
+                "SERIALIZATION_READ_FAILED",
+                f"Could not read SimulationResult from {filepath!r}.",
+                "Check that the file exists and is readable, then retry load_result().",
+            )
+            emit_failure_diagnostic(err.issue)
+            raise err from exc
+
         if isinstance(data, dict) and "data" in data:
+            if not isinstance(data["data"], dict):
+                err = _serialization_error(
+                    "SERIALIZATION_SCHEMA_INVALID",
+                    "SimulationResult envelope field 'data' must be a JSON object.",
+                    "Regenerate the result artifact with SimulationResult.save().",
+                )
+                emit_failure_diagnostic(err.issue)
+                raise err
             return cls(data["data"], metadata=data.get("metadata"), diagnostics=data.get("diagnostics"))
+        if not isinstance(data, dict):
+            err = _serialization_error(
+                "SERIALIZATION_SCHEMA_INVALID",
+                "Legacy SimulationResult JSON must be a JSON object mapping series names to values.",
+                "Load only artifacts produced by SimulationResult.save() or convert the file to the result envelope schema.",
+            )
+            emit_failure_diagnostic(err.issue)
+            raise err
         return cls(data)
 
     def plot(self, show: bool = True):
@@ -209,7 +311,11 @@ class Simulation:
         if observables:
             for name, idx in observables.items():
                 if not isinstance(name, str):
-                    raise ValueError(f"Observable names must be strings, got {type(name).__name__}")
+                    raise _validation_error(
+                        "VALIDATION_OBSERVABLE_NAME_TYPE",
+                        f"Observable names must be strings, got {type(name).__name__}",
+                        "Use string keys for the observables mapping.",
+                    )
                 _validate_atom_index(idx, N, context=f"Observable {name!r}")
 
     def validate(self) -> int:
@@ -261,6 +367,21 @@ class Simulation:
                 return sgr.create_const_vec_func(v, N)
 
     def run(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, int]] = None) -> SimulationResult:
+        try:
+            return self._run_impl(psi0, t_start, t_end, observables)
+        except SagittariusError as exc:
+            emit_failure_diagnostic(exc.issue, backend=self.config.gpu_backend if self.config.use_gpu else "CPU")
+            raise
+        except Exception as exc:
+            issue = make_issue(
+                "SOLVER_EXECUTION_FAILED",
+                "Simulation solver execution failed.",
+                "Inspect the original exception, validate inputs with Simulation.validate_inputs(), and run doctor(initialize_backend=True) for backend details.",
+            )
+            emit_failure_diagnostic(issue, backend=self.config.gpu_backend if self.config.use_gpu else "CPU")
+            raise SagittariusSolverError(issue) from exc
+
+    def _run_impl(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, int]] = None) -> SimulationResult:
         self.validate_inputs(sample_time=float(t_start), observables=observables)
         jl, sgr, phys, solv = get_modules()
         backend_report = doctor(backend=self.config.gpu_backend if self.config.use_gpu else "CPU")
@@ -287,7 +408,11 @@ class Simulation:
         }
         
         if len(psi0) != basis_size:
-            raise ValueError(f"Initial state psi0 must have size {basis_size} (current basis size)")
+            raise _validation_error(
+                "VALIDATION_INITIAL_STATE_SIZE",
+                f"Initial state psi0 must have size {basis_size} (current basis size)",
+                "Resize psi0 to the current full or blockade-reduced basis size returned by validate().",
+            )
 
         # 1. Compile pulses
         omega_func = self._get_compiled_func(self.sequence.omega, N)
@@ -381,7 +506,11 @@ class Simulation:
                     jl.seval("using Metal")
                     jl_psi0 = jl.Metal.MtlVector[jl.ComplexF64](psi0)
                 else:
-                    raise ValueError(f"Unsupported GPU backend: {backend}")
+                    raise _validation_error(
+                        "UNSUPPORTED_BACKEND",
+                        f"Unsupported GPU backend: {backend}",
+                        "Choose one of: CPU, CUDA, AMDGPU, METAL.",
+                    )
 
                 result = solv.solve_schrodinger_gpu(
                     jl_psi0,
