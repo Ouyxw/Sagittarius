@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import pandas as pd
-from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig, Constant
+from sagittarius import Atom, Register, RUN_MANIFEST_SCHEMA_VERSION, Simulation, PulseSequence, SolverConfig, Constant, validate_run_manifest
 
 def test_simulation_object_api():
     """Verify the new Simulation/SimulationResult API works as expected."""
@@ -27,6 +27,11 @@ def test_simulation_object_api():
     assert "pop" in df.columns
     assert "t" in df.columns
     assert np.isclose(df["pop"].iloc[-1], 1.0, atol=1e-2)
+    validate_run_manifest(results.manifest)
+    assert results.manifest["schema_version"] == RUN_MANIFEST_SCHEMA_VERSION
+    assert results.manifest["result_type"] == "observables"
+    assert results.manifest["register"]["atom_count"] == 1
+    assert results.manifest["solver"]["observables"] == {"pop": 0}
 
 def test_simulation_validation():
     """Verify that validation correctly calculates basis size."""

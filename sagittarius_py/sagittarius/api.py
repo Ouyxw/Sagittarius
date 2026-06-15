@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import numbers
+from datetime import datetime, timezone
 from collections.abc import Sequence as ABCSequence
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Union, Any, List, Tuple
@@ -9,7 +10,57 @@ from typing import Optional, Dict, Union, Any, List, Tuple
 import numpy as np
 RESULT_ARTIFACT_SCHEMA_VERSION = "result-artifact/v1"
 RESULT_ARTIFACT_TYPE = "sagittarius.simulation_result"
+RUN_MANIFEST_SCHEMA_VERSION = "run-manifest/v1"
+RUN_MANIFEST_SCHEMA = {
+    "schema_version": RUN_MANIFEST_SCHEMA_VERSION,
+    "artifact_type": "sagittarius.run_manifest",
+    "required": [
+        "schema_version",
+        "created_at",
+        "result_type",
+        "register",
+        "pulse",
+        "solver",
+        "initial_state",
+        "backend_diagnostics",
+        "versions",
+        "event_taxonomy_schema",
+        "event_ids",
+        "random",
+    ],
+    "sections": {
+        "register": ["atom_count", "C6", "atoms", "geometry"],
+        "pulse": ["omega", "delta"],
+        "solver": [
+            "method",
+            "t_span",
+            "reltol",
+            "abstol",
+            "blockade_radius",
+            "gamma",
+            "gamma_phi",
+            "use_mc",
+            "n_trajectories",
+            "use_gpu",
+            "gpu_backend",
+            "observables",
+        ],
+        "initial_state": ["basis_size", "norm"],
+        "backend_diagnostics": [
+            "requested_backend",
+            "available",
+            "issues",
+            "issue_details",
+            "backend_probe_schema",
+            "backend_probe_available",
+            "versions",
+            "devices",
+        ],
+        "random": ["seed", "n_trajectories"],
+    },
+}
 
+from .events import EVENT_CATALOG, EVENT_TAXONOMY_SCHEMA_VERSION, get_event_spec
 from .runtime import (
     SagittariusError,
     SagittariusSerializationError,
@@ -281,6 +332,70 @@ def _serialization_error(code: str, message: str, remediation: str) -> Sagittari
     return SagittariusSerializationError(make_issue(code, message, remediation))
 
 
+def _manifest_schema_error(message: str, remediation: str) -> SagittariusSerializationError:
+    return _serialization_error("SERIALIZATION_RUN_MANIFEST_SCHEMA_INVALID", message, remediation)
+
+
+def validate_run_manifest(manifest: Dict[str, Any]) -> None:
+    """Validate the stable run-manifest/v1 structure produced by Sagittarius."""
+    if not isinstance(manifest, dict):
+        raise _manifest_schema_error(
+            "Run manifest must be a JSON object.",
+            "Pass the manifest dictionary produced by Simulation.run() or load_result().",
+        )
+    if manifest.get("schema_version") != RUN_MANIFEST_SCHEMA_VERSION:
+        raise _manifest_schema_error(
+            f"Run manifest has unsupported schema_version: {manifest.get('schema_version')!r}.",
+            f"Use a manifest with schema_version {RUN_MANIFEST_SCHEMA_VERSION!r}.",
+        )
+
+    missing = [field for field in RUN_MANIFEST_SCHEMA["required"] if field not in manifest]
+    if missing:
+        raise _manifest_schema_error(
+            f"Run manifest is missing required fields: {', '.join(missing)}.",
+            "Regenerate the result with Simulation.run() and SimulationResult.save().",
+        )
+
+    for section, fields in RUN_MANIFEST_SCHEMA["sections"].items():
+        value = manifest.get(section)
+        if not isinstance(value, dict):
+            raise _manifest_schema_error(
+                f"Run manifest field {section!r} must be a JSON object.",
+                "Regenerate the result with Simulation.run() and SimulationResult.save().",
+            )
+        section_missing = [field for field in fields if field not in value]
+        if section_missing:
+            raise _manifest_schema_error(
+                f"Run manifest section {section!r} is missing fields: {', '.join(section_missing)}.",
+                "Regenerate the result with Simulation.run() and SimulationResult.save().",
+            )
+
+    register = manifest["register"]
+    atoms = register.get("atoms")
+    if not isinstance(register.get("atom_count"), int) or register["atom_count"] < 0:
+        raise _manifest_schema_error("Run manifest register.atom_count must be a non-negative integer.", "Regenerate the manifest from a valid Register.")
+    if not isinstance(atoms, list) or len(atoms) != register["atom_count"]:
+        raise _manifest_schema_error("Run manifest register.atoms length must match register.atom_count.", "Regenerate the manifest from a valid Register.")
+
+    solver = manifest["solver"]
+    if not (isinstance(solver.get("t_span"), list) and len(solver["t_span"]) == 2):
+        raise _manifest_schema_error("Run manifest solver.t_span must contain exactly [t_start, t_end].", "Regenerate the manifest from Simulation.run().")
+
+    if manifest.get("event_taxonomy_schema") != EVENT_TAXONOMY_SCHEMA_VERSION:
+        raise _manifest_schema_error(
+            f"Run manifest has unsupported event_taxonomy_schema: {manifest.get('event_taxonomy_schema')!r}.",
+            f"Use event_taxonomy_schema {EVENT_TAXONOMY_SCHEMA_VERSION!r} for {RUN_MANIFEST_SCHEMA_VERSION} manifests.",
+        )
+
+    event_ids = manifest.get("event_ids")
+    known_event_ids = {spec.event_id for spec in EVENT_CATALOG.values()}
+    if not isinstance(event_ids, list) or not all(isinstance(event_id, str) and event_id in known_event_ids for event_id in event_ids):
+        raise _manifest_schema_error(
+            "Run manifest event_ids must be known Sagittarius event taxonomy IDs.",
+            "Use cataloged event IDs from event_taxonomy() when constructing manifests.",
+        )
+
+
 def _json_compatible(value: Any) -> Any:
     if isinstance(value, np.ndarray):
         return value.tolist()
@@ -291,6 +406,119 @@ def _json_compatible(value: Any) -> Any:
     if isinstance(value, (list, tuple)):
         return [_json_compatible(v) for v in value]
     return value
+
+
+def _pulse_manifest(value: Any) -> Dict[str, Any]:
+    from .pulse import is_pulse
+
+    if _is_numeric_scalar(value):
+        return {"kind": "scalar", "value": float(value)}
+    if isinstance(value, np.ndarray):
+        return _pulse_manifest(value.tolist())
+    if isinstance(value, list):
+        return {"kind": "local_vector", "values": [_pulse_manifest(item) for item in value]}
+    if isinstance(value, dict):
+        return {
+            "kind": "local_dict",
+            "values": [
+                {"atom_index": int(key), "value": _pulse_manifest(item)}
+                for key, item in sorted(value.items(), key=lambda pair: int(pair[0]))
+            ],
+        }
+    if callable(value):
+        return {
+            "kind": "callable",
+            "name": getattr(value, "__name__", type(value).__name__),
+            "module": getattr(value, "__module__", None),
+            "reproducible": False,
+        }
+    if is_pulse(value):
+        params = {
+            key: _pulse_manifest(item) if is_pulse(item) else _json_compatible(item)
+            for key, item in vars(value).items()
+        }
+        return {"kind": "pulse_ast", "type": type(value).__name__, "parameters": params}
+    return {"kind": "unsupported", "type": type(value).__name__, "repr": repr(value)}
+
+
+def _config_manifest(config: SolverConfig, *, t_start: float, t_end: float, observables: Optional[Dict[str, int]]) -> Dict[str, Any]:
+    return {
+        "method": config.method,
+        "t_span": [float(t_start), float(t_end)],
+        "reltol": float(config.reltol),
+        "abstol": float(config.abstol),
+        "blockade_radius": float(config.blockade_radius),
+        "gamma": _json_compatible(config.gamma),
+        "gamma_phi": _json_compatible(config.gamma_phi),
+        "use_mc": bool(config.use_mc),
+        "n_trajectories": int(config.n_trajectories),
+        "use_gpu": bool(config.use_gpu),
+        "gpu_backend": str(config.gpu_backend).upper(),
+        "observables": dict(observables or {}),
+    }
+
+
+def _backend_manifest(diagnostics: Dict[str, Any]) -> Dict[str, Any]:
+    probe = diagnostics.get("backend_probe") or {}
+    return {
+        "requested_backend": diagnostics.get("requested_backend"),
+        "available": diagnostics.get("available"),
+        "issues": diagnostics.get("issues", []),
+        "issue_details": diagnostics.get("issue_details", []),
+        "backend_probe_schema": probe.get("schema_version"),
+        "backend_probe_available": probe.get("available"),
+        "versions": probe.get("versions", {}),
+        "devices": probe.get("devices", []),
+    }
+
+
+def _event_ids_for_run(result_event: str) -> List[str]:
+    names = ["doctor_report", "solver_start", result_event]
+    return [get_event_spec(name).event_id for name in names]
+
+
+def _build_run_manifest(
+    *,
+    register: Register,
+    sequence: PulseSequence,
+    config: SolverConfig,
+    t_start: float,
+    t_end: float,
+    observables: Optional[Dict[str, int]],
+    psi0: np.ndarray,
+    diagnostics: Dict[str, Any],
+    metadata: Dict[str, Any],
+    result_type: str,
+) -> Dict[str, Any]:
+    n_atoms = len(register.atoms)
+    return {
+        "schema_version": RUN_MANIFEST_SCHEMA_VERSION,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "result_type": result_type,
+        "register": {
+            "atom_count": n_atoms,
+            "C6": float(register.C6),
+            "atoms": [[float(atom.x), float(atom.y), float(atom.z)] for atom in register.atoms],
+            "geometry": register.geometry_summary(blockade_radius=config.blockade_radius, include_edges=False),
+        },
+        "pulse": {
+            "omega": _pulse_manifest(sequence.omega),
+            "delta": _pulse_manifest(sequence.delta),
+        },
+        "solver": _config_manifest(config, t_start=t_start, t_end=t_end, observables=observables),
+        "initial_state": {
+            "basis_size": int(len(psi0)),
+            "norm": float(np.linalg.norm(psi0)),
+        },
+        "backend_diagnostics": _backend_manifest(diagnostics),
+        "versions": metadata,
+        "event_taxonomy_schema": EVENT_TAXONOMY_SCHEMA_VERSION,
+        "event_ids": _event_ids_for_run("solver_finish"),
+        "random": {
+            "seed": None,
+            "n_trajectories": int(config.n_trajectories) if config.use_mc else None,
+        },
+    }
 
 
 def _validate_atom_index(index: Any, N: int, *, context: str) -> int:
@@ -574,6 +802,36 @@ def dense_vs_reduced_validation(
     }
 
 
+def _simulation_result_with_manifest(
+    data: Dict[str, List[float]],
+    *,
+    metadata: Dict[str, Any],
+    diagnostics: Dict[str, Any],
+    register: Register,
+    sequence: PulseSequence,
+    config: SolverConfig,
+    t_start: float,
+    t_end: float,
+    observables: Optional[Dict[str, int]],
+    psi0: np.ndarray,
+    result_type: str,
+) -> "SimulationResult":
+    manifest = _build_run_manifest(
+        register=register,
+        sequence=sequence,
+        config=config,
+        t_start=t_start,
+        t_end=t_end,
+        observables=observables,
+        psi0=psi0,
+        diagnostics=diagnostics,
+        metadata=metadata,
+        result_type=result_type,
+    )
+    validate_run_manifest(manifest)
+    return SimulationResult(data, metadata=metadata, diagnostics=diagnostics, manifest=manifest)
+
+
 class SimulationResult:
     def __init__(
         self,
@@ -853,17 +1111,18 @@ class Simulation:
 
         # 3. Handle observables
         jl_obs = None
+        observable_names = list(observables.keys()) if observables else []
         if observables:
             if self.config.blockade_radius > 0:
-                jl_obs = jl.Dict[jl.String, jl.Any]({
-                    name: solv.RydbergPopulation(idx + 1, N, basis=self._basis) 
-                    for name, idx in observables.items()
-                })
+                jl_obs = jl.Vector[jl.Any]([
+                    solv.RydbergPopulation(observables[name] + 1, N, basis=self._basis)
+                    for name in observable_names
+                ])
             else:
-                jl_obs = jl.Dict[jl.String, jl.Any]({
-                    name: solv.RydbergPopulation(idx + 1, N) 
-                    for name, idx in observables.items()
-                })
+                jl_obs = jl.Vector[jl.Any]([
+                    solv.RydbergPopulation(observables[name] + 1, N)
+                    for name in observable_names
+                ])
 
         # 4. Determine if we use Lindblad, MC, or Schrodinger
         is_noisy = (np.any(np.array(self.config.gamma) > 0) or 
@@ -894,11 +1153,25 @@ class Simulation:
                 if jl_obs:
                     t_vals, avg_res = result
                     times = list(t_vals)
-                    data = {name: [avg_res[t_idx][i] for t_idx in range(len(times))] 
-                            for i, name in enumerate(observables.keys())}
+                    data = {name: [avg_res[t_idx][i] for t_idx in range(len(times))]
+                            for i, name in enumerate(observable_names)}
                     data['t'] = times
-                    log_event("solver_finish", result_type="mcwf_observables", basis_size=basis_size)
-                    return SimulationResult(data, metadata=version_info(), diagnostics=diagnostics)
+                    result_type = "mcwf_observables"
+                    log_event("solver_finish", result_type=result_type, basis_size=basis_size)
+                    metadata = version_info()
+                    return _simulation_result_with_manifest(
+                        data,
+                        metadata=metadata,
+                        diagnostics=diagnostics,
+                        register=self.register,
+                        sequence=self.sequence,
+                        config=self.config,
+                        t_start=t_start,
+                        t_end=t_end,
+                        observables=observables,
+                        psi0=np.asarray(psi0),
+                        result_type=result_type,
+                    )
                 log_event("solver_finish", result_type="raw_mcwf", basis_size=basis_size)
                 return result
 
@@ -958,10 +1231,24 @@ class Simulation:
         if jl_obs:
             sol, saved = result
             times = list(saved.t)
-            data = {name: [v[i] for v in saved.saveval] for i, name in enumerate(observables.keys())}
+            data = {name: [v[i] for v in saved.saveval] for i, name in enumerate(observable_names)}
             data['t'] = times
-            log_event("solver_finish", result_type="observables", basis_size=basis_size)
-            return SimulationResult(data, metadata=version_info(), diagnostics=diagnostics)
+            result_type = "observables"
+            log_event("solver_finish", result_type=result_type, basis_size=basis_size)
+            metadata = version_info()
+            return _simulation_result_with_manifest(
+                data,
+                metadata=metadata,
+                diagnostics=diagnostics,
+                register=self.register,
+                sequence=self.sequence,
+                config=self.config,
+                t_start=t_start,
+                t_end=t_end,
+                observables=observables,
+                psi0=np.asarray(psi0),
+                result_type=result_type,
+            )
         
         log_event("solver_finish", result_type="raw", basis_size=basis_size)
         return result

@@ -43,7 +43,7 @@ Implemented or partially implemented capabilities include:
 - Global and local pulse controls for Rabi frequency and detuning.
 - Pulse helpers including constant, ramp, piecewise, Gaussian, Blackman, and sinc shapes.
 - Schrodinger, Lindblad, and Monte Carlo trajectory workflows.
-- JSON serialization for simulation results using the `result-artifact/v1` envelope with data, metadata, diagnostics, and manifest fields.
+- JSON serialization for simulation results using the `result-artifact/v1` envelope with data, metadata, diagnostics, and validated `run-manifest/v1` fields.
 - Lightweight Python imports with lazy Julia/GPU initialization.
 - Runtime diagnostics through `doctor()`, `version_info()`, and `backend_maturity()`.
 - GPU execution paths for supported backends, with CUDA as the primary containerized development target.
@@ -173,7 +173,7 @@ print(backend_maturity())
 print(doctor(backend="CUDA"))
 ```
 
-`doctor()` reports container detection, backend maturity, runtime versions, basic GPU visibility, structured `issue_details`, and schema version `doctor/v2.1`. Pass `initialize_backend=True` to also attempt Julia backend loading and return a `backend-probe/v2.1` payload with `checks`, `versions`, `devices`, `driver`, `runtime`, and `errors`. Simulation results expose `metadata`, `diagnostics`, and `manifest`; `SimulationResult.save()` always writes the `result-artifact/v1` envelope.
+`doctor()` reports container detection, backend maturity, runtime versions, basic GPU visibility, structured `issue_details`, and schema version `doctor/v2.1`. Pass `initialize_backend=True` to also attempt Julia backend loading and return a `backend-probe/v2.1` payload with `checks`, `versions`, `devices`, `driver`, `runtime`, and `errors`. Simulation results expose `metadata`, `diagnostics`, and a validated `run-manifest/v1` manifest; `SimulationResult.save()` always writes the `result-artifact/v1` envelope. Use `validate_run_manifest(result.manifest)` to check the manifest contract explicitly.
 
 ## MWIS Example
 

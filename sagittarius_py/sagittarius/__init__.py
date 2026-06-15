@@ -1,6 +1,8 @@
 from .api import (
     RESULT_ARTIFACT_SCHEMA_VERSION,
     RESULT_ARTIFACT_TYPE,
+    RUN_MANIFEST_SCHEMA_VERSION,
+    RUN_MANIFEST_SCHEMA,
     Atom,
     Register,
     solve,
@@ -10,6 +12,7 @@ from .api import (
     PulseSequence,
     SolverConfig,
     dense_vs_reduced_validation,
+    validate_run_manifest,
     load_result,
 )
 from .runtime import (
@@ -29,6 +32,8 @@ from .cluster import ParallelSimulation
 __all__ = [
     "RESULT_ARTIFACT_SCHEMA_VERSION",
     "RESULT_ARTIFACT_TYPE",
+    "RUN_MANIFEST_SCHEMA_VERSION",
+    "RUN_MANIFEST_SCHEMA",
     "Atom",
     "Register",
     "solve",
@@ -38,6 +43,7 @@ __all__ = [
     "PulseSequence",
     "SolverConfig",
     "dense_vs_reduced_validation",
+    "validate_run_manifest",
     "load_result",
     "Constant",
     "Ramp",

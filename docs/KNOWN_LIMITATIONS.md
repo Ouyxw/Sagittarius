@@ -31,7 +31,7 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 
 ## Data and Reproducibility
 
-- `SimulationResult.save()` persists a `result-artifact/v1` envelope with data, metadata, diagnostics, and a manifest slot. The full run manifest schema and cross-language Julia parity are still tracked in the Observability & Reproducibility roadmap phase.
+- Python `SimulationResult.save()` persists a `result-artifact/v1` envelope with data, metadata, diagnostics, and a validated `run-manifest/v1` manifest for SDK-generated simulation results. Cross-language Julia parity is still tracked under shared result schema work.
 - Benchmark scripts are not yet a finalized reproducible artifact pipeline. JSON/CSV outputs, markdown tables, linked diagnostics, and build/container metadata are planned.
 
 ## Unsupported or Future Scenarios

@@ -7,9 +7,15 @@ import pytest
 from sagittarius import (
     RESULT_ARTIFACT_SCHEMA_VERSION,
     RESULT_ARTIFACT_TYPE,
+    RUN_MANIFEST_SCHEMA,
+    RUN_MANIFEST_SCHEMA_VERSION,
+    Register,
     SagittariusSerializationError,
     SimulationResult,
     load_result,
+    PulseSequence,
+    SolverConfig,
+    validate_run_manifest,
 )
 
 def test_json_serialization():
@@ -102,3 +108,95 @@ def test_unsupported_result_schema_is_normalized(tmp_path):
 
     assert excinfo.value.issue.code == "SERIALIZATION_SCHEMA_UNSUPPORTED"
     assert RESULT_ARTIFACT_SCHEMA_VERSION in excinfo.value.issue.remediation
+
+
+def test_run_manifest_schema_validates_generated_manifest():
+    from sagittarius.api import _build_run_manifest
+
+    reg = Register.chain(2, spacing=0.5, C6=2.0)
+    seq = PulseSequence(omega=[1.0, 2.0], delta={0: 0.25})
+    cfg = SolverConfig(reltol=1e-7, abstol=1e-9, blockade_radius=0.6)
+    metadata = {
+        "python_version": "3.test",
+        "package_version": "0.test",
+        "julia_version": None,
+        "sagittarius_julia_version": "0.test",
+        "platform": "test",
+        "in_container": False,
+    }
+    diagnostics = {
+        "requested_backend": "CPU",
+        "available": True,
+        "issues": [],
+        "issue_details": [],
+    }
+
+    manifest = _build_run_manifest(
+        register=reg,
+        sequence=seq,
+        config=cfg,
+        t_start=0.0,
+        t_end=1.0,
+        observables={"pop0": 0},
+        psi0=np.array([1.0, 0.0, 0.0], dtype=complex),
+        diagnostics=diagnostics,
+        metadata=metadata,
+        result_type="observables",
+    )
+
+    validate_run_manifest(manifest)
+    assert RUN_MANIFEST_SCHEMA["schema_version"] == RUN_MANIFEST_SCHEMA_VERSION
+    assert manifest["schema_version"] == RUN_MANIFEST_SCHEMA_VERSION
+    assert manifest["register"]["atom_count"] == 2
+    assert manifest["register"]["geometry"]["blockade_edge_count"] == 1
+    assert manifest["pulse"]["omega"]["kind"] == "local_vector"
+    assert manifest["solver"]["observables"] == {"pop0": 0}
+    assert manifest["backend_diagnostics"]["requested_backend"] == "CPU"
+    assert manifest["versions"] == metadata
+    assert manifest["event_ids"] == ["SAG-EVT-0004", "SAG-EVT-0005", "SAG-EVT-0006"]
+    assert manifest["random"] == {"seed": None, "n_trajectories": None}
+
+
+def test_validate_run_manifest_rejects_unknown_event_id():
+    manifest = {
+        "schema_version": RUN_MANIFEST_SCHEMA_VERSION,
+        "created_at": "2026-06-15T00:00:00+00:00",
+        "result_type": "observables",
+        "register": {"atom_count": 0, "C6": 1.0, "atoms": [], "geometry": {}},
+        "pulse": {"omega": {"kind": "scalar", "value": 1.0}, "delta": {"kind": "scalar", "value": 0.0}},
+        "solver": {
+            "method": "Tsit5",
+            "t_span": [0.0, 1.0],
+            "reltol": 1e-8,
+            "abstol": 1e-8,
+            "blockade_radius": 0.0,
+            "gamma": 0.0,
+            "gamma_phi": 0.0,
+            "use_mc": False,
+            "n_trajectories": 100,
+            "use_gpu": False,
+            "gpu_backend": "CUDA",
+            "observables": {},
+        },
+        "initial_state": {"basis_size": 1, "norm": 1.0},
+        "backend_diagnostics": {
+            "requested_backend": "CPU",
+            "available": True,
+            "issues": [],
+            "issue_details": [],
+            "backend_probe_schema": None,
+            "backend_probe_available": None,
+            "versions": {},
+            "devices": [],
+        },
+        "versions": {},
+        "event_taxonomy_schema": "event-taxonomy/v1",
+        "event_ids": ["SAG-EVT-9999"],
+        "random": {"seed": None, "n_trajectories": None},
+    }
+
+    with pytest.raises(SagittariusSerializationError) as excinfo:
+        validate_run_manifest(manifest)
+
+    assert excinfo.value.issue.code == "SERIALIZATION_RUN_MANIFEST_SCHEMA_INVALID"
+    assert "event_ids" in excinfo.value.issue.message
