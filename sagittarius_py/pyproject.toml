@@ -31,4 +31,5 @@ packages = ["sagittarius"]
 [tool.pytest.ini_options]
 markers = [
     "requires_julia_backend: tests that require a working Julia/PythonCall backend",
+    "requires_cuda_backend: tests that require SAGITTARIUS_ENABLE_GPU_TESTS=1 and a working CUDA backend",
 ]

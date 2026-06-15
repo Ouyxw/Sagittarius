@@ -7,8 +7,8 @@
 在开始之前，请确保你的宿主机满足以下条件：
 - **操作系统**: Linux (推荐 Ubuntu 22.04+) 或 Windows (WSL2)。
 - **Docker**: 已安装 Docker Engine。
-- **GPU 支持**: 
-    - 已安装 NVIDIA 驱动。
+- **GPU 支持**:
+    - 已安装 NVIDIA 驱动。CUDA 12.8/Blackwell 工作流建议 Linux 驱动 `>=570.26`（Windows/WSL `>=570.65`）。
     - 已安装 [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)。
 - **VS Code**: 已安装 [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) 扩展。
 
@@ -17,10 +17,11 @@
 项目根目录下的 `.devcontainer` 包含以下核心文件：
 
 ### 2.1 Dockerfile
-- **基础镜像**: `nvidia/cuda:12.1.1-devel-ubuntu22.04` (提供完整的 CUDA 编译工具链)。
-- **运行时**: 同时集成 Julia (最新稳定版) 和 Python 3.11。
+- **基础镜像**: `nvidia/cuda:12.8.0-devel-ubuntu22.04`，作为 CUDA 12.8+ 和 Blackwell/RTX 50 系列开发基线。
+- **运行时**: 集成 Julia 1.11 系列和 Python 3.11。
 - **包管理器**: 使用 `uv` 加速 Python 依赖同步。
-- **优化**: 构建时预执行 `CUDA.precompile_runtime()`，减少首次运行 GPU 任务的延迟。
+- **CUDA.jl**: 容器构建固定安装 `CUDA.jl 6.2.0`，并设置 `CUDA.set_runtime_version!(local_toolkit=true)` 使用容器内 CUDA toolkit。
+- **优化**: 构建时预编译 Julia GPU 环境，减少首次运行 GPU 任务的延迟。
 
 ### 2.2 devcontainer.json
 - **GPU 透传**: 配置 `--gpus all` 允许容器访问物理显卡。
@@ -45,10 +46,18 @@
    - 或者：按 `F1` 键，输入 `Dev Containers: Reopen in Container`。
 
 4. **验证环境**:
-   容器启动并完成 `uv sync` 后，在集成终端运行：
+   容器启动并完成 `uv sync` 后，先运行诊断：
    ```bash
    cd sagittarius_py
-   uv run python -m pytest tests/test_gpu_acceleration.py
+   uv run python - <<'PY'
+   from sagittarius import doctor
+   print(doctor(backend="CUDA", initialize_backend=True))
+   PY
+   ```
+
+   GPU parity 测试默认关闭，避免无 GPU 的 CI/开发机误初始化 CUDA。确认诊断通过后显式启用：
+   ```bash
+   SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python -m pytest tests/test_gpu_acceleration.py
    ```
 
 ## 4. 硬件兼容性与优雅降级
@@ -64,8 +73,9 @@ uv run python check_env.py
 
 ### 4.2 非 GPU 环境配置
 如果宿主机没有 NVIDIA 显卡，容器可能无法启动。此时需要修改 `.devcontainer/devcontainer.json`：
-1. 注释掉 `runArgs` 中的 `"--runtime=nvidia"`。
-2. 将 `SolverConfig(use_gpu=True)` 修改为 `False`。
+1. 注释掉 `runArgs` 中的 `"--runtime=nvidia"` 和 `"--gpus", "all"`。
+2. 不设置 `SAGITTARIUS_ENABLE_GPU_TESTS=1`。
+3. 将应用代码中的 `SolverConfig(use_gpu=True)` 修改为 `False`。
 
 ### 4.3 跨平台 GPU 支持
 - **Apple Silicon (Mac)**: 支持 `gpu_backend="Metal"`。
@@ -81,10 +91,10 @@ uv run python check_env.py
 ## 5. 常见问题 (FAQ)
 
 **Q: 容器构建非常慢怎么办？**
-A: 第一次构建涉及下载 CUDA 镜像和预编译 Julia 包，耗时较长是正常现象。建议配置 `JULIA_PKG_SERVER` 镜像。
+A: 第一次构建涉及下载 CUDA 12.8 镜像、安装 `CUDA.jl 6.2.0` 和预编译 Julia 包，耗时较长是正常现象。建议配置 `JULIA_PKG_SERVER` 镜像。
 
 **Q: 容器内找不到 GPU (CUDA Error)？**
-A: 请确认宿主机执行 `nvidia-smi` 正常，且 Docker 已配置 `--gpus all` 权限。
+A: 请确认宿主机执行 `nvidia-smi` 正常，Docker 已配置 `--gpus all` 权限，并在容器内运行 `doctor(backend="CUDA", initialize_backend=True)` 查看 `CUDA_PASSTHROUGH_UNAVAILABLE`、`CUDA_DRIVER_RUNTIME_MISMATCH` 或 `CUDA_BLACKWELL_DRIVER_BELOW_RECOMMENDED` 等诊断码。
 
 ---
-*Created by Gemini CLI - 2026-04-29*
+*Last updated: 2026-06-15*

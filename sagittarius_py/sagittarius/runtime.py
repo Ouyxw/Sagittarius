@@ -20,6 +20,10 @@ DOCTOR_SCHEMA_VERSION = "doctor/v2.1"
 BACKEND_PROBE_SCHEMA_VERSION = "backend-probe/v2.1"
 FAILURE_DIAGNOSTIC_SCHEMA_VERSION = "failure-diagnostic/v1"
 VERSION_INFO_SCHEMA_VERSION = "version-info/v1"
+MIN_RECOMMENDED_CUDAJL_VERSION = "6.2.0"
+CUDA_12_8_MIN_LINUX_DRIVER = "570.26"
+CUDA_12_8_MIN_WINDOWS_DRIVER = "570.65"
+BLACKWELL_COMPUTE_MAJOR_MIN = 10
 
 PYTHON_PACKAGE_VERSION_FIELDS = (
     "sagittarius-py",
@@ -286,15 +290,17 @@ def _container_metadata() -> Dict[str, Any]:
 
 
 def _backend_toolchain_metadata() -> Dict[str, Any]:
-    nvidia_smi = _metadata_command(["nvidia-smi", "--query-gpu=name,driver_version,memory.total", "--format=csv,noheader,nounits"])
+    nvidia_smi = _query_nvidia_smi()
     nvcc = _metadata_command(["nvcc", "--version"])
     rocm_smi = _metadata_command(["rocm-smi", "--showdriverversion"])
     metal = _metadata_command(["xcrun", "--find", "metal"]) if sys.platform == "darwin" else {"ok": False, "missing": True, "returncode": None, "output": None}
+    cuda_devices = _parse_nvidia_smi_csv(nvidia_smi.get("raw_output") or nvidia_smi.get("output"))
     return {
         "CUDA": {
             "nvidia_smi": nvidia_smi,
             "nvcc": nvcc,
-            "devices": _parse_nvidia_smi_csv(nvidia_smi.get("raw_output") or nvidia_smi.get("output")),
+            "devices": cuda_devices,
+            "compatibility": _cuda_host_compatibility(cuda_devices),
         },
         "AMDGPU": {"rocm_smi": rocm_smi},
         "METAL": {"metal_compiler": metal},
@@ -377,8 +383,53 @@ def _parse_nvidia_smi_csv(output: Optional[str]) -> list[Dict[str, Optional[str]
             "name": parts[0],
             "driver_version": parts[1] if len(parts) > 1 else None,
             "memory_total_mib": parts[2] if len(parts) > 2 else None,
+            "compute_capability": parts[3] if len(parts) > 3 else None,
         })
     return devices
+
+
+def _version_tuple(value: Optional[str]) -> tuple[int, ...]:
+    if not value:
+        return ()
+    parts = []
+    for raw in str(value).replace("+", ".").replace("-", ".").split("."):
+        digits = "".join(ch for ch in raw if ch.isdigit())
+        if digits == "":
+            break
+        parts.append(int(digits))
+    return tuple(parts)
+
+
+def _version_at_least(value: Optional[str], minimum: str) -> Optional[bool]:
+    current = _version_tuple(value)
+    required = _version_tuple(minimum)
+    if not current or not required:
+        return None
+    width = max(len(current), len(required))
+    return current + (0,) * (width - len(current)) >= required + (0,) * (width - len(required))
+
+
+def _compute_major(device: Dict[str, Optional[str]]) -> Optional[int]:
+    capability = device.get("compute_capability")
+    if not capability:
+        return None
+    try:
+        return int(str(capability).split(".", 1)[0])
+    except ValueError:
+        return None
+
+
+def _cuda_host_compatibility(devices: list[Dict[str, Optional[str]]]) -> Dict[str, Any]:
+    driver_version = devices[0].get("driver_version") if devices else None
+    blackwell_devices = [device for device in devices if (_compute_major(device) or 0) >= BLACKWELL_COMPUTE_MAJOR_MIN]
+    return {
+        "driver_version": driver_version,
+        "cuda_12_8_min_linux_driver": CUDA_12_8_MIN_LINUX_DRIVER,
+        "cuda_12_8_min_windows_driver": CUDA_12_8_MIN_WINDOWS_DRIVER,
+        "cuda_12_8_driver_ok": _version_at_least(driver_version, CUDA_12_8_MIN_LINUX_DRIVER),
+        "blackwell_detected": bool(blackwell_devices),
+        "blackwell_devices": blackwell_devices,
+    }
 
 
 def _probe_failure_issue(probe: Dict[str, Any]) -> Dict[str, str]:
@@ -548,6 +599,21 @@ def _command_version(command: list[str]) -> Optional[str]:
     return result.get("output") if result.get("ok") else None
 
 
+def _query_nvidia_smi() -> Dict[str, Any]:
+    detailed = _run_command(["nvidia-smi", "--query-gpu=name,driver_version,memory.total,compute_cap", "--format=csv,noheader,nounits"])
+    if detailed.get("ok"):
+        detailed["query_fields"] = ["name", "driver_version", "memory.total", "compute_cap"]
+        return detailed
+
+    fallback = _run_command(["nvidia-smi", "--query-gpu=name,driver_version,memory.total", "--format=csv,noheader,nounits"])
+    if fallback.get("ok"):
+        fallback["query_fields"] = ["name", "driver_version", "memory.total"]
+        fallback["fallback_from_compute_cap"] = True
+        return fallback
+    detailed["fallback"] = fallback
+    return detailed
+
+
 def _probe_julia_backend(jl: Any, backend: str) -> Dict[str, Any]:
     probe = _new_backend_probe(backend)
     probe["versions"]["julia"] = str(jl.VERSION)
@@ -580,12 +646,36 @@ def _probe_julia_backend(jl: Any, backend: str) -> Dict[str, Any]:
         jl.seval("using CUDA")
         _set_check(probe, "package_loadable", True, message="CUDA.jl loaded.", severity="info")
         probe["versions"]["CUDA.jl"] = str(jl.seval("""begin using Pkg; deps = Pkg.dependencies(); only([string(dep.version) for dep in values(deps) if dep.name == \"CUDA\" && dep.version !== nothing]) end"""))
-        probe["runtime"]["cuda_functional"] = bool(jl.seval("CUDA.functional()"))
+        cudajl_ok = _version_at_least(probe["versions"].get("CUDA.jl"), MIN_RECOMMENDED_CUDAJL_VERSION)
+        _set_check(
+            probe,
+            "cudajl_version_recommended",
+            cudajl_ok is not False,
+            message=f"CUDA.jl >= {MIN_RECOMMENDED_CUDAJL_VERSION} is recommended for CUDA 12.8+/Blackwell workflows.",
+            severity="warning" if cudajl_ok is False else "info",
+            code="CUDAJL_VERSION_BELOW_RECOMMENDED" if cudajl_ok is False else None,
+        )
+        probe["runtime"].update(dict(jl.seval("""
+            begin
+                Dict(
+                    "cuda_functional" => CUDA.functional(),
+                    "runtime_version" => string(try CUDA.runtime_version() catch; missing end),
+                    "driver_version" => string(try CUDA.driver_version() catch; missing end),
+                )
+            end
+            """)))
+        probe["runtime"]["cuda_functional"] = bool(probe["runtime"].get("cuda_functional"))
         _set_check(probe, "cuda_functional", probe["runtime"]["cuda_functional"], message="CUDA.jl functional runtime check.", code="CUDA_DRIVER_RUNTIME_MISMATCH")
         device_count = int(jl.seval("try length(CUDA.devices()) catch; 0 end"))
         if device_count > 0:
-            names = list(jl.seval("[string(CUDA.name(dev)) for dev in CUDA.devices()]"))
-            probe["devices"] = [{"index": idx, "name": name} for idx, name in enumerate(names)]
+            probe["devices"] = list(jl.seval("""
+                [Dict(
+                    "index" => idx - 1,
+                    "name" => string(CUDA.name(dev)),
+                    "compute_capability" => string(try CUDA.capability(dev) catch; missing end),
+                    "total_memory_bytes" => string(try CUDA.totalmem(dev) catch; missing end),
+                ) for (idx, dev) in enumerate(CUDA.devices())]
+                """))
         _set_check(probe, "device_visible", device_count > 0, message="CUDA device enumeration.", code="GPU_DEVICE_NOT_FOUND")
         if probe["runtime"]["cuda_functional"] and device_count > 0:
             alloc_ok = bool(jl.seval("begin x = CUDA.zeros(Float32, 1); Array(x)[1] == 0f0 end"))
@@ -644,13 +734,22 @@ def doctor(*, backend: str = "CPU", initialize_backend: bool = False) -> Dict[st
             f"Choose one of: {', '.join(sorted(maturity))}.",
         )
     elif requested == "CUDA":
-        smi = _run_command(["nvidia-smi", "--query-gpu=name,driver_version,memory.total", "--format=csv,noheader,nounits"])
+        smi = _query_nvidia_smi()
         nvcc = _run_command(["nvcc", "--version"])
         report["gpu"]["nvidia_smi"] = smi
         report["gpu"]["nvcc"] = nvcc
         report["gpu"]["devices"] = _parse_nvidia_smi_csv(smi.get("raw_output") or smi.get("output"))
+        report["gpu"]["compatibility"] = _cuda_host_compatibility(report["gpu"]["devices"])
         if report["gpu"]["devices"]:
             report["gpu"]["driver"] = {"version": report["gpu"]["devices"][0].get("driver_version")}
+        if report["gpu"]["compatibility"].get("blackwell_detected") and report["gpu"]["compatibility"].get("cuda_12_8_driver_ok") is False:
+            _append_issue(
+                report,
+                "CUDA_BLACKWELL_DRIVER_BELOW_RECOMMENDED",
+                "Blackwell-class NVIDIA GPU detected with a driver below the CUDA 12.8 GA recommendation.",
+                f"Use an NVIDIA Linux driver >= {CUDA_12_8_MIN_LINUX_DRIVER} or Windows driver >= {CUDA_12_8_MIN_WINDOWS_DRIVER} for CUDA 12.8+/Blackwell workflows.",
+                severity="warning",
+            )
         if not smi.get("ok"):
             _append_issue(
                 report,

@@ -1,13 +1,9 @@
 import numpy as np
 import pytest
 import time
-from sagittarius import Atom, Register, SagittariusSolverError, Simulation, PulseSequence, SolverConfig, doctor
+from sagittarius import Atom, Register, SagittariusSolverError, Simulation, PulseSequence, SolverConfig
 
 def test_gpu_vs_cpu():
-    cuda_report = doctor(backend="CUDA", initialize_backend=True)
-    if not cuda_report["available"]:
-        pytest.skip(f"CUDA backend unavailable: {cuda_report['issues']}")
-
     # Large-ish system to see some benefit, or at least verify correctness
     # Let's use 10 atoms
     N = 10

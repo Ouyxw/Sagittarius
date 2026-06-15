@@ -159,7 +159,7 @@ from sagittarius import SolverConfig
 cfg = SolverConfig(use_gpu=True, gpu_backend="CUDA")
 ```
 
-Supported backend names are currently `CUDA`, `AMDGPU`, and `Metal`, but maturity and test coverage are not identical across backends. CUDA is the main target of the provided container workflow. See [docs/BACKENDS.md](docs/BACKENDS.md) for the current maturity matrix, and use `doctor(backend="CUDA")` before enabling GPU execution on a machine or container.
+Supported backend names are currently `CUDA`, `AMDGPU`, and `Metal`, but maturity and test coverage are not identical across backends. CUDA is the main target of the provided container workflow; the devcontainer uses CUDA 12.8 and pins CUDA.jl 6.2.x for CUDA 12.8+/Blackwell compatibility. See [docs/BACKENDS.md](docs/BACKENDS.md) for the current maturity matrix, and use `doctor(backend="CUDA", initialize_backend=True)` before enabling GPU execution on a machine or container.
 
 ## Runtime Diagnostics
 
@@ -207,7 +207,7 @@ cd sagittarius_py
 uv run python -m pytest tests/
 ```
 
-The tests cover API behavior, pulse handling, local addressing, physical invariants, analytic benchmarks, serialization, open-system workflows, GPU paths, and cluster orchestration. Some hardware-dependent tests may require a configured GPU runtime.
+The tests cover API behavior, pulse handling, local addressing, physical invariants, analytic benchmarks, serialization, open-system workflows, GPU paths, and cluster orchestration. CUDA hardware tests are opt-in: set `SAGITTARIUS_ENABLE_GPU_TESTS=1` and ensure `doctor(backend="CUDA", initialize_backend=True)` passes before running `tests/test_gpu_acceleration.py`.
 
 Performance scripts live under:
 

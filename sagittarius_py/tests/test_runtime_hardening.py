@@ -42,7 +42,7 @@ def test_version_info_records_build_and_backend_metadata(monkeypatch):
         if "status --porcelain" in joined:
             return {"ok": True, "missing": False, "returncode": 0, "output": None, "raw_output": ""}
         if command[0] == "nvidia-smi":
-            return {"ok": True, "missing": False, "returncode": 0, "output": "NVIDIA A100, 550.54.14, 40960", "raw_output": "NVIDIA A100, 550.54.14, 40960"}
+            return {"ok": True, "missing": False, "returncode": 0, "output": "NVIDIA A100, 550.54.14, 40960, 8.0", "raw_output": "NVIDIA A100, 550.54.14, 40960, 8.0"}
         if command[0] == "nvcc":
             return {"ok": True, "missing": False, "returncode": 0, "output": "Cuda compilation tools, release 12.1", "raw_output": "Cuda compilation tools, release 12.1"}
         return {"ok": False, "missing": True, "returncode": None, "output": None}
@@ -170,9 +170,9 @@ def test_backend_probe_schema_helpers():
 def test_parse_nvidia_smi_csv():
     import sagittarius.runtime as runtime
 
-    devices = runtime._parse_nvidia_smi_csv("NVIDIA A100, 550.54.14, 40960")
+    devices = runtime._parse_nvidia_smi_csv("NVIDIA A100, 550.54.14, 40960, 8.0")
 
-    assert devices == [{"name": "NVIDIA A100", "driver_version": "550.54.14", "memory_total_mib": "40960"}]
+    assert devices == [{"name": "NVIDIA A100", "driver_version": "550.54.14", "memory_total_mib": "40960", "compute_capability": "8.0"}]
 
 
 def test_probe_failure_issue_selects_specific_code():
@@ -193,8 +193,8 @@ def test_doctor_cuda_records_driver_and_devices(monkeypatch):
                 "ok": True,
                 "missing": False,
                 "returncode": 0,
-                "output": "NVIDIA A100, 550.54.14, 40960",
-                "raw_output": "NVIDIA A100, 550.54.14, 40960",
+                "output": "NVIDIA A100, 550.54.14, 40960, 8.0",
+                "raw_output": "NVIDIA A100, 550.54.14, 40960, 8.0",
             }
         return {"ok": False, "missing": True, "returncode": None, "output": None}
 
@@ -205,6 +205,67 @@ def test_doctor_cuda_records_driver_and_devices(monkeypatch):
     assert report["available"] is True
     assert report["gpu"]["driver"]["version"] == "550.54.14"
     assert report["gpu"]["devices"][0]["memory_total_mib"] == "40960"
+
+
+
+
+def test_doctor_cuda_falls_back_when_compute_cap_query_is_unavailable(monkeypatch):
+    import sagittarius.runtime as runtime
+
+    def fake_run(command, *, timeout=5):
+        joined = " ".join(command)
+        if "compute_cap" in joined:
+            return {"ok": False, "missing": False, "returncode": 1, "output": "unsupported query"}
+        if command[0] == "nvidia-smi":
+            return {
+                "ok": True,
+                "missing": False,
+                "returncode": 0,
+                "output": "NVIDIA A100, 550.54.14, 40960",
+                "raw_output": "NVIDIA A100, 550.54.14, 40960",
+            }
+        return {"ok": False, "missing": True, "returncode": None, "output": None}
+
+    monkeypatch.setattr(runtime, "_run_command", fake_run)
+
+    report = runtime.doctor(backend="CUDA")
+
+    assert report["available"] is True
+    assert report["gpu"]["nvidia_smi"]["fallback_from_compute_cap"] is True
+    assert report["gpu"]["devices"][0]["compute_capability"] is None
+
+
+def test_doctor_cuda_warns_for_blackwell_driver_below_cuda_12_8(monkeypatch):
+    import sagittarius.runtime as runtime
+
+    def fake_run(command, *, timeout=5):
+        if command[0] == "nvidia-smi":
+            return {
+                "ok": True,
+                "missing": False,
+                "returncode": 0,
+                "output": "NVIDIA RTX 5090, 565.57.01, 32768, 12.0",
+                "raw_output": "NVIDIA RTX 5090, 565.57.01, 32768, 12.0",
+            }
+        return {"ok": False, "missing": True, "returncode": None, "output": None}
+
+    monkeypatch.setattr(runtime, "_run_command", fake_run)
+
+    report = runtime.doctor(backend="CUDA")
+
+    assert report["available"] is True
+    assert report["gpu"]["compatibility"]["blackwell_detected"] is True
+    assert report["gpu"]["compatibility"]["cuda_12_8_driver_ok"] is False
+    assert report["issue_details"][0]["code"] == "CUDA_BLACKWELL_DRIVER_BELOW_RECOMMENDED"
+    assert report["issue_details"][0]["severity"] == "warning"
+
+
+def test_cuda_version_helpers_compare_dotted_versions():
+    import sagittarius.runtime as runtime
+
+    assert runtime._version_at_least("570.86.10", "570.26") is True
+    assert runtime._version_at_least("565.57.01", "570.26") is False
+    assert runtime._version_at_least(None, "570.26") is None
 
 
 def test_failed_backend_probe_uses_v21_schema(monkeypatch):
