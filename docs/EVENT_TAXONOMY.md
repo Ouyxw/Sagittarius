@@ -1,6 +1,6 @@
 # Event Taxonomy
 
-Sagittarius uses a stable event taxonomy for runtime logs, diagnostics, run manifests, and future cross-language Python/Julia observability. The Python package exposes the catalog through `sagittarius.event_taxonomy()` and individual entries through `sagittarius.get_event_spec(name)`.
+Sagittarius uses a stable event taxonomy for runtime logs, diagnostics, run manifests, and cross-language Python/Julia observability. The Python package exposes the catalog through `sagittarius.event_taxonomy()` and individual entries through `sagittarius.get_event_spec(name)`.
 
 Schema version: `event-taxonomy/v1`
 
@@ -43,7 +43,7 @@ Schema version: `event-taxonomy/v1`
 
 ## Log Payload Shape
 
-Cataloged events emitted through Python `sagittarius.runtime.log_event()` and Julia `Sagittarius.StructuredLogging.log_event()` include these common fields:
+Cataloged events emitted through Python `sagittarius.runtime.log_event()` and Julia `Sagittarius.StructuredLogging.log_event()` include these common fields. Julia solver, cluster, and physics helpers emit the relevant cataloged events automatically.
 
 ```json
 {

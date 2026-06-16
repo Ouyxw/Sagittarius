@@ -7,6 +7,7 @@ using SparseArrays
 using Random
 using SciMLBase
 using ..Physics: BasisContext
+using ..StructuredLogging: log_event
 
 # Optional dependencies handled via requires or dynamic checks in real packages,
 # but for this prototype we'll assume they are available if selected.
@@ -78,7 +79,26 @@ function RydbergPopulation(atom_idx, N_atoms; basis=nothing, basis_context=nothi
     end
 end
 
-function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
+function _log_solver_start(; backend="CPU", use_gpu=false, reltol=1e-8, abstol=1e-8, blockade_radius=0.0)
+    return log_event(
+        "solver_start";
+        backend=backend,
+        use_gpu=use_gpu,
+        reltol=reltol,
+        abstol=abstol,
+        blockade_radius=blockade_radius,
+    )
+end
+
+function _log_solver_finish(result_type::AbstractString, basis_size::Integer; backend=nothing)
+    if isnothing(backend)
+        return log_event("solver_finish"; result_type=String(result_type), basis_size=basis_size)
+    end
+    return log_event("solver_finish"; result_type=String(result_type), basis_size=basis_size, backend=backend)
+end
+
+function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0)
+    _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
     f(ψ, p, t) = (H_func(t) * ψ) .* (-1im)
     saved_values = SavedValues(Float64, Any)
     cb = nothing
@@ -88,6 +108,8 @@ function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=n
     end
     prob = ODEProblem(f, ψ0, tspan)
     sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    result_type = isnothing(observables) ? "schrodinger" : "schrodinger_observables"
+    _log_solver_finish(result_type, length(ψ0); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
@@ -117,7 +139,8 @@ function _cached_gpu_sparse!(op)
     return op.cached_sparse_H
 end
 
-function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
+function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0)
+    _log_solver_start(; backend=backend, use_gpu=true, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
     @eval using CUDA
     @eval using CUDA.CUSPARSE
     function f(ψ, p, t)
@@ -146,10 +169,13 @@ function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1
     end
     prob = ODEProblem(f, ψ0, tspan)
     sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    result_type = isnothing(observables) ? "schrodinger_gpu" : "schrodinger_gpu_observables"
+    _log_solver_finish(result_type, length(ψ0); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
-function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8)
+function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0)
+    _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
     J_dagger_J = [J' * J for J in J_ops]
     J_dagger = [sparse(J') for J in J_ops]
     f(ρ, p, t) = begin
@@ -171,12 +197,15 @@ function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observabl
     end
     prob = ODEProblem(f, ρ0, tspan)
     sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    result_type = isnothing(observables) ? "lindblad" : "lindblad_observables"
+    _log_solver_finish(result_type, size(ρ0, 1); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
 function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan; 
                                n_trajectories=100, observables=nothing, 
-                               reltol=1e-8, abstol=1e-8)
+                               reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0)
+    _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
     J_dagger_J = [J' * J for J in J_ops]
     sum_J_dagger_J = isempty(J_ops) ? spzeros(ComplexF64, length(ψ0), length(ψ0)) : sum(J_dagger_J)
     f(ψ, p, t) = begin
@@ -230,10 +259,13 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
         for t_idx in 1:length(t_vals)
             avg_res[t_idx] ./= n_trajectories
         end
+        _log_solver_finish("mcwf_observables", length(ψ0); backend=backend)
         return (t_vals, avg_res)
     else
-        return solve(ensemble_prob, Tsit5(), EnsembleThreads(), trajectories=n_trajectories, 
-                     callback=cb_jump, reltol=reltol, abstol=abstol)
+        sim = solve(ensemble_prob, Tsit5(), EnsembleThreads(), trajectories=n_trajectories, 
+                    callback=cb_jump, reltol=reltol, abstol=abstol)
+        _log_solver_finish("mcwf", length(ψ0); backend=backend)
+        return sim
     end
 end
 

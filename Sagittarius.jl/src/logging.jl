@@ -7,6 +7,60 @@ export log_event, event_spec
 const EVENT_TAXONOMY_SCHEMA_VERSION = "event-taxonomy/v1"
 
 const EVENT_CATALOG = Dict{String, NamedTuple}(
+    "backend_init_start" => (
+        event_id="SAG-EVT-0001",
+        severity="info",
+        component="runtime",
+        required_fields=(:setup,),
+    ),
+    "backend_init_finish" => (
+        event_id="SAG-EVT-0002",
+        severity="info",
+        component="runtime",
+        required_fields=(:julia_version,),
+    ),
+    "backend_init_failed" => (
+        event_id="SAG-EVT-0003",
+        severity="error",
+        component="runtime",
+        required_fields=(:code, :message),
+    ),
+    "doctor_report" => (
+        event_id="SAG-EVT-0004",
+        severity="info",
+        component="runtime",
+        required_fields=(:backend, :available, :issues),
+    ),
+    "solver_start" => (
+        event_id="SAG-EVT-0005",
+        severity="info",
+        component="solver",
+        required_fields=(:backend, :use_gpu, :reltol, :abstol, :blockade_radius),
+    ),
+    "solver_finish" => (
+        event_id="SAG-EVT-0006",
+        severity="info",
+        component="solver",
+        required_fields=(:result_type, :basis_size),
+    ),
+    "cluster_setup_start" => (
+        event_id="SAG-EVT-0007",
+        severity="info",
+        component="cluster",
+        required_fields=(:n_workers,),
+    ),
+    "cluster_setup_finish" => (
+        event_id="SAG-EVT-0008",
+        severity="info",
+        component="cluster",
+        required_fields=(:n_workers,),
+    ),
+    "backend_selected" => (
+        event_id="SAG-EVT-0009",
+        severity="info",
+        component="runtime",
+        required_fields=(:backend, :use_gpu),
+    ),
     "basis_generated" => (
         event_id="SAG-EVT-0010",
         severity="info",
@@ -18,6 +72,18 @@ const EVENT_CATALOG = Dict{String, NamedTuple}(
         severity="info",
         component="physics",
         required_fields=(:atom_count, :basis_size, :use_gpu),
+    ),
+    "gpu_allocation" => (
+        event_id="SAG-EVT-0012",
+        severity="info",
+        component="runtime",
+        required_fields=(:backend, :ok),
+    ),
+    "failure_diagnostic" => (
+        event_id="SAG-EVT-0013",
+        severity="error",
+        component="runtime",
+        required_fields=(:code, :message, :remediation),
     ),
 )
 

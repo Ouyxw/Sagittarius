@@ -4,15 +4,19 @@ using Distributed
 using ..Program
 using ..Physics
 using ..Solver
+using ..StructuredLogging: log_event
 
 export setup_workers, run_parallel_sweep
 
 function setup_workers(n::Int)
+    log_event("cluster_setup_start"; n_workers=n)
     if nprocs() < n
         addprocs(n - nprocs())
     end
     # Sagittarius loading must be done from Main or via proper package load
-    return nprocs()
+    worker_count = nprocs()
+    log_event("cluster_setup_finish"; n_workers=worker_count)
+    return worker_count
 end
 
 """

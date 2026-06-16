@@ -65,6 +65,65 @@ def test_log_event_validates_required_payload_fields():
         runtime.log_event("solver_start", backend="CPU", use_gpu=False, reltol=1e-8, abstol=1e-8)
 
 
+def test_julia_solver_and_cluster_emitters_use_structured_event_taxonomy():
+    from sagittarius.runtime import get_julia
+
+    jl, _ = get_julia()
+    report = jl.seval("""
+    begin
+        using Logging
+        using Test
+
+        solver_logger = Test.TestLogger()
+        with_logger(solver_logger) do
+            Sagittarius.Solver.solve_schrodinger(
+                ComplexF64[1.0 + 0.0im, 0.0 + 0.0im],
+                t -> zeros(ComplexF64, 2, 2),
+                (0.0, 0.01);
+                reltol=1e-6,
+                abstol=1e-6,
+                blockade_radius=0.25,
+            )
+        end
+        solver_logs = [record for record in solver_logger.logs if record.message in ("solver_start", "solver_finish")]
+
+        cluster_logger = Test.TestLogger()
+        with_logger(cluster_logger) do
+            Sagittarius.Cluster.setup_workers(1)
+        end
+        cluster_logs = [record for record in cluster_logger.logs if record.message in ("cluster_setup_start", "cluster_setup_finish")]
+
+        Dict(
+            "solver_start_id" => solver_logs[1].kwargs[:event_id],
+            "solver_start_schema" => solver_logs[1].kwargs[:event_schema],
+            "solver_start_component" => solver_logs[1].kwargs[:component],
+            "solver_start_backend" => solver_logs[1].kwargs[:backend],
+            "solver_start_blockade_radius" => solver_logs[1].kwargs[:blockade_radius],
+            "solver_finish_id" => solver_logs[2].kwargs[:event_id],
+            "solver_finish_result_type" => solver_logs[2].kwargs[:result_type],
+            "solver_finish_basis_size" => solver_logs[2].kwargs[:basis_size],
+            "cluster_start_id" => cluster_logs[1].kwargs[:event_id],
+            "cluster_start_component" => cluster_logs[1].kwargs[:component],
+            "cluster_finish_id" => cluster_logs[2].kwargs[:event_id],
+            "cluster_finish_workers" => cluster_logs[2].kwargs[:n_workers],
+        )
+    end
+    """)
+
+    assert report["solver_start_id"] == "SAG-EVT-0005"
+    assert report["solver_start_schema"] == "event-taxonomy/v1"
+    assert report["solver_start_component"] == "solver"
+    assert report["solver_start_backend"] == "CPU"
+    assert report["solver_start_blockade_radius"] == 0.25
+    assert report["solver_finish_id"] == "SAG-EVT-0006"
+    assert report["solver_finish_result_type"] == "schrodinger"
+    assert report["solver_finish_basis_size"] == 2
+    assert report["cluster_start_id"] == "SAG-EVT-0007"
+    assert report["cluster_start_component"] == "cluster"
+    assert report["cluster_finish_id"] == "SAG-EVT-0008"
+    assert report["cluster_finish_workers"] >= 1
+
+
 def test_julia_physics_emitters_use_structured_event_taxonomy():
     from sagittarius.runtime import get_julia
 
