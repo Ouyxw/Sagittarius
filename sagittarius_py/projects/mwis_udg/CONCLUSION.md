@@ -1,6 +1,6 @@
 # Project Conclusion: MWIS-UDG via Optimized AQC
 
-This historical note summarizes local MWIS project observations. Treat performance numbers as historical context unless regenerated with current `benchmark-artifact/v1` or `mwis-batch-verification/v1` outputs and current `version-info/v1` metadata. See [../../../docs/PERFORMANCE_CLAIMS.md](../../../docs/PERFORMANCE_CLAIMS.md).
+This historical note summarizes local MWIS project observations. Treat performance numbers as historical context unless regenerated with current `benchmark-artifact/v1` or `mwis-batch-verification/v1` outputs and current `version-info/v1` metadata. See [../../../docs/governance/performance-claims.md](../../../docs/governance/performance-claims.md).
 
 ## 1. Technical Enhancements
 

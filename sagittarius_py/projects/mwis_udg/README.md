@@ -18,11 +18,11 @@ This project exercises Sagittarius execution paths that may affect performance, 
 - **CUDA Execution Path**: Can offload sparse matrix-vector work when `SolverConfig(use_gpu=True, gpu_backend="CUDA")` is used and CUDA diagnostics pass.
 - **Hamiltonian Caching**: Reuses operator structures to reduce repeated Hamiltonian setup work during sweeps.
 
-See [../../../docs/PERFORMANCE_CLAIMS.md](../../../docs/PERFORMANCE_CLAIMS.md) for the claim checklist. [CONCLUSION.md](CONCLUSION.md) is a historical project note and should not be used as an external performance claim without regenerating current artifacts.
+See [../../../docs/governance/performance-claims.md](../../../docs/governance/performance-claims.md) for the claim checklist. [CONCLUSION.md](CONCLUSION.md) is a historical project note and should not be used as an external performance claim without regenerating current artifacts.
 
 ## 📊 Performance & Hardness Metrics
 
-The benchmarking suite follows methodology discussed in the Rydberg/MWIS literature, including *"Hardness of the maximum-independent-set problem on unit-disk graphs and prospects for quantum speedups"* (Andrist et al., PRR 5, 043277, 2023). Treat the Rydberg/MWIS mapping and hardness metrics as prior-art background; see [../../../docs/PRIOR_ART_NOTES.md](../../../docs/PRIOR_ART_NOTES.md).
+The benchmarking suite follows methodology discussed in the Rydberg/MWIS literature, including *"Hardness of the maximum-independent-set problem on unit-disk graphs and prospects for quantum speedups"* (Andrist et al., PRR 5, 043277, 2023). Treat the Rydberg/MWIS mapping and hardness metrics as prior-art background; see [../../../docs/governance/prior-art-notes.md](../../../docs/governance/prior-art-notes.md).
 
 We evaluate Sagittarius and classical baselines against several key metrics:
 

@@ -63,9 +63,9 @@ Before publishing a README section, benchmark report, release note, blog post, p
 
 - Identify whether the text is about known physics/mapping background, Sagittarius implementation, measured performance, or patent-sensitive strategy.
 - Cite representative prior art when discussing Rydberg/MWIS mappings, hardware speedups, or neutral-atom software workflows.
-- Replace broad performance language with artifact-backed wording from `docs/PERFORMANCE_CLAIMS.md`.
+- Replace broad performance language with artifact-backed wording from [`performance-claims.md`](performance-claims.md).
 - Attach run manifests, shared result schemas, benchmark artifacts, and version metadata where measurements are discussed.
-- Record planned and actual public disclosure dates in `docs/DISCLOSURE_CONTROL.md`.
+- Record planned and actual public disclosure dates in [`disclosure-control.md`](disclosure-control.md).
 
 ## Source Pointers
 

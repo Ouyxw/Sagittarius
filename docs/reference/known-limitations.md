@@ -5,14 +5,14 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 ## API Stability
 
 - The Python SDK and Julia developer API are still evolving. Names, defaults, result fields, and error behavior may change before a stable release.
-- Scalar/list/dict/callable pulse inputs are supported today, but explicit typed pulse wrappers are still planned. See `docs/PULSE_CONTRACT.md` for the current contract.
-- Python atom indices are zero-based and follow `Register.atoms` order. Julia internals are one-based; this boundary is documented in `docs/PYTHON_JULIA_PARITY.md` and covered by cross-language golden tests.
+- Scalar/list/dict/callable pulse inputs are supported today, but explicit typed pulse wrappers are still planned. See [`pulse-and-indexing-contract.md`](../api/pulse-and-indexing-contract.md) for the current contract.
+- Python atom indices are zero-based and follow `Register.atoms` order. Julia internals are one-based; this boundary is documented in [`python-julia-parity.md`](../api/python-julia-parity.md) and covered by cross-language golden tests.
 
 ## Backend and Environment
 
 - Importing `sagittarius` is designed to stay lightweight, but simulations and pulse compilation require Julia through `juliacall`. A broken Julia/PythonCall environment will prevent backend execution.
 - `doctor()` provides structured diagnostics, ABI/toolchain capability summaries, and backend parity-status pointers, but it is not a substitute for hardware-backed numerical parity testing.
-- CUDA is the primary GPU development target and is marked experimental. AMDGPU and Metal are planned; they should not be treated as production-equivalent to CUDA. See `docs/BACKENDS.md`.
+- CUDA is the primary GPU development target and is marked experimental. AMDGPU and Metal are planned; they should not be treated as production-equivalent to CUDA. See [`backends.md`](backends.md).
 - Container images do not guarantee GPU availability. Host drivers, device passthrough, runtime compatibility, and backend package availability must be validated on the running machine.
 
 ## Scale and Performance
@@ -25,14 +25,14 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 ## Physics and Numerics
 
 - Sagittarius models idealized Rydberg neutral-atom analog dynamics. It is not a calibrated hardware control stack.
-- Units and conventions are documented in `README.md`; users are responsible for supplying parameters in those units.
+- Units and conventions are documented in the repository [`README.md`](../../README.md); users are responsible for supplying parameters in those units.
 - Open-system Lindblad and MCWF workflows are available, but expanded positivity, trace-preservation, and MCWF-vs-Lindblad ensemble sanity checks are planned.
 - Reduced-basis simulations should be cross-checked against dense/full-basis evolution for small systems when introducing new physics assumptions.
 
 ## Data and Reproducibility
 
 - Python `SimulationResult.save()` persists a `result-artifact/v1` envelope with data, metadata, diagnostics, a validated `run-manifest/v1` manifest for SDK-generated simulation results, and an embedded `shared-result/v1` payload. Julia-native result writers should emit the same shared payload shape for cross-language tooling.
-- Benchmark scripts now emit `benchmark-artifact/v1` JSON with companion CSV and Markdown tables, runtime/build/backend metadata, process memory usage, and linked run manifests where available. Public performance statements should cite those artifacts, follow `docs/PERFORMANCE_CLAIMS.md`, and be tracked through `docs/DISCLOSURE_CONTROL.md`; the benchmark set is still not a complete performance corpus.
+- Benchmark scripts now emit `benchmark-artifact/v1` JSON with companion CSV and Markdown tables, runtime/build/backend metadata, process memory usage, and linked run manifests where available. Public performance statements should cite those artifacts, follow [`performance-claims.md`](../governance/performance-claims.md), and be tracked through [`disclosure-control.md`](../governance/disclosure-control.md); the benchmark set is still not a complete performance corpus.
 
 ## Unsupported or Future Scenarios
 

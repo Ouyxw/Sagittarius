@@ -750,7 +750,7 @@ def _validate_pulse_config(p_config: Any, N: int, *, field_name: str, sample_tim
         "VALIDATION_PULSE_CONFIG_TYPE",
         f"PulseSequence.{field_name} must be a scalar, Pulse node, list, dict, or callable; "
         f"got {type(p_config).__name__}",
-        "Use a supported pulse input shape documented in docs/PULSE_CONTRACT.md.",
+        "Use a supported pulse input shape documented in docs/api/pulse-and-indexing-contract.md.",
     )
 
 

@@ -1,6 +1,6 @@
 # GPU Benchmark Conclusion: RTX 5070 Ti (Full Path)
 
-This historical note records a local performance evaluation of the Sagittarius CUDA path on an **NVIDIA GeForce RTX 5070 Ti** (16GB VRAM, CUDA 13.1) environment, conducted on April 30, 2026. Treat these values as historical context unless they are regenerated as `benchmark-artifact/v1` output with current `version-info/v1` metadata. See [../../../docs/PERFORMANCE_CLAIMS.md](../../../docs/PERFORMANCE_CLAIMS.md).
+This historical note records a local performance evaluation of the Sagittarius CUDA path on an **NVIDIA GeForce RTX 5070 Ti** (16GB VRAM, CUDA 13.1) environment, conducted on April 30, 2026. Treat these values as historical context unless they are regenerated as `benchmark-artifact/v1` output with current `version-info/v1` metadata. See [../../../docs/governance/performance-claims.md](../../../docs/governance/performance-claims.md).
 
 ## 1. Environment Status
 - **Hardware**: NVIDIA GeForce RTX 5070 Ti

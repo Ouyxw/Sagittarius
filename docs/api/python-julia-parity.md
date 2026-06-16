@@ -1,6 +1,6 @@
 # Python SDK Parity Contract
 
-Sagittarius maintains the following contract between the Python SDK and the Julia-native API for shared simulation semantics. Python remains the ergonomic front door, but these behaviors must stay equivalent unless a breaking schema/version note says otherwise. For paired examples that apply this contract, see `docs/DUAL_SDK_EXAMPLES.md`.
+Sagittarius maintains the following contract between the Python SDK and the Julia-native API for shared simulation semantics. Python remains the ergonomic front door, but these behaviors must stay equivalent unless a breaking schema/version note says otherwise. For paired examples that apply this contract, see [`dual-sdk-examples.md`](../getting-started/dual-sdk-examples.md).
 
 ## Covered Semantics
 

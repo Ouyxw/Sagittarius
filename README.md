@@ -51,7 +51,7 @@ Implemented or partially implemented capabilities include:
 - MWIS/UDG example workflows with classical baselines.
 
 See [REQUIREMENTS.md](REQUIREMENTS.md) for the current development roadmap and planned hardening work.
-For short verification snippets with expected output, see [docs/MINIMAL_EXAMPLES.md](docs/MINIMAL_EXAMPLES.md). For prior-art-aware wording around Rydberg/MWIS mappings and simulator claims, see [docs/PRIOR_ART_NOTES.md](docs/PRIOR_ART_NOTES.md). For public release, benchmark report, and technical disclosure tracking, see [docs/DISCLOSURE_CONTROL.md](docs/DISCLOSURE_CONTROL.md).
+For short verification snippets with expected output, see [docs/getting-started/minimal-examples.md](docs/getting-started/minimal-examples.md). For prior-art-aware wording around Rydberg/MWIS mappings and simulator claims, see [docs/governance/prior-art-notes.md](docs/governance/prior-art-notes.md). For public release, benchmark report, and technical disclosure tracking, see [docs/governance/disclosure-control.md](docs/governance/disclosure-control.md).
 
 ## Repository Layout
 
@@ -98,7 +98,7 @@ The Python package depends on Julia through `juliacall`, but importing `sagittar
 
 ### Containerized Development
 
-A Docker/VS Code devcontainer workflow is documented in [docs/CONTAINERIZATION.md](docs/CONTAINERIZATION.md). The container is the recommended path for CUDA-oriented development because it pins the main system dependencies and configures GPU access for supported hosts.
+A Docker/VS Code devcontainer workflow is documented in [docs/getting-started/containerization.md](docs/getting-started/containerization.md). The container is the recommended path for CUDA-oriented development because it pins the main system dependencies and configures GPU access for supported hosts.
 
 After entering the container, validate the environment with:
 
@@ -159,7 +159,7 @@ from sagittarius import SolverConfig
 cfg = SolverConfig(use_gpu=True, gpu_backend="CUDA")
 ```
 
-Supported backend names are currently `CUDA`, `AMDGPU`, and `Metal`, but maturity and test coverage are not identical across backends. CUDA is the main target of the provided container workflow; the devcontainer uses CUDA 12.8 and pins CUDA.jl 6.2.x for CUDA 12.8+/Blackwell compatibility. See [docs/BACKENDS.md](docs/BACKENDS.md) for the current maturity matrix, and use `doctor(backend="CUDA", initialize_backend=True)` before enabling GPU execution on a machine or container. The default container/PythonCall environment is CUDA-only; install AMDGPU.jl or Metal.jl only in separate backend-specific experimental environments.
+Supported backend names are currently `CUDA`, `AMDGPU`, and `Metal`, but maturity and test coverage are not identical across backends. CUDA is the main target of the provided container workflow; the devcontainer uses CUDA 12.8 and pins CUDA.jl 6.2.x for CUDA 12.8+/Blackwell compatibility. See [docs/reference/backends.md](docs/reference/backends.md) for the current maturity matrix, and use `doctor(backend="CUDA", initialize_backend=True)` before enabling GPU execution on a machine or container. The default container/PythonCall environment is CUDA-only; install AMDGPU.jl or Metal.jl only in separate backend-specific experimental environments.
 
 ## Runtime Diagnostics
 
@@ -196,7 +196,7 @@ The project includes exact and heuristic classical baselines, benchmark scripts,
 | Interaction coefficient | rad / microsecond * micrometer^6 | Van der Waals `C6` convention. |
 | Decay and dephasing rates | 1 / microsecond | Open-system rates. |
 
-Python atom indices are zero-based in user-facing APIs and follow `Register.atoms` order. Julia internals are one-based, and the Python SDK performs boundary conversion without reversing local pulse vectors. See [docs/PULSE_CONTRACT.md](docs/PULSE_CONTRACT.md) for local addressing validation, indexing semantics, and pulse input behavior.
+Python atom indices are zero-based in user-facing APIs and follow `Register.atoms` order. Julia internals are one-based, and the Python SDK performs boundary conversion without reversing local pulse vectors. See [docs/api/pulse-and-indexing-contract.md](docs/api/pulse-and-indexing-contract.md) for local addressing validation, indexing semantics, and pulse input behavior.
 
 ## Verification
 
@@ -215,7 +215,7 @@ Performance scripts live under:
 sagittarius_py/tests/test_performance/
 ```
 
-Benchmark results should be interpreted with the exact hardware, `version-info/v1` metadata, solver settings, and backend configuration used to generate them. Public performance statements should follow [docs/PERFORMANCE_CLAIMS.md](docs/PERFORMANCE_CLAIMS.md) and cite the relevant `benchmark-artifact/v1` JSON.
+Benchmark results should be interpreted with the exact hardware, `version-info/v1` metadata, solver settings, and backend configuration used to generate them. Public performance statements should follow [docs/governance/performance-claims.md](docs/governance/performance-claims.md) and cite the relevant `benchmark-artifact/v1` JSON.
 
 ## Architecture
 
@@ -225,7 +225,7 @@ Sagittarius is organized around three layers:
 2. Shared model layer: pulse representations, blockade-reduced basis semantics, observable definitions, and serialization contracts.
 3. Julia backend: physics kernels, Hamiltonian construction, numerical solvers, GPU paths, and distributed execution.
 
-The roadmap calls for a first-class Julia developer API alongside the Python SDK. The intent is not to force both languages to expose identical syntax, but to keep the physical semantics, defaults, result schemas, and benchmark fixtures consistent. See [docs/DUAL_SDK_EXAMPLES.md](docs/DUAL_SDK_EXAMPLES.md) for paired Python and Julia workflows.
+The roadmap calls for a first-class Julia developer API alongside the Python SDK. The intent is not to force both languages to expose identical syntax, but to keep the physical semantics, defaults, result schemas, and benchmark fixtures consistent. See [docs/getting-started/dual-sdk-examples.md](docs/getting-started/dual-sdk-examples.md) for paired Python and Julia workflows.
 
 ## Development Notes
 
@@ -247,11 +247,11 @@ print(doctor(backend="CUDA"))
 PY
 ```
 
-For roadmap context, see [REQUIREMENTS.md](REQUIREMENTS.md). For container setup, see [docs/CONTAINERIZATION.md](docs/CONTAINERIZATION.md).
+For roadmap context, see [REQUIREMENTS.md](REQUIREMENTS.md). For container setup, see [docs/getting-started/containerization.md](docs/getting-started/containerization.md).
 
 ## Known Limitations
 
-Sagittarius is an early research SDK. Important limitations include evolving APIs, Julia/PythonCall backend dependency, non-uniform GPU maturity, exponential full-basis scaling, incomplete CPU/GPU parity coverage, and benchmark reproducibility work still in progress. See [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) for the detailed list.
+Sagittarius is an early research SDK. Important limitations include evolving APIs, Julia/PythonCall backend dependency, non-uniform GPU maturity, exponential full-basis scaling, incomplete CPU/GPU parity coverage, and benchmark reproducibility work still in progress. See [docs/reference/known-limitations.md](docs/reference/known-limitations.md) for the detailed list.
 
 ## License
 
