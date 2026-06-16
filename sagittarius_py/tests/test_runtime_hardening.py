@@ -65,6 +65,8 @@ def test_version_info_records_build_and_backend_metadata(monkeypatch):
     assert "devcontainer" in info["container"]
     assert info["backend_toolchains"]["CUDA"]["devices"][0]["driver_version"] == "550.54.14"
     assert info["backend_toolchains"]["CUDA"]["nvcc"]["output"] == "Cuda compilation tools, release 12.1"
+    assert info["abi"]["python"]["implementation"]
+    assert "cache_tag" in info["abi"]["python"]
 
 
 def test_doctor_runtime_includes_version_metadata(monkeypatch):
@@ -151,8 +153,11 @@ def test_doctor_report_schema_is_stable():
     report = doctor()
 
     assert report["schema_version"] == "doctor/v2.1"
-    assert {"runtime", "requested_backend", "available", "issues", "issue_details", "backend_probe"} <= set(report)
+    assert {"runtime", "requested_backend", "available", "issues", "issue_details", "backend_probe", "capabilities"} <= set(report)
     assert report["backend_probe"] is None
+    assert report["capabilities"]["backend"] == "CPU"
+    assert report["capabilities"]["parity"]["status"] == "regular_test_suite"
+    assert "abi" in report["capabilities"]
 
 
 def test_backend_probe_schema_helpers():
@@ -162,7 +167,7 @@ def test_backend_probe_schema_helpers():
     runtime._set_check(probe, "device_visible", False, message="No device", code="GPU_DEVICE_NOT_FOUND")
 
     assert probe["schema_version"] == "backend-probe/v2.1"
-    assert {"checks", "versions", "devices", "driver", "runtime", "errors"} <= set(probe)
+    assert {"checks", "versions", "devices", "driver", "runtime", "errors", "abi"} <= set(probe)
     assert probe["checks"]["device_visible"]["ok"] is False
     assert probe["checks"]["device_visible"]["code"] == "GPU_DEVICE_NOT_FOUND"
 
@@ -205,6 +210,38 @@ def test_doctor_cuda_records_driver_and_devices(monkeypatch):
     assert report["available"] is True
     assert report["gpu"]["driver"]["version"] == "550.54.14"
     assert report["gpu"]["devices"][0]["memory_total_mib"] == "40960"
+
+
+def test_doctor_cuda_capabilities_include_parity_and_abi(monkeypatch):
+    import sagittarius.runtime as runtime
+
+    def fake_run(command, *, timeout=5):
+        joined = " ".join(command)
+        if command[0] == "nvidia-smi":
+            return {
+                "ok": True,
+                "missing": False,
+                "returncode": 0,
+                "output": "NVIDIA A100, 550.54.14, 40960, 8.0",
+                "raw_output": "NVIDIA A100, 550.54.14, 40960, 8.0",
+            }
+        if command[0] == "nvcc":
+            return {"ok": True, "missing": False, "returncode": 0, "output": "Cuda compilation tools, release 12.1", "raw_output": "Cuda compilation tools, release 12.1"}
+        if "git" in joined:
+            return {"ok": True, "missing": False, "returncode": 0, "output": "test", "raw_output": ""}
+        return {"ok": False, "missing": True, "returncode": None, "output": None}
+
+    monkeypatch.setattr(runtime, "_run_command", fake_run)
+    monkeypatch.setattr(runtime, "_metadata_command", fake_run)
+
+    report = runtime.doctor(backend="CUDA")
+
+    assert report["capabilities"]["backend"] == "CUDA"
+    assert report["capabilities"]["parity"]["status"] == "opt_in_hardware_parity_suite"
+    assert report["capabilities"]["parity"]["hardware_validated_by_doctor"] is False
+    assert report["capabilities"]["abi"]["driver"]["version"] == "550.54.14"
+    assert report["capabilities"]["abi"]["devices"][0]["compute_capability"] == "8.0"
+    assert report["capabilities"]["abi"]["runtime"]["nvcc"]["output"] == "Cuda compilation tools, release 12.1"
 
 
 

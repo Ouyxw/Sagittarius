@@ -11,7 +11,7 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 ## Backend and Environment
 
 - Importing `sagittarius` is designed to stay lightweight, but simulations and pulse compilation require Julia through `juliacall`. A broken Julia/PythonCall environment will prevent backend execution.
-- `doctor()` provides structured diagnostics, but it is not a substitute for hardware-backed parity testing.
+- `doctor()` provides structured diagnostics, ABI/toolchain capability summaries, and backend parity-status pointers, but it is not a substitute for hardware-backed numerical parity testing.
 - CUDA is the primary GPU development target and is marked experimental. AMDGPU and Metal are planned; they should not be treated as production-equivalent to CUDA. See `docs/BACKENDS.md`.
 - Container images do not guarantee GPU availability. Host drivers, device passthrough, runtime compatibility, and backend package availability must be validated on the running machine.
 

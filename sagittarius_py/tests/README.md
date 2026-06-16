@@ -34,9 +34,7 @@ This directory contains the comprehensive test suite for the Sagittarius Python 
 ### 6. 📈 Performance Benchmarking (`test_performance/`)
 Quantitative analysis of solver throughput and scaling behavior.
 - **Scaling Profiles**: Measures execution time as a function of atom count ($N$) and Hilbert space dimension.
-- **Hardware Benchmarks**: CPU vs. GPU speedup comparisons across various backends.
-- **Recent Results**: High-performance evaluation on **NVIDIA RTX 5070 Ti** demonstrates a **19.6x speedup** at $N=20$ atoms.
-  - Detailed findings are documented in `tests/test_performance/gpu_bench_conclusion.md`.
+- **Hardware Benchmarks**: CPU vs. GPU timing comparisons emit benchmark artifacts when run on configured hardware. Treat historical Markdown summaries as local notes unless regenerated with current `benchmark-artifact/v1` metadata.
 
 ## ✅ Passing Evidence
 A test is considered passed if:

@@ -78,6 +78,7 @@ class RuntimeInfo:
     build: Dict[str, Any]
     container: Dict[str, Any]
     backend_toolchains: Dict[str, Any]
+    abi: Dict[str, Any]
 
 
 @dataclass
@@ -289,6 +290,99 @@ def _container_metadata() -> Dict[str, Any]:
     }
 
 
+def _python_abi_metadata() -> Dict[str, Any]:
+    libc_name, libc_version = platform.libc_ver()
+    return {
+        "implementation": platform.python_implementation(),
+        "version": sys.version.split()[0],
+        "cache_tag": getattr(sys.implementation, "cache_tag", None),
+        "executable": sys.executable,
+        "platform": platform.platform(),
+        "system": platform.system(),
+        "machine": platform.machine(),
+        "processor": platform.processor(),
+        "libc": {"name": libc_name or None, "version": libc_version or None},
+    }
+
+
+def _host_abi_metadata() -> Dict[str, Any]:
+    return {
+        "python": _python_abi_metadata(),
+        "julia": {
+            "version": str(_jl.VERSION) if _jl is not None else None,
+            "sagittarius_julia_version": _julia_project_version(),
+            "project_path": str(_project_path()),
+        },
+    }
+
+
+def _backend_parity_status(backend: str) -> Dict[str, Any]:
+    normalized = backend.upper()
+    if normalized == "CPU":
+        return {
+            "status": "regular_test_suite",
+            "hardware_validated_by_doctor": False,
+            "test_entrypoints": ["sagittarius_py/tests/"],
+            "notes": "CPU execution is covered by the regular Python/Julia test suite; doctor() is a capability probe, not a numerical parity test.",
+        }
+    if normalized == "CUDA":
+        return {
+            "status": "opt_in_hardware_parity_suite",
+            "hardware_validated_by_doctor": False,
+            "test_entrypoints": ["SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python -m pytest tests/test_gpu_acceleration.py"],
+            "notes": "doctor(backend='CUDA', initialize_backend=True) checks runtime capability. CPU/GPU numerical parity is validated separately by the opt-in CUDA parity suite.",
+        }
+    if normalized in {"AMDGPU", "METAL"}:
+        return {
+            "status": "not_parity_tested",
+            "hardware_validated_by_doctor": False,
+            "test_entrypoints": [],
+            "notes": f"{normalized} is maturity-tracked but does not yet have established parity tests or deployment documentation.",
+        }
+    return {
+        "status": "unsupported",
+        "hardware_validated_by_doctor": False,
+        "test_entrypoints": [],
+        "notes": "Unsupported backend name.",
+    }
+
+
+def _backend_abi_report(backend: str, runtime_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    normalized = backend.upper()
+    runtime_info = runtime_info or version_info(initialize_backend=False)
+    toolchains = runtime_info.get("backend_toolchains", {})
+    report = {
+        "backend": normalized,
+        "host": runtime_info.get("abi", _host_abi_metadata()),
+        "maturity": BACKEND_MATURITY.get(normalized),
+        "toolchain": toolchains.get(normalized, {}),
+        "compatibility": {},
+    }
+    if normalized == "CUDA":
+        cuda = toolchains.get("CUDA", {})
+        devices = cuda.get("devices", [])
+        compatibility = cuda.get("compatibility", {})
+        report["driver"] = {"version": compatibility.get("driver_version")}
+        report["runtime"] = {"nvcc": cuda.get("nvcc")}
+        report["devices"] = devices
+        report["compatibility"] = compatibility
+    elif normalized == "AMDGPU":
+        report["runtime"] = {"rocm_smi": toolchains.get("AMDGPU", {}).get("rocm_smi")}
+    elif normalized == "METAL":
+        report["runtime"] = {"metal_compiler": toolchains.get("METAL", {}).get("metal_compiler")}
+    return report
+
+
+def _backend_capability_summary(backend: str, runtime_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    normalized = backend.upper()
+    return {
+        "backend": normalized,
+        "maturity": BACKEND_MATURITY.get(normalized),
+        "parity": _backend_parity_status(normalized),
+        "abi": _backend_abi_report(normalized, runtime_info),
+    }
+
+
 def _backend_toolchain_metadata() -> Dict[str, Any]:
     nvidia_smi = _query_nvidia_smi()
     nvcc = _metadata_command(["nvcc", "--version"])
@@ -347,6 +441,7 @@ def _new_backend_probe(backend: str) -> Dict[str, Any]:
         "driver": {},
         "runtime": {},
         "errors": [],
+        "abi": {},
     }
 
 
@@ -586,6 +681,7 @@ def version_info(*, initialize_backend: bool = False) -> Dict[str, Any]:
         build=build,
         container=container,
         backend_toolchains=_backend_toolchain_metadata(),
+        abi=_host_abi_metadata(),
     )
     return asdict(info)
 
@@ -664,6 +760,13 @@ def _probe_julia_backend(jl: Any, backend: str) -> Dict[str, Any]:
                 )
             end
             """)))
+        probe["abi"] = {
+            "backend": "CUDA",
+            "julia": {"version": probe["versions"].get("julia")},
+            "package_versions": {"CUDA.jl": probe["versions"].get("CUDA.jl")},
+            "driver": {"version": probe["runtime"].get("driver_version")},
+            "runtime": {"version": probe["runtime"].get("runtime_version")},
+        }
         probe["runtime"]["cuda_functional"] = bool(probe["runtime"].get("cuda_functional"))
         _set_check(probe, "cuda_functional", probe["runtime"]["cuda_functional"], message="CUDA.jl functional runtime check.", code="CUDA_DRIVER_RUNTIME_MISMATCH")
         device_count = int(jl.seval("try length(CUDA.devices()) catch; 0 end"))
@@ -713,14 +816,16 @@ def doctor(*, backend: str = "CPU", initialize_backend: bool = False) -> Dict[st
     """Inspect runtime capabilities without forcing Julia startup by default."""
     requested = backend.upper()
     maturity = backend_maturity()
+    runtime_info = version_info(initialize_backend=False)
     report: Dict[str, Any] = {
         "schema_version": DOCTOR_SCHEMA_VERSION,
-        "runtime": version_info(initialize_backend=False),
+        "runtime": runtime_info,
         "requested_backend": requested,
         "backend_maturity": maturity,
         "container": _container_metadata(),
         "gpu": {},
         "backend_probe": None,
+        "capabilities": _backend_capability_summary(requested, runtime_info),
         "available": True,
         "issues": [],
         "issue_details": [],
@@ -770,6 +875,7 @@ def doctor(*, backend: str = "CPU", initialize_backend: bool = False) -> Dict[st
             jl, _ = get_julia()
             report["julia_loaded"] = True
             report["runtime"] = version_info(initialize_backend=False)
+            report["capabilities"] = _backend_capability_summary(requested, report["runtime"])
             try:
                 probe = _probe_julia_backend(jl, requested)
                 report["backend_probe"] = probe
