@@ -32,7 +32,7 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 ## Data and Reproducibility
 
 - Python `SimulationResult.save()` persists a `result-artifact/v1` envelope with data, metadata, diagnostics, a validated `run-manifest/v1` manifest for SDK-generated simulation results, and an embedded `shared-result/v1` payload. Julia-native result writers should emit the same shared payload shape for cross-language tooling.
-- Benchmark scripts now emit `benchmark-artifact/v1` JSON with companion CSV and Markdown tables, runtime/build/backend metadata, process memory usage, and linked run manifests where available. Public performance statements should cite those artifacts and follow `docs/PERFORMANCE_CLAIMS.md`; the benchmark set is still not a complete performance corpus.
+- Benchmark scripts now emit `benchmark-artifact/v1` JSON with companion CSV and Markdown tables, runtime/build/backend metadata, process memory usage, and linked run manifests where available. Public performance statements should cite those artifacts, follow `docs/PERFORMANCE_CLAIMS.md`, and be tracked through `docs/DISCLOSURE_CONTROL.md`; the benchmark set is still not a complete performance corpus.
 
 ## Unsupported or Future Scenarios
 

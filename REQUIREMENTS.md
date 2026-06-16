@@ -90,7 +90,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Minimal Examples with Expected Output** | Medium | Done | Add short examples with expected diagnostics shape, validation errors, indexing behavior, basis size, observable values, and serialization output in `docs/MINIMAL_EXAMPLES.md`. |
 | **Dual SDK Documentation** | Medium | Done | Added `docs/DUAL_SDK_EXAMPLES.md` with paired Python and Julia workflows for algorithm prototyping, experiment-style pulse simulation, baseline validation, and hardware-demo preparation, linked from README, Julia API, and parity docs. |
 | **Prior-Art-Aware Technical Notes** | Medium | Done | Added `docs/PRIOR_ART_NOTES.md` to distinguish known Rydberg/MWIS mappings, hardness methodology, neutral-atom tooling, and generic numerical techniques from Sagittarius-specific schemas, diagnostics, parity tests, and execution-path implementation work. |
-| **Disclosure Control** | Medium | Planned | Track dates for public releases, benchmark reports, and technical disclosures that may affect patent filing strategy. |
+| **Disclosure Control** | Medium | Done | Added `docs/DISCLOSURE_CONTROL.md` with a disclosure register, required review fields, status values, approval workflow, trigger examples, and links to performance-claim, prior-art, and known-limitation checks. |
 
 ## 🔬 Phase 11: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.

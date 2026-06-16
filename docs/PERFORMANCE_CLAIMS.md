@@ -2,7 +2,7 @@
 
 Sagittarius performance statements must be tied to reproducible benchmark artifacts. Use this page as the review checklist before publishing README text, reports, plots, release notes, or hardware-facing summaries.
 
-For claims involving Rydberg/MWIS mappings or neutral-atom simulator positioning, also check `docs/PRIOR_ART_NOTES.md`.
+For claims involving Rydberg/MWIS mappings or neutral-atom simulator positioning, also check `docs/PRIOR_ART_NOTES.md`. For public releases or external reports, create or update a row in `docs/DISCLOSURE_CONTROL.md`.
 
 ## Claim Requirements
 

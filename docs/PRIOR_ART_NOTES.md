@@ -65,7 +65,7 @@ Before publishing a README section, benchmark report, release note, blog post, p
 - Cite representative prior art when discussing Rydberg/MWIS mappings, hardware speedups, or neutral-atom software workflows.
 - Replace broad performance language with artifact-backed wording from `docs/PERFORMANCE_CLAIMS.md`.
 - Attach run manifests, shared result schemas, benchmark artifacts, and version metadata where measurements are discussed.
-- Record planned public disclosure dates in the disclosure-control tracker once that Phase 10 item exists.
+- Record planned and actual public disclosure dates in `docs/DISCLOSURE_CONTROL.md`.
 
 ## Source Pointers
 
