@@ -126,18 +126,28 @@ def test_run_manifest_schema_validates_generated_manifest():
     seq = PulseSequence(omega=[1.0, 2.0], delta={0: 0.25})
     cfg = SolverConfig(reltol=1e-7, abstol=1e-9, blockade_radius=0.6)
     metadata = {
+        "schema_version": "version-info/v1",
         "python_version": "3.test",
         "package_version": "0.test",
         "julia_version": None,
         "sagittarius_julia_version": "0.test",
         "platform": "test",
         "in_container": False,
+        "python": {"packages": {"sagittarius-py": "0.test"}},
+        "julia": {"project_path": "Sagittarius.jl"},
+        "build": {"source": {"git_commit": "abc123"}},
+        "container": {"detected": False},
+        "backend_toolchains": {},
+        "abi": {"python": {"cache_tag": "cpython-test"}},
     }
     diagnostics = {
+        "schema_version": "doctor/v2.1",
         "requested_backend": "CPU",
         "available": True,
         "issues": [],
         "issue_details": [],
+        "runtime": metadata,
+        "capabilities": {"backend": "CPU", "parity": {"status": "regular_test_suite"}},
     }
 
     manifest = _build_run_manifest(
@@ -161,7 +171,11 @@ def test_run_manifest_schema_validates_generated_manifest():
     assert manifest["pulse"]["omega"]["kind"] == "local_vector"
     assert manifest["solver"]["observables"] == {"pop0": 0}
     assert manifest["backend_diagnostics"]["requested_backend"] == "CPU"
+    assert manifest["backend_diagnostics"]["issue_details"] == []
     assert manifest["versions"] == metadata
+    assert manifest["versions"]["schema_version"] == "version-info/v1"
+    assert manifest["versions"]["build"]["source"]["git_commit"] == "abc123"
+    assert manifest["event_taxonomy_schema"] == "event-taxonomy/v1"
     assert manifest["event_ids"] == ["SAG-EVT-0004", "SAG-EVT-0005", "SAG-EVT-0006"]
     assert manifest["random"] == {"seed": None, "n_trajectories": None}
 

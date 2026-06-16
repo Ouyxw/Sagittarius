@@ -65,6 +65,9 @@ def test_version_info_records_build_and_backend_metadata(monkeypatch):
     assert "devcontainer" in info["container"]
     assert info["backend_toolchains"]["CUDA"]["devices"][0]["driver_version"] == "550.54.14"
     assert info["backend_toolchains"]["CUDA"]["nvcc"]["output"] == "Cuda compilation tools, release 12.1"
+    assert {"CUDA", "AMDGPU", "METAL"} <= set(info["backend_toolchains"])
+    assert info["python"]["packages"]["sagittarius-py"] == info["package_version"]
+    assert info["julia"]["project_path"].endswith("Sagittarius.jl")
     assert info["abi"]["python"]["implementation"]
     assert "cache_tag" in info["abi"]["python"]
 
@@ -77,8 +80,10 @@ def test_doctor_runtime_includes_version_metadata(monkeypatch):
     report = runtime.doctor()
 
     assert report["runtime"]["schema_version"] == "version-info/v1"
-    assert {"python", "julia", "build", "container", "backend_toolchains"} <= set(report["runtime"])
+    assert {"python", "julia", "build", "container", "backend_toolchains", "abi"} <= set(report["runtime"])
     assert report["container"] == report["runtime"]["container"]
+    assert report["capabilities"]["backend"] == report["requested_backend"]
+    assert report["capabilities"]["abi"]["host"] == report["runtime"]["abi"]
 
 
 def test_doctor_unknown_backend_has_actionable_issue():

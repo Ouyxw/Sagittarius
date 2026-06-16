@@ -58,6 +58,21 @@ def test_log_event_enriches_json_payload(caplog):
     assert payload["severity"] == "info"
 
 
+def test_text_log_event_includes_catalog_identity(caplog):
+    import logging
+    import sagittarius.runtime as runtime
+
+    runtime.configure_logging(logging.INFO, json_output=False)
+    caplog.set_level(logging.INFO, logger="sagittarius")
+
+    runtime.log_event("doctor_report", backend="CPU", available=True, issues=[])
+
+    message = caplog.records[-1].message
+    assert message.startswith("doctor_report ")
+    assert "event_id=SAG-EVT-0004" in message
+    assert "severity=info" in message
+
+
 def test_log_event_validates_required_payload_fields():
     import sagittarius.runtime as runtime
 
