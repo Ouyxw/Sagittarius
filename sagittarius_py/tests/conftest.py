@@ -7,6 +7,7 @@ JULIA_BACKEND_TEST_MODULES = (
     "tests/test_api_v2.py",
     "tests/test_benchmarks.py",
     "tests/test_cluster.py",
+    "tests/test_cross_language_golden.py",
     "tests/test_gpu_acceleration.py",
     "tests/test_invariants.py",
     "tests/test_local_pulses.py",

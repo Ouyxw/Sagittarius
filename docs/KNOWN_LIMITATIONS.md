@@ -6,7 +6,7 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 
 - The Python SDK and Julia developer API are still evolving. Names, defaults, result fields, and error behavior may change before a stable release.
 - Scalar/list/dict/callable pulse inputs are supported today, but explicit typed pulse wrappers are still planned. See `docs/PULSE_CONTRACT.md` for the current contract.
-- Python atom indices are zero-based and follow `Register.atoms` order. Julia internals are one-based. Cross-language golden tests are still planned.
+- Python atom indices are zero-based and follow `Register.atoms` order. Julia internals are one-based; this boundary is documented in `docs/PYTHON_JULIA_PARITY.md` and covered by cross-language golden tests.
 
 ## Backend and Environment
 

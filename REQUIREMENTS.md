@@ -69,8 +69,8 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Indexing Semantics** | High | Done | Python atom indices are zero-based in `Register.atoms` order; Julia boundary calls convert to one-based indices, and local pulse vectors are not reversed. Documented in `docs/PULSE_CONTRACT.md` and covered by tests. |
 | **Pulse Compilation Contract** | Medium | Done | Define scalar, list, dict, callable, and Pulse AST behavior, including callable vector dimensions and local addressing defaults. Documented in `docs/PULSE_CONTRACT.md` and covered by validation tests. |
 | **Julia Native Developer API** | High | Planned | Maintain a first-class Julia API for users who need direct access to Hamiltonians, bases, pulse objects, solvers, backend controls, and performance-critical internals. |
-| **Python SDK Parity Contract** | High | Planned | Define which simulation semantics, defaults, result fields, and error behaviors must remain equivalent between the Python SDK and Julia SDK. |
-| **Cross-Language Golden Tests** | High | Planned | Add shared Python/Julia test cases that verify equivalent Hamiltonians, observables, solver outputs, serialization, and benchmark fixtures within documented tolerances. |
+| **Python SDK Parity Contract** | High | Done | Documented Python/Julia parity semantics for atom ordering, bitstrings, pulse addressing, Hamiltonians, solver settings, result manifests, and validation boundaries in `docs/PYTHON_JULIA_PARITY.md`. |
+| **Cross-Language Golden Tests** | High | Done | Added Python-vs-Julia golden tests for full and reduced Hamiltonians, reduced basis ordering, local addressing, observable solver trajectories, and manifest parity fields. |
 | **Shared Result Schema** | Medium | Planned | Define stable language-neutral simulation result fields and semantics; artifact envelopes and manifests are tracked in Phase 6. |
 
 ## 🧪 Phase 9: Scientific Verification & Benchmarks (In Progress)
