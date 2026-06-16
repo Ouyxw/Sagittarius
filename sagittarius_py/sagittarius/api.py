@@ -1176,6 +1176,7 @@ class Simulation:
         self.config = config
         self._basis = None
         self._mapping = None
+        self._basis_context = None
 
     def validate_inputs(self, *, sample_time: Optional[float] = None, observables: Optional[Dict[str, int]] = None) -> None:
         N = len(self.register.atoms)
@@ -1195,11 +1196,14 @@ class Simulation:
         """Returns the size of the Hilbert space after pruning."""
         if self.config.blockade_radius > 0:
             _, _, phys, _ = get_modules()
-            res = phys.generate_reduced_basis(self.register.jl_obj, float(self.config.blockade_radius))
-            self._basis = res[0]
-            self._mapping = res[1]
+            self._basis_context = phys.reduced_basis_context(self.register.jl_obj, blockade_radius=float(self.config.blockade_radius))
+            self._basis = self._basis_context.basis
+            self._mapping = self._basis_context.mapping
             return len(self._basis)
         else:
+            self._basis_context = None
+            self._basis = None
+            self._mapping = None
             return 2**len(self.register.atoms)
 
     def _get_compiled_func(self, p_config: Any, N: int) -> Any:
@@ -1301,11 +1305,12 @@ class Simulation:
 
         # 2. Build Hamiltonian
         H_func = phys.build_hamiltonian_func(
-            self.register.jl_obj, 
-            omega_func, 
-            delta_func, 
+            self.register.jl_obj,
+            omega_func,
+            delta_func,
             blockade_radius=float(self.config.blockade_radius),
-            use_gpu=bool(self.config.use_gpu)
+            basis_context=self._basis_context,
+            use_gpu=bool(self.config.use_gpu),
         )
 
         # 3. Handle observables
@@ -1314,7 +1319,7 @@ class Simulation:
         if observables:
             if self.config.blockade_radius > 0:
                 jl_obs = jl.Vector[jl.Any]([
-                    solv.RydbergPopulation(observables[name] + 1, N, basis=self._basis)
+                    solv.RydbergPopulation(observables[name] + 1, N, basis_context=self._basis_context)
                     for name in observable_names
                 ])
             else:
@@ -1330,8 +1335,12 @@ class Simulation:
         if is_noisy:
             # Get jump operators
             if self.config.blockade_radius > 0:
-                j_ops = phys.get_jump_operators(N, self.config.gamma, self.config.gamma_phi, 
-                                               basis=self._basis, mapping=self._mapping)
+                j_ops = phys.get_jump_operators(
+                    N,
+                    self.config.gamma,
+                    self.config.gamma_phi,
+                    basis_context=self._basis_context,
+                )
             else:
                 j_ops = phys.get_jump_operators(N, self.config.gamma, self.config.gamma_phi)
 

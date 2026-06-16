@@ -19,12 +19,13 @@ atom = Atom(0.0, 0.0, 0.0)
 
 ```julia
 basis_states = basis(reg; blockade_radius=0.6)
+context = reduced_basis_context(reg; blockade_radius=0.6)
 reduced_states, mapping = reduced_basis(reg; blockade_radius=0.6)
-H = hamiltonian(reg, [0.2, 0.3, 0.4, 0.5], zeros(4); blockade_radius=0.6)
-H_func = hamiltonian_func(reg, t -> fill(0.2, 4), t -> zeros(4); blockade_radius=0.6)
+H = hamiltonian(reg, [0.2, 0.3, 0.4, 0.5], zeros(4); basis_context=context)
+H_func = hamiltonian_func(reg, t -> fill(0.2, 4), t -> zeros(4); basis_context=context)
 ```
 
-The lowercase API is the stable developer-facing facade. Existing internal names such as `RydbergHamiltonian`, `generate_reduced_basis`, and `build_hamiltonian_func` remain exported for compatibility.
+`BasisContext` carries a reduced basis and its bitstring-to-index mapping so Hamiltonians, observables, and jump operators can share one ordering. The lowercase API is the stable developer-facing facade. Existing internal names such as `RydbergHamiltonian`, `generate_reduced_basis`, and `build_hamiltonian_func` remain exported for compatibility.
 
 ## Pulses and Solvers
 
@@ -36,7 +37,7 @@ pulse = PiecewisePulse(PulseNode[
 omega = compile_pulse(pulse)
 
 psi0 = ComplexF64[1.0; zeros(ComplexF64, length(basis_states) - 1)]
-obs = Dict("atom1" => RydbergPopulation(1, length(reg.atoms); basis=basis_states))
+obs = Dict("atom1" => RydbergPopulation(1, length(reg.atoms); basis_context=context))
 sol, saved = solve_schrodinger(psi0, H_func, (0.0, 1.0); observables=obs)
 ```
 

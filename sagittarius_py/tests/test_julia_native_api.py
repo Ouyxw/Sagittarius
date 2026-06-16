@@ -10,17 +10,18 @@ def test_julia_native_api_exports_register_basis_hamiltonian_and_solver():
         using SparseArrays
         reg = Sagittarius.chain_register(3; spacing=0.5, C6=10.0)
         b = Sagittarius.basis(reg; blockade_radius=0.6)
+        context = Sagittarius.reduced_basis_context(reg; blockade_radius=0.6)
         rbasis, mapping = Sagittarius.reduced_basis(reg; blockade_radius=0.6)
-        H = Sagittarius.hamiltonian(reg, [0.2, 0.3, 0.4], [-0.1, 0.0, 0.2]; blockade_radius=0.6)
+        H = Sagittarius.hamiltonian(reg, [0.2, 0.3, 0.4], [-0.1, 0.0, 0.2]; basis_context=context)
         Hs = Matrix(sparse(H))
         H_func = Sagittarius.hamiltonian_func(
             reg,
             t -> [0.2, 0.3, 0.4],
             t -> [-0.1, 0.0, 0.2];
-            blockade_radius=0.6,
+            basis_context=context,
         )
         psi0 = ComplexF64[1.0, 0.0, 0.0, 0.0, 0.0]
-        obs = Dict("atom1" => Sagittarius.RydbergPopulation(1, 3; basis=rbasis))
+        obs = Dict("atom1" => Sagittarius.RydbergPopulation(1, 3; basis_context=context))
         sol, saved = Sagittarius.solve_schrodinger(
             psi0,
             H_func,
@@ -29,7 +30,7 @@ def test_julia_native_api_exports_register_basis_hamiltonian_and_solver():
             reltol=1e-9,
             abstol=1e-9,
         )
-        jumps = Sagittarius.get_jump_operators(3, 0.1, 0.0; basis=rbasis, mapping=mapping)
+        jumps = Sagittarius.get_jump_operators(3, 0.1, 0.0; basis_context=context)
         Dict(
             "basis" => b,
             "reduced_basis" => rbasis,
@@ -92,3 +93,30 @@ def test_julia_native_api_validates_constructor_inputs():
     """)
 
     assert "n must be positive" in message
+
+
+def test_julia_basis_context_is_shared_by_hamiltonian_observable_and_jumps():
+    jl, _ = get_julia()
+    report = jl.seval("""
+    begin
+        reg = Sagittarius.chain_register(3; spacing=0.5, C6=10.0)
+        context = Sagittarius.reduced_basis_context(reg; blockade_radius=0.6)
+        H = Sagittarius.hamiltonian(reg, [0.2, 0.3, 0.4], [0.0, 0.0, 0.0]; basis_context=context)
+        obs = Sagittarius.RydbergPopulation(1, 3; basis_context=context)
+        jumps = Sagittarius.get_jump_operators(3, 0.1, 0.0; basis_context=context)
+        psi = ComplexF64[0.0, 1.0, 0.0, 0.0, 0.0]
+        Dict(
+            "same_context" => H.basis_context === context,
+            "same_basis" => H.basis === context.basis,
+            "same_mapping" => H.mapping === context.mapping,
+            "observable_value" => obs(psi, 0.0, nothing),
+            "jump_size" => collect(size(jumps[1])),
+        )
+    end
+    """)
+
+    assert report["same_context"] is True
+    assert report["same_basis"] is True
+    assert report["same_mapping"] is True
+    assert report["observable_value"] == 1.0
+    assert list(report["jump_size"]) == [5, 5]

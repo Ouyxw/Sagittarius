@@ -5,8 +5,8 @@ using SparseArrays
 using StaticArrays
 using ..StructuredLogging: log_event
 
-export Atom, Register, RydbergHamiltonian, RydbergOperator, ReducedRydbergOperator, DenseBasisMapping, interaction_matrix
-export generate_reduced_basis, reduced_basis, basis, hamiltonian, hamiltonian_func, build_hamiltonian_func, get_jump_operators
+export Atom, Register, RydbergHamiltonian, RydbergOperator, ReducedRydbergOperator, DenseBasisMapping, BasisContext, interaction_matrix
+export generate_reduced_basis, reduced_basis, reduced_basis_context, basis, hamiltonian, hamiltonian_func, build_hamiltonian_func, get_jump_operators
 export chain_register, square_lattice_register
 
 struct DenseBasisMapping
@@ -15,6 +15,14 @@ end
 
 const _DENSE_BASIS_LOOKUP_MAX_STATES = 1_048_576
 const _BasisMapping = Union{DenseBasisMapping, Dict{Int, Int}}
+
+struct BasisContext
+    N::Int
+    basis::Vector{Int}
+    mapping::_BasisMapping
+    blockade_radius::Float64
+end
+
 const _ReducedBasisCacheKey = Tuple{Int, Float64, UInt64}
 const _REDUCED_BASIS_CACHE = Dict{_ReducedBasisCacheKey, Tuple{Vector{Int}, _BasisMapping}}()
 const _REDUCED_BASIS_CACHE_LOCK = ReentrantLock()
@@ -259,14 +267,15 @@ mutable struct ReducedRydbergOperator
     V::Matrix{Float64}
     basis::Vector{Int}
     mapping::_BasisMapping
+    basis_context::Union{Nothing, BasisContext}
     use_gpu::Bool
     cached_sparse_H::Any
     cached_sparse_cpu::Union{Nothing, SparseMatrixCSC{ComplexF64, Int}}
 end
 
 # Constructor with default values
-function ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping; use_gpu=false)
-    return ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping, use_gpu, nothing, nothing)
+function ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping; basis_context=nothing, use_gpu=false)
+    return ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping, basis_context, use_gpu, nothing, nothing)
 end
 
 function _blockade_adjacency(reg::Register, blockade_radius::Float64)
@@ -377,6 +386,16 @@ function reduced_basis(reg::Register; blockade_radius::Real)
     return generate_reduced_basis(reg, Float64(blockade_radius))
 end
 
+function reduced_basis_context(reg::Register; blockade_radius::Real)
+    radius = Float64(blockade_radius)
+    basis, mapping = generate_reduced_basis(reg, radius)
+    return BasisContext(length(reg.atoms), basis, mapping, radius)
+end
+
+function _basis_context_parts(context::BasisContext)
+    return context.basis, context.mapping
+end
+
 function basis(reg::Register; blockade_radius::Real=0.0)
     radius = Float64(blockade_radius)
     if radius > 0.0
@@ -385,11 +404,11 @@ function basis(reg::Register; blockade_radius::Real=0.0)
     return collect(0:(2^length(reg.atoms) - 1))
 end
 
-hamiltonian(reg::Register, Ω, Δ; blockade_radius::Real=0.0, use_gpu::Bool=false) =
-    RydbergHamiltonian(reg, Ω, Δ; blockade_radius=Float64(blockade_radius), use_gpu=use_gpu)
+hamiltonian(reg::Register, Ω, Δ; blockade_radius::Real=0.0, basis_context=nothing, use_gpu::Bool=false) =
+    RydbergHamiltonian(reg, Ω, Δ; blockade_radius=Float64(blockade_radius), basis_context=basis_context, use_gpu=use_gpu)
 
-hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius::Real=0.0, use_gpu::Bool=false) =
-    build_hamiltonian_func(reg, Ω_func, Δ_func; blockade_radius=Float64(blockade_radius), use_gpu=use_gpu)
+hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius::Real=0.0, basis_context=nothing, use_gpu::Bool=false) =
+    build_hamiltonian_func(reg, Ω_func, Δ_func; blockade_radius=Float64(blockade_radius), basis_context=basis_context, use_gpu=use_gpu)
 
 function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})
     res = zero(ψ)
@@ -508,7 +527,11 @@ end
 Returns a list of sparse jump operators for Lindblad simulation.
 γ and γ_phi can be scalars or vectors of length N.
 """
-function get_jump_operators(N::Int, γ, γ_phi; basis=nothing, mapping=nothing)
+function get_jump_operators(N::Int, γ, γ_phi; basis=nothing, mapping=nothing, basis_context=nothing)
+    if !isnothing(basis_context)
+        basis, mapping = _basis_context_parts(basis_context)
+        N == basis_context.N || throw(ArgumentError("basis_context atom count $(basis_context.N) does not match N=$N"))
+    end
     v_γ = (γ isa AbstractVector) ? convert(Vector{Float64}, γ) : fill(float(γ), N)
     v_γp = (γ_phi isa AbstractVector) ? convert(Vector{Float64}, γ_phi) : fill(float(γ_phi), N)
     
@@ -590,7 +613,7 @@ end
 Returns either a full or reduced Rydberg operator. 
 If blockade_radius > 0, the Hilbert space is truncated.
 """
-function RydbergHamiltonian(reg::Register, Ω, Δ; blockade_radius=0.0, use_gpu=false)
+function RydbergHamiltonian(reg::Register, Ω, Δ; blockade_radius=0.0, basis_context=nothing, use_gpu=false)
     V = interaction_matrix(reg)
     N = length(reg.atoms)
     
@@ -598,10 +621,15 @@ function RydbergHamiltonian(reg::Register, Ω, Δ; blockade_radius=0.0, use_gpu=
     v_Ω = (Ω isa AbstractVector) ? convert(Vector{Float64}, Ω) : fill(float(Ω), N)
     v_Δ = (Δ isa AbstractVector) ? convert(Vector{Float64}, Δ) : fill(float(Δ), N)
     
-    if blockade_radius > 0.0
-        basis, mapping = generate_reduced_basis(reg, blockade_radius)
+    if blockade_radius > 0.0 || !isnothing(basis_context)
+        if isnothing(basis_context)
+            basis_context = reduced_basis_context(reg; blockade_radius=blockade_radius)
+        else
+            basis_context.N == N || throw(ArgumentError("basis_context atom count $(basis_context.N) does not match register atom count $N"))
+        end
+        basis, mapping = _basis_context_parts(basis_context)
         log_event("hamiltonian_built"; atom_count=N, basis_size=length(basis), use_gpu=use_gpu)
-        return ReducedRydbergOperator(N, v_Ω, v_Δ, V, basis, mapping, use_gpu=use_gpu)
+        return ReducedRydbergOperator(N, v_Ω, v_Δ, V, basis, mapping, basis_context=basis_context, use_gpu=use_gpu)
     else
         basis_size = 2^N
         log_event("basis_generated"; atom_count=N, basis_size=basis_size, full_basis_size=basis_size, blockade_radius=0.0)
@@ -616,14 +644,19 @@ end
 Returns a highly optimized closure `t -> Operator` for use in ODE solvers,
 where `Ω_func` and `Δ_func` are functions of time returning a Vector{Float64}.
 """
-function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius=0.0, use_gpu=false)
+function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius=0.0, basis_context=nothing, use_gpu=false)
     V = interaction_matrix(reg)
     N = length(reg.atoms)
     
-    if blockade_radius > 0.0
-        basis, mapping = generate_reduced_basis(reg, blockade_radius)
+    if blockade_radius > 0.0 || !isnothing(basis_context)
+        if isnothing(basis_context)
+            basis_context = reduced_basis_context(reg; blockade_radius=blockade_radius)
+        else
+            basis_context.N == N || throw(ArgumentError("basis_context atom count $(basis_context.N) does not match register atom count $N"))
+        end
+        basis, mapping = _basis_context_parts(basis_context)
         # Create a single operator object to be reused
-        op = ReducedRydbergOperator(N, fill(NaN, N), fill(NaN, N), V, basis, mapping, use_gpu=use_gpu)
+        op = ReducedRydbergOperator(N, fill(NaN, N), fill(NaN, N), V, basis, mapping, basis_context=basis_context, use_gpu=use_gpu)
         log_event("hamiltonian_built"; atom_count=N, basis_size=length(basis), use_gpu=use_gpu)
         
         return t -> begin

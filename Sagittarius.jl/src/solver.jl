@@ -6,6 +6,7 @@ using DiffEqCallbacks
 using SparseArrays
 using Random
 using SciMLBase
+using ..Physics: BasisContext
 
 # Optional dependencies handled via requires or dynamic checks in real packages,
 # but for this prototype we'll assume they are available if selected.
@@ -19,7 +20,11 @@ export solve_schrodinger_gpu
     RydbergPopulation(atom_idx, N_atoms; basis=nothing)
 Returns a function that calculates the population of the Rydberg state for atom \`atom_idx\`.
 """
-function RydbergPopulation(atom_idx, N_atoms; basis=nothing)
+function RydbergPopulation(atom_idx, N_atoms; basis=nothing, basis_context=nothing)
+    if !isnothing(basis_context)
+        basis_context.N == N_atoms || throw(ArgumentError("basis_context atom count $(basis_context.N) does not match N_atoms=$N_atoms"))
+        basis = basis_context.basis
+    end
     mask = 1 << (atom_idx - 1)
     return (state, t, integrator) -> begin
         if state isa Vector
