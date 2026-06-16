@@ -6,9 +6,54 @@ using StaticArrays
 
 export Atom, Register, RydbergHamiltonian, generate_reduced_basis, ReducedRydbergOperator, build_hamiltonian_func, get_jump_operators
 
+struct DenseBasisMapping
+    indices::Vector{Int}
+end
+
+const _DENSE_BASIS_LOOKUP_MAX_STATES = 1_048_576
+const _BasisMapping = Union{DenseBasisMapping, Dict{Int, Int}}
 const _ReducedBasisCacheKey = Tuple{Int, Float64, UInt64}
-const _REDUCED_BASIS_CACHE = Dict{_ReducedBasisCacheKey, Tuple{Vector{Int}, Dict{Int, Int}}}()
+const _REDUCED_BASIS_CACHE = Dict{_ReducedBasisCacheKey, Tuple{Vector{Int}, _BasisMapping}}()
 const _REDUCED_BASIS_CACHE_LOCK = ReentrantLock()
+
+function _basis_index(mapping::DenseBasisMapping, state::Integer)
+    state < 0 && return 0
+    idx = Int(state) + 1
+    if idx > length(mapping.indices)
+        return 0
+    end
+    return @inbounds mapping.indices[idx]
+end
+
+_basis_index(mapping::Dict{Int, Int}, state::Integer) = get(mapping, Int(state), 0)
+
+Base.get(mapping::DenseBasisMapping, state::Integer, default) = begin
+    idx = _basis_index(mapping, state)
+    idx == 0 ? default : idx
+end
+Base.haskey(mapping::DenseBasisMapping, state::Integer) = _basis_index(mapping, state) != 0
+Base.getindex(mapping::DenseBasisMapping, state::Integer) = begin
+    idx = _basis_index(mapping, state)
+    idx == 0 && throw(KeyError(state))
+    idx
+end
+
+function _build_basis_mapping(basis::Vector{Int})
+    if isempty(basis)
+        return DenseBasisMapping(Int[])
+    end
+
+    max_state = maximum(basis)
+    if max_state >= 0 && max_state + 1 <= _DENSE_BASIS_LOOKUP_MAX_STATES
+        indices = zeros(Int, max_state + 1)
+        for (idx, state) in enumerate(basis)
+            @inbounds indices[state + 1] = idx
+        end
+        return DenseBasisMapping(indices)
+    end
+
+    return Dict(state => i for (i, state) in enumerate(basis))
+end
 
 struct Atom
     coords::SVector{3, Float64}
@@ -163,7 +208,7 @@ end
 
 A Hamiltonian operator that acts on a truncated Hilbert space.
 `basis` is a Vector of bitstrings (Int) representing valid states.
-`mapping` is a Dictionary (or lookup table) from bitstring to its index in the reduced basis.
+`mapping` is a lookup table from bitstring to its index in the reduced basis.
 """
 mutable struct ReducedRydbergOperator
     N::Int
@@ -171,7 +216,7 @@ mutable struct ReducedRydbergOperator
     Δ::Vector{Float64}
     V::Matrix{Float64}
     basis::Vector{Int}
-    mapping::Dict{Int, Int}
+    mapping::_BasisMapping
     use_gpu::Bool
     cached_sparse_H::Any
     cached_sparse_cpu::Union{Nothing, SparseMatrixCSC{ComplexF64, Int}}
@@ -267,7 +312,7 @@ function generate_reduced_basis(reg::Register, blockade_radius::Float64)
     find_states(1, 0)
     sort!(basis)
     
-    mapping = Dict(state => i for (i, state) in enumerate(basis))
+    mapping = _build_basis_mapping(basis)
     entry = (basis, mapping)
     return lock(_REDUCED_BASIS_CACHE_LOCK) do
         get!(_REDUCED_BASIS_CACHE, key, entry)
@@ -300,9 +345,8 @@ function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})
         # 2. Off-diagonal terms (Driving σx)
         for j in 1:N
             target_state = state ⊻ (1 << (j-1))
-            # Only transition if the target state is in our reduced basis
-            if haskey(op.mapping, target_state)
-                target_idx = op.mapping[target_state]
+            target_idx = _basis_index(op.mapping, target_state)
+            if target_idx != 0
                 res[target_idx] += (op.Ω[j] / 2.0) * ψ[idx]
             end
         end
@@ -349,7 +393,7 @@ function _build_reduced_sparse_cache(op::ReducedRydbergOperator)
         rows = Int[col_idx]  # keep an explicit diagonal slot even when its value is zero
         for j in 1:op.N
             target_state = state ⊻ (1 << (j-1))
-            target_idx = get(op.mapping, target_state, 0)
+            target_idx = _basis_index(op.mapping, target_state)
             if target_idx != 0
                 push!(rows, target_idx)
             end
@@ -433,8 +477,9 @@ function jump_sigma_minus(N, atom_idx, weight; basis=nothing, mapping=nothing)
         for (idx, state) in enumerate(basis)
             if (state & mask) != 0
                 target_state = state ⊻ mask
-                if haskey(mapping, target_state)
-                    push!(I, mapping[target_state]); push!(J, idx); push!(V, weight)
+                target_idx = _basis_index(mapping, target_state)
+                if target_idx != 0
+                    push!(I, target_idx); push!(J, idx); push!(V, weight)
                 end
             end
         end

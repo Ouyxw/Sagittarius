@@ -143,6 +143,10 @@ def test_reduced_basis_cache_reuses_basis_by_adjacency_radius_and_atom_count():
             "same_register_mapping_reused" => mapping1 === mapping2,
             "same_graph_basis_reused" => basis1 === basis3,
             "same_graph_mapping_reused" => mapping1 === mapping3,
+            "mapping_is_dense" => mapping1 isa Sagittarius.Physics.DenseBasisMapping,
+            "dense_lookup_hit" => Sagittarius.Physics._basis_index(mapping1, 5) == 5,
+            "dense_lookup_miss" => Sagittarius.Physics._basis_index(mapping1, 3) == 0,
+            "fallback_mapping_is_dict" => Sagittarius.Physics._build_basis_mapping([0, 2^20]) isa Dict{Int, Int},
             "new_radius_basis_separated" => basis1 !== basis4,
             "cache_after_first" => cache_after_first,
             "cache_after_second" => cache_after_second,
@@ -157,6 +161,10 @@ def test_reduced_basis_cache_reuses_basis_by_adjacency_radius_and_atom_count():
     assert report["same_register_mapping_reused"] is True
     assert report["same_graph_basis_reused"] is True
     assert report["same_graph_mapping_reused"] is True
+    assert report["mapping_is_dense"] is True
+    assert report["dense_lookup_hit"] is True
+    assert report["dense_lookup_miss"] is True
+    assert report["fallback_mapping_is_dict"] is True
     assert report["new_radius_basis_separated"] is True
     assert report["cache_after_first"] == 1
     assert report["cache_after_second"] == 1
