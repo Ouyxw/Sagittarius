@@ -5,7 +5,9 @@ using SparseArrays
 using StaticArrays
 using ..StructuredLogging: log_event
 
-export Atom, Register, RydbergHamiltonian, generate_reduced_basis, ReducedRydbergOperator, build_hamiltonian_func, get_jump_operators
+export Atom, Register, RydbergHamiltonian, RydbergOperator, ReducedRydbergOperator, DenseBasisMapping, interaction_matrix
+export generate_reduced_basis, reduced_basis, basis, hamiltonian, hamiltonian_func, build_hamiltonian_func, get_jump_operators
+export chain_register, square_lattice_register
 
 struct DenseBasisMapping
     indices::Vector{Int}
@@ -60,9 +62,48 @@ struct Atom
     coords::SVector{3, Float64}
 end
 
+Atom(x::Real, y::Real, z::Real=0.0) = Atom(SVector(Float64(x), Float64(y), Float64(z)))
+Atom(coords::NTuple{2, <:Real}) = Atom(coords[1], coords[2], 0.0)
+Atom(coords::NTuple{3, <:Real}) = Atom(coords[1], coords[2], coords[3])
+Atom(coords::AbstractVector{<:Real}) = length(coords) == 2 ? Atom(coords[1], coords[2], 0.0) :
+    (length(coords) == 3 ? Atom(coords[1], coords[2], coords[3]) : throw(ArgumentError("Atom coordinates must contain 2 or 3 values")))
+
 struct Register
     atoms::Vector{Atom}
     C6::Float64
+end
+
+Register(atoms::AbstractVector{Atom}; C6::Real=1.0) = Register(collect(atoms), Float64(C6))
+Register(coords::AbstractVector{<:Tuple}; C6::Real=1.0) = Register([Atom(coord) for coord in coords], Float64(C6))
+Register(coords::AbstractVector{<:AbstractVector}; C6::Real=1.0) = Register([Atom(coord) for coord in coords], Float64(C6))
+
+function chain_register(n::Integer; spacing::Real=1.0, C6::Real=1.0, origin=(0.0, 0.0, 0.0), axis::Symbol=:x)
+    n > 0 || throw(ArgumentError("n must be positive"))
+    axis in (:x, :y, :z) || throw(ArgumentError("axis must be one of :x, :y, or :z"))
+    o = Atom(origin).coords
+    step = axis == :x ? SVector(Float64(spacing), 0.0, 0.0) :
+        (axis == :y ? SVector(0.0, Float64(spacing), 0.0) : SVector(0.0, 0.0, Float64(spacing)))
+    return Register([Atom(o + (i - 1) * step) for i in 1:n], Float64(C6))
+end
+
+function square_lattice_register(rows::Integer, cols::Integer; spacing::Real=1.0, C6::Real=1.0, origin=(0.0, 0.0, 0.0), plane::Symbol=:xy)
+    rows > 0 || throw(ArgumentError("rows must be positive"))
+    cols > 0 || throw(ArgumentError("cols must be positive"))
+    plane in (:xy, :xz, :yz) || throw(ArgumentError("plane must be one of :xy, :xz, or :yz"))
+    o = Atom(origin).coords
+    s = Float64(spacing)
+    row_step, col_step = if plane == :xy
+        (SVector(s, 0.0, 0.0), SVector(0.0, s, 0.0))
+    elseif plane == :xz
+        (SVector(s, 0.0, 0.0), SVector(0.0, 0.0, s))
+    else
+        (SVector(0.0, s, 0.0), SVector(0.0, 0.0, s))
+    end
+    atoms = Atom[]
+    for r in 0:(rows - 1), c in 0:(cols - 1)
+        push!(atoms, Atom(o + r * row_step + c * col_step))
+    end
+    return Register(atoms, Float64(C6))
 end
 
 function interaction_matrix(reg::Register)
@@ -331,6 +372,24 @@ function generate_reduced_basis(reg::Register, blockade_radius::Float64)
     end
     return cached_or_inserted
 end
+
+function reduced_basis(reg::Register; blockade_radius::Real)
+    return generate_reduced_basis(reg, Float64(blockade_radius))
+end
+
+function basis(reg::Register; blockade_radius::Real=0.0)
+    radius = Float64(blockade_radius)
+    if radius > 0.0
+        return first(generate_reduced_basis(reg, radius))
+    end
+    return collect(0:(2^length(reg.atoms) - 1))
+end
+
+hamiltonian(reg::Register, Ω, Δ; blockade_radius::Real=0.0, use_gpu::Bool=false) =
+    RydbergHamiltonian(reg, Ω, Δ; blockade_radius=Float64(blockade_radius), use_gpu=use_gpu)
+
+hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius::Real=0.0, use_gpu::Bool=false) =
+    build_hamiltonian_func(reg, Ω_func, Δ_func; blockade_radius=Float64(blockade_radius), use_gpu=use_gpu)
 
 function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})
     res = zero(ψ)
