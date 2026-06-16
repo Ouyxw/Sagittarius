@@ -802,6 +802,148 @@ def dense_vs_reduced_validation(
     }
 
 
+def _copy_solver_config(config: SolverConfig, **overrides: Any) -> SolverConfig:
+    values = dict(config.__dict__)
+    values.update(overrides)
+    return SolverConfig(**values)
+
+
+def _density_matrix_metrics(states: Any) -> Dict[str, Any]:
+    trace_errors: List[float] = []
+    min_eigenvalues: List[float] = []
+    for rho in states:
+        rho_arr = np.asarray(rho, dtype=np.complex128)
+        trace = np.trace(rho_arr)
+        trace_errors.append(float(abs(trace - 1.0)))
+        hermitian_rho = 0.5 * (rho_arr + rho_arr.conj().T)
+        min_eigenvalues.append(float(np.min(np.linalg.eigvalsh(hermitian_rho))))
+    return {
+        "max_trace_error": max(trace_errors) if trace_errors else 0.0,
+        "min_density_eigenvalue": min(min_eigenvalues) if min_eigenvalues else 0.0,
+        "sample_count": len(trace_errors),
+    }
+
+
+def _observable_series(result: "SimulationResult", observables: Dict[str, int]) -> Dict[str, np.ndarray]:
+    return {name: np.asarray(result.data[name], dtype=float) for name in observables}
+
+
+def open_system_sanity_checks(
+    register: Register,
+    sequence: PulseSequence,
+    *,
+    config: Optional[SolverConfig] = None,
+    psi0: Optional[np.ndarray] = None,
+    t_start: float = 0.0,
+    t_end: float = 1.0,
+    observables: Optional[Dict[str, int]] = None,
+    n_trajectories: int = 300,
+    trace_atol: float = 1e-6,
+    positivity_atol: float = 1e-7,
+    mc_mean_abs_atol: float = 0.08,
+) -> Dict[str, Any]:
+    """Run small-system open-system sanity checks for Lindblad and MCWF paths."""
+    n_atoms = len(register.atoms)
+    if n_atoms > 8:
+        raise _validation_error(
+            "VALIDATION_OPEN_SYSTEM_SYSTEM_TOO_LARGE",
+            f"open-system sanity checks are limited to <= 8 atoms, got {n_atoms}.",
+            "Use this validation on small systems because raw density matrices scale as 4**N.",
+        )
+    if config is None:
+        config = SolverConfig(gamma=0.1)
+    n_trajectories = _positive_int(n_trajectories, field_name="n_trajectories")
+    has_gamma = bool(np.any(np.asarray(config.gamma, dtype=float) > 0))
+    has_gamma_phi = bool(np.any(np.asarray(config.gamma_phi, dtype=float) > 0))
+    if not has_gamma and not has_gamma_phi:
+        raise _validation_error(
+            "VALIDATION_OPEN_SYSTEM_NO_NOISE",
+            "open-system sanity checks require gamma or gamma_phi to be positive.",
+            "Provide a SolverConfig with nonzero gamma and/or gamma_phi.",
+        )
+    if psi0 is None:
+        dim = Simulation(register, sequence, config).validate()
+        psi0 = np.zeros(dim, dtype=np.complex128)
+        psi0[0] = 1.0
+    else:
+        psi0 = np.asarray(psi0, dtype=np.complex128)
+    if observables is None:
+        observables = {f"atom_{idx}": idx for idx in range(n_atoms)}
+    Simulation(register, sequence, config).validate_inputs(sample_time=float(t_start), observables=observables)
+
+    lindblad_config = _copy_solver_config(config, use_mc=False, use_gpu=False)
+    lindblad_sim = Simulation(register, sequence, lindblad_config)
+    lindblad_raw = lindblad_sim.run(psi0, float(t_start), float(t_end))
+    metrics = _density_matrix_metrics(lindblad_raw.u)
+
+    lindblad_obs = Simulation(register, sequence, lindblad_config).run(
+        psi0,
+        float(t_start),
+        float(t_end),
+        observables=observables,
+    )
+    mc_config = _copy_solver_config(
+        config, use_mc=True, use_gpu=False, n_trajectories=n_trajectories
+    )
+    mc_obs = Simulation(register, sequence, mc_config).run(
+        psi0,
+        float(t_start),
+        float(t_end),
+        observables=observables,
+    )
+
+    lindblad_t = np.asarray(lindblad_obs.data["t"], dtype=float)
+    mc_t = np.asarray(mc_obs.data["t"], dtype=float)
+    lindblad_series = _observable_series(lindblad_obs, observables)
+    mc_series = _observable_series(mc_obs, observables)
+    observable_reports: Dict[str, Dict[str, float]] = {}
+    max_mean_abs_error = 0.0
+    max_abs_error = 0.0
+    for name in observables:
+        interpolated = np.interp(mc_t, lindblad_t, lindblad_series[name])
+        diff = np.abs(interpolated - mc_series[name])
+        mean_abs_error = float(np.mean(diff)) if diff.size else 0.0
+        obs_max_abs_error = float(np.max(diff)) if diff.size else 0.0
+        observable_reports[name] = {
+            "mean_abs_error": mean_abs_error,
+            "max_abs_error": obs_max_abs_error,
+        }
+        max_mean_abs_error = max(max_mean_abs_error, mean_abs_error)
+        max_abs_error = max(max_abs_error, obs_max_abs_error)
+
+    trace_ok = metrics["max_trace_error"] <= float(trace_atol)
+    positivity_ok = metrics["min_density_eigenvalue"] >= -float(positivity_atol)
+    mc_lindblad_ok = max_mean_abs_error <= float(mc_mean_abs_atol)
+    return {
+        "schema_version": "open-system-sanity-checks/v1",
+        "ok": bool(trace_ok and positivity_ok and mc_lindblad_ok),
+        "atom_count": n_atoms,
+        "basis_size": int(len(psi0)),
+        "t_start": float(t_start),
+        "t_end": float(t_end),
+        "n_trajectories": n_trajectories,
+        "trace_atol": float(trace_atol),
+        "positivity_atol": float(positivity_atol),
+        "mc_mean_abs_atol": float(mc_mean_abs_atol),
+        "lindblad_trace": {
+            "ok": bool(trace_ok),
+            "max_error": metrics["max_trace_error"],
+        },
+        "lindblad_positivity": {
+            "ok": bool(positivity_ok),
+            "min_eigenvalue": metrics["min_density_eigenvalue"],
+        },
+        "mcwf_vs_lindblad": {
+            "ok": bool(mc_lindblad_ok),
+            "max_mean_abs_error": max_mean_abs_error,
+            "max_abs_error": max_abs_error,
+            "observables": observable_reports,
+        },
+        "lindblad_sample_count": metrics["sample_count"],
+        "observable_names": list(observables.keys()),
+    }
+
+
 def _simulation_result_with_manifest(
     data: Dict[str, List[float]],
     *,

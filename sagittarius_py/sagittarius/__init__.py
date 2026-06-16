@@ -12,6 +12,7 @@ from .api import (
     PulseSequence,
     SolverConfig,
     dense_vs_reduced_validation,
+    open_system_sanity_checks,
     validate_run_manifest,
     load_result,
 )
@@ -52,6 +53,7 @@ __all__ = [
     "PulseSequence",
     "SolverConfig",
     "dense_vs_reduced_validation",
+    "open_system_sanity_checks",
     "validate_run_manifest",
     "load_result",
     "Constant",
