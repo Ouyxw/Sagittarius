@@ -1,6 +1,6 @@
 # GPU Benchmark Conclusion: RTX 5070 Ti (Full Path)
 
-This report summarizes the performance evaluation of the Sagittarius GPU-accelerated solver on an **NVIDIA GeForce RTX 5070 Ti** (16GB VRAM, CUDA 13.1) environment, conducted on April 30, 2026. This test covers the **full vectorized path**, including ODE integration and Rydberg population observables.
+This historical note records a local performance evaluation of the Sagittarius CUDA path on an **NVIDIA GeForce RTX 5070 Ti** (16GB VRAM, CUDA 13.1) environment, conducted on April 30, 2026. Treat these values as historical context unless they are regenerated as `benchmark-artifact/v1` output with current `version-info/v1` metadata. See [../../../docs/PERFORMANCE_CLAIMS.md](../../../docs/PERFORMANCE_CLAIMS.md).
 
 ## 1. Environment Status
 - **Hardware**: NVIDIA GeForce RTX 5070 Ti
@@ -8,7 +8,7 @@ This report summarizes the performance evaluation of the Sagittarius GPU-acceler
 - **Optimizations**: Hamiltonian caching, Matrix-reuse, and Fixed GPU Observables (1-based index fix).
 
 ## 2. Benchmark Results (Integration + Observables)
-The benchmark compares CPU vs GPU performance for a 1D chain simulation (1.0μs duration) with one observable tracked.
+The table below came from a 1D chain simulation (1.0 microsecond duration) with one observable tracked. Use the current `benchmark_gpu.py` artifact output for new claims.
 
 | Atoms (\$N\$) | Basis Dimension | CPU Time (s) | GPU Time (s) | Speedup |
 | :--- | :--- | :--- | :--- | :--- |
@@ -22,16 +22,16 @@ The benchmark compares CPU vs GPU performance for a 1D chain simulation (1.0μs 
 ## 3. Key Findings
 
 ### 3.1 Observables Overhead
-Adding observables introduces a slight constant overhead for GPU kernel launches (~50ms) but remains highly efficient. The **crossover point remains at N=14**, where the GPU's throughput justifies the overhead.
+In this historical run, observable evaluation added GPU kernel-launch overhead and the measured CPU/CUDA crossover occurred at N=14. That crossover is not a general claim; cite a current artifact for the target hardware and configuration.
 
 ### 3.2 Result Parity & Stability
-After fixing the 1-based indexing bug in `RydbergPopulation`, the GPU results now perfectly match CPU outputs (Mean Diff < 1e-6). The system survived a high-stress $N=20$ run without any memory or signal-handling issues.
+For this historical run, CPU and CUDA observable outputs matched within the recorded tolerance (mean difference below 1e-6), and the N=20 row completed without observed memory or signal-handling failures.
 
 ### 3.3 Optimized Scaling
-At $N=20$, the total simulation time (including all ODE steps and population mapping) is **under 0.4 seconds** on the RTX 5070 Ti, compared to over 5 seconds on a multi-threaded CPU. This represents a robust **14x speedup** for complete physical workflows.
+For the N=20 row in this historical table, the recorded CUDA time was 0.370 seconds and the recorded CPU time was 5.203 seconds. Re-run `benchmark_gpu.py` and cite its JSON artifact before using this comparison externally.
 
 ## 4. Conclusion
-The Sagittarius GPU backend is **Production-Ready** for Rydberg simulations on the RTX 5000 series. The combination of Hamiltonian caching and vectorized observable reduction ensures that performance gains scale linearly with problem complexity beyond the crossover threshold.
+The current public maturity contract marks CUDA as experimental. This note should be read as a historical local benchmark, not as a production-readiness or scaling guarantee.
 
 ---
 *Updated by Gemini CLI - 2026-04-30*

@@ -11,14 +11,14 @@ An **Independent Set** is a set of vertices in a graph where no two vertices are
 2.  **Edges $\to$ Blockade**: Edges in a UDG exist between vertices within distance $R$. By setting the Rydberg `blockade_radius` $\ge R$, the physical interaction prevents adjacent atoms from both being in the Rydberg state $|r\rangle$, enforcing the independent set constraint.
 3.  **Weights $\to$ Detunings**: Node weights $w_i$ are mapped to local detunings $\Delta_i$. The Hamiltonian ground state minimizes $E = - \sum \Delta_i n_i$, which is equivalent to maximizing the total weight.
 
-## 🚀 Performance Optimizations
+## Performance and Optimization Notes
 
-This project leverages the high-performance Sagittarius backend features:
-- **Native Pulse Compilation**: Uses `Pulse.sin_squared` and `Pulse.ramp` to eliminate Python-Julia bridge overhead.
-- **GPU Acceleration**: Offloads sparse matrix-vector multiplications to CUDA for large graphs ($N \ge 14$).
-- **Hamiltonian Caching**: Reuses operator structures to minimize Host-to-Device synchronization.
+This project exercises Sagittarius execution paths that may affect performance, but any speed or scaling statement should be backed by a generated benchmark artifact:
+- **Native Pulse Compilation**: Uses `Pulse.sin_squared` and `Pulse.ramp` to keep pulse evaluation in the Julia backend.
+- **CUDA Execution Path**: Can offload sparse matrix-vector work when `SolverConfig(use_gpu=True, gpu_backend="CUDA")` is used and CUDA diagnostics pass.
+- **Hamiltonian Caching**: Reuses operator structures to reduce repeated Hamiltonian setup work during sweeps.
 
-For a detailed performance analysis on the RTX 5070 Ti, see the [Conclusion Report](CONCLUSION.md).
+See [../../../docs/PERFORMANCE_CLAIMS.md](../../../docs/PERFORMANCE_CLAIMS.md) for the claim checklist. [CONCLUSION.md](CONCLUSION.md) is a historical project note and should not be used as an external performance claim without regenerating current artifacts.
 
 ## 📊 Performance & Hardness Metrics
 

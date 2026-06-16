@@ -1,7 +1,7 @@
 [project]
 name = "sagittarius-py"
 version = "0.1.0"
-description = "A high-performance Neutral Atom quantum emulator"
+description = "A neutral-atom quantum emulator with Julia and Python SDKs"
 requires-python = ">=3.10"
 dependencies = [
     "juliacall>=0.9.35",

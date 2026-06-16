@@ -215,7 +215,7 @@ Performance scripts live under:
 sagittarius_py/tests/test_performance/
 ```
 
-Benchmark results should be interpreted with the exact hardware, `version-info/v1` metadata, solver settings, and backend configuration used to generate them.
+Benchmark results should be interpreted with the exact hardware, `version-info/v1` metadata, solver settings, and backend configuration used to generate them. Public performance statements should follow [docs/PERFORMANCE_CLAIMS.md](docs/PERFORMANCE_CLAIMS.md) and cite the relevant `benchmark-artifact/v1` JSON.
 
 ## Architecture
 

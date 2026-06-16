@@ -1,6 +1,6 @@
 # Sagittarius Development Roadmap & Requirements
 
-This document outlines the development lifecycle of Sagittarius, from a functional prototype to a high-performance scientific SDK.
+This document outlines the development lifecycle of Sagittarius, from a functional prototype to a reproducible scientific SDK.
 
 ## ✅ Phase 1: Core API & Ergonomics (Completed)
 | Feature | Status | Description |
@@ -86,7 +86,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Known Limitations** | High | Done | Document current scale limits, backend limitations, numerical assumptions, reproducibility gaps, and unsupported scenarios in `docs/KNOWN_LIMITATIONS.md`. |
-| **Verifiable Performance Claims** | High | Planned | Replace broad marketing claims with benchmark-backed statements that reference Phase 6 benchmark artifacts and name hardware, versions, problem size, and configuration. |
+| **Verifiable Performance Claims** | High | Done | Added `docs/PERFORMANCE_CLAIMS.md` with claim requirements, artifact sources, and approved wording; updated README, MWIS notes, and historical GPU/MWIS conclusions to require `benchmark-artifact/v1` or `mwis-batch-verification/v1` evidence before public performance claims. |
 | **Minimal Examples with Expected Output** | Medium | Done | Add short examples with expected diagnostics shape, validation errors, indexing behavior, basis size, observable values, and serialization output in `docs/MINIMAL_EXAMPLES.md`. |
 | **Dual SDK Documentation** | Medium | Planned | Provide parallel Python and Julia examples for algorithm prototyping, experiment-style pulse simulation, baseline validation, and hardware-demo preparation. |
 | **Prior-Art-Aware Technical Notes** | Medium | Planned | Maintain internal notes distinguishing Sagittarius-specific execution optimizations from known Rydberg/MWIS mappings and existing neutral-atom simulators. |
