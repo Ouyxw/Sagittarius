@@ -36,14 +36,14 @@ Schema version: `event-taxonomy/v1`
 | `SAG-EVT-0007` | `cluster_setup_start` | cluster | `info` | active | `n_workers` | - |
 | `SAG-EVT-0008` | `cluster_setup_finish` | cluster | `info` | active | `n_workers` | - |
 | `SAG-EVT-0009` | `backend_selected` | runtime | `info` | reserved | `backend`, `use_gpu` | - |
-| `SAG-EVT-0010` | `basis_generated` | physics | `info` | reserved | `atom_count`, `basis_size`, `full_basis_size`, `blockade_radius` | `reduced_basis_pruning_ratio` |
-| `SAG-EVT-0011` | `hamiltonian_built` | physics | `info` | reserved | `atom_count`, `basis_size`, `use_gpu` | `backend`, `nnz` |
+| `SAG-EVT-0010` | `basis_generated` | physics | `info` | active | `atom_count`, `basis_size`, `full_basis_size`, `blockade_radius` | `reduced_basis_pruning_ratio` |
+| `SAG-EVT-0011` | `hamiltonian_built` | physics | `info` | active | `atom_count`, `basis_size`, `use_gpu` | `backend`, `nnz` |
 | `SAG-EVT-0012` | `gpu_allocation` | runtime | `info` | reserved | `backend`, `ok` | `bytes`, `device`, `code`, `message` |
 | `SAG-EVT-0013` | `failure_diagnostic` | runtime | `error` | reserved | `code`, `message`, `remediation` | `backend`, `severity` |
 
 ## Log Payload Shape
 
-Cataloged events emitted through `sagittarius.runtime.log_event()` include these common fields:
+Cataloged events emitted through Python `sagittarius.runtime.log_event()` and Julia `Sagittarius.StructuredLogging.log_event()` include these common fields:
 
 ```json
 {

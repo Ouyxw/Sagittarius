@@ -3,6 +3,7 @@ module Physics
 using LinearAlgebra
 using SparseArrays
 using StaticArrays
+using ..StructuredLogging: log_event
 
 export Atom, Register, RydbergHamiltonian, generate_reduced_basis, ReducedRydbergOperator, build_hamiltonian_func, get_jump_operators
 
@@ -314,9 +315,21 @@ function generate_reduced_basis(reg::Register, blockade_radius::Float64)
     
     mapping = _build_basis_mapping(basis)
     entry = (basis, mapping)
-    return lock(_REDUCED_BASIS_CACHE_LOCK) do
+    cached_or_inserted = lock(_REDUCED_BASIS_CACHE_LOCK) do
         get!(_REDUCED_BASIS_CACHE, key, entry)
     end
+    if cached_or_inserted === entry
+        full_basis_size = 2^N
+        log_event(
+            "basis_generated";
+            atom_count=N,
+            basis_size=length(basis),
+            full_basis_size=full_basis_size,
+            blockade_radius=blockade_radius,
+            reduced_basis_pruning_ratio=1.0 - (length(basis) / full_basis_size),
+        )
+    end
+    return cached_or_inserted
 end
 
 function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})
@@ -528,8 +541,12 @@ function RydbergHamiltonian(reg::Register, Ω, Δ; blockade_radius=0.0, use_gpu=
     
     if blockade_radius > 0.0
         basis, mapping = generate_reduced_basis(reg, blockade_radius)
+        log_event("hamiltonian_built"; atom_count=N, basis_size=length(basis), use_gpu=use_gpu)
         return ReducedRydbergOperator(N, v_Ω, v_Δ, V, basis, mapping, use_gpu=use_gpu)
     else
+        basis_size = 2^N
+        log_event("basis_generated"; atom_count=N, basis_size=basis_size, full_basis_size=basis_size, blockade_radius=0.0)
+        log_event("hamiltonian_built"; atom_count=N, basis_size=basis_size, use_gpu=use_gpu)
         return RydbergOperator(N, v_Ω, v_Δ, V)
     end
 end
@@ -548,6 +565,7 @@ function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius
         basis, mapping = generate_reduced_basis(reg, blockade_radius)
         # Create a single operator object to be reused
         op = ReducedRydbergOperator(N, fill(NaN, N), fill(NaN, N), V, basis, mapping, use_gpu=use_gpu)
+        log_event("hamiltonian_built"; atom_count=N, basis_size=length(basis), use_gpu=use_gpu)
         
         return t -> begin
             # Get current pulse values
@@ -562,6 +580,9 @@ function build_hamiltonian_func(reg::Register, Ω_func, Δ_func; blockade_radius
         end
     else
         op = RydbergOperator(N, fill(NaN, N), fill(NaN, N), V)
+        basis_size = 2^N
+        log_event("basis_generated"; atom_count=N, basis_size=basis_size, full_basis_size=basis_size, blockade_radius=0.0)
+        log_event("hamiltonian_built"; atom_count=N, basis_size=basis_size, use_gpu=use_gpu)
         return t -> begin
             cur_Ω = convert(Vector{Float64}, Ω_func(t))
             cur_Δ = convert(Vector{Float64}, Δ_func(t))

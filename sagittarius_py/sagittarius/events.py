@@ -121,7 +121,6 @@ EVENT_CATALOG: Dict[str, EventSpec] = {
         description="A full or blockade-reduced basis was generated.",
         required_fields=("atom_count", "basis_size", "full_basis_size", "blockade_radius"),
         optional_fields=("reduced_basis_pruning_ratio",),
-        status="reserved",
     ),
     "hamiltonian_built": EventSpec(
         event_id="SAG-EVT-0011",
@@ -131,7 +130,6 @@ EVENT_CATALOG: Dict[str, EventSpec] = {
         description="Hamiltonian construction completed for a register and pulse configuration.",
         required_fields=("atom_count", "basis_size", "use_gpu"),
         optional_fields=("backend", "nnz"),
-        status="reserved",
     ),
     "gpu_allocation": EventSpec(
         event_id="SAG-EVT-0012",

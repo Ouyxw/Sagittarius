@@ -1,10 +1,12 @@
 module Sagittarius
 
+include("logging.jl")
 include("program.jl")
 include("physics.jl")
 include("solver.jl")
 include("cluster.jl")
 
+using .StructuredLogging
 using .Program
 using .Physics
 using .Solver
