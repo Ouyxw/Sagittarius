@@ -49,6 +49,7 @@ These characterize the optimization difficulty of the instance:
 - `solution_verify.py`: Classical MWIS solver for correctness verification and hardness calculation.
 - `baselines.py`: Collection of classical heuristic and ILP solvers.
 - `benchmark_mwis.py`: Comprehensive performance evaluation and scaling analysis.
+- `batch_verify.py`: Seeded randomized MWIS batch verifier comparing AQC outputs against exact PuLP/CBC ILP solutions.
 - `test_gpu_mwis.py`: Specialized parity test for hardware acceleration.
 - `CONCLUSION.md`: Summary of technical gains and benchmark results.
 
@@ -60,4 +61,15 @@ cd sagittarius_py/projects/mwis_udg
 uv run python example_mwis.py
 # Run the benchmarks
 PYTHON_JULIACALL_HANDLE_SIGNALS=yes uv run python benchmark_mwis.py
+```
+
+## Batch Verification
+
+`batch_verify.py` provides a reproducible Phase 9 verification harness. It generates seeded weighted UDG instances, solves each instance exactly with PuLP/CBC ILP, runs the configured AQC solver, and reports validity, exact-match count, approximation ratios, and optional optimal-state probability when the solver exposes full basis probabilities.
+
+```python
+from batch_verify import verify_mwis_batch
+
+report = verify_mwis_batch(n_instances=8, n_nodes=8, seed=2026)
+print(report.to_dict())
 ```
