@@ -88,7 +88,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Known Limitations** | High | Done | Document current scale limits, backend limitations, numerical assumptions, reproducibility gaps, and unsupported scenarios in `docs/KNOWN_LIMITATIONS.md`. |
 | **Verifiable Performance Claims** | High | Done | Added `docs/PERFORMANCE_CLAIMS.md` with claim requirements, artifact sources, and approved wording; updated README, MWIS notes, and historical GPU/MWIS conclusions to require `benchmark-artifact/v1` or `mwis-batch-verification/v1` evidence before public performance claims. |
 | **Minimal Examples with Expected Output** | Medium | Done | Add short examples with expected diagnostics shape, validation errors, indexing behavior, basis size, observable values, and serialization output in `docs/MINIMAL_EXAMPLES.md`. |
-| **Dual SDK Documentation** | Medium | Planned | Provide parallel Python and Julia examples for algorithm prototyping, experiment-style pulse simulation, baseline validation, and hardware-demo preparation. |
+| **Dual SDK Documentation** | Medium | Done | Added `docs/DUAL_SDK_EXAMPLES.md` with paired Python and Julia workflows for algorithm prototyping, experiment-style pulse simulation, baseline validation, and hardware-demo preparation, linked from README, Julia API, and parity docs. |
 | **Prior-Art-Aware Technical Notes** | Medium | Planned | Maintain internal notes distinguishing Sagittarius-specific execution optimizations from known Rydberg/MWIS mappings and existing neutral-atom simulators. |
 | **Disclosure Control** | Medium | Planned | Track dates for public releases, benchmark reports, and technical disclosures that may affect patent filing strategy. |
 

@@ -1,0 +1,201 @@
+# Dual SDK Examples
+
+Sagittarius supports two complementary entry points:
+
+- **Python SDK** for notebooks, algorithm prototyping, validation scripts, artifact handling, plotting, and integration with scientific Python tools.
+- **Julia native API** for direct access to registers, pulse ASTs, reduced bases, Hamiltonian operators, solver functions, jump operators, GPU entry points, and Julia logging.
+
+Both SDKs share the physical semantics documented in `docs/PYTHON_JULIA_PARITY.md`: atom order is preserved, Python indices are zero-based, Julia indices are one-based, bitstrings use the same ascending integer order, and reduced-basis Hamiltonians, observables, and jump operators should share the same basis context.
+
+## When to Use Each SDK
+
+| Workflow | Python SDK | Julia Native API |
+| :--- | :--- | :--- |
+| Algorithm prototyping | Preferred for graph/data tooling, quick validation, pandas/NumPy analysis, and artifact writing. | Useful when the prototype needs direct Hamiltonian inspection or custom Julia-side kernels. |
+| Experiment-style pulse simulation | Preferred for user-facing pulse construction, input validation, and result manifests. | Preferred for low-level pulse AST compilation and direct solver control. |
+| Baseline validation | Preferred for backend-free checks such as dense-vs-reduced validation and MWIS batch verification. | Preferred for exact backend parity checks, reduced-basis inspection, and solver-level comparisons. |
+| Hardware-demo preparation | Preferred for diagnostics, run manifests, serialization, and reproducible artifact bundles. | Preferred for backend-specific execution paths after diagnostics pass. |
+
+## Algorithm Prototyping
+
+Use Python when graph construction, exact baselines, and result analysis matter more than direct solver internals.
+
+```python
+import numpy as np
+import networkx as nx
+
+from sagittarius import Register, Simulation, Pulse, PulseSequence, SolverConfig
+
+G = nx.path_graph(4)
+for node in G.nodes:
+    G.nodes[node]["pos"] = (0.5 * node, 0.0)
+    G.nodes[node]["weight"] = 1.0 + 0.1 * node
+
+reg = Register.from_udg_graph(G, C6=10.0, blockade_radius=0.6)
+seq = PulseSequence(
+    omega=Pulse.global_(Pulse.sin_squared(amplitude=1.0, duration=2.0)),
+    delta=Pulse.local([Pulse.ramp(start=-2.0, end=G.nodes[i]["weight"], duration=2.0) for i in G.nodes]),
+)
+sim = Simulation(reg, seq, SolverConfig(blockade_radius=0.6))
+
+basis_size = sim.validate()
+psi0 = np.zeros(basis_size, dtype=complex)
+psi0[0] = 1.0
+result = sim.run(psi0, 0.0, 2.0, observables={"pop0": 0})
+print(result.to_shared_result()["schema_version"])
+```
+
+Use Julia when the algorithm needs direct basis or Hamiltonian access.
+
+```julia
+using Sagittarius
+using SparseArrays
+
+reg = chain_register(4; spacing=0.5, C6=10.0)
+context = reduced_basis_context(reg; blockade_radius=0.6)
+omega = compile_pulse(SinSquaredPulse(1.0, 2.0))
+deltas = [compile_pulse(RampPulse(-2.0, 1.0 + 0.1 * (i - 1), 2.0)) for i in 1:4]
+
+H_func = build_hamiltonian_func(
+    reg,
+    t -> fill(omega(t), 4),
+    t -> [f(t) for f in deltas];
+    basis_context=context,
+)
+
+println(length(context.basis))
+println(size(sparse(H_func(0.0))))
+```
+
+## Experiment-Style Pulse Simulation
+
+Python validates user-facing pulse shapes before backend initialization and records manifests with simulation results.
+
+```python
+import numpy as np
+from sagittarius import Register, Simulation, Pulse, PulseSequence, SolverConfig
+
+reg = Register.chain(3, spacing=0.7, C6=20.0)
+seq = PulseSequence(
+    omega=Pulse.global_(Pulse.blackman(amplitude=1.2, duration=1.5)),
+    delta=Pulse.local([
+        Pulse.ramp(start=-2.0, end=0.5, duration=1.5),
+        Pulse.ramp(start=-2.0, end=0.8, duration=1.5),
+        Pulse.ramp(start=-2.0, end=1.1, duration=1.5),
+    ]),
+)
+sim = Simulation(reg, seq, SolverConfig(blockade_radius=0.8, reltol=1e-7, abstol=1e-7))
+sim.validate_inputs(sample_time=0.0, observables={"center": 1})
+
+basis_size = sim.validate()
+psi0 = np.zeros(basis_size, dtype=complex)
+psi0[0] = 1.0
+result = sim.run(psi0, 0.0, 1.5, observables={"center": 1})
+print(result.manifest["solver"]["blockade_radius"])
+```
+
+Julia exposes the pulse ASTs and solver call directly.
+
+```julia
+using Sagittarius
+
+reg = chain_register(3; spacing=0.7, C6=20.0)
+context = reduced_basis_context(reg; blockade_radius=0.8)
+omega = compile_pulse(BlackmanPulse(1.2, 1.5))
+deltas = [
+    compile_pulse(RampPulse(-2.0, 0.5, 1.5)),
+    compile_pulse(RampPulse(-2.0, 0.8, 1.5)),
+    compile_pulse(RampPulse(-2.0, 1.1, 1.5)),
+]
+H_func = build_hamiltonian_func(reg, t -> fill(omega(t), 3), t -> [f(t) for f in deltas]; basis_context=context)
+psi0 = ComplexF64[1.0; zeros(ComplexF64, length(context.basis) - 1)]
+obs = Dict("center" => RydbergPopulation(2, length(reg.atoms); basis_context=context))
+sol, saved = solve_schrodinger(psi0, H_func, (0.0, 1.5); observables=obs, reltol=1e-7, abstol=1e-7)
+println(length(saved.t))
+```
+
+## Baseline Validation
+
+Use Python for packaged validation reports and exact classical comparisons.
+
+```python
+from sagittarius import Register, PulseSequence, dense_vs_reduced_validation
+
+report = dense_vs_reduced_validation(
+    Register.chain(3, spacing=0.5, C6=10.0),
+    PulseSequence(omega=[0.2, 0.3, 0.4], delta=[-0.1, 0.0, 0.2]),
+    blockade_radius=0.6,
+    duration=0.7,
+)
+print(report["ok"])
+print(report["basis"])
+```
+
+For MWIS-style validation, use `projects/mwis_udg/batch_verify.py` to compare AQC outputs against exact PuLP/CBC ILP solutions across seeded UDG instances.
+
+```python
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path("sagittarius_py/projects/mwis_udg").resolve()))
+from batch_verify import verify_mwis_batch
+
+report = verify_mwis_batch(n_instances=4, n_nodes=6, seed=2026)
+print(report.to_dict()["schema_version"])
+```
+
+Use Julia for low-level parity checks over the same basis order.
+
+```julia
+using Sagittarius
+using SparseArrays
+
+reg = chain_register(3; spacing=0.5, C6=10.0)
+context = reduced_basis_context(reg; blockade_radius=0.6)
+H = hamiltonian(reg, [0.2, 0.3, 0.4], [-0.1, 0.0, 0.2]; basis_context=context)
+obs = RydbergPopulation(1, length(reg.atoms); basis_context=context)
+
+println(context.basis)
+println(size(sparse(H)))
+println(obs(ComplexF64[1.0; zeros(ComplexF64, length(context.basis) - 1)], 0.0, nothing))
+```
+
+## Hardware-Demo Preparation
+
+Before enabling hardware-specific execution paths, use Python diagnostics and artifact contracts to make the runtime state explicit.
+
+```python
+from sagittarius import SolverConfig, doctor, version_info
+
+print(version_info()["schema_version"])
+report = doctor(backend="CUDA", initialize_backend=True)
+print(report["schema_version"])
+print(report["available"])
+
+cfg = SolverConfig(use_gpu=True, gpu_backend="CUDA")
+```
+
+Only run Julia CUDA solver calls after diagnostics indicate the CUDA backend is available in the target environment.
+
+```julia
+using Sagittarius
+
+reg = chain_register(4; spacing=0.7, C6=20.0)
+context = reduced_basis_context(reg; blockade_radius=0.8)
+H_func = build_hamiltonian_func(reg, t -> fill(1.0, 4), t -> zeros(4); basis_context=context, use_gpu=true)
+psi0 = ComplexF64[1.0; zeros(ComplexF64, length(context.basis) - 1)]
+
+# Requires CUDA.jl and a working CUDA device in the active Julia environment.
+sol = solve_schrodinger_gpu(psi0, H_func, (0.0, 1.0); reltol=1e-7, abstol=1e-7)
+println(length(sol.t))
+```
+
+## Cross-SDK Review Checklist
+
+Before adding a dual SDK example or claiming parity, check:
+
+- Python atom `0` corresponds to Julia atom `1`; local pulse vectors preserve register order.
+- Both snippets use the same `C6`, coordinates, blockade radius, pulse values, solver tolerances, and time span.
+- Reduced-basis snippets share a `BasisContext` on the Julia side and use the Python `Simulation.validate()` basis size on the Python side.
+- Result files use `result-artifact/v1`, embedded `shared-result/v1`, and validated `run-manifest/v1` when produced by Python.
+- Performance statements cite `benchmark-artifact/v1` or `mwis-batch-verification/v1` evidence as described in `docs/PERFORMANCE_CLAIMS.md`.

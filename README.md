@@ -225,7 +225,7 @@ Sagittarius is organized around three layers:
 2. Shared model layer: pulse representations, blockade-reduced basis semantics, observable definitions, and serialization contracts.
 3. Julia backend: physics kernels, Hamiltonian construction, numerical solvers, GPU paths, and distributed execution.
 
-The roadmap calls for a first-class Julia developer API alongside the Python SDK. The intent is not to force both languages to expose identical syntax, but to keep the physical semantics, defaults, result schemas, and benchmark fixtures consistent.
+The roadmap calls for a first-class Julia developer API alongside the Python SDK. The intent is not to force both languages to expose identical syntax, but to keep the physical semantics, defaults, result schemas, and benchmark fixtures consistent. See [docs/DUAL_SDK_EXAMPLES.md](docs/DUAL_SDK_EXAMPLES.md) for paired Python and Julia workflows.
 
 ## Development Notes
 

@@ -1,6 +1,6 @@
 # Julia Native Developer API
 
-Sagittarius exposes a Julia-native API for users who want direct access to registers, pulse ASTs, bases, Hamiltonians, jump operators, solvers, and structured logging without going through the Python SDK.
+Sagittarius exposes a Julia-native API for users who want direct access to registers, pulse ASTs, bases, Hamiltonians, jump operators, solvers, and structured logging without going through the Python SDK. For side-by-side Python and Julia workflows, see `docs/DUAL_SDK_EXAMPLES.md`.
 
 ## Registers
 
@@ -22,7 +22,7 @@ basis_states = basis(reg; blockade_radius=0.6)
 context = reduced_basis_context(reg; blockade_radius=0.6)
 reduced_states, mapping = reduced_basis(reg; blockade_radius=0.6)
 H = hamiltonian(reg, [0.2, 0.3, 0.4, 0.5], zeros(4); basis_context=context)
-H_func = hamiltonian_func(reg, t -> fill(0.2, 4), t -> zeros(4); basis_context=context)
+H_func = build_hamiltonian_func(reg, t -> fill(0.2, 4), t -> zeros(4); basis_context=context)
 ```
 
 `BasisContext` carries a reduced basis and its bitstring-to-index mapping so Hamiltonians, observables, and jump operators can share one ordering. The lowercase API is the stable developer-facing facade. Existing internal names such as `RydbergHamiltonian`, `generate_reduced_basis`, and `build_hamiltonian_func` remain exported for compatibility.
