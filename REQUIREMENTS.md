@@ -40,18 +40,18 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Basic Runtime Diagnostics** | High | Done | `doctor()` and simulation results capture `doctor/v2.1` runtime/backend diagnostics, structured issue details, capability summaries, solver settings, tolerances, basis size, reduced-basis pruning ratio, register geometry, runtime metadata, and validated run manifests for observable result artifacts. |
 | **Repository Cleanup** | Medium | Done | Removed `api.py-FIX`, moved root debug scripts into `scripts/`, added `LICENSE`, and updated backend documentation references. |
 
-## 📈 Phase 6: Observability & Reproducibility (In Progress)
+## ✅ Phase 6: Observability & Reproducibility (Done)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Structured Python/Julia Logging** | High | Done | Python logs enrich cataloged events with stable event IDs, schema version, default severity, and optional JSON output; Julia emits taxonomy-aligned structured events for solver start/finish, cluster setup, basis generation, and Hamiltonian construction, with catalog validation shared across Python and Julia emitters. |
 | **Event Taxonomy** | High | Done | Stable catalog implemented in `sagittarius.events`, exposed through `event_taxonomy()` / `get_event_spec()`, documented in `docs/EVENT_TAXONOMY.md`, and covered by tests for IDs, payload fields, severity conventions, and compatibility rules. |
 | **Run Manifest Schema** | High | Done | Python `SimulationResult` outputs now include a validated `run-manifest/v1` manifest with register geometry, pulse configuration, solver options, backend diagnostics, package versions, random/trajectory metadata, and cataloged log event IDs. Benchmark scripts now link generated run manifests through benchmark artifacts where simulation results are produced. |
-| **Result Artifact Envelope** | Medium | Done | Python `SimulationResult.save()` now writes a stable `result-artifact/v1` envelope with schema version, artifact type, data, metadata, diagnostics, and manifest fields; `load_result()` preserves compatibility with legacy result JSON. Julia workflow parity remains tracked by the broader shared result schema work. |
+| **Result Artifact Envelope** | Medium | Done | Python `SimulationResult.save()` writes a stable `result-artifact/v1` envelope with schema version, artifact type, data, metadata, diagnostics, manifest fields, and an embedded `shared-result/v1` payload; `load_result()` preserves compatibility with legacy result JSON. |
 | **Benchmark Artifact Metadata** | High | Done | Benchmark scripts emit `benchmark-artifact/v1` JSON plus CSV and generated Markdown tables with parameters, timings, memory usage, runtime/backend diagnostics, Python/Julia/CUDA metadata from `version_info()`, and linked run manifests where simulations produce them. |
 | **Version and Build Metadata** | Medium | Done | `version_info()` now emits `version-info/v1` with Python package versions, Julia project/runtime versions, git source/build metadata, container metadata, and CUDA/AMDGPU/Metal toolchain probes. `doctor()`, simulation run manifests, and benchmark artifacts carry this metadata. |
 | **Failure Diagnostics Normalization** | High | Done | Backend, solver, validation, and serialization failures normalize to actionable diagnostic issue codes, remediation messages, and `failure_diagnostic` log events while preserving compatible Python exception types. |
 
-## 🚀 Phase 7: Core Performance Improvements (Planned)
+## ✅ Phase 7: Core Performance Improvements (Done)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Reduced Basis Cache** | High | Done | Cache blockade-reduced bases by an adjacency hash, blockade radius, and atom count to avoid repeated basis generation across validation, Hamiltonian construction, observables, and jump operators. |
@@ -61,7 +61,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Observable/Jumps Basis Sharing** | Medium | Done | Added a shared Julia `BasisContext` so reduced Hamiltonians, observables, Lindblad jump operators, MCWF trajectories, and Python simulations reuse the same basis and mapping. |
 | **Specialized Register Constructors** | Medium | Done | Python `Register.chain()`, `Register.square_lattice()`, `Register.udg()`, and `Register.from_udg_graph()` construct common geometries with topology metadata; simulation diagnostics include register geometry and reduced-basis pruning-ratio data. |
 
-## 🧩 Phase 8: API & Data Model Refinement (In Progress)
+## ✅ Phase 8: API & Data Model Refinement (Done)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Explicit Pulse Types** | High | Done | Added validated `GlobalPulse`, `LocalPulseVector`, and `CallablePulse` wrappers plus `Pulse.global_()`, `Pulse.local()`, and `Pulse.callable()` factories while preserving legacy scalar/list/dict/callable shorthand compatibility. |
@@ -73,7 +73,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Cross-Language Golden Tests** | High | Done | Added Python-vs-Julia golden tests for full and reduced Hamiltonians, reduced basis ordering, local addressing, observable solver trajectories, and manifest parity fields. |
 | **Shared Result Schema** | Medium | Done | Defined `shared-result/v1` as a language-neutral result payload, embedded it in Python result artifacts, added validation helpers, and documented required fields in `docs/SHARED_RESULT_SCHEMA.md`. |
 
-## 🧪 Phase 9: Scientific Verification & Benchmarks (In Progress)
+## ✅ Phase 9: Scientific Verification & Benchmarks (Done)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Dense-vs-Reduced Validation** | High | Done | Backend-free `dense_vs_reduced_validation()` compares small-system full dense Hamiltonians projected onto the blockade basis with reduced-basis Hamiltonian evolution, reporting basis sizes, pruning ratio, and max errors. |
@@ -82,7 +82,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **MWIS Batch Verification** | Medium | Done | `projects/mwis_udg/batch_verify.py` compares AQC outputs against exact PuLP/CBC ILP solutions across seeded randomized UDG/MWIS instances and emits `mwis-batch-verification/v1` aggregate reports. |
 | **Ablation Benchmarks** | High | Done | `benchmark_ablation.py` emits `benchmark-artifact/v1` results for full dense, full sparse, reduced matrix-free, reduced sparse, and opt-in reduced sparse CUDA-cached execution paths. |
 
-## 📚 Phase 10: Documentation & Patent Readiness (In Progress)
+## ✅ Phase 10: Documentation & Patent Readiness (Done)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Known Limitations** | High | Done | Document current scale limits, backend limitations, numerical assumptions, reproducibility gaps, and unsupported scenarios in `docs/KNOWN_LIMITATIONS.md`. |
