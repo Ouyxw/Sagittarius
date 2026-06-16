@@ -408,8 +408,36 @@ def _json_compatible(value: Any) -> Any:
     return value
 
 
+def _explicit_pulse_kind(value: Any) -> Optional[str]:
+    from .pulse import CallablePulse, GlobalPulse, LocalPulseVector
+
+    if isinstance(value, GlobalPulse):
+        return "global"
+    if isinstance(value, LocalPulseVector):
+        return "local"
+    if isinstance(value, CallablePulse):
+        return "callable"
+    return None
+
+
+def _explicit_pulse_payload(value: Any) -> Any:
+    from .pulse import CallablePulse, GlobalPulse, LocalPulseVector
+
+    if isinstance(value, GlobalPulse):
+        return value.value
+    if isinstance(value, LocalPulseVector):
+        return value.values
+    if isinstance(value, CallablePulse):
+        return value.func
+    return value
+
+
 def _pulse_manifest(value: Any) -> Dict[str, Any]:
     from .pulse import is_pulse
+
+    explicit_kind = _explicit_pulse_kind(value)
+    if explicit_kind is not None:
+        return {"kind": explicit_kind, "payload": _pulse_manifest(_explicit_pulse_payload(value))}
 
     if _is_numeric_scalar(value):
         return {"kind": "scalar", "value": float(value)}
@@ -585,7 +613,18 @@ def _coerce_callable_vector(values: Any, N: int, *, field_name: str) -> List[flo
 
 
 def _validate_pulse_config(p_config: Any, N: int, *, field_name: str, sample_time: Optional[float] = None) -> None:
-    from .pulse import is_pulse
+    from .pulse import CallablePulse, GlobalPulse, LocalPulseVector, is_pulse
+
+    if isinstance(p_config, GlobalPulse):
+        _validate_pulse_value(p_config.value, field_name=field_name)
+        return
+
+    if isinstance(p_config, LocalPulseVector):
+        _validate_pulse_config(p_config.values, N, field_name=field_name, sample_time=sample_time)
+        return
+
+    if isinstance(p_config, CallablePulse):
+        p_config = p_config.func
 
     if callable(p_config):
         if sample_time is not None:
@@ -629,12 +668,23 @@ def _validate_pulse_config(p_config: Any, N: int, *, field_name: str, sample_tim
 
 
 def _local_pulse_values_in_register_order(p_config: Union[Dict[int, Any], List[Any]], N: int) -> List[Any]:
+    from .pulse import LocalPulseVector
+
+    if isinstance(p_config, LocalPulseVector):
+        p_config = p_config.values
     if isinstance(p_config, dict):
         return [p_config.get(i, 0.0) for i in range(N)]
     return list(p_config)
 
 def _constant_vector(value: Any, N: int, *, field_name: str) -> List[float]:
-    from .pulse import is_pulse
+    from .pulse import CallablePulse, GlobalPulse, LocalPulseVector, is_pulse
+
+    if isinstance(value, GlobalPulse):
+        value = value.value
+    elif isinstance(value, LocalPulseVector):
+        value = value.values
+    elif isinstance(value, CallablePulse):
+        value = value.func
 
     if callable(value) or is_pulse(value):
         raise _validation_error(
@@ -1154,8 +1204,15 @@ class Simulation:
 
     def _get_compiled_func(self, p_config: Any, N: int) -> Any:
         """Compiles a pulse configuration into a Julia-side closure t -> Vector{Float64}."""
-        from .pulse import is_pulse
+        from .pulse import CallablePulse, GlobalPulse, LocalPulseVector, is_pulse
         jl, sgr = get_julia()
+
+        if isinstance(p_config, GlobalPulse):
+            p_config = p_config.value
+        elif isinstance(p_config, LocalPulseVector):
+            p_config = p_config.values
+        elif isinstance(p_config, CallablePulse):
+            p_config = p_config.func
 
         if callable(p_config):
             # Callable pulses return one numeric value per Python atom index, in Register.atoms order.

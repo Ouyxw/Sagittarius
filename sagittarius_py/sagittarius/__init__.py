@@ -28,7 +28,7 @@ from .runtime import (
     version_info,
 )
 from .events import event_taxonomy, get_event_spec
-from .pulse import Constant, Ramp, Piecewise, Gaussian, Blackman, Sinc, Pulse
+from .pulse import CallablePulse, Constant, GlobalPulse, LocalPulseVector, Ramp, Piecewise, Gaussian, Blackman, Sinc, Pulse
 from .cluster import ParallelSimulation
 from .benchmarking import (
     BENCHMARK_ARTIFACT_SCHEMA_VERSION,
@@ -56,6 +56,9 @@ __all__ = [
     "open_system_sanity_checks",
     "validate_run_manifest",
     "load_result",
+    "CallablePulse",
+    "GlobalPulse",
+    "LocalPulseVector",
     "Constant",
     "Ramp",
     "Piecewise",

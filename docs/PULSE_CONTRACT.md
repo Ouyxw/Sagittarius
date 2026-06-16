@@ -16,11 +16,14 @@ For a two-atom register `[a0, a1]`, a local Rabi pulse `{0: 1.0, 1: 0.0}` drives
 
 ## Pulse Inputs
 
-`PulseSequence.omega` and `PulseSequence.delta` accept the following forms:
+`PulseSequence.omega` and `PulseSequence.delta` accept explicit addressing wrappers and legacy shorthand forms:
 
 | Input form | Meaning | Validation |
 | :--- | :--- | :--- |
-| Numeric scalar | Global value applied to every atom. | Must be numeric and not boolean. |
+| `GlobalPulse(value)` / `Pulse.global_(value)` | Explicit global value or `PulseNode` applied to every atom. | Value must be numeric or a `PulseNode`. |
+| `LocalPulseVector(values)` / `Pulse.local(values)` | Explicit local vector/list or sparse dict in `Register.atoms` order. | List length must equal atom count; dict keys are zero-based atom indices; values must be numeric or `PulseNode`. |
+| `CallablePulse(f)` / `Pulse.callable(f)` | Explicit time-dependent local vector callback. | Called as `f(t)` and must return exactly one numeric value per atom. |
+| Numeric scalar | Legacy shorthand for global value applied to every atom. | Must be numeric and not boolean. |
 | `PulseNode` | Global time-dependent pulse applied to every atom. | Must be one of the SDK pulse node types. |
 | `list` | Local values in `Register.atoms` order. | Length must equal atom count; each value must be numeric or a `PulseNode`. |
 | `dict` | Sparse local values keyed by zero-based atom index. | Keys must be integer atom indices in range; missing atoms default to `0.0`; values must be numeric or a `PulseNode`. |
@@ -31,19 +34,28 @@ Callable pulses are validated before backend initialization using the simulation
 ## Examples
 
 ```python
-from sagittarius import Atom, Register, PulseSequence, Pulse
+from sagittarius import Atom, Register, PulseSequence, Pulse, GlobalPulse
 
 reg = Register([Atom(0, 0, 0), Atom(5, 0, 0)])
 
-# Global scalar drive.
+# Explicit global scalar drive.
+PulseSequence(omega=Pulse.global_(1.0), delta=GlobalPulse(0.0))
+
+# Legacy global scalar shorthand.
 PulseSequence(omega=1.0, delta=0.0)
 
-# Local list drive: atom 0 driven, atom 1 off.
+# Explicit local list drive: atom 0 driven, atom 1 off.
+PulseSequence(omega=Pulse.local([1.0, 0.0]))
+
+# Legacy local list shorthand.
 PulseSequence(omega=[1.0, 0.0])
 
 # Sparse local dictionary drive with the same meaning.
 PulseSequence(omega={0: Pulse.constant(1.0, duration=1.0)})
 
-# Callable local vector in Register.atoms order.
+# Explicit callable local vector in Register.atoms order.
+PulseSequence(omega=Pulse.callable(lambda t: [1.0, 0.0]))
+
+# Legacy callable shorthand.
 PulseSequence(omega=lambda t: [1.0, 0.0])
 ```

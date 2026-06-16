@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from sagittarius import Atom, Register, Simulation, PulseSequence, Pulse
+from sagittarius import Atom, Register, Simulation, PulseSequence, Pulse, GlobalPulse, LocalPulseVector, CallablePulse
 from sagittarius.api import _coerce_callable_vector, _local_pulse_values_in_register_order
 
 
@@ -74,3 +74,40 @@ def test_pulse_nodes_are_valid_local_values():
     sim = _sim(PulseSequence(omega=[Pulse.constant(1.0, duration=1.0), 0.0]))
 
     sim.validate_inputs(sample_time=0.0)
+
+
+def test_explicit_global_pulse_validates_and_runs():
+    sim = _sim(PulseSequence(omega=Pulse.global_(1.0), delta=GlobalPulse(0.0)))
+
+    sim.validate_inputs(sample_time=0.0)
+    assert sim.validate() == 4
+
+
+def test_explicit_local_pulse_vector_uses_register_order():
+    wrapped = LocalPulseVector({0: 1.0, 2: 3.0})
+
+    assert _local_pulse_values_in_register_order(wrapped, 3) == [1.0, 0.0, 3.0]
+
+
+def test_explicit_local_pulse_vector_accepts_tuple_values():
+    sim = _sim(PulseSequence(omega=LocalPulseVector((1.0, 0.0))))
+
+    sim.validate_inputs(sample_time=0.0)
+
+
+def test_explicit_callable_pulse_validates_return_shape():
+    sim = _sim(PulseSequence(omega=CallablePulse(lambda t: [1.0, 0.0])))
+
+    sim.validate_inputs(sample_time=0.25)
+
+
+def test_explicit_pulse_wrappers_are_serialized_in_manifest():
+    sim = _sim(PulseSequence(omega=Pulse.global_(1.0), delta=Pulse.local({1: -0.5})))
+    psi0 = np.array([1.0, 0.0, 0.0, 0.0], dtype=complex)
+
+    result = sim.run(psi0, 0.0, 0.1, observables={"a0": 0})
+
+    assert result.manifest["pulse"]["omega"]["kind"] == "global"
+    assert result.manifest["pulse"]["omega"]["payload"] == {"kind": "scalar", "value": 1.0}
+    assert result.manifest["pulse"]["delta"]["kind"] == "local"
+    assert result.manifest["pulse"]["delta"]["payload"]["kind"] == "local_dict"

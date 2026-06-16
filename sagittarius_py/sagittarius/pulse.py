@@ -1,6 +1,40 @@
-from typing import List, Optional
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
 from .runtime import get_julia
+
+
+
+class ExplicitPulse:
+    """Base class for explicit pulse addressing wrappers."""
+
+
+class GlobalPulse(ExplicitPulse):
+    """Apply one scalar or PulseNode value to every atom."""
+
+    def __init__(self, value: Any):
+        self.value = value
+
+
+class LocalPulseVector(ExplicitPulse):
+    """Apply per-atom pulse values in Register.atoms order or sparse atom-index form."""
+
+    def __init__(self, values: Union[Sequence[Any], Dict[int, Any]]):
+        if isinstance(values, dict):
+            self.values = values
+        elif isinstance(values, Sequence) and not isinstance(values, (str, bytes, bytearray)):
+            self.values = list(values)
+        else:
+            self.values = values
+
+
+class CallablePulse(ExplicitPulse):
+    """Apply a callable t -> per-atom numeric vector."""
+
+    def __init__(self, func: Callable[[float], Sequence[float]]):
+        self.func = func
+
+    def __call__(self, t: float):
+        return self.func(t)
 
 class PulseNode:
     """Base class for Pulse AST nodes."""
@@ -84,7 +118,20 @@ class SinSquared(PulseNode):
         return sgr.SinSquaredPulse(self.amplitude, self.duration)
 
 class Pulse:
-    """Factory class for all pulse forms used in cold atom experiments."""
+    """Factory class for pulse shapes and explicit addressing wrappers."""
+
+    @staticmethod
+    def global_(value: Any) -> GlobalPulse:
+        return GlobalPulse(value)
+
+    @staticmethod
+    def local(values: Union[Sequence[Any], Dict[int, Any]]) -> LocalPulseVector:
+        return LocalPulseVector(values)
+
+    @staticmethod
+    def callable(func: Callable[[float], Sequence[float]]) -> CallablePulse:
+        return CallablePulse(func)
+
     @staticmethod
     def constant(value: float, duration: float) -> Constant:
         return Constant(value, duration)
@@ -120,3 +167,6 @@ def compile_pulse(pulse: PulseNode):
 
 def is_pulse(obj):
     return isinstance(obj, PulseNode)
+
+def is_explicit_pulse(obj):
+    return isinstance(obj, ExplicitPulse)
