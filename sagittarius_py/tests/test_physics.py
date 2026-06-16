@@ -109,6 +109,62 @@ def test_full_sparse_pattern_reuses_structure_when_pulses_change():
     assert report["matches_fresh"] is True
 
 
+def test_reduced_basis_cache_reuses_basis_by_adjacency_radius_and_atom_count():
+    from sagittarius.runtime import get_julia
+
+    jl, _ = get_julia()
+    report = jl.seval("""
+    begin
+        using StaticArrays
+        Sagittarius.Physics._clear_reduced_basis_cache!()
+
+        reg1 = Sagittarius.Physics.Register([
+            Sagittarius.Physics.Atom(SVector(0.0, 0.0, 0.0)),
+            Sagittarius.Physics.Atom(SVector(0.5, 0.0, 0.0)),
+            Sagittarius.Physics.Atom(SVector(1.5, 0.0, 0.0)),
+        ], 10.0)
+        reg_same_graph = Sagittarius.Physics.Register([
+            Sagittarius.Physics.Atom(SVector(10.0, 0.0, 0.0)),
+            Sagittarius.Physics.Atom(SVector(10.5, 0.0, 0.0)),
+            Sagittarius.Physics.Atom(SVector(11.5, 0.0, 0.0)),
+        ], 20.0)
+
+        basis1, mapping1 = Sagittarius.Physics.generate_reduced_basis(reg1, 0.75)
+        cache_after_first = Sagittarius.Physics._reduced_basis_cache_size()
+        basis2, mapping2 = Sagittarius.Physics.generate_reduced_basis(reg1, 0.75)
+        cache_after_second = Sagittarius.Physics._reduced_basis_cache_size()
+        basis3, mapping3 = Sagittarius.Physics.generate_reduced_basis(reg_same_graph, 0.75)
+        cache_after_same_graph = Sagittarius.Physics._reduced_basis_cache_size()
+        basis4, mapping4 = Sagittarius.Physics.generate_reduced_basis(reg1, 1.25)
+        cache_after_new_radius = Sagittarius.Physics._reduced_basis_cache_size()
+
+        Dict(
+            "same_register_basis_reused" => basis1 === basis2,
+            "same_register_mapping_reused" => mapping1 === mapping2,
+            "same_graph_basis_reused" => basis1 === basis3,
+            "same_graph_mapping_reused" => mapping1 === mapping3,
+            "new_radius_basis_separated" => basis1 !== basis4,
+            "cache_after_first" => cache_after_first,
+            "cache_after_second" => cache_after_second,
+            "cache_after_same_graph" => cache_after_same_graph,
+            "cache_after_new_radius" => cache_after_new_radius,
+            "basis_values" => basis1,
+        )
+    end
+    """)
+
+    assert report["same_register_basis_reused"] is True
+    assert report["same_register_mapping_reused"] is True
+    assert report["same_graph_basis_reused"] is True
+    assert report["same_graph_mapping_reused"] is True
+    assert report["new_radius_basis_separated"] is True
+    assert report["cache_after_first"] == 1
+    assert report["cache_after_second"] == 1
+    assert report["cache_after_same_graph"] == 1
+    assert report["cache_after_new_radius"] == 2
+    assert list(report["basis_values"]) == [0, 1, 2, 4, 5, 6]
+
+
 def test_reduced_sparse_pattern_reuses_structure_when_pulses_change():
     from sagittarius.runtime import get_julia
 

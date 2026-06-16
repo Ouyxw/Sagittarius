@@ -6,6 +6,10 @@ using StaticArrays
 
 export Atom, Register, RydbergHamiltonian, generate_reduced_basis, ReducedRydbergOperator, build_hamiltonian_func, get_jump_operators
 
+const _ReducedBasisCacheKey = Tuple{Int, Float64, UInt64}
+const _REDUCED_BASIS_CACHE = Dict{_ReducedBasisCacheKey, Tuple{Vector{Int}, Dict{Int, Int}}}()
+const _REDUCED_BASIS_CACHE_LOCK = ReentrantLock()
+
 struct Atom
     coords::SVector{3, Float64}
 end
@@ -178,15 +182,59 @@ function ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping; use_gpu=false)
     return ReducedRydbergOperator(N, Ω, Δ, V, basis, mapping, use_gpu, nothing, nothing)
 end
 
-function generate_reduced_basis(reg::Register, blockade_radius::Float64)
+function _blockade_adjacency(reg::Register, blockade_radius::Float64)
     N = length(reg.atoms)
-    # 1. Build adjacency list for the blockade graph
     adj = [Int[] for _ in 1:N]
     for i in 1:N, j in i+1:N
         if norm(reg.atoms[i].coords - reg.atoms[j].coords) < blockade_radius
             push!(adj[i], j)
             push!(adj[j], i)
         end
+    end
+    return adj
+end
+
+function _adjacency_hash(adj::Vector{Vector{Int}})
+    h = UInt(0x9e3779b97f4a7c15)
+    for i in eachindex(adj)
+        h = hash(i, h)
+        for j in adj[i]
+            if i < j
+                h = hash((i, j), h)
+            end
+        end
+    end
+    return UInt64(h)
+end
+
+function _reduced_basis_cache_key(reg::Register, blockade_radius::Float64, adj::Vector{Vector{Int}})
+    return (length(reg.atoms), blockade_radius, _adjacency_hash(adj))
+end
+
+function _clear_reduced_basis_cache!()
+    lock(_REDUCED_BASIS_CACHE_LOCK) do
+        empty!(_REDUCED_BASIS_CACHE)
+    end
+    return nothing
+end
+
+function _reduced_basis_cache_size()
+    lock(_REDUCED_BASIS_CACHE_LOCK) do
+        return length(_REDUCED_BASIS_CACHE)
+    end
+end
+
+function generate_reduced_basis(reg::Register, blockade_radius::Float64)
+    N = length(reg.atoms)
+    # 1. Build adjacency list for the blockade graph and use it as the cache identity.
+    adj = _blockade_adjacency(reg, blockade_radius)
+    key = _reduced_basis_cache_key(reg, blockade_radius, adj)
+
+    cached = lock(_REDUCED_BASIS_CACHE_LOCK) do
+        get(_REDUCED_BASIS_CACHE, key, nothing)
+    end
+    if !isnothing(cached)
+        return cached
     end
 
     # 2. Recursive search for all valid independent sets (basis states)
@@ -220,7 +268,10 @@ function generate_reduced_basis(reg::Register, blockade_radius::Float64)
     sort!(basis)
     
     mapping = Dict(state => i for (i, state) in enumerate(basis))
-    return basis, mapping
+    entry = (basis, mapping)
+    return lock(_REDUCED_BASIS_CACHE_LOCK) do
+        get!(_REDUCED_BASIS_CACHE, key, entry)
+    end
 end
 
 function Base.:*(op::ReducedRydbergOperator, ψ::Vector{ComplexF64})

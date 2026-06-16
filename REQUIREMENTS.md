@@ -54,7 +54,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 ## 🚀 Phase 7: Core Performance Improvements (Planned)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
-| **Reduced Basis Cache** | High | Planned | Cache blockade-reduced bases by an adjacency/register hash, blockade radius, and atom count to avoid repeated basis generation. |
+| **Reduced Basis Cache** | High | Done | Cache blockade-reduced bases by an adjacency hash, blockade radius, and atom count to avoid repeated basis generation across validation, Hamiltonian construction, observables, and jump operators. |
 | **Fast Basis Mapping** | High | Planned | Evaluate faster lookup structures than `Dict{Int, Int}` for bitstring-to-basis-index mapping on hot Hamiltonian paths. |
 | **Sparse Pattern Reuse** | High | Done | Full and reduced-basis Hamiltonians cache their CSC sparse row/column structure and update only stored values when time-dependent $\Omega$ or $\Delta$ changes; CUDA sparse buffers are retained across value-only pulse updates. |
 | **GPU Buffer Reuse** | High | Done | CUDA reduced-basis execution reuses the cached `CuSparseMatrixCSC` and copies updated Hamiltonian values into the existing device value buffer instead of rebuilding GPU sparse structure on value-only pulse changes. |
