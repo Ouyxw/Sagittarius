@@ -22,8 +22,7 @@ See [../../../docs/PERFORMANCE_CLAIMS.md](../../../docs/PERFORMANCE_CLAIMS.md) f
 
 ## 📊 Performance & Hardness Metrics
 
-The benchmarking suite follows the methodology described in:
-*"Hardness of the maximum-independent-set problem on unit-disk graphs and prospects for quantum speedups"* (Andrist et al., PRR 5, 043277, 2023).
+The benchmarking suite follows methodology discussed in the Rydberg/MWIS literature, including *"Hardness of the maximum-independent-set problem on unit-disk graphs and prospects for quantum speedups"* (Andrist et al., PRR 5, 043277, 2023). Treat the Rydberg/MWIS mapping and hardness metrics as prior-art background; see [../../../docs/PRIOR_ART_NOTES.md](../../../docs/PRIOR_ART_NOTES.md).
 
 We evaluate Sagittarius and classical baselines against several key metrics:
 

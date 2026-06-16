@@ -2,6 +2,8 @@
 
 Sagittarius performance statements must be tied to reproducible benchmark artifacts. Use this page as the review checklist before publishing README text, reports, plots, release notes, or hardware-facing summaries.
 
+For claims involving Rydberg/MWIS mappings or neutral-atom simulator positioning, also check `docs/PRIOR_ART_NOTES.md`.
+
 ## Claim Requirements
 
 A performance claim is verifiable only when it names all of the following:

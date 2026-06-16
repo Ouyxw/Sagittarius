@@ -51,7 +51,7 @@ Implemented or partially implemented capabilities include:
 - MWIS/UDG example workflows with classical baselines.
 
 See [REQUIREMENTS.md](REQUIREMENTS.md) for the current development roadmap and planned hardening work.
-For short verification snippets with expected output, see [docs/MINIMAL_EXAMPLES.md](docs/MINIMAL_EXAMPLES.md).
+For short verification snippets with expected output, see [docs/MINIMAL_EXAMPLES.md](docs/MINIMAL_EXAMPLES.md). For prior-art-aware wording around Rydberg/MWIS mappings and simulator claims, see [docs/PRIOR_ART_NOTES.md](docs/PRIOR_ART_NOTES.md).
 
 ## Repository Layout
 
