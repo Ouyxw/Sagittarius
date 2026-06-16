@@ -10,6 +10,8 @@ from typing import Optional, Dict, Union, Any, List, Tuple
 import numpy as np
 RESULT_ARTIFACT_SCHEMA_VERSION = "result-artifact/v1"
 RESULT_ARTIFACT_TYPE = "sagittarius.simulation_result"
+SHARED_RESULT_SCHEMA_VERSION = "shared-result/v1"
+SHARED_RESULT_TYPE = "sagittarius.shared_result"
 RUN_MANIFEST_SCHEMA_VERSION = "run-manifest/v1"
 RUN_MANIFEST_SCHEMA = {
     "schema_version": RUN_MANIFEST_SCHEMA_VERSION,
@@ -394,6 +396,91 @@ def validate_run_manifest(manifest: Dict[str, Any]) -> None:
             "Run manifest event_ids must be known Sagittarius event taxonomy IDs.",
             "Use cataloged event IDs from event_taxonomy() when constructing manifests.",
         )
+
+
+SHARED_RESULT_SCHEMA = {
+    "schema_version": SHARED_RESULT_SCHEMA_VERSION,
+    "artifact_type": SHARED_RESULT_TYPE,
+    "required": [
+        "schema_version",
+        "artifact_type",
+        "result_type",
+        "series",
+        "time_key",
+        "observable_names",
+        "basis_size",
+        "manifest_schema",
+    ],
+}
+
+
+def _shared_result_schema_error(message: str, remediation: str) -> SagittariusSerializationError:
+    return SagittariusSerializationError(make_issue("SERIALIZATION_SHARED_RESULT_SCHEMA_INVALID", message, remediation))
+
+
+def make_shared_result(
+    data: Dict[str, Any],
+    *,
+    manifest: Optional[Dict[str, Any]] = None,
+    result_type: Optional[str] = None,
+) -> Dict[str, Any]:
+    manifest = manifest or {}
+    time_key = "t" if "t" in data else None
+    observable_names = [key for key in data.keys() if key != time_key]
+    basis_size = None
+    if isinstance(manifest.get("initial_state"), dict):
+        basis_size = manifest["initial_state"].get("basis_size")
+    shared = {
+        "schema_version": SHARED_RESULT_SCHEMA_VERSION,
+        "artifact_type": SHARED_RESULT_TYPE,
+        "result_type": result_type or manifest.get("result_type") or "series",
+        "series": _json_compatible(data),
+        "time_key": time_key,
+        "observable_names": observable_names,
+        "basis_size": basis_size,
+        "manifest_schema": manifest.get("schema_version"),
+    }
+    validate_shared_result(shared)
+    return shared
+
+
+def validate_shared_result(shared_result: Dict[str, Any]) -> None:
+    if not isinstance(shared_result, dict):
+        raise _shared_result_schema_error(
+            "Shared result must be a JSON object.",
+            "Pass the shared_result dictionary produced by SimulationResult.to_shared_result().",
+        )
+    if shared_result.get("schema_version") != SHARED_RESULT_SCHEMA_VERSION:
+        raise _shared_result_schema_error(
+            f"Shared result has unsupported schema_version: {shared_result.get('schema_version')!r}.",
+            f"Use shared results with schema_version {SHARED_RESULT_SCHEMA_VERSION!r}.",
+        )
+    if shared_result.get("artifact_type") != SHARED_RESULT_TYPE:
+        raise _shared_result_schema_error(
+            "Shared result has unsupported artifact_type.",
+            f"Expected artifact_type {SHARED_RESULT_TYPE!r}.",
+        )
+    missing = [field for field in SHARED_RESULT_SCHEMA["required"] if field not in shared_result]
+    if missing:
+        raise _shared_result_schema_error(
+            f"Shared result is missing required fields: {', '.join(missing)}.",
+            "Regenerate the shared result with SimulationResult.to_shared_result().",
+        )
+    if not isinstance(shared_result.get("series"), dict):
+        raise _shared_result_schema_error("Shared result series must be a JSON object.", "Use named result series keyed by string.")
+    time_key = shared_result.get("time_key")
+    if time_key is not None and time_key not in shared_result["series"]:
+        raise _shared_result_schema_error("Shared result time_key must refer to a series key or be null.", "Use time_key='t' when a t series exists.")
+    observable_names = shared_result.get("observable_names")
+    if not isinstance(observable_names, list) or not all(isinstance(name, str) for name in observable_names):
+        raise _shared_result_schema_error("Shared result observable_names must be a list of strings.", "Use named observable series.")
+    missing_observables = [name for name in observable_names if name not in shared_result["series"]]
+    if missing_observables:
+        raise _shared_result_schema_error(
+            f"Shared result observable_names reference missing series: {', '.join(missing_observables)}.",
+            "Ensure every observable name has a matching series entry.",
+        )
+
 
 
 def _json_compatible(value: Any) -> Any:
@@ -1038,11 +1125,17 @@ class SimulationResult:
         self.manifest = manifest or {}
         self.t = np.array(data.get('t', []))
 
+    def to_shared_result(self) -> Dict[str, Any]:
+        """Return the language-neutral shared-result/v1 payload."""
+        return make_shared_result(self.data, manifest=self.manifest)
+
     def to_envelope(self) -> Dict[str, Any]:
         """Return the stable JSON artifact envelope for this result."""
+        shared_result = self.to_shared_result()
         return {
             "schema_version": RESULT_ARTIFACT_SCHEMA_VERSION,
             "artifact_type": RESULT_ARTIFACT_TYPE,
+            "shared_result": shared_result,
             "data": _json_compatible(self.data),
             "metadata": _json_compatible(self.metadata),
             "diagnostics": _json_compatible(self.diagnostics),
@@ -1117,6 +1210,9 @@ class SimulationResult:
                 )
                 emit_failure_diagnostic(err.issue)
                 raise err
+            shared_result = data.get("shared_result")
+            if shared_result is not None:
+                validate_shared_result(shared_result)
             return cls(
                 data["data"],
                 metadata=data.get("metadata"),

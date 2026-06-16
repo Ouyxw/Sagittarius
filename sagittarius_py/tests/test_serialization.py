@@ -7,6 +7,8 @@ import pytest
 from sagittarius import (
     RESULT_ARTIFACT_SCHEMA_VERSION,
     RESULT_ARTIFACT_TYPE,
+    SHARED_RESULT_SCHEMA_VERSION,
+    SHARED_RESULT_TYPE,
     RUN_MANIFEST_SCHEMA,
     RUN_MANIFEST_SCHEMA_VERSION,
     Register,
@@ -16,6 +18,7 @@ from sagittarius import (
     PulseSequence,
     SolverConfig,
     validate_run_manifest,
+    validate_shared_result,
 )
 
 def test_json_serialization():
@@ -65,6 +68,12 @@ def test_result_save_always_writes_artifact_envelope(tmp_path):
     assert payload["schema_version"] == RESULT_ARTIFACT_SCHEMA_VERSION
     assert payload["artifact_type"] == RESULT_ARTIFACT_TYPE
     assert payload["data"] == {"t": [0.0, 1.0], "atom0": [1.0, 0.0]}
+    assert payload["shared_result"]["schema_version"] == SHARED_RESULT_SCHEMA_VERSION
+    assert payload["shared_result"]["artifact_type"] == SHARED_RESULT_TYPE
+    assert payload["shared_result"]["series"] == payload["data"]
+    assert payload["shared_result"]["time_key"] == "t"
+    assert payload["shared_result"]["observable_names"] == ["atom0"]
+    validate_shared_result(payload["shared_result"])
     assert payload["metadata"]["package_version"] == "test"
     assert payload["diagnostics"]["requested_backend"] == "CPU"
     assert payload["manifest"]["event_ids"] == ["SAG-EVT-0005"]
@@ -200,3 +209,39 @@ def test_validate_run_manifest_rejects_unknown_event_id():
 
     assert excinfo.value.issue.code == "SERIALIZATION_RUN_MANIFEST_SCHEMA_INVALID"
     assert "event_ids" in excinfo.value.issue.message
+
+
+def test_shared_result_validation_rejects_missing_observable_series():
+    with pytest.raises(SagittariusSerializationError) as excinfo:
+        validate_shared_result({
+            "schema_version": SHARED_RESULT_SCHEMA_VERSION,
+            "artifact_type": SHARED_RESULT_TYPE,
+            "result_type": "observables",
+            "series": {"t": [0.0]},
+            "time_key": "t",
+            "observable_names": ["missing"],
+            "basis_size": 2,
+            "manifest_schema": RUN_MANIFEST_SCHEMA_VERSION,
+        })
+
+    assert excinfo.value.issue.code == "SERIALIZATION_SHARED_RESULT_SCHEMA_INVALID"
+    assert "missing" in excinfo.value.issue.message
+
+
+def test_simulation_result_to_shared_result_uses_manifest_semantics():
+    result = SimulationResult(
+        {"t": [0.0], "pop": [1.0]},
+        manifest={
+            "schema_version": RUN_MANIFEST_SCHEMA_VERSION,
+            "result_type": "observables",
+            "initial_state": {"basis_size": 4},
+        },
+    )
+
+    shared = result.to_shared_result()
+
+    assert shared["schema_version"] == SHARED_RESULT_SCHEMA_VERSION
+    assert shared["result_type"] == "observables"
+    assert shared["basis_size"] == 4
+    assert shared["manifest_schema"] == RUN_MANIFEST_SCHEMA_VERSION
+    assert shared["observable_names"] == ["pop"]

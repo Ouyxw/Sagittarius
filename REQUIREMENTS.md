@@ -71,7 +71,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Julia Native Developer API** | High | Done | Julia now exports first-class constructors, register helpers, basis/Hamiltonian facades, pulse nodes, solver functions, jump operators, GPU solver entry points, and structured logging APIs; documented in `docs/JULIA_NATIVE_API.md`. |
 | **Python SDK Parity Contract** | High | Done | Documented Python/Julia parity semantics for atom ordering, bitstrings, pulse addressing, Hamiltonians, solver settings, result manifests, and validation boundaries in `docs/PYTHON_JULIA_PARITY.md`. |
 | **Cross-Language Golden Tests** | High | Done | Added Python-vs-Julia golden tests for full and reduced Hamiltonians, reduced basis ordering, local addressing, observable solver trajectories, and manifest parity fields. |
-| **Shared Result Schema** | Medium | Planned | Define stable language-neutral simulation result fields and semantics; artifact envelopes and manifests are tracked in Phase 6. |
+| **Shared Result Schema** | Medium | Done | Defined `shared-result/v1` as a language-neutral result payload, embedded it in Python result artifacts, added validation helpers, and documented required fields in `docs/SHARED_RESULT_SCHEMA.md`. |
 
 ## 🧪 Phase 9: Scientific Verification & Benchmarks (In Progress)
 | Requirement | Priority | Status | Description |
