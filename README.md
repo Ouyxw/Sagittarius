@@ -190,11 +190,11 @@ The project includes exact and heuristic classical baselines, benchmark scripts,
 
 | Quantity | Unit | Notes |
 | :--- | :---: | :--- |
-| Distance | micrometer | Atom coordinates and blockade distances. |
-| Time | microsecond | Simulation intervals and pulse durations. |
-| Frequency | rad / microsecond | Angular frequencies, including Rabi frequency and detuning. |
-| Interaction coefficient | rad / microsecond * micrometer^6 | Van der Waals `C6` convention. |
-| Decay and dephasing rates | 1 / microsecond | Open-system rates. |
+| Distance | $\mu m$ | Atom coordinates and blockade distances. |
+| Time | $\mu s$ | Simulation intervals and pulse durations. |
+| Frequency | $rad/ \mu s$ | Angular frequencies, including Rabi frequency and detuning. |
+| Interaction coefficient | $rad/\mu s \cdot \mu m^6$ | Van der Waals `C6` convention. |
+| Decay and dephasing rates | $1/\mu s$ | Open-system rates. |
 
 Python atom indices are zero-based in user-facing APIs and follow `Register.atoms` order. Julia internals are one-based, and the Python SDK performs boundary conversion without reversing local pulse vectors. See [docs/api/pulse-and-indexing-contract.md](docs/api/pulse-and-indexing-contract.md) for local addressing validation, indexing semantics, and pulse input behavior.
 
