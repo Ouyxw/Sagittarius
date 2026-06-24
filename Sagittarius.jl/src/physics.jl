@@ -1,5 +1,20 @@
 module Physics
 
+# Core physics models and operators for neutral-atom Rydberg simulations.
+#
+# This module defines atomic registers and lattice geometries, computes the
+# van der Waals interaction V_ij = C6 / r_ij^6, and constructs the driven
+# Rydberg Hamiltonian
+#
+#     H = sum_i (Omega_i / 2) sigma_i^x
+#         - sum_i Delta_i n_i
+#         + sum_{i<j} V_ij n_i n_j.
+#
+# Both the full Hilbert space and a Rydberg-blockade-reduced basis are
+# supported through matrix-free operators and cached sparse matrices. The
+# module also provides reusable basis contexts, time-dependent Hamiltonian
+# closures, and Lindblad jump operators for decay and dephasing simulations.
+
 using LinearAlgebra
 using SparseArrays
 using StaticArrays
