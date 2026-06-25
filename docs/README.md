@@ -4,6 +4,7 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 
 ## Start Here
 
+- [Local installation and workspace layout](getting-started/installation.md)
 - [Minimal examples](getting-started/minimal-examples.md)
 - [Dual SDK examples](getting-started/dual-sdk-examples.md)
 - [Containerized development](getting-started/containerization.md)

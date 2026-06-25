@@ -92,7 +92,29 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Prior-Art-Aware Technical Notes** | Medium | Done | Added `docs/governance/prior-art-notes.md` to distinguish known Rydberg/MWIS mappings, hardness methodology, neutral-atom tooling, and generic numerical techniques from Sagittarius-specific schemas, diagnostics, parity tests, and execution-path implementation work. |
 | **Disclosure Control** | Medium | Done | Added `docs/governance/disclosure-control.md` with a disclosure register, required review fields, status values, approval workflow, trigger examples, and links to performance-claim, prior-art, and known-limitation checks. |
 
-## 🔬 Phase 11: HPC & Advanced Deployment (Future)
+## 🧮 Phase 11: Numerical Solver Configuration (Planned)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Solver Method Dispatch** | High | Planned | Connect `SolverConfig.method` to the Julia backend so the configured method determines the OrdinaryDiffEq algorithm actually used. Initially support the explicit whitelist `Tsit5`, `Vern9`, and `RK4`; do not evaluate arbitrary Julia expressions or silently fall back to another method. |
+| **All Solver-Path Coverage** | High | Planned | Apply method dispatch consistently to Schrödinger, Lindblad, Monte Carlo trajectory, and supported GPU solver paths. A method must not be reported as supported if any applicable execution path silently ignores it. |
+| **Adaptive and Fixed-Step Options** | High | Planned | Extend `SolverConfig` with `adaptive: bool = True` and `dt: Optional[float] = None`. `Tsit5` and `Vern9` support adaptive tolerance-driven integration. Fixed-step `RK4` requires `adaptive=False` and a finite positive `dt`; invalid combinations must fail validation before solver execution. |
+| **Backend Algorithm Resolver** | High | Planned | Implement a Julia-side whitelist resolver that maps stable public names to OrdinaryDiffEq algorithm instances. Unsupported names must raise an actionable validation error that lists the supported methods. |
+| **Effective Configuration Metadata** | High | Planned | Record the algorithm and stepping options actually used by the backend in simulation diagnostics, run manifests, serialized result artifacts, and relevant solver start events. Requested and effective configuration must agree; metadata must never claim `RK4` or `Vern9` when the backend used `Tsit5`. |
+| **Backward Compatibility** | Medium | Planned | Preserve current behavior by keeping `method="Tsit5"` and adaptive stepping as defaults. Existing callers that do not specify `method`, `adaptive`, or `dt` must continue to use tolerance-controlled `Tsit5`. |
+| **Method Dispatch Verification** | High | Planned | Add Python/Julia integration tests proving that each supported method reaches the Julia resolver and is used by every applicable solver path. Add tests for unsupported names, invalid `dt`, incompatible RK4 stepping options, default behavior, metadata accuracy, and representative numerical agreement across methods. |
+| **Documentation** | Medium | Planned | Document the accuracy/cost tradeoffs of `Tsit5`, `Vern9`, and `RK4`, including that `reltol`/`abstol` primarily control adaptive methods while fixed-step RK4 accuracy is governed by `dt`. |
+
+### Phase 11 Acceptance Criteria
+
+1. Changing `SolverConfig.method` changes the Julia OrdinaryDiffEq algorithm used during execution.
+2. `SolverConfig(method="Tsit5")` and `SolverConfig(method="Vern9")` run with adaptive stepping by default and honor `reltol` and `abstol`.
+3. `SolverConfig(method="RK4", adaptive=False, dt=<positive finite value>)` runs with fixed-step RK4.
+4. Unsupported methods and invalid option combinations fail explicitly; no execution path silently substitutes `Tsit5`.
+5. Diagnostics and manifests contain the effective method, `adaptive` value, and `dt` where applicable.
+6. Schrödinger, Lindblad, MCWF, CPU, and supported GPU paths either honor the selected method or reject it with a documented error.
+7. Automated tests verify dispatch, validation, metadata, backward compatibility, and numerical sanity.
+
+## 🔬 Phase 12: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
 - **C++ FFI**: Direct bindings for C++ applications to leverage the Julia engine.

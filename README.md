@@ -66,6 +66,7 @@ For short verification snippets with expected output, see [docs/getting-started/
 |   |-- tests/
 |   `-- projects/mwis_udg/
 |-- docs/                    # Development, deployment, and backend notes
+|-- examples/                # User-facing examples and short simulations
 |-- scripts/                 # Development/debug helper scripts
 |-- LICENSE                  # MIT license
 |-- REQUIREMENTS.md          # Roadmap and production requirements
@@ -73,8 +74,35 @@ For short verification snippets with expected output, see [docs/getting-started/
 ```
 
 Development/debug helper scripts that are not part of the public SDK live under `scripts/`.
+User-facing examples belong under `examples/`. Long-running research projects should normally
+live in a separate repository or sibling directory rather than inside the Sagittarius source tree.
 
 ## Installation
+
+For a complete local installation and testing guide, see
+[docs/getting-started/installation.md](docs/getting-started/installation.md).
+
+### Local Workspace
+
+Sagittarius does not require a directory named `/workspace` or `/workspaces`. Those paths are
+conventions used by some container and hosted development environments. Clone the repository into
+any writable directory on the local machine while preserving the repository layout:
+
+```bash
+mkdir -p ~/workspace
+cd ~/workspace
+git clone <repository_url> Sagittarius
+cd Sagittarius
+```
+
+The Python SDK locates the sibling `Sagittarius.jl` directory relative to the repository, so these
+two directories must remain together:
+
+```text
+Sagittarius/
+|-- Sagittarius.jl/
+`-- sagittarius_py/
+```
 
 ### Python SDK
 
@@ -95,6 +123,46 @@ python -m juliapkg resolve
 ```
 
 The Python package depends on Julia through `juliacall`, but importing `sagittarius` is designed to stay lightweight. Julia package resolution and precompilation happen when a backend operation, simulation, pulse compilation, cluster setup, or explicit backend initialization needs Julia.
+
+### Local Verification
+
+Run the environment check and complete Python test suite without a container:
+
+```bash
+cd sagittarius_py
+uv run python check_env.py
+uv run python -m pytest tests/
+```
+
+CPU tests do not require CUDA. GPU tests require a compatible local GPU stack and are opt-in.
+
+### User Scripts
+
+Short examples intended to accompany Sagittarius can be placed in `examples/`:
+
+```text
+Sagittarius/
+|-- examples/
+|   `-- rabi_simulation.py
+|-- Sagittarius.jl/
+`-- sagittarius_py/
+```
+
+Run them from the repository root with the Python environment managed by `sagittarius_py`:
+
+```bash
+uv run --project sagittarius_py python examples/rabi_simulation.py
+```
+
+For independent research, keep scripts and generated results outside the Sagittarius repository:
+
+```text
+~/workspace/
+|-- Sagittarius/
+`-- my_experiment/
+    |-- scripts/
+    `-- results/
+```
 
 ### Containerized Development
 
