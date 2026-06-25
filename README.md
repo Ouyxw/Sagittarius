@@ -230,6 +230,8 @@ psi0[0] = 1.0
 result = sim.run(psi0, 0.0, 1.0, observables={"pop_atom_0": 0})
 ```
 
+Physical inputs are unitless numbers, so coordinates, times, angular frequencies, interaction coefficients, and decay rates must use one consistent unit system. See [docs/physics/units.md](docs/physics/units.md) for the meaning and selection criteria of `blockade_radius`, `C6`, pulse parameters, and open-system rates.
+
 ## GPU Execution
 
 GPU execution is configured through `SolverConfig`:
