@@ -4,7 +4,11 @@ This guide describes how to clone, install, test, and use Sagittarius directly o
 
 ## Prerequisites
 
-Install Git, a Python version supported by `sagittarius_py/pyproject.toml`, Julia 1.10.3 or newer, and `uv` (recommended) or another Python environment manager. CUDA is not required for CPU simulations or the regular CPU test suite.
+Install Git, a Python version supported by `sagittarius_py/pyproject.toml`, and `uv`
+(recommended) or another Python environment manager. Julia 1.10.3 or newer is required,
+but JuliaPkg may download a compatible Julia runtime while resolving the Python environment.
+That runtime is not necessarily added to the shell `PATH`. CUDA is not required for CPU
+simulations or the regular CPU test suite.
 
 ## Workspace Location
 
@@ -67,6 +71,39 @@ Windows PowerShell:
 
 ```powershell
 $env:PYTHON_JULIACALL_EXE = "C:\absolute\path\to\julia.exe"
+```
+
+### JuliaPkg Runtime Is Not on `PATH`
+
+If `uv run python -m juliapkg resolve` succeeds but the shell reports
+`julia: command not found`, do not install a second Julia runtime immediately. First query
+the executable selected by JuliaPkg:
+
+```bash
+cd Sagittarius/sagittarius_py
+uv run python -c 'import juliapkg, shutil; exe = juliapkg.executable(); print(shutil.which(exe) or exe)'
+```
+
+Use the printed absolute path in Julia commands:
+
+```bash
+JULIA_EXE=/absolute/path/printed/above
+"$JULIA_EXE" --version
+```
+
+If the command cannot query JuliaPkg, locate a downloaded executable directly:
+
+```bash
+find "$HOME/.julia" -type f -path '*/bin/julia'
+```
+
+JuliaPkg and Juliaup commonly place versioned runtimes below `~/.julia`. Avoid documenting
+or scripting a fixed version path because it changes after a Julia upgrade. To make the
+selected executable available as `julia`, add its `bin` directory to `PATH`, then restart
+the shell or source its startup file:
+
+```bash
+export PATH="/absolute/path/to/julia/bin:$PATH"
 ```
 
 ## Verify the Local Installation
@@ -170,7 +207,9 @@ Julia users should also keep long-running experiments outside the Sagittarius re
     `-- notebooks/
 ```
 
-Initialize the project and register the local Sagittarius checkout as a development dependency:
+Initialize the project and register the local Sagittarius checkout as a development dependency.
+The examples below assume `julia` is on `PATH`; otherwise replace it with the absolute
+executable reported in [JuliaPkg Runtime Is Not on `PATH`](#juliapkg-runtime-is-not-on-path).
 
 ```bash
 mkdir -p ~/workspace/my_julia_experiment/scripts
@@ -178,13 +217,17 @@ cd ~/workspace/my_julia_experiment
 
 julia --project=. -e '
 using Pkg
-Pkg.activate(".")
 Pkg.develop(path="../Sagittarius/Sagittarius.jl")
 Pkg.instantiate()
+Pkg.precompile()
+using Sagittarius
+println("Sagittarius loaded successfully")
 '
 ```
 
 `Pkg.develop` records Sagittarius in the experiment's `Project.toml` and `Manifest.toml` while continuing to load source code from the local checkout. It is not necessary to modify `JULIA_LOAD_PATH` or copy `Sagittarius.jl` into the experiment.
+Because `--project=.` already activates the current directory, an additional
+`Pkg.activate(".")` call is unnecessary.
 
 A minimal `scripts/rabi_simulation.jl` can use the package directly:
 
