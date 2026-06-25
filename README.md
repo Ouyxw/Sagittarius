@@ -1,173 +1,64 @@
 # Sagittarius
 
-Sagittarius is a neutral-atom analog quantum simulation project with a Julia numerical core and a Python SDK. It is intended for two related workflows:
+Sagittarius is a research SDK for classical simulation of Rydberg neutral-atom analog dynamics. It combines a Julia physics and solver backend with a Python SDK for experiment-oriented pulse studies and algorithm prototypes.
 
-- baseline simulation for Rydberg-atom analog devices and experiment-oriented pulse studies;
-- exploratory algorithm research, especially workflows that may later be demonstrated on neutral-atom hardware.
+The project is under active development. APIs, backend support, and benchmark results may change unless covered by tests and documented artifacts. Sagittarius is a simulation layer, not a calibrated hardware control stack.
 
-The current repository contains a Julia backend for the physics and solver implementation, a Python package for user-facing workflows, tests for scientific invariants and API behavior, and an MWIS-on-unit-disk-graphs application example.
+## Capabilities
 
-Sagittarius is still an early research SDK. Treat benchmark numbers, backend maturity, and high-level APIs as actively evolving unless they are covered by tests and documented artifacts in this repository.
+- 2D and 3D atom registers, including chains, square lattices, and unit-disk graphs.
+- Full and Rydberg-blockade-reduced Hilbert spaces.
+- Global and local Rabi-frequency and detuning controls.
+- Constant, ramp, piecewise, Gaussian, Blackman, sinc, and sine-squared pulses.
+- Schrodinger, Lindblad, and Monte Carlo wave-function evolution.
+- Per-atom Rydberg populations and parameter sweeps.
+- CPU execution and experimental GPU backends, with CUDA as the primary target.
+- Python and Julia APIs with shared physical semantics.
+- Runtime diagnostics and versioned result serialization.
+- MWIS-on-unit-disk-graph examples with classical baselines.
 
-## Scope
-
-Sagittarius focuses on classical emulation of Rydberg neutral-atom analog dynamics. The main modeling targets are:
-
-- registers of atoms in 2D or 3D space;
-- Rydberg blockade and blockade-reduced Hilbert spaces;
-- global and local Rabi frequency and detuning controls;
-- closed-system Schrodinger evolution;
-- open-system Lindblad and Monte Carlo wave-function trajectories;
-- observables such as per-atom Rydberg population;
-- parameter sweeps and hardware-oriented baseline studies.
-
-The project is not a replacement for a calibrated hardware control stack. It is a simulation and research layer for testing physical assumptions, algorithm mappings, pulse schedules, solver behavior, and expected observables before moving to real devices.
-
-## Design Goals
-
-- Keep the physics core transparent and inspectable for Julia users.
-- Provide a practical Python SDK for notebooks, algorithm prototypes, plotting, and integration with the broader scientific Python ecosystem.
-- Maintain consistent simulation semantics across Python and Julia interfaces as the dual SDK matures.
-- Prefer benchmark-backed performance claims over broad marketing claims.
-- Make failures diagnosable: backend availability, GPU passthrough, package versions, and solver configuration should be explicit.
-
-## Features
-
-Implemented or partially implemented capabilities include:
-
-- Julia backend using SciML/OrdinaryDiffEq-based numerical integration.
-- Python SDK with `Atom`, `Register`, `Simulation`, `PulseSequence`, `SolverConfig`, and `SimulationResult`.
-- Rydberg blockade basis reduction for constrained Hilbert spaces.
-- Specialized register constructors for 1D chains, 2D square lattices, and unit-disk graph instances.
-- Backend-free dense-vs-reduced validation for small blockade systems.
-- Global and local pulse controls for Rabi frequency and detuning.
-- Pulse helpers including constant, ramp, piecewise, Gaussian, Blackman, and sinc shapes.
-- Schrodinger, Lindblad, and Monte Carlo trajectory workflows.
-- JSON serialization for simulation results using the `result-artifact/v1` envelope with data, metadata, diagnostics, and validated `run-manifest/v1` fields.
-- Lightweight Python imports with lazy Julia/GPU initialization.
-- Runtime diagnostics through `doctor()`, `version_info()`, and `backend_maturity()`, including `version-info/v1` package, build, container, and backend toolchain metadata.
-- GPU execution paths for supported backends, with CUDA as the primary containerized development target.
-- Distributed parameter sweeps through `ParallelSimulation`.
-- MWIS/UDG example workflows with classical baselines.
-
-See [REQUIREMENTS.md](REQUIREMENTS.md) for the current development roadmap and planned hardening work.
-For short verification snippets with expected output, see [docs/getting-started/minimal-examples.md](docs/getting-started/minimal-examples.md). For prior-art-aware wording around Rydberg/MWIS mappings and simulator claims, see [docs/governance/prior-art-notes.md](docs/governance/prior-art-notes.md). For public release, benchmark report, and technical disclosure tracking, see [docs/governance/disclosure-control.md](docs/governance/disclosure-control.md).
+See [REQUIREMENTS.md](REQUIREMENTS.md) for the roadmap and [known limitations](docs/reference/known-limitations.md) for current constraints.
 
 ## Repository Layout
 
 ```text
-.
-|-- Sagittarius.jl/          # Julia physics and solver backend
-|   |-- Project.toml
-|   `-- src/
-|-- sagittarius_py/          # Python SDK package and tests
-|   |-- pyproject.toml
-|   |-- sagittarius/
-|   |-- tests/
-|   `-- projects/mwis_udg/
-|-- docs/                    # Development, deployment, and backend notes
-|-- examples/                # User-facing examples and short simulations
-|-- scripts/                 # Development/debug helper scripts
-|-- LICENSE                  # MIT license
-|-- REQUIREMENTS.md          # Roadmap and production requirements
-`-- README.md
+Sagittarius/
+|-- Sagittarius.jl/          # Julia backend
+|-- sagittarius_py/          # Python SDK and tests
+|-- docs/                    # User and developer documentation
+|-- examples/                # Short user-facing examples
+`-- scripts/                 # Repository maintenance tools
 ```
 
-Development/debug helper scripts that are not part of the public SDK live under `scripts/`.
-User-facing examples belong under `examples/`. Long-running research projects should normally
-live in a separate repository or sibling directory rather than inside the Sagittarius source tree.
+Keep long-running experiments in a separate project rather than under this repository.
 
 ## Installation
 
-For a complete local installation and testing guide, see
-[docs/getting-started/installation.md](docs/getting-started/installation.md).
+Requirements: Git, Julia 1.10.3 or newer, a Python version supported by `sagittarius_py/pyproject.toml`, and optionally `uv`.
 
-### Local Workspace
-
-Sagittarius does not require a directory named `/workspace` or `/workspaces`. Those paths are
-conventions used by some container and hosted development environments. Clone the repository into
-any writable directory on the local machine while preserving the repository layout:
+Clone the complete repository; the Python SDK expects `Sagittarius.jl/` and `sagittarius_py/` to remain together.
 
 ```bash
-mkdir -p ~/workspace
-cd ~/workspace
 git clone <repository_url> Sagittarius
-cd Sagittarius
-```
-
-The Python SDK locates the sibling `Sagittarius.jl` directory relative to the repository, so these
-two directories must remain together:
-
-```text
-Sagittarius/
-|-- Sagittarius.jl/
-`-- sagittarius_py/
-```
-
-### Python SDK
-
-From the repository root:
-
-```bash
-cd sagittarius_py
+cd Sagittarius/sagittarius_py
 uv sync
 uv run python -m juliapkg resolve
 ```
 
-If you do not use `uv`, install the package in editable mode with your preferred Python environment manager:
+Without `uv`:
 
 ```bash
-cd sagittarius_py
+cd Sagittarius/sagittarius_py
 python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-The Python package depends on Julia through `juliacall`, but importing `sagittarius` is designed to stay lightweight. Julia package resolution and precompilation happen when a backend operation, simulation, pulse compilation, cluster setup, or explicit backend initialization needs Julia.
+For container setup, platform-specific notes, and environment troubleshooting, see the [installation guide](docs/getting-started/installation.md).
 
-### Local Verification
-
-Run the environment check and complete Python test suite without a container:
+### Independent Python Projects
 
 ```bash
-cd sagittarius_py
-uv run python check_env.py
-uv run python -m pytest tests/
-```
-
-CPU tests do not require CUDA. GPU tests require a compatible local GPU stack and are opt-in.
-
-### User Scripts
-
-Short examples intended to accompany Sagittarius can be placed in `examples/`:
-
-```text
-Sagittarius/
-|-- examples/
-|   `-- rabi_simulation.py
-|-- Sagittarius.jl/
-`-- sagittarius_py/
-```
-
-Run them from the repository root with the Python environment managed by `sagittarius_py`:
-
-```bash
-uv run --project sagittarius_py python examples/rabi_simulation.py
-```
-
-For independent research, keep scripts and generated results outside the Sagittarius repository and give the experiment its own uv environment:
-
-```text
-~/workspace/
-|-- Sagittarius/
-`-- my_experiment/
-    |-- pyproject.toml
-    |-- scripts/
-    `-- results/
-```
-
-Set up the editable local dependency and resolve Julia packages once, then use a short project-local run command:
-
-```bash
+mkdir -p ~/workspace/my_experiment
 cd ~/workspace/my_experiment
 uv init
 uv add --editable ../Sagittarius/sagittarius_py
@@ -175,167 +66,110 @@ uv run python -m juliapkg resolve
 uv run python scripts/rabi_simulation.py
 ```
 
-Run `juliapkg resolve` in the experiment project because it has its own uv environment. The editable dependency lets JuliaPkg discover Sagittarius dependency metadata; explicit resolution surfaces setup failures before the first simulation. Keep the complete Sagittarius checkout at the configured path because the current editable installation resolves the Julia backend from that source tree. See the [local installation guide](docs/getting-started/installation.md#user-script-location) for details.
-
-### Containerized Development
-
-A Docker/VS Code devcontainer workflow is documented in [docs/getting-started/containerization.md](docs/getting-started/containerization.md). The container is the recommended path for CUDA-oriented development because it pins the main system dependencies and configures GPU access for supported hosts.
-
-After entering the container, validate the environment with:
+### Independent Julia Projects
 
 ```bash
-cd sagittarius_py
-uv run python check_env.py
+mkdir -p ~/workspace/my_julia_experiment/scripts
+cd ~/workspace/my_julia_experiment
+julia --project=. -e 'using Pkg; Pkg.develop(path="../Sagittarius/Sagittarius.jl"); Pkg.instantiate()'
+julia --project=. scripts/rabi_simulation.jl
 ```
 
-A container image does not guarantee that a GPU backend is available at runtime. GPU passthrough, host drivers, and backend-specific Julia packages still need to be checked on the running machine. Use `doctor(backend="CUDA")` for a lightweight check and `doctor(backend="CUDA", initialize_backend=True)` when you also want to validate Julia startup.
+Use `--project=.` instead of modifying `JULIA_LOAD_PATH`. The [installation guide](docs/getting-started/installation.md#julia-user-projects) contains the recommended layout and a Julia example.
 
-## Quick Start
+## Python Quick Start
 
-The following example runs a one-atom Rabi oscillation and records the Rydberg population.
+This example runs a one-atom Rabi oscillation and records the Rydberg population:
 
 ```python
 import numpy as np
 from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig
 
 reg = Register([Atom(0.0, 0.0, 0.0)], C6=0.0)
-seq = PulseSequence(omega=2.0 * np.pi, delta=0.0)
-cfg = SolverConfig(reltol=1e-7, abstol=1e-7)
+sim = Simulation(
+    reg,
+    PulseSequence(omega=2.0 * np.pi, delta=0.0),
+    SolverConfig(reltol=1e-7, abstol=1e-7),
+)
 
-sim = Simulation(reg, seq, cfg)
 psi0 = np.array([1.0, 0.0], dtype=complex)
-
 result = sim.run(psi0, 0.0, 0.5, observables={"pop_atom_0": 0})
 print(result.to_pandas().tail())
 ```
 
-For a blockade-reduced simulation, set `blockade_radius` in `SolverConfig` and size the initial state according to the reduced basis:
+For a reduced basis, set `SolverConfig(blockade_radius=...)` and allocate the initial state using the size returned by `sim.validate()`. See the [minimal examples](docs/getting-started/minimal-examples.md) for complete full- and reduced-basis workflows.
 
-```python
-import numpy as np
-from sagittarius import Register, Simulation, PulseSequence, SolverConfig
+## Julia Quick Start
 
-reg = Register.chain(3, spacing=0.5, C6=100.0)
+```julia
+using Sagittarius
 
-sim = Simulation(
-    reg,
-    PulseSequence(omega=1.0, delta=0.0),
-    SolverConfig(blockade_radius=0.6),
-)
+reg = chain_register(3; spacing=0.5, C6=100.0)
+context = reduced_basis_context(reg; blockade_radius=0.6)
+H = hamiltonian(reg, fill(1.0, 3), zeros(3); basis_context=context)
 
-basis_size = sim.validate()
-psi0 = np.zeros(basis_size, dtype=complex)
-psi0[0] = 1.0
-
-result = sim.run(psi0, 0.0, 1.0, observables={"pop_atom_0": 0})
+println("Reduced basis size: ", length(context.basis))
 ```
 
-Physical inputs are unitless numbers, so coordinates, times, angular frequencies, interaction coefficients, and decay rates must use one consistent unit system. See [docs/physics/units.md](docs/physics/units.md) for the meaning and selection criteria of `blockade_radius`, `C6`, pulse parameters, and open-system rates.
+See the [Julia native API](docs/api/julia-native-api.md) and [dual-SDK examples](docs/getting-started/dual-sdk-examples.md).
 
-## GPU Execution
+## Physical Units and Indexing
 
-GPU execution is configured through `SolverConfig`:
+Numeric inputs do not carry units. Coordinates, times, angular frequencies, interaction coefficients, and decay rates must use one consistent unit system. See [physical units and parameter selection](docs/physics/units.md) for `blockade_radius`, `C6`, pulse parameters, and open-system rates.
+
+Python atom indices are zero-based and follow `Register.atoms` order; Julia indices are one-based. See the [pulse and indexing contract](docs/api/pulse-and-indexing-contract.md).
+
+## GPU and Diagnostics
+
+Enable GPU execution through `SolverConfig`:
 
 ```python
-from sagittarius import SolverConfig
-
 cfg = SolverConfig(use_gpu=True, gpu_backend="CUDA")
 ```
 
-Supported backend names are currently `CUDA`, `AMDGPU`, and `Metal`, but maturity and test coverage are not identical across backends. CUDA is the main target of the provided container workflow; the devcontainer uses CUDA 12.8 and pins CUDA.jl 6.2.x for CUDA 12.8+/Blackwell compatibility. See [docs/reference/backends.md](docs/reference/backends.md) for the current maturity matrix, and use `doctor(backend="CUDA", initialize_backend=True)` before enabling GPU execution on a machine or container. The default container/PythonCall environment is CUDA-only; install AMDGPU.jl or Metal.jl only in separate backend-specific experimental environments.
-
-## Runtime Diagnostics
-
-The diagnostics API is safe to call before Julia is initialized:
+Backend names include `CUDA`, `AMDGPU`, and `Metal`, but support and test coverage differ. Check the [backend maturity matrix](docs/reference/backends.md) before use.
 
 ```python
 from sagittarius import backend_maturity, doctor, version_info
 
 print(version_info())
 print(backend_maturity())
-print(doctor(backend="CUDA"))
+print(doctor(backend="CUDA", initialize_backend=True))
 ```
 
-`doctor()` reports container detection, backend maturity, runtime versions, build/source metadata, package versions, backend toolchain probes, basic GPU visibility, structured `issue_details`, backend `capabilities` with ABI/toolchain and parity-status fields, and schema version `doctor/v2.1`. `version_info()` returns schema `version-info/v1` while retaining compatibility fields such as `package_version`, `julia_version`, and `in_container`, plus host ABI metadata. Pass `initialize_backend=True` to also attempt Julia backend loading and return a `backend-probe/v2.1` payload with `checks`, `versions`, `devices`, `driver`, `runtime`, `errors`, and `abi`. Simulation results expose `metadata`, `diagnostics`, and a validated `run-manifest/v1` manifest; `SimulationResult.save()` always writes the `result-artifact/v1` envelope. Use `validate_run_manifest(result.manifest)` to check the manifest contract explicitly.
+CUDA is the primary containerized development target. GPU execution still requires compatible host drivers, runtime libraries, and device passthrough.
 
 ## MWIS Example
 
-The `sagittarius_py/projects/mwis_udg` directory contains an application workflow for mapping maximum weighted independent set problems on unit-disk graphs to Rydberg analog simulation.
+The `sagittarius_py/projects/mwis_udg/` project demonstrates maximum weighted independent set workflows on unit-disk graphs:
 
 ```bash
 cd sagittarius_py/projects/mwis_udg
 uv run python example_mwis.py
 ```
 
-The project includes exact and heuristic classical baselines, benchmark scripts, and solution verification helpers. Use these examples as research scaffolding rather than as a finalized benchmark suite.
-
-## Units and Conventions
-
-| Quantity | Unit | Notes |
-| :--- | :---: | :--- |
-| Distance | $\mu m$ | Atom coordinates and blockade distances. |
-| Time | $\mu s$ | Simulation intervals and pulse durations. |
-| Frequency | $rad/ \mu s$ | Angular frequencies, including Rabi frequency and detuning. |
-| Interaction coefficient | $rad/\mu s \cdot \mu m^6$ | Van der Waals `C6` convention. |
-| Decay and dephasing rates | $1/\mu s$ | Open-system rates. |
-
-Python atom indices are zero-based in user-facing APIs and follow `Register.atoms` order. Julia internals are one-based, and the Python SDK performs boundary conversion without reversing local pulse vectors. See [docs/api/pulse-and-indexing-contract.md](docs/api/pulse-and-indexing-contract.md) for local addressing validation, indexing semantics, and pulse input behavior.
+It is research scaffolding, not a finalized benchmark suite.
 
 ## Verification
-
-Run the Python test suite from the Python package directory:
-
-```bash
-cd sagittarius_py
-uv run python -m pytest tests/
-```
-
-The tests cover API behavior, pulse handling, local addressing, physical invariants, analytic benchmarks, serialization, open-system workflows, GPU paths, and cluster orchestration. CUDA hardware tests are opt-in: set `SAGITTARIUS_ENABLE_GPU_TESTS=1` and ensure `doctor(backend="CUDA", initialize_backend=True)` passes before running `tests/test_gpu_acceleration.py`.
-
-Performance scripts live under:
-
-```text
-sagittarius_py/tests/test_performance/
-```
-
-Benchmark results should be interpreted with the exact hardware, `version-info/v1` metadata, solver settings, and backend configuration used to generate them. Public performance statements should follow [docs/governance/performance-claims.md](docs/governance/performance-claims.md) and cite the relevant `benchmark-artifact/v1` JSON.
-
-## Architecture
-
-Sagittarius is organized around three layers:
-
-1. Python SDK: ergonomic construction of registers, pulse sequences, solver configuration, result handling, plotting, and algorithm workflows.
-2. Shared model layer: pulse representations, blockade-reduced basis semantics, observable definitions, and serialization contracts.
-3. Julia backend: physics kernels, Hamiltonian construction, numerical solvers, GPU paths, and distributed execution.
-
-The roadmap calls for a first-class Julia developer API alongside the Python SDK. The intent is not to force both languages to expose identical syntax, but to keep the physical semantics, defaults, result schemas, and benchmark fixtures consistent. See [docs/getting-started/dual-sdk-examples.md](docs/getting-started/dual-sdk-examples.md) for paired Python and Julia workflows.
-
-## Development Notes
-
-Recommended checks before submitting changes:
-
-```bash
-cd sagittarius_py
-uv run python -m pytest tests/
-```
-
-For environment diagnostics:
 
 ```bash
 cd sagittarius_py
 uv run python check_env.py
-uv run python - <<'PY'
-from sagittarius import doctor
-print(doctor(backend="CUDA"))
-PY
+uv run python -m pytest tests/
 ```
 
-For roadmap context, see [REQUIREMENTS.md](REQUIREMENTS.md). For container setup, see [docs/getting-started/containerization.md](docs/getting-started/containerization.md).
+CPU tests do not require CUDA. GPU tests are opt-in and require a working backend. Performance results must include the hardware, solver settings, backend configuration, and version metadata described in the [performance claims policy](docs/governance/performance-claims.md).
 
-## Known Limitations
+## Documentation
 
-Sagittarius is an early research SDK. Important limitations include evolving APIs, Julia/PythonCall backend dependency, non-uniform GPU maturity, exponential full-basis scaling, incomplete CPU/GPU parity coverage, and benchmark reproducibility work still in progress. See [docs/reference/known-limitations.md](docs/reference/known-limitations.md) for the detailed list.
+- [Installation and workspace layout](docs/getting-started/installation.md)
+- [Minimal examples](docs/getting-started/minimal-examples.md)
+- [Physical units and parameter selection](docs/physics/units.md)
+- [Python/Julia parity contract](docs/api/python-julia-parity.md)
+- [Backend support](docs/reference/backends.md)
+- [Known limitations](docs/reference/known-limitations.md)
+- [Containerized development](docs/getting-started/containerization.md)
 
 ## License
 
-Sagittarius is distributed under the MIT License. See [LICENSE](LICENSE).
+Sagittarius is distributed under the [MIT License](LICENSE).

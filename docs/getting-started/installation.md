@@ -153,3 +153,62 @@ uv run python scripts/rabi_simulation.py
 This is preferred over invoking the full path to `Sagittarius/sagittarius_py/.venv/bin/python`: the experiment records its own dependencies, receives an isolated environment, and remains straightforward to reproduce. Because the current editable installation locates the Julia backend from the source repository, keep the complete `Sagittarius/` checkout in the configured relative location. Moving it requires updating the uv source path and running `uv sync` again.
 
 The location and name of `~/workspace` are arbitrary; only the Sagittarius repository internal directory layout and the configured editable dependency path are significant.
+
+### Julia User Projects
+
+Julia users should also keep long-running experiments outside the Sagittarius repository and give each experiment its own Julia project:
+
+```text
+~/workspace/
+|-- Sagittarius/
+`-- my_julia_experiment/
+    |-- Project.toml
+    |-- Manifest.toml
+    |-- scripts/
+    |   `-- rabi_simulation.jl
+    |-- results/
+    `-- notebooks/
+```
+
+Initialize the project and register the local Sagittarius checkout as a development dependency:
+
+```bash
+mkdir -p ~/workspace/my_julia_experiment/scripts
+cd ~/workspace/my_julia_experiment
+
+julia --project=. -e '
+using Pkg
+Pkg.activate(".")
+Pkg.develop(path="../Sagittarius/Sagittarius.jl")
+Pkg.instantiate()
+'
+```
+
+`Pkg.develop` records Sagittarius in the experiment's `Project.toml` and `Manifest.toml` while continuing to load source code from the local checkout. It is not necessary to modify `JULIA_LOAD_PATH` or copy `Sagittarius.jl` into the experiment.
+
+A minimal `scripts/rabi_simulation.jl` can use the package directly:
+
+```julia
+using Sagittarius
+
+reg = chain_register(3; spacing=0.5, C6=100.0)
+context = reduced_basis_context(reg; blockade_radius=0.6)
+
+H = hamiltonian(
+    reg,
+    fill(1.0, 3),
+    zeros(3);
+    basis_context=context,
+)
+
+println("Reduced basis size: ", length(context.basis))
+```
+
+Run scripts from the experiment root with its project activated:
+
+```bash
+cd ~/workspace/my_julia_experiment
+julia --project=. scripts/rabi_simulation.jl
+```
+
+Always using `--project=.` prevents dependencies from being taken accidentally from Julia's global environment. Keep experiment scripts in the experiment's `scripts/` directory; `Sagittarius/scripts/` remains reserved for repository maintenance and debugging. If the Sagittarius checkout moves, update its path with `Pkg.develop(path="...")` from the experiment environment and run `Pkg.instantiate()` again.
