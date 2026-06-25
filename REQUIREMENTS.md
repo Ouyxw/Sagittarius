@@ -114,7 +114,33 @@ This document outlines the development lifecycle of Sagittarius, from a function
 6. Schrödinger, Lindblad, MCWF, CPU, and supported GPU paths either honor the selected method or reject it with a documented error.
 7. Automated tests verify dispatch, validation, metadata, backward compatibility, and numerical sanity.
 
-## 🔬 Phase 12: HPC & Advanced Deployment (Future)
+## 📦 Phase 12: Packaging & Installation (Planned)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Source Installation Baseline** | High | Planned | Define the currently supported installation model as a complete repository checkout followed by `uv sync` and `python -m juliapkg resolve`. Document `pip install -e .` as a development-only editable install that still depends on the repository layout, and explicitly state that an independent PyPI installation is not yet supported. |
+| **Relocatable Wheel** | High | Planned | Build a Python wheel that contains the Julia backend sources and required Julia project metadata. An installed wheel must continue to run after the source checkout is moved or deleted. |
+| **Package Resource Lookup** | High | Planned | Replace repository-relative backend discovery such as `Path(__file__).resolve().parents[2] / "Sagittarius.jl"` with installed-package resource lookup, while retaining an explicit development override where needed. |
+| **Julia Package Data** | High | Planned | Include `Sagittarius.jl/Project.toml`, Julia source files, and any required runtime metadata as declared Python package data in both wheel and source distributions. Verify that no backend file is obtained accidentally from the build checkout. |
+| **CPU-First Dependency Profile** | High | Planned | Make the default installation usable for CPU simulations without CUDA, an NVIDIA driver, or CUDA.jl. Move CUDA and future GPU backend setup to explicit optional workflows rather than resolving CUDA for every user. |
+| **Backend Setup Command** | Medium | Planned | Provide a user-facing CLI or equivalent explicit workflow for Julia dependency resolution and backend setup, such as `sagittarius backend resolve`, `sagittarius backend install cuda`, and `sagittarius doctor`. Backend installation failures must return actionable diagnostics. |
+| **Clean-Environment Artifact Tests** | High | Planned | Build wheel and sdist artifacts in CI, install them into clean virtual environments outside the repository, and run import, backend initialization, one-atom simulation, serialization, and uninstall/reinstall smoke tests. Tests executed from the source tree alone are insufficient. |
+| **Cross-Platform Installation Matrix** | High | Planned | Validate supported Python and Julia versions on Linux, macOS, and Windows. Publish an explicit compatibility matrix and classify platform-specific Julia discovery or compilation limitations. |
+| **PyPI Release Readiness** | High | Planned | Publish to PyPI only after wheel/sdist isolation tests pass, CPU installation is independent of CUDA, package metadata and licensing are complete, Julia initialization errors are actionable, and the supported version matrix is documented. |
+| **Installation Documentation** | Medium | Planned | Keep local source installation, editable development installation, wheel installation, Julia executable overrides, CPU/GPU setup, upgrade, and uninstall instructions distinct. Do not advertise `pip install sagittarius-py` until a released artifact satisfies the acceptance criteria below. |
+
+### Phase 12 Acceptance Criteria
+
+1. `pip install <built-wheel>` succeeds in a clean virtual environment outside the source repository.
+2. `import sagittarius` remains lightweight and does not initialize or download Julia packages.
+3. A CPU one-atom simulation succeeds after explicit backend resolution with no source checkout present.
+4. Moving or deleting the original repository does not break an installed wheel.
+5. The wheel and sdist contain all required Julia backend source and project files, verified from their artifact contents.
+6. Default CPU installation does not require CUDA.jl, an NVIDIA driver, or GPU hardware.
+7. Unsupported or missing Julia installations produce documented, actionable diagnostics.
+8. CI tests installation artifacts across the declared Python, Julia, and operating-system support matrix.
+9. PyPI publication remains blocked until all release-readiness requirements and artifact smoke tests pass.
+
+## 🔬 Phase 13: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
 - **C++ FFI**: Direct bindings for C++ applications to leverage the Julia engine.
