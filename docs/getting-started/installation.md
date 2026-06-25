@@ -105,23 +105,51 @@ Do not place user scripts inside:
 - `Sagittarius.jl/src/`, which contains Julia backend source;
 - `scripts/`, unless the script is a repository maintenance or debugging tool.
 
-For long-running experiments, keep the research project separate:
+For long-running experiments, keep the research project separate and let it manage its own Python environment:
 
 ```text
 ~/workspace/
 |-- Sagittarius/
 `-- my_experiment/
+    |-- pyproject.toml
     |-- scripts/
     |   `-- rabi_simulation.py
     |-- results/
     `-- README.md
 ```
 
-Install Sagittarius in editable mode into the environment used by the experiment, or run the experiment with the virtual environment created under `Sagittarius/sagittarius_py`:
+Initialize the experiment once, add the local Sagittarius checkout as an editable dependency, and resolve Julia packages inside the experiment environment:
 
 ```bash
-~/workspace/Sagittarius/sagittarius_py/.venv/bin/python \
-    ~/workspace/my_experiment/scripts/rabi_simulation.py
+cd ~/workspace/my_experiment
+uv init
+uv add --editable ../Sagittarius/sagittarius_py
+uv run python -m juliapkg resolve
 ```
 
-The location and name of `~/workspace` are arbitrary; only the repository internal directory layout is significant.
+Run `juliapkg resolve` from `my_experiment`, not from the Sagittarius development environment. Each uv project has its own Python environment and JuliaCall project selection. The editable dependency allows JuliaPkg to discover `../Sagittarius/sagittarius_py/juliapkg.json` and install the Julia packages required by Sagittarius for this experiment. Although the first backend call may trigger resolution implicitly, resolving during setup exposes Julia discovery, network, and package compatibility failures before a simulation starts.
+
+The current `juliapkg.json` also includes CUDA.jl. Consequently, this resolution may install Julia CUDA packages even for CPU-only experiments; separating the default CPU dependency profile from optional GPU setup is planned packaging work.
+
+The generated `pyproject.toml` records the local source dependency through a uv source entry equivalent to:
+
+```toml
+[project]
+dependencies = [
+    "sagittarius-py",
+]
+
+[tool.uv.sources]
+sagittarius-py = { path = "../Sagittarius/sagittarius_py", editable = true }
+```
+
+After this one-time setup, run experiment scripts with a short, project-local command:
+
+```bash
+cd ~/workspace/my_experiment
+uv run python scripts/rabi_simulation.py
+```
+
+This is preferred over invoking the full path to `Sagittarius/sagittarius_py/.venv/bin/python`: the experiment records its own dependencies, receives an isolated environment, and remains straightforward to reproduce. Because the current editable installation locates the Julia backend from the source repository, keep the complete `Sagittarius/` checkout in the configured relative location. Moving it requires updating the uv source path and running `uv sync` again.
+
+The location and name of `~/workspace` are arbitrary; only the Sagittarius repository internal directory layout and the configured editable dependency path are significant.

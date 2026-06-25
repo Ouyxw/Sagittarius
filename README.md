@@ -154,15 +154,28 @@ Run them from the repository root with the Python environment managed by `sagitt
 uv run --project sagittarius_py python examples/rabi_simulation.py
 ```
 
-For independent research, keep scripts and generated results outside the Sagittarius repository:
+For independent research, keep scripts and generated results outside the Sagittarius repository and give the experiment its own uv environment:
 
 ```text
 ~/workspace/
 |-- Sagittarius/
 `-- my_experiment/
+    |-- pyproject.toml
     |-- scripts/
     `-- results/
 ```
+
+Set up the editable local dependency and resolve Julia packages once, then use a short project-local run command:
+
+```bash
+cd ~/workspace/my_experiment
+uv init
+uv add --editable ../Sagittarius/sagittarius_py
+uv run python -m juliapkg resolve
+uv run python scripts/rabi_simulation.py
+```
+
+Run `juliapkg resolve` in the experiment project because it has its own uv environment. The editable dependency lets JuliaPkg discover Sagittarius dependency metadata; explicit resolution surfaces setup failures before the first simulation. Keep the complete Sagittarius checkout at the configured path because the current editable installation resolves the Julia backend from that source tree. See the [local installation guide](docs/getting-started/installation.md#user-script-location) for details.
 
 ### Containerized Development
 
