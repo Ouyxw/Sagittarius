@@ -164,7 +164,15 @@ uv add --editable ../Sagittarius/sagittarius_py
 uv run python -m juliapkg resolve
 ```
 
-Run `juliapkg resolve` from `my_experiment`, not from the Sagittarius development environment. Each uv project has its own Python environment and JuliaCall project selection. The editable dependency allows JuliaPkg to discover `../Sagittarius/sagittarius_py/juliapkg.json` and install the Julia packages required by Sagittarius for this experiment. Although the first backend call may trigger resolution implicitly, resolving during setup exposes Julia discovery, network, and package compatibility failures before a simulation starts.
+Run `juliapkg resolve` from `my_experiment`, not from the Sagittarius development environment. Each uv project has its own Python environment and JuliaCall project selection. The editable dependency allows JuliaPkg to discover the packaged `sagittarius/juliapkg.json` file and install the Julia packages required by Sagittarius for this experiment. Although the first backend call may trigger resolution implicitly, resolving during setup exposes Julia discovery, network, and package compatibility failures before a simulation starts.
+
+If the experiment environment was created before the packaged JuliaPkg configuration was available, refresh the editable installation before resolving again:
+
+```bash
+cd ~/workspace/my_experiment
+uv sync --reinstall-package sagittarius-py
+uv run python -m juliapkg resolve
+```
 
 The current `juliapkg.json` also includes CUDA.jl. Consequently, this resolution may install Julia CUDA packages even for CPU-only experiments; separating the default CPU dependency profile from optional GPU setup is planned packaging work.
 
