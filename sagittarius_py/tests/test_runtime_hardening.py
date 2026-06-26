@@ -120,6 +120,28 @@ def test_runtime_exception_classification():
     assert "juliapkg resolve" in issue["remediation"]
 
 
+def test_missing_julia_package_classification_names_package():
+    import sagittarius.runtime as runtime
+
+    issue = runtime._classify_exception(Exception("ArgumentError: Package OrdinaryDiffEq not found in current path."))
+
+    assert issue["code"] == "JULIA_PACKAGE_LOAD_FAILED"
+    assert "OrdinaryDiffEq" in issue["message"]
+    assert "juliapkg resolve" in issue["remediation"]
+    assert "--reinstall-package sagittarius-py" in issue["remediation"]
+
+
+def test_required_cpu_julia_packages_include_solver_dependencies():
+    import sagittarius.runtime as runtime
+
+    assert set(runtime.REQUIRED_CPU_JULIA_PACKAGES) == {
+        "OrdinaryDiffEq",
+        "StaticArrays",
+        "DiffEqCallbacks",
+        "SciMLBase",
+    }
+
+
 def test_backend_maturity_uses_normalized_keys():
     from sagittarius import backend_maturity
 

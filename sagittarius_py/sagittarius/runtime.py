@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,13 @@ MIN_RECOMMENDED_CUDAJL_VERSION = "6.2.0"
 CUDA_12_8_MIN_LINUX_DRIVER = "570.26"
 CUDA_12_8_MIN_WINDOWS_DRIVER = "570.65"
 BLACKWELL_COMPUTE_MAJOR_MIN = 10
+
+REQUIRED_CPU_JULIA_PACKAGES = (
+    "OrdinaryDiffEq",
+    "StaticArrays",
+    "DiffEqCallbacks",
+    "SciMLBase",
+)
 
 PYTHON_PACKAGE_VERSION_FIELDS = (
     "sagittarius-py",
@@ -527,6 +535,14 @@ def _cuda_host_compatibility(devices: list[Dict[str, Optional[str]]]) -> Dict[st
     }
 
 
+def _missing_julia_package_name(text: str) -> Optional[str]:
+    match = re.search(
+        r"Package\s+([A-Za-z_][A-Za-z0-9_]*)\s+(?:not found|is required but does not seem to be installed)",
+        text,
+    )
+    return match.group(1) if match else None
+
+
 def _probe_failure_issue(probe: Dict[str, Any]) -> Dict[str, str]:
     checks = probe.get("checks", {})
     if not checks.get("package_loadable", {"ok": True}).get("ok", True):
@@ -555,17 +571,20 @@ def _classify_exception(exc: Exception) -> Dict[str, str]:
             "PythonCall.jl failed during juliacall startup.",
             "Run `cd sagittarius_py && uv run python -m juliapkg resolve`, then retry with `doctor(initialize_backend=True)`. If it persists, rebuild the Julia environment.",
         )
-    if "pkg.instantiate" in lowered or "does not seem to be installed" in lowered:
+    if "pkg.instantiate" in lowered or ("does not seem to be installed" in lowered and "package" not in lowered):
         return _issue(
             "JULIA_PROJECT_NOT_INSTANTIATED",
             "The Julia project dependencies are not instantiated.",
             "Run `julia --project=Sagittarius.jl -e 'using Pkg; Pkg.instantiate()'` or `cd sagittarius_py && uv run python -m juliapkg resolve`.",
         )
     if "package" in lowered and ("not found" in lowered or "not installed" in lowered or "could not be loaded" in lowered):
+        missing = _missing_julia_package_name(text)
+        package_detail = f" Missing Julia package: {missing}." if missing else ""
         return _issue(
             "JULIA_PACKAGE_LOAD_FAILED",
-            "A required Julia package could not be loaded.",
-            "Run Julia project instantiation and verify optional backend packages are installed for the selected backend.",
+            f"A required Julia package could not be loaded.{package_detail}",
+            "Run `uv run python -m juliapkg resolve` in the active Python project. "
+            "If this is an older editable experiment environment, run `uv sync --reinstall-package sagittarius-py` first.",
         )
     if "no devices" in lowered or "device not found" in lowered or "no gpu" in lowered:
         return _issue(
@@ -610,8 +629,9 @@ def get_julia(*, setup: bool = True):
         from juliacall import Main as jl
 
         if setup:
+            required_packages = json.dumps(list(REQUIRED_CPU_JULIA_PACKAGES))
             jl.seval(
-                """
+                f"""
                 using Pkg
                 function ensure_pkg(pkg_name)
                     if !haskey(Pkg.project().dependencies, pkg_name)
@@ -619,7 +639,10 @@ def get_julia(*, setup: bool = True):
                     end
                 end
 
-                ensure_pkg("SciMLBase")
+                required_cpu_packages = {required_packages}
+                for pkg_name in required_cpu_packages
+                    ensure_pkg(pkg_name)
+                end
                 ensure_pkg("Distributed")
 
                 using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase, Distributed
