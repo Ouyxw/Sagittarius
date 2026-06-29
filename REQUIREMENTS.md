@@ -92,7 +92,29 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Prior-Art-Aware Technical Notes** | Medium | Done | Added `docs/governance/prior-art-notes.md` to distinguish known Rydberg/MWIS mappings, hardness methodology, neutral-atom tooling, and generic numerical techniques from Sagittarius-specific schemas, diagnostics, parity tests, and execution-path implementation work. |
 | **Disclosure Control** | Medium | Done | Added `docs/governance/disclosure-control.md` with a disclosure register, required review fields, status values, approval workflow, trigger examples, and links to performance-claim, prior-art, and known-limitation checks. |
 
-## 🧮 Phase 11: Numerical Solver Configuration (Planned)
+## 📏 Phase 11: Observable Library (Planned)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Julia Observable Library** | High | Planned | Add a first-class Julia observable library that returns solver-compatible callables with the stable signature `(state, t, integrator) -> Float64`. Keep `RydbergPopulation` as the existing primitive and add common neutral-atom observables for total Rydberg population, pair correlations, connected correlations, blockade-violation counts, bitstring probabilities, MWIS/cost expectations, Pauli-Z, Pauli-ZZ, and parity. |
+| **Shared Basis and State Helpers** | High | Planned | Centralize full-basis, reduced-basis, `BasisContext`, bitstring mapping, `Vector`, `Matrix`, and CUDA state handling in internal helper functions so every observable interprets amplitudes, density matrices, and reduced-basis indices consistently. |
+| **Diagonal Observable First Scope** | High | Planned | Prioritize diagonal occupation/bitstring observables in the first implementation because they are stable across full and reduced bases and directly support Rydberg blockade, AQC, and MWIS workflows. Off-diagonal observables such as Pauli-X, Pauli-Y, coherence, energy with non-diagonal Hamiltonians, and entanglement measures remain future work unless they can be implemented with explicit basis-mapping tests. |
+| **Solver-Path Compatibility** | High | Planned | Observable callables must work consistently across Schrödinger, Lindblad, MCWF, and supported GPU solver paths, or fail with a documented validation error when a path is unsupported. Reduced-basis observables must share the same `BasisContext` as Hamiltonians and jump operators. |
+| **Python Observable Declarations** | High | Planned | Extend the Python SDK beyond the current `dict[str, int]` Rydberg-population shorthand with a validated declaration format for named observables, while preserving `observables={"pop0": 0}` as backward-compatible shorthand. Python indices remain zero-based and are converted at the Julia boundary. |
+| **Observable Metadata** | Medium | Planned | Record observable type, parameters, atom indices, edge lists where applicable, basis mode, and declaration order in run manifests, shared results, and serialized result artifacts so observable series can be audited and reproduced. |
+| **Observable Validation** | High | Planned | Validate observable names, type identifiers, atom indices, bitstring bounds, edge endpoints, weight lengths, penalty parameters, and unsupported state/backend combinations before solver execution where possible. Errors must include actionable remediation. |
+| **Verification and Documentation** | High | Planned | Add Julia unit tests, Python wrapper tests, reduced-vs-full parity tests, Lindblad density-matrix tests, MCWF smoke tests, and opt-in CUDA parity tests for the observable library. Document Julia native examples, Python declaration examples, indexing conventions, and reduced-basis requirements. |
+
+### Phase 11 Acceptance Criteria
+
+1. Julia exports documented constructors for the first-scope observable library while preserving `RydbergPopulation` compatibility.
+2. Each first-scope observable returns a solver-compatible callable and produces the same value on equivalent full-basis and reduced-basis states.
+3. Observables correctly handle wavefunction vectors and Lindblad density matrices; GPU support is implemented for supported observables or explicitly rejected with a documented diagnostic.
+4. `BasisContext` sharing is required and tested for reduced-basis Hamiltonians, observables, jump operators, and MCWF trajectories.
+5. Python supports a validated observable declaration format and preserves the existing `observables={"name": atom_index}` shorthand.
+6. Result data, shared results, and run manifests preserve observable names, order, types, and parameters.
+7. Automated tests cover indexing, bitstring mapping, full/reduced parity, solver-path behavior, serialization metadata, invalid declarations, and representative Rydberg/MWIS use cases.
+
+## 🧮 Phase 12: Numerical Solver Configuration (Planned)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Solver Method Dispatch** | High | Planned | Connect `SolverConfig.method` to the Julia backend so the configured method determines the OrdinaryDiffEq algorithm actually used. Initially support the explicit whitelist `Tsit5`, `Vern9`, and `RK4`; do not evaluate arbitrary Julia expressions or silently fall back to another method. |
@@ -104,7 +126,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Method Dispatch Verification** | High | Planned | Add Python/Julia integration tests proving that each supported method reaches the Julia resolver and is used by every applicable solver path. Add tests for unsupported names, invalid `dt`, incompatible RK4 stepping options, default behavior, metadata accuracy, and representative numerical agreement across methods. |
 | **Documentation** | Medium | Planned | Document the accuracy/cost tradeoffs of `Tsit5`, `Vern9`, and `RK4`, including that `reltol`/`abstol` primarily control adaptive methods while fixed-step RK4 accuracy is governed by `dt`. |
 
-### Phase 11 Acceptance Criteria
+### Phase 12 Acceptance Criteria
 
 1. Changing `SolverConfig.method` changes the Julia OrdinaryDiffEq algorithm used during execution.
 2. `SolverConfig(method="Tsit5")` and `SolverConfig(method="Vern9")` run with adaptive stepping by default and honor `reltol` and `abstol`.
@@ -114,7 +136,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 6. Schrödinger, Lindblad, MCWF, CPU, and supported GPU paths either honor the selected method or reject it with a documented error.
 7. Automated tests verify dispatch, validation, metadata, backward compatibility, and numerical sanity.
 
-## 📦 Phase 12: Packaging & Installation (Planned)
+## 📦 Phase 13: Packaging & Installation (Planned)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Source Installation Baseline** | High | Planned | Define the currently supported installation model as a complete repository checkout followed by `uv sync` and `python -m juliapkg resolve`. Document `pip install -e .` as a development-only editable install that still depends on the repository layout, and explicitly state that an independent PyPI installation is not yet supported. |
@@ -128,7 +150,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **PyPI Release Readiness** | High | Planned | Publish to PyPI only after wheel/sdist isolation tests pass, CPU installation is independent of CUDA, package metadata and licensing are complete, Julia initialization errors are actionable, and the supported version matrix is documented. |
 | **Installation Documentation** | Medium | Planned | Keep local source installation, editable development installation, wheel installation, Julia executable overrides, CPU/GPU setup, upgrade, and uninstall instructions distinct. Do not advertise `pip install sagittarius-py` until a released artifact satisfies the acceptance criteria below. |
 
-### Phase 12 Acceptance Criteria
+### Phase 13 Acceptance Criteria
 
 1. `pip install <built-wheel>` succeeds in a clean virtual environment outside the source repository.
 2. `import sagittarius` remains lightweight and does not initialize or download Julia packages.
@@ -140,7 +162,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 8. CI tests installation artifacts across the declared Python, Julia, and operating-system support matrix.
 9. PyPI publication remains blocked until all release-readiness requirements and artifact smoke tests pass.
 
-## 🔬 Phase 13: HPC & Advanced Deployment (Future)
+## 🔬 Phase 14: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
 - **C++ FFI**: Direct bindings for C++ applications to leverage the Julia engine.
