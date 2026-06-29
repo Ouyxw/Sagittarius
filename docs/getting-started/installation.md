@@ -216,14 +216,19 @@ Julia users should also keep long-running experiments outside the Sagittarius re
 ```
 
 Initialize the project and register the local Sagittarius checkout as a development dependency.
-The examples below assume `julia` is on `PATH`; otherwise replace it with the absolute
-executable reported in [JuliaPkg Runtime Is Not on `PATH`](#juliapkg-runtime-is-not-on-path).
+This workflow needs a Julia executable in the current shell. Setting `PYTHON_JULIACALL_EXE`
+for Python/JuliaCall, or exporting `PATH` only inside `Sagittarius/sagittarius_py`, does not
+make `julia` available in a separate experiment shell. Either install Julia on `PATH`, or
+carry the absolute executable path reported by JuliaPkg into the experiment shell:
 
 ```bash
 mkdir -p ~/workspace/my_julia_experiment/scripts
 cd ~/workspace/my_julia_experiment
 
-julia --project=. -e '
+JULIA_EXE=$(cd ../Sagittarius/sagittarius_py && uv run python -c 'import juliapkg, shutil; exe = juliapkg.executable(); print(shutil.which(exe) or exe)')
+"$JULIA_EXE" --version
+
+"$JULIA_EXE" --project=. -e '
 using Pkg
 Pkg.develop(path="../Sagittarius/Sagittarius.jl")
 Pkg.instantiate()
@@ -259,7 +264,30 @@ Run scripts from the experiment root with its project activated:
 
 ```bash
 cd ~/workspace/my_julia_experiment
-julia --project=. scripts/rabi_simulation.jl
+JULIA_EXE=$(cd ../Sagittarius/sagittarius_py && uv run python -c 'import juliapkg, shutil; exe = juliapkg.executable(); print(shutil.which(exe) or exe)')
+"$JULIA_EXE" --project=. scripts/rabi_simulation.jl
 ```
 
-Always using `--project=.` prevents dependencies from being taken accidentally from Julia's global environment. Keep experiment scripts in the experiment's `scripts/` directory; `Sagittarius/scripts/` remains reserved for repository maintenance and debugging. If the Sagittarius checkout moves, update its path with `Pkg.develop(path="...")` from the experiment environment and run `Pkg.instantiate()` again.
+Always using `--project=.` prevents dependencies from being taken accidentally from the global Julia environment. If you prefer to type `julia` directly, add the executable `bin` directory to `PATH` in the current shell or shell startup file as described in [JuliaPkg Runtime Is Not on `PATH`](#juliapkg-runtime-is-not-on-path). Keep experiment scripts in the experiment `scripts/` directory; `Sagittarius/scripts/` remains reserved for repository maintenance and debugging. If the Sagittarius checkout moves, update its path with `Pkg.develop(path="...")` from the experiment environment and run `Pkg.instantiate()` again.
+
+If you are already inside a nested script directory, keep using the resolved executable and point `--project` back to the experiment root. For example, from `my_julia_experiment/scripts/dual_sdk`:
+
+```bash
+"$JULIA_EXE" --project=../.. algo_prototyping.jl
+```
+
+A successful `"$JULIA_EXE" --version` does not mean the bare `julia` command is on `PATH`. These two commands use different lookup paths:
+
+```bash
+"$JULIA_EXE" --version   # uses the explicit executable path
+julia --version          # requires a julia command on PATH
+```
+
+To make `julia` available in the current shell, prepend the executable directory to `PATH`:
+
+```bash
+export PATH="$(dirname "$JULIA_EXE"):$PATH"
+julia --version
+```
+
+Add that `export PATH=...` line to your shell startup file, such as `~/.bashrc`, only if you want it to persist for future terminals.
