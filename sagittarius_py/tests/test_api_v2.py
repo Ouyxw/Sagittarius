@@ -59,3 +59,61 @@ def test_simulation_plot_no_error():
     
     with patch("matplotlib.pyplot.show"):
         results.plot(show=True)
+
+
+def test_simulation_forwards_blockade_radius_to_julia_solver(monkeypatch):
+    import sagittarius.api as api
+
+    calls = {}
+
+    class FakeRegister:
+        atoms = [object(), object()]
+
+        @property
+        def jl_obj(self):
+            return self
+
+        def geometry_summary(self, **kwargs):
+            calls["geometry"] = kwargs
+            return {"atom_count": 2}
+
+    class FakeContext:
+        basis = [0, 1]
+        mapping = {0: 0, 1: 1}
+
+    class FakePhys:
+        def reduced_basis_context(self, reg, *, blockade_radius):
+            calls["basis_radius"] = blockade_radius
+            return FakeContext()
+
+        def build_hamiltonian_func(self, reg, omega_func, delta_func, **kwargs):
+            calls["hamiltonian"] = kwargs
+            return lambda t: None
+
+    class FakeSolver:
+        def solve_schrodinger(self, psi0, h_func, tspan, **kwargs):
+            calls["solver"] = kwargs
+            return "raw-result"
+
+    class FakeVectorFactory:
+        def __getitem__(self, dtype):
+            return lambda values: list(values)
+
+    class FakeJL:
+        ComplexF64 = complex
+        Vector = FakeVectorFactory()
+
+        def SVector(self, *values):
+            return tuple(values)
+
+    monkeypatch.setattr(api, "doctor", lambda backend: {"requested_backend": backend})
+    monkeypatch.setattr(api, "get_modules", lambda: (FakeJL(), None, FakePhys(), FakeSolver()))
+    monkeypatch.setattr(api.Simulation, "_get_compiled_func", lambda self, pulse, n: (lambda t: [0.0] * n))
+
+    sim = api.Simulation(FakeRegister(), api.PulseSequence(), api.SolverConfig(blockade_radius=0.6))
+    result = sim.run(np.array([1.0, 0.0], dtype=complex), 0.0, 0.1)
+
+    assert result == "raw-result"
+    assert calls["basis_radius"] == 0.6
+    assert calls["hamiltonian"]["blockade_radius"] == 0.6
+    assert calls["solver"]["blockade_radius"] == 0.6

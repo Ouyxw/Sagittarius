@@ -1451,7 +1451,8 @@ class Simulation:
                     n_trajectories=int(self.config.n_trajectories),
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
-                    abstol=float(self.config.abstol)
+                    abstol=float(self.config.abstol),
+                    blockade_radius=float(self.config.blockade_radius)
                 )
                 
                 if jl_obs:
@@ -1491,7 +1492,8 @@ class Simulation:
                     jl.SVector(float(t_start), float(t_end)),
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
-                    abstol=float(self.config.abstol)
+                    abstol=float(self.config.abstol),
+                    blockade_radius=float(self.config.blockade_radius)
                 )
         else:
             # Solve Schrodinger Equation
@@ -1519,7 +1521,8 @@ class Simulation:
                     jl.SVector(float(t_start), float(t_end)),
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
-                    abstol=float(self.config.abstol)
+                    abstol=float(self.config.abstol),
+                    blockade_radius=float(self.config.blockade_radius)
                 )
             else:
                 jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
@@ -1529,7 +1532,8 @@ class Simulation:
                     jl.SVector(float(t_start), float(t_end)), 
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
-                    abstol=float(self.config.abstol)
+                    abstol=float(self.config.abstol),
+                    blockade_radius=float(self.config.blockade_radius)
                 )
         
         if jl_obs:

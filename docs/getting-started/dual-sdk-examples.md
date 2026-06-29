@@ -76,7 +76,7 @@ H_func = build_hamiltonian_func(
 )
 psi0 = ComplexF64[1.0; zeros(ComplexF64, length(context.basis) - 1)]
 obs = Dict("pop0" => RydbergPopulation(1, length(reg.atoms); basis_context=context))
-sol, saved = solve_schrodinger(psi0, H_func, (0.0, duration); observables=obs)
+sol, saved = solve_schrodinger(psi0, H_func, (0.0, duration); observables=obs, blockade_radius=blockade_radius)
 
 println(length(context.basis))
 println(size(sparse(H_func(0.0))))
@@ -138,7 +138,7 @@ deltas = [
 H_func = build_hamiltonian_func(reg, t -> fill(omega(t), n_atoms), t -> [f(t) for f in deltas]; basis_context=context)
 psi0 = ComplexF64[1.0; zeros(ComplexF64, length(context.basis) - 1)]
 obs = Dict("center" => RydbergPopulation(2, length(reg.atoms); basis_context=context))
-sol, saved = solve_schrodinger(psi0, H_func, (0.0, duration); observables=obs, reltol=1e-7, abstol=1e-7)
+sol, saved = solve_schrodinger(psi0, H_func, (0.0, duration); observables=obs, reltol=1e-7, abstol=1e-7, blockade_radius=blockade_radius)
 println(length(context.basis))
 println(blockade_radius)
 println(length(saved.t))
@@ -236,7 +236,7 @@ psi0 = ComplexF64[1.0; zeros(ComplexF64, length(context.basis) - 1)]
 obs = Dict("pop0" => RydbergPopulation(1, length(reg.atoms); basis_context=context))
 
 # Requires CUDA.jl and a working CUDA device in the active Julia environment.
-sol, saved = solve_schrodinger_gpu(psi0, H_func, (0.0, duration); observables=obs, reltol=1e-7, abstol=1e-7)
+sol, saved = solve_schrodinger_gpu(psi0, H_func, (0.0, duration); observables=obs, reltol=1e-7, abstol=1e-7, blockade_radius=blockade_radius)
 println(length(saved.t))
 ```
 
