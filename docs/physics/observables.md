@@ -10,9 +10,9 @@ The computational basis is represented by integer bitstrings. Bit `i` indicates 
 
 For an atom `i`, Sagittarius uses
 
-\[
+$$
 n_i = |r_i\rangle\langle r_i|
-\]
+$$
 
 as the Rydberg occupation operator. Its expectation value is the probability that atom `i` is in the Rydberg state.
 
@@ -20,9 +20,9 @@ For a wavefunction `psi`, diagonal observables are computed from probabilities `
 
 ## Single-atom Rydberg population
 
-\[
+$$
 \langle n_i \rangle
-\]
+$$
 
 This is the probability that atom `i` is in the Rydberg state. It is the most direct diagnostic for blockade dynamics, local excitation transfer, pulse calibration, and final-state readout.
 
@@ -37,9 +37,9 @@ Typical uses:
 
 ## Total Rydberg population
 
-\[
+$$
 N_r = \sum_i \langle n_i \rangle
-\]
+$$
 
 This is the expected number of Rydberg excitations in the register. It summarizes how strongly the system is excited without specifying where those excitations are located.
 
@@ -52,9 +52,9 @@ Typical uses:
 
 ## Pair correlation
 
-\[
+$$
 \langle n_i n_j \rangle
-\]
+$$
 
 This is the probability that atoms `i` and `j` are both in the Rydberg state at the same time. In Rydberg blockade systems, nearby atoms should have strongly suppressed pair correlation.
 
@@ -67,9 +67,9 @@ Typical uses:
 
 ## Connected pair correlation
 
-\[
+$$
 C_{ij} = \langle n_i n_j \rangle - \langle n_i \rangle\langle n_j \rangle
-\]
+$$
 
 This removes the part of the pair signal expected from independent occupations. Positive values indicate that two atoms are excited together more often than expected from their single-site populations. Negative values indicate anticorrelation, which is common for nearby blocked pairs.
 
@@ -83,9 +83,9 @@ Typical uses:
 
 For a set of constrained edges `E`,
 
-\[
+$$
 V_\mathrm{viol} = \sum_{(i,j)\in E}\langle n_i n_j \rangle.
-\]
+$$
 
 This is the expected number of violated blockade or graph constraints. In an ideal independent-set interpretation, adjacent vertices must not both be selected, so this quantity should be near zero.
 
@@ -102,15 +102,15 @@ A low violation value does not by itself imply an optimal solution; it only indi
 
 For a target bitstring `b`,
 
-\[
+$$
 P(b) = |\langle b | \psi \rangle|^2
-\]
+$$
 
 for a wavefunction, or
 
-\[
+$$
 P(b) = \rho_{bb}
-\]
+$$
 
 for a density matrix.
 
@@ -127,9 +127,9 @@ Typical uses:
 
 For a weighted independent-set style objective, a common diagnostic is
 
-\[
+$$
 C = \sum_i w_i\langle n_i \rangle - \lambda\sum_{(i,j)\in E}\langle n_i n_j \rangle.
-\]
+$$
 
 The first term rewards selected vertices. The second term penalizes constraint violations. The sign and penalty convention should match the problem formulation being analyzed.
 
@@ -146,17 +146,17 @@ For reporting optimization performance, this expectation should be paired with f
 
 If the two-level atom is interpreted as a qubit, a Pauli-Z observable can be derived from the Rydberg occupation. The sign depends on the encoding convention. A common convention is
 
-\[
+$$
 Z_i = 1 - 2n_i,
-\]
+$$
 
 where the ground state has `Z=+1` and the Rydberg state has `Z=-1`. The opposite convention is also possible, so documentation and metadata must state which one is used.
 
 Two-body Pauli-ZZ observables measure correlated qubit readout:
 
-\[
+$$
 Z_i Z_j.
-\]
+$$
 
 Typical uses:
 
@@ -169,9 +169,9 @@ Typical uses:
 
 For a set of atoms `S`, parity measures whether the number of selected or excited atoms in that set is even or odd. With the convention `Z_i = 1 - 2n_i`, parity is
 
-\[
+$$
 \Pi_S = \prod_{i\in S} Z_i.
-\]
+$$
 
 Typical uses:
 
@@ -186,15 +186,15 @@ The physical interpretation depends on whether parity is defined over Rydberg ex
 
 For an initial or target pure state `phi`, the overlap diagnostic is
 
-\[
+$$
 F_\phi(t) = |\langle \phi | \psi(t) \rangle|^2.
-\]
+$$
 
 For density matrices,
 
-\[
+$$
 F_\phi(t) = \langle \phi | \rho(t) | \phi \rangle.
-\]
+$$
 
 When `phi` is the initial state, this is often called survival probability or return probability. When `phi` is a desired final state, it is a target-state fidelity.
 
@@ -209,15 +209,15 @@ Typical uses:
 
 For a Hamiltonian `H(t)`,
 
-\[
+$$
 E(t) = \langle \psi(t) | H(t) | \psi(t) \rangle
-\]
+$$
 
 or, for a density matrix,
 
-\[
+$$
 E(t) = \mathrm{Tr}[\rho(t)H(t)].
-\]
+$$
 
 This measures the instantaneous energy in the modeled rotating-frame Hamiltonian. Because Sagittarius uses a sign convention with detuning term `-Delta_i n_i`, energy values should be interpreted with that Hamiltonian convention.
 

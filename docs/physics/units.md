@@ -16,11 +16,11 @@ Other unit systems, including dimensionless units, are valid if every input is c
 
 Sagittarius implements
 
-\[
+$$
 H(t)=\sum_i \frac{\Omega_i(t)}{2}\sigma_i^x
      -\sum_i \Delta_i(t)n_i
      +\sum_{i<j}\frac{C_6}{r_{ij}^6}n_i n_j.
-\]
+$$
 
 Here \(n_i=|r_i\rangle\langle r_i|\). Positive `delta` lowers the modeled Rydberg-state energy because the detuning term is \(-\Delta_i n_i\). The sign of `C6` determines whether the modeled van der Waals interaction is repulsive or attractive.
 
@@ -43,23 +43,23 @@ Here \(n_i=|r_i\rangle\langle r_i|\). Positive `delta` lowers the modeled Rydber
 
 The reduced basis excludes a pair when
 
-\[
+$$
 r_{ij}<R_b.
-\]
+$$
 
 Pairs exactly at `blockade_radius` are retained. The full \(C_6/r^6\) interaction remains active for all pairs represented in the reduced basis. Sagittarius does not calculate the radius from `C6`, `omega`, or `delta`; a radius stored as UDG topology metadata also does not enable basis reduction unless it is passed to `SolverConfig`.
 
 Choose an interaction threshold \(E_\mathrm{cut}>0\) above which double excitation is treated as inaccessible, then estimate
 
-\[
+$$
 R_b=\left(\frac{|C_6|}{E_\mathrm{cut}}\right)^{1/6}.
-\]
+$$
 
 The threshold should exceed the largest competing scale over the complete protocol. A practical starting point is
 
-\[
+$$
 E_\mathrm{cut}=\kappa\max_t\left(\max_i|\Omega_i(t)|,\max_i|\Delta_i(t)|,1/T_\mathrm{protocol}\right),
-\]
+$$
 
 with a conservative \(\kappa>1\). There is no universal value: select it from the observable error budget or use the experiment's calibrated blockade criterion.
 
