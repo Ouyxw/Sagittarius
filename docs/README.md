@@ -1,6 +1,6 @@
 # Sagittarius Documentation
 
-This directory groups Sagittarius documentation by reader intent: getting started, API contracts, reference material, and release governance.
+This directory groups Sagittarius documentation by reader intent: getting started, API contracts, reference material, and release governance. See [Documentation status](status.md) for phase mapping and maintenance triggers.
 
 ## Start Here
 
