@@ -36,6 +36,7 @@ const EVENT_CATALOG = Dict{String, NamedTuple}(
         severity="info",
         component="solver",
         required_fields=(:backend, :use_gpu, :reltol, :abstol, :blockade_radius),
+        optional_fields=(:method, :adaptive, :dt, :use_mc),
     ),
     "solver_finish" => (
         event_id="SAG-EVT-0006",

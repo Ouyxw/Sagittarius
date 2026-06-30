@@ -38,7 +38,7 @@ Schema version: `event-taxonomy/v1`
 | `SAG-EVT-0002` | `backend_init_finish` | runtime | `info` | active | `julia_version` | - |
 | `SAG-EVT-0003` | `backend_init_failed` | runtime | `error` | active | `code`, `message` | - |
 | `SAG-EVT-0004` | `doctor_report` | runtime | `info` | active | `backend`, `available`, `issues` | - |
-| `SAG-EVT-0005` | `solver_start` | solver | `info` | active | `backend`, `use_gpu`, `reltol`, `abstol`, `blockade_radius` | `method`, `use_mc` |
+| `SAG-EVT-0005` | `solver_start` | solver | `info` | active | `backend`, `use_gpu`, `reltol`, `abstol`, `blockade_radius` | `method`, `adaptive`, `dt`, `use_mc` |
 | `SAG-EVT-0006` | `solver_finish` | solver | `info` | active | `result_type`, `basis_size` | `backend` |
 | `SAG-EVT-0007` | `cluster_setup_start` | cluster | `info` | active | `n_workers` | - |
 | `SAG-EVT-0008` | `cluster_setup_finish` | cluster | `info` | active | `n_workers` | - |

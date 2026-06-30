@@ -124,7 +124,7 @@ This layer allows results, benchmark claims, and public reports to be audited af
 - Source checkout layout is still important for the Python SDK and Julia backend relationship. Phase 13 tracks relocatable wheel and package-resource lookup work.
 - CUDA is experimental and requires explicit runtime diagnostics and parity evidence before performance claims.
 - AMDGPU and Metal are planned backend names, not mature execution paths.
-- Solver method dispatch is not fully connected to every backend path yet; Phase 12 tracks effective solver configuration.
+- Solver method dispatch is implemented for current solver paths through an auditable `method`/`adaptive`/`dt` contract; unsupported backend paths must reject explicitly rather than silently substituting algorithms.
 - Seed and output-grid contracts are implemented for current solver paths; sampling, stochastic-noise ensembles, and benchmark scripts still need to build on that metadata consistently.
 - Advanced cluster/HPC execution is future Phase 17 work.
 
@@ -133,7 +133,7 @@ This layer allows results, benchmark claims, and public reports to be audited af
 | Roadmap | Architectural impact |
 | :--- | :--- |
 | Phase 11 | Adds typed observable declarations and observable metadata across solver paths and artifacts. |
-| Phase 12 | Makes solver method dispatch and effective solver configuration explicit and auditable. |
+| Phase 12 | Implemented solver method dispatch and effective solver configuration metadata. |
 | Phase 13 | Reduces source-checkout coupling through relocatable packaging and package-resource lookup. |
 | Phase 14 | Extends open-system and stochastic-noise architecture around shared basis and metadata contracts. |
 | Phase 15 | Adds seed, output-grid, sampling, experiment recipe, and sweep reproducibility contracts. |

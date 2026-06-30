@@ -1,6 +1,7 @@
 module Solver
 
 using OrdinaryDiffEq
+using OrdinaryDiffEqLowOrderRK: RK4
 using LinearAlgebra
 using DiffEqCallbacks
 using SparseArrays
@@ -14,7 +15,7 @@ using ..StructuredLogging: log_event
 # using AMDGPU
 # using Metal
 
-export solve_schrodinger, solve_lindblad, solve_mc_trajectories, RydbergPopulation
+export solve_schrodinger, solve_lindblad, solve_mc_trajectories, RydbergPopulation, resolve_solver_algorithm
 export TotalRydbergPopulation, PairCorrelation, ConnectedPairCorrelation, BlockadeViolation
 export BitstringProbability, MWISCost, PauliZ, PauliZZ, Parity
 export solve_schrodinger_gpu
@@ -148,7 +149,7 @@ function Parity(atoms, N_atoms; convention="ground_plus", basis=nothing, basis_c
     return (state, t, integrator) -> _diagonal_expectation(state, N_atoms, basis, bitstring -> prod(_z_value(bitstring, mask, convention) for mask in masks))
 end
 
-function _log_solver_start(; backend="CPU", use_gpu=false, reltol=1e-8, abstol=1e-8, blockade_radius=0.0)
+function _log_solver_start(; backend="CPU", use_gpu=false, reltol=1e-8, abstol=1e-8, blockade_radius=0.0, method="Tsit5", adaptive=true, dt=nothing, use_mc=false)
     return log_event(
         "solver_start";
         backend=backend,
@@ -156,7 +157,36 @@ function _log_solver_start(; backend="CPU", use_gpu=false, reltol=1e-8, abstol=1
         reltol=reltol,
         abstol=abstol,
         blockade_radius=blockade_radius,
+        method=String(method),
+        adaptive=Bool(adaptive),
+        dt=dt,
+        use_mc=Bool(use_mc),
     )
+end
+
+
+function resolve_solver_algorithm(method::AbstractString; adaptive::Bool=true, dt=nothing)
+    if method == "Tsit5"
+        adaptive || throw(ArgumentError("Tsit5 supports only adaptive=true in the Sagittarius public solver contract"))
+        isnothing(dt) || throw(ArgumentError("Tsit5 adaptive runs require dt=nothing in the Sagittarius public solver contract"))
+        return Tsit5()
+    elseif method == "Vern9"
+        adaptive || throw(ArgumentError("Vern9 supports only adaptive=true in the Sagittarius public solver contract"))
+        isnothing(dt) || throw(ArgumentError("Vern9 adaptive runs require dt=nothing in the Sagittarius public solver contract"))
+        return Vern9()
+    elseif method == "RK4"
+        adaptive && throw(ArgumentError("RK4 requires adaptive=false in the Sagittarius public solver contract"))
+        (isnothing(dt) || !(Float64(dt) > 0.0) || !isfinite(Float64(dt))) && throw(ArgumentError("RK4 requires a finite positive dt"))
+        return RK4()
+    end
+    throw(ArgumentError("unsupported solver method: $method. Supported methods: Tsit5, Vern9, RK4"))
+end
+
+function _solver_kwargs(method; adaptive=true, dt=nothing, reltol=1e-8, abstol=1e-8, saveat=nothing)
+    algorithm = resolve_solver_algorithm(String(method); adaptive=Bool(adaptive), dt=dt)
+    save_kwargs = isnothing(saveat) ? NamedTuple() : (saveat=collect(saveat),)
+    step_kwargs = Bool(adaptive) ? (reltol=reltol, abstol=abstol) : (adaptive=false, dt=Float64(dt))
+    return algorithm, merge(step_kwargs, save_kwargs)
 end
 
 
@@ -182,8 +212,8 @@ function _log_solver_finish(result_type::AbstractString, basis_size::Integer; ba
     return log_event("solver_finish"; result_type=String(result_type), basis_size=basis_size, backend=backend)
 end
 
-function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0, saveat=nothing)
-    _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
+function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
+    _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius, method=method, adaptive=adaptive, dt=dt)
     f(ψ, p, t) = (H_func(t) * ψ) .* (-1im)
     saved_values = SavedValues(Float64, Any)
     cb = nothing
@@ -192,8 +222,8 @@ function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=n
         cb = _saving_callback(save_func, saved_values, saveat)
     end
     prob = ODEProblem(f, ψ0, tspan)
-    save_kwargs = _saveat_kwargs(saveat)
-    sol = solve(prob, Tsit5(); reltol=reltol, abstol=abstol, callback=cb, save_kwargs...)
+    algorithm, solver_kwargs = _solver_kwargs(method; adaptive=adaptive, dt=dt, reltol=reltol, abstol=abstol, saveat=saveat)
+    sol = solve(prob, algorithm; callback=cb, solver_kwargs...)
     result_type = isnothing(observables) ? "schrodinger" : "schrodinger_observables"
     _log_solver_finish(result_type, length(ψ0); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
@@ -225,8 +255,8 @@ function _cached_gpu_sparse!(op)
     return op.cached_sparse_H
 end
 
-function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing)
-    _log_solver_start(; backend=backend, use_gpu=true, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
+function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
+    _log_solver_start(; backend=backend, use_gpu=true, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius, method=method, adaptive=adaptive, dt=dt)
     @eval using CUDA
     @eval using CUDA.CUSPARSE
     function f(ψ, p, t)
@@ -254,15 +284,15 @@ function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1
         cb = _saving_callback(save_func, saved_values, saveat)
     end
     prob = ODEProblem(f, ψ0, tspan)
-    save_kwargs = _saveat_kwargs(saveat)
-    sol = solve(prob, Tsit5(); reltol=reltol, abstol=abstol, callback=cb, save_kwargs...)
+    algorithm, solver_kwargs = _solver_kwargs(method; adaptive=adaptive, dt=dt, reltol=reltol, abstol=abstol, saveat=saveat)
+    sol = solve(prob, algorithm; callback=cb, solver_kwargs...)
     result_type = isnothing(observables) ? "schrodinger_gpu" : "schrodinger_gpu_observables"
     _log_solver_finish(result_type, length(ψ0); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
-function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0, saveat=nothing)
-    _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
+function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
+    _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius, method=method, adaptive=adaptive, dt=dt)
     J_dagger_J = [J' * J for J in J_ops]
     J_dagger = [sparse(J') for J in J_ops]
     f(ρ, p, t) = begin
@@ -283,8 +313,8 @@ function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observabl
         cb = _saving_callback(save_func, saved_values, saveat)
     end
     prob = ODEProblem(f, ρ0, tspan)
-    save_kwargs = _saveat_kwargs(saveat)
-    sol = solve(prob, Tsit5(); reltol=reltol, abstol=abstol, callback=cb, save_kwargs...)
+    algorithm, solver_kwargs = _solver_kwargs(method; adaptive=adaptive, dt=dt, reltol=reltol, abstol=abstol, saveat=saveat)
+    sol = solve(prob, algorithm; callback=cb, solver_kwargs...)
     result_type = isnothing(observables) ? "lindblad" : "lindblad_observables"
     _log_solver_finish(result_type, size(ρ0, 1); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
@@ -293,8 +323,8 @@ end
 function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
                                n_trajectories=100, observables=nothing,
                                reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0,
-                               seed=nothing, saveat=nothing)
-    _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
+                               seed=nothing, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
+    _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius, method=method, adaptive=adaptive, dt=dt, use_mc=true)
     if !isnothing(seed)
         Random.seed!(Int(seed))
     end
@@ -340,8 +370,9 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
         end
         ensemble_prob = EnsembleProblem(prob, prob_func=prob_func, output_func=output_func)
         ensemble_alg = _ensemble_algorithm_for_seed(seed)
-        sim = solve(ensemble_prob, Tsit5(), ensemble_alg; trajectories=n_trajectories,
-                    callback=cb_jump, reltol=reltol, abstol=abstol, saveat=t_vals)
+        algorithm, solver_kwargs = _solver_kwargs(method; adaptive=adaptive, dt=dt, reltol=reltol, abstol=abstol, saveat=t_vals)
+        sim = solve(ensemble_prob, algorithm, ensemble_alg; trajectories=n_trajectories,
+                    callback=cb_jump, solver_kwargs...)
         n_obs = length(observables)
         avg_res = [zeros(n_obs) for _ in 1:length(t_vals)]
         for traj_res in sim.u
@@ -356,9 +387,9 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
         return (t_vals, avg_res)
     else
         ensemble_alg = _ensemble_algorithm_for_seed(seed)
-        save_kwargs = _saveat_kwargs(saveat)
-        sim = solve(ensemble_prob, Tsit5(), ensemble_alg; trajectories=n_trajectories,
-                    callback=cb_jump, reltol=reltol, abstol=abstol, save_kwargs...)
+        algorithm, solver_kwargs = _solver_kwargs(method; adaptive=adaptive, dt=dt, reltol=reltol, abstol=abstol, saveat=saveat)
+        sim = solve(ensemble_prob, algorithm, ensemble_alg; trajectories=n_trajectories,
+                    callback=cb_jump, solver_kwargs...)
         _log_solver_finish("mcwf", length(ψ0); backend=backend)
         return sim
     end

@@ -18,7 +18,7 @@ export generate_reduced_basis, reduced_basis, reduced_basis_context, basis, hami
 export PulseNode, ConstantPulse, RampPulse, PiecewisePulse, GaussianPulse, BlackmanPulse, SincPulse, SinSquaredPulse, compile_pulse, create_vec_func, create_const_vec_func
 export RydbergPopulation, TotalRydbergPopulation, PairCorrelation, ConnectedPairCorrelation, BlockadeViolation
 export BitstringProbability, MWISCost, PauliZ, PauliZZ, Parity
-export solve_schrodinger, solve_schrodinger_gpu, solve_lindblad, solve_mc_trajectories
+export solve_schrodinger, solve_schrodinger_gpu, solve_lindblad, solve_mc_trajectories, resolve_solver_algorithm
 export log_event, event_spec
 
 end # module Sagittarius

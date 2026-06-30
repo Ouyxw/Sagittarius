@@ -35,6 +35,11 @@ RUN_MANIFEST_SCHEMA = {
         "pulse": ["omega", "delta"],
         "solver": [
             "method",
+            "adaptive",
+            "dt",
+            "effective_method",
+            "effective_adaptive",
+            "effective_dt",
             "t_span",
             "reltol",
             "abstol",
@@ -308,6 +313,8 @@ class SolverConfig:
     abstol: float = 1e-8
     blockade_radius: float = 0.0
     method: str = "Tsit5"
+    adaptive: bool = True
+    dt: Optional[float] = None
     gamma: Union[float, List[float]] = 0.0      # T1 decay rate
     gamma_phi: Union[float, List[float]] = 0.0  # T2 dephasing rate
     use_mc: bool = False                        # Use Monte Carlo Trajectories instead of Lindblad
@@ -517,6 +524,92 @@ def _normalize_seed(seed: Optional[int]) -> Optional[int]:
             "Use a non-negative integer seed.",
         )
     return seed
+
+
+SUPPORTED_SOLVER_METHODS = {"Tsit5", "Vern9", "RK4"}
+
+
+def _finite_positive_solver_float(value: Any, *, field_name: str, code_prefix: str = "VALIDATION_SOLVER") -> float:
+    if _is_bool(value):
+        raise _validation_error(
+            f"{code_prefix}_{field_name.upper()}_TYPE",
+            f"SolverConfig.{field_name} must be a finite positive numeric value, got {value!r}.",
+            f"Use a finite positive real number for SolverConfig.{field_name}.",
+        )
+    try:
+        result = float(value)
+    except (TypeError, ValueError) as exc:
+        raise _validation_error(
+            f"{code_prefix}_{field_name.upper()}_TYPE",
+            f"SolverConfig.{field_name} must be a finite positive numeric value.",
+            f"Use a finite positive real number for SolverConfig.{field_name}.",
+        ) from exc
+    if not np.isfinite(result) or result <= 0.0:
+        raise _validation_error(
+            f"{code_prefix}_{field_name.upper()}_VALUE",
+            f"SolverConfig.{field_name} must be finite and positive, got {result}.",
+            f"Use a finite positive real number for SolverConfig.{field_name}.",
+        )
+    return result
+
+
+def _normalize_solver_config(config: SolverConfig) -> Dict[str, Any]:
+    method = config.method
+    if not isinstance(method, str) or method not in SUPPORTED_SOLVER_METHODS:
+        raise _validation_error(
+            "VALIDATION_SOLVER_METHOD",
+            f"SolverConfig.method must be one of {sorted(SUPPORTED_SOLVER_METHODS)}, got {method!r}.",
+            "Choose method='Tsit5', method='Vern9', or method='RK4'.",
+        )
+
+    adaptive = config.adaptive
+    if not _is_bool(adaptive):
+        raise _validation_error(
+            "VALIDATION_SOLVER_ADAPTIVE_TYPE",
+            f"SolverConfig.adaptive must be a boolean, got {adaptive!r}.",
+            "Use adaptive=True for Tsit5/Vern9 or adaptive=False with RK4 and a finite positive dt.",
+        )
+    adaptive = bool(adaptive)
+
+    normalized_dt = None
+    if method in {"Tsit5", "Vern9"}:
+        if not adaptive:
+            raise _validation_error(
+                "VALIDATION_SOLVER_ADAPTIVE_COMBINATION",
+                f"SolverConfig.method={method!r} supports only adaptive=True in the public contract.",
+                "Use adaptive=True with dt=None, or choose method='RK4' for fixed-step runs.",
+            )
+        if config.dt is not None:
+            raise _validation_error(
+                "VALIDATION_SOLVER_DT_COMBINATION",
+                f"SolverConfig.method={method!r} requires dt=None for adaptive runs.",
+                "Remove dt for adaptive Tsit5/Vern9, or choose method='RK4' with adaptive=False.",
+            )
+        _finite_positive_solver_float(config.reltol, field_name="reltol")
+        _finite_positive_solver_float(config.abstol, field_name="abstol")
+    else:
+        if adaptive:
+            raise _validation_error(
+                "VALIDATION_SOLVER_ADAPTIVE_COMBINATION",
+                "SolverConfig.method='RK4' requires adaptive=False in the public contract.",
+                "Set adaptive=False and provide a finite positive dt for RK4.",
+            )
+        if config.dt is None:
+            raise _validation_error(
+                "VALIDATION_SOLVER_DT_REQUIRED",
+                "SolverConfig.method='RK4' requires a finite positive dt.",
+                "Set dt to the fixed integration step, for example dt=1e-3.",
+            )
+        normalized_dt = _finite_positive_solver_float(config.dt, field_name="dt")
+
+    return {
+        "method": method,
+        "adaptive": adaptive,
+        "dt": normalized_dt,
+        "effective_method": method,
+        "effective_adaptive": adaptive,
+        "effective_dt": normalized_dt,
+    }
 
 
 def _normalize_saveat(saveat: Any, *, t_start: float, t_end: float) -> Optional[List[float]]:
@@ -789,9 +882,16 @@ def _config_manifest(
     observables: Optional[Dict[str, Any]],
     observable_metadata: Optional[List[Dict[str, Any]]] = None,
     effective_saveat: Optional[List[float]] = None,
+    effective_solver: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
+    effective_solver = effective_solver or _normalize_solver_config(config)
     return {
         "method": config.method,
+        "adaptive": bool(config.adaptive),
+        "dt": _json_compatible(config.dt),
+        "effective_method": effective_solver["effective_method"],
+        "effective_adaptive": bool(effective_solver["effective_adaptive"]),
+        "effective_dt": _json_compatible(effective_solver["effective_dt"]),
         "t_span": [float(t_start), float(t_end)],
         "reltol": float(config.reltol),
         "abstol": float(config.abstol),
@@ -842,6 +942,7 @@ def _build_run_manifest(
     metadata: Dict[str, Any],
     result_type: str,
     effective_saveat: Optional[List[float]] = None,
+    effective_solver: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     n_atoms = len(register.atoms)
     return {
@@ -858,7 +959,7 @@ def _build_run_manifest(
             "omega": _pulse_manifest(sequence.omega),
             "delta": _pulse_manifest(sequence.delta),
         },
-        "solver": _config_manifest(config, t_start=t_start, t_end=t_end, observables=observables, observable_metadata=observable_metadata, effective_saveat=effective_saveat),
+        "solver": _config_manifest(config, t_start=t_start, t_end=t_end, observables=observables, observable_metadata=observable_metadata, effective_saveat=effective_saveat, effective_solver=effective_solver),
         "initial_state": {
             "basis_size": int(len(psi0)),
             "norm": float(np.linalg.norm(psi0)),
@@ -1335,6 +1436,7 @@ def _simulation_result_with_manifest(
     psi0: np.ndarray,
     result_type: str,
     effective_saveat: Optional[List[float]] = None,
+    effective_solver: Optional[Dict[str, Any]] = None,
 ) -> "SimulationResult":
     manifest = _build_run_manifest(
         register=register,
@@ -1349,6 +1451,7 @@ def _simulation_result_with_manifest(
         metadata=metadata,
         result_type=result_type,
         effective_saveat=effective_saveat,
+        effective_solver=effective_solver,
     )
     validate_run_manifest(manifest)
     return SimulationResult(data, metadata=metadata, diagnostics=diagnostics, manifest=manifest)
@@ -1631,6 +1734,7 @@ class Simulation:
         self.validate_inputs(sample_time=float(t_start), observables=observables)
         seed = _normalize_seed(self.config.seed)
         effective_saveat = _normalize_saveat(self.config.saveat, t_start=float(t_start), t_end=float(t_end))
+        effective_solver = _normalize_solver_config(self.config)
         jl, sgr, phys, solv = get_modules()
         backend_report = doctor(backend=self.config.gpu_backend if self.config.use_gpu else "CPU")
         log_event(
@@ -1640,6 +1744,9 @@ class Simulation:
             reltol=self.config.reltol,
             abstol=self.config.abstol,
             blockade_radius=self.config.blockade_radius,
+            method=effective_solver["effective_method"],
+            adaptive=effective_solver["effective_adaptive"],
+            dt=effective_solver["effective_dt"],
         )
         N = len(self.register.jl_obj.atoms)
         basis_size = self.validate()
@@ -1651,6 +1758,11 @@ class Simulation:
         diagnostics = dict(backend_report)
         diagnostics["simulation"] = {
             "solver_method": self.config.method,
+            "adaptive": bool(self.config.adaptive),
+            "dt": _json_compatible(self.config.dt),
+            "effective_method": effective_solver["effective_method"],
+            "effective_adaptive": bool(effective_solver["effective_adaptive"]),
+            "effective_dt": _json_compatible(effective_solver["effective_dt"]),
             "reltol": self.config.reltol,
             "abstol": self.config.abstol,
             "basis_size": basis_size,
@@ -1692,7 +1804,12 @@ class Simulation:
             jl_observable_values = [self._build_julia_observable(item, N, solv, jl) for item in normalized_observables]
             jl_obs = jl.Vector[jl.Any](jl_observable_values)
 
-        solver_extra_kwargs: Dict[str, Any] = {}
+        solver_extra_kwargs: Dict[str, Any] = {
+            "method": effective_solver["effective_method"],
+            "adaptive": bool(effective_solver["effective_adaptive"]),
+        }
+        if effective_solver["effective_dt"] is not None:
+            solver_extra_kwargs["dt"] = float(effective_solver["effective_dt"])
         if effective_saveat is not None:
             solver_extra_kwargs["saveat"] = jl.Vector[jl.Float64](effective_saveat)
 
@@ -1752,6 +1869,7 @@ class Simulation:
                         psi0=np.asarray(psi0),
                         result_type=result_type,
                         effective_saveat=effective_saveat,
+                        effective_solver=effective_solver,
                     )
                 log_event("solver_finish", result_type="raw_mcwf", basis_size=basis_size)
                 return result
@@ -1837,6 +1955,7 @@ class Simulation:
                 psi0=np.asarray(psi0),
                 result_type=result_type,
                 effective_saveat=effective_saveat,
+                effective_solver=effective_solver,
             )
         
         log_event("solver_finish", result_type="raw", basis_size=basis_size)

@@ -28,6 +28,7 @@ BLACKWELL_COMPUTE_MAJOR_MIN = 10
 
 REQUIRED_CPU_JULIA_PACKAGES = (
     "OrdinaryDiffEq",
+    "OrdinaryDiffEqLowOrderRK",
     "StaticArrays",
     "DiffEqCallbacks",
     "SciMLBase",
@@ -645,7 +646,7 @@ def get_julia(*, setup: bool = True):
                 end
                 ensure_pkg("Distributed")
 
-                using OrdinaryDiffEq, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase, Distributed
+                using OrdinaryDiffEq, OrdinaryDiffEqLowOrderRK, StaticArrays, DiffEqCallbacks, LinearAlgebra, SparseArrays, SciMLBase, Distributed
                 """
             )
 
@@ -743,7 +744,7 @@ def _probe_julia_backend(jl: Any, backend: str) -> Dict[str, Any]:
             begin
                 using Pkg
                 deps = Pkg.dependencies()
-                wanted = ["OrdinaryDiffEq", "SciMLBase", "StaticArrays", "DiffEqCallbacks", "CUDA", "AMDGPU", "Metal"]
+                wanted = ["OrdinaryDiffEq", "OrdinaryDiffEqLowOrderRK", "SciMLBase", "StaticArrays", "DiffEqCallbacks", "CUDA", "AMDGPU", "Metal"]
                 Dict(string(dep.name) => string(dep.version) for dep in values(deps) if dep.name in wanted && dep.version !== nothing)
             end
             """

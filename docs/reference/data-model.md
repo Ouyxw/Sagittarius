@@ -39,7 +39,7 @@ Persistent artifacts
 | `Register` | Python and Julia | Ordered atom collection plus interaction coefficient `C6`. | Python atom indices are zero-based in `Register.atoms` order. |
 | `Pulse` / `PulseNode` | Python and Julia | Time-dependent pulse declarations. | Includes constants, ramps, Gaussian, Blackman, sinc, sin-squared, and piecewise forms. |
 | `PulseSequence` | Python | User-facing omega/delta pulse container. | Accepts scalar, local vector, dict, callable, and explicit pulse wrapper forms under the pulse contract. |
-| `SolverConfig` | Python | Solver, basis, backend, open-system, and GPU options. | Phase 12 and Phase 15 extend effective solver, seed, and output-grid contracts. |
+| `SolverConfig` | Python | Solver, basis, backend, open-system, and GPU options. | Carries `method`, `adaptive`, `dt`, seed, and output-grid contracts with requested/effective metadata. |
 | `Simulation` | Python | Coordinates validation, backend calls, solver execution, diagnostics, and result wrapping. | Main lifecycle object. |
 | `SimulationResult` | Python | In-memory result plus metadata, diagnostics, manifest, save/load helpers. | Writes `result-artifact/v1` and embeds `shared-result/v1`. |
 
@@ -75,7 +75,7 @@ See [`SPEC-API-002-python-julia-parity.md`](../api/SPEC-API-002-python-julia-par
 
 `SolverConfig` currently carries:
 
-- `method`, `reltol`, and `abstol`;
+- `method`, `adaptive`, `dt`, `reltol`, and `abstol`;
 - `blockade_radius`;
 - local open-system rates such as `gamma` and `gamma_phi`;
 - MCWF settings such as `use_mc` and `n_trajectories`;
@@ -89,7 +89,7 @@ Important distinction:
 | Normalized configuration | Python-validated and canonicalized values. |
 | Effective configuration | What the backend actually used. |
 
-Phase 15 seed and output-grid fields are now represented through `SolverConfig.seed`, `SolverConfig.saveat`, diagnostics, run manifests, and result artifacts. Future Phase 12 work should make effective solver method, `adaptive`, and `dt` equally explicit.
+Phase 12 solver fields and Phase 15 seed/output-grid fields are represented through `SolverConfig`, diagnostics, run manifests, and result artifacts. Effective solver metadata records `effective_method`, `effective_adaptive`, and `effective_dt`; effective output metadata records `effective_saveat`.
 
 ## Result Object Model
 
@@ -167,7 +167,7 @@ See [`SPEC-GOV-004-benchmarking-plan.md`](../governance/SPEC-GOV-004-benchmarkin
 | Roadmap | Planned model changes |
 | :--- | :--- |
 | Phase 11 | Typed observable declarations and observable metadata in manifests and artifacts. |
-| Phase 12 | Effective solver method, adaptive/fixed-step settings, and `dt` metadata. |
+| Phase 12 | Implemented effective solver method, adaptive/fixed-step settings, and `dt` metadata. |
 | Phase 14 | Noise model metadata, custom Lindblad declarations, correlated noise, stochastic realization metadata. |
 | Phase 15 | Implemented seed and output-grid metadata; planned sampling results, experiment configs, and sweep artifacts. |
 | Phase 16 | Optional readout noise and interop/export metadata. |

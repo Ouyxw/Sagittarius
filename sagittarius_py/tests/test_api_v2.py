@@ -117,6 +117,9 @@ def test_simulation_forwards_blockade_radius_to_julia_solver(monkeypatch):
     assert calls["basis_radius"] == 0.6
     assert calls["hamiltonian"]["blockade_radius"] == 0.6
     assert calls["solver"]["blockade_radius"] == 0.6
+    assert calls["solver"]["method"] == "Tsit5"
+    assert calls["solver"]["adaptive"] is True
+    assert "dt" not in calls["solver"]
 
 
 
@@ -221,6 +224,9 @@ def test_seed_and_saveat_forwarded_to_mcwf_solver(monkeypatch):
     result = sim.run(np.array([1.0, 0.0], dtype=complex), 0.0, 1.0, observables={"pop": 0})
 
     assert calls["seed"] == 123
+    assert calls["method"] == "Tsit5"
+    assert calls["adaptive"] is True
+    assert "dt" not in calls
     assert np.allclose(calls["saveat"], [0.0, 0.5, 1.0])
     assert result.manifest["random"] == {"seed": 123, "effective_seed": 123, "n_trajectories": 100}
     assert result.manifest["solver"]["saveat"] == 3

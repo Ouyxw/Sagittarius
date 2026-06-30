@@ -1,15 +1,15 @@
 # Solver Configuration Contract
 
 Spec ID: `SPEC-API-005`
-Status: `Planned contract`
+Status: `Current`
 Roadmap: Phase 12
-Version: `solver-configuration-contract/draft`
+Version: `solver-configuration-contract/v1`
 Last reviewed: 2026-06-30
 
 
-This page defines the planned Phase 12 numerical solver configuration contract. It is an implementation target, not a claim that every option below is already active. The current Python `SolverConfig` exposes `method`, `reltol`, `abstol`, `blockade_radius`, open-system settings, MCWF trajectory count, `seed`, `saveat`, and GPU settings; the Julia solver paths currently use `Tsit5()` internally while honoring the Phase 15 `saveat` output grid and MCWF seed contract.
+This page defines the implemented Phase 12 numerical solver configuration contract. Python `SolverConfig` exposes `method`, `adaptive`, `dt`, `reltol`, `abstol`, `blockade_radius`, open-system settings, MCWF trajectory count, `seed`, `saveat`, and GPU settings. Julia solver paths resolve the public method name through an explicit OrdinaryDiffEq whitelist and record requested/effective solver metadata in diagnostics, manifests, result artifacts, and `solver_start` events.
 
-Phase 12 connects the public solver configuration to the Julia OrdinaryDiffEq algorithm actually used by every supported execution path.
+Phase 12 connects public solver configuration to the Julia OrdinaryDiffEq algorithm used by supported execution paths.
 
 ## Current Compatibility
 
@@ -23,11 +23,11 @@ cfg = SolverConfig(reltol=1e-8, abstol=1e-8)
 
 The backward-compatible default is tolerance-controlled adaptive `Tsit5`.
 
-Until Phase 12 is implemented, changing `SolverConfig.method` should not be treated as evidence that the backend used a different OrdinaryDiffEq algorithm. Phase 12 is complete only when requested and effective solver metadata agree and tests prove dispatch across applicable solver paths.
+Changing `SolverConfig.method` now changes the Julia algorithm through the whitelist resolver. Requested and effective solver metadata are recorded together so result artifacts can be audited after execution.
 
 ## Public Method Names
 
-Phase 12 should support only this explicit whitelist:
+Phase 12 supports only this explicit whitelist:
 
 | Method | Stepping mode | Intended use | Notes |
 | :--- | :--- | :--- | :--- |
@@ -73,9 +73,9 @@ Invalid combinations must fail explicitly. No execution path may silently substi
 
 ## Julia Resolver Contract
 
-The Julia backend should expose an internal whitelist resolver that maps stable public names to OrdinaryDiffEq algorithm instances. The resolver should be the only place where public method strings become Julia algorithm objects.
+The Julia backend exposes a whitelist resolver that maps stable public names to OrdinaryDiffEq algorithm instances. The resolver is the only place where public method strings become Julia algorithm objects.
 
-Conceptual target:
+Implemented resolver shape:
 
 ```julia
 resolve_solver_algorithm("Tsit5"; adaptive=true, dt=nothing)  # Tsit5()
@@ -109,7 +109,7 @@ For production or publication-facing runs, compare observables under tighter tol
 
 ## Metadata Contract
 
-Diagnostics, run manifests, serialized result artifacts, and relevant `solver_start` events should record both requested and effective configuration. Requested and effective values must agree unless the run failed before execution. The Phase 15 `saveat` contract records both requested `saveat` and normalized `effective_saveat`; MCWF runs record requested and effective seed metadata in the run manifest `random` section.
+Diagnostics, run manifests, serialized result artifacts, and relevant `solver_start` events record both requested and effective configuration. Requested and effective values must agree unless the run failed before execution. The Phase 15 `saveat` contract records both requested `saveat` and normalized `effective_saveat`; MCWF runs record requested and effective seed metadata in the run manifest `random` section.
 
 Target shape:
 
@@ -128,11 +128,11 @@ Target shape:
 }
 ```
 
-Metadata must never claim `RK4` or `Vern9` when the backend used `Tsit5`. If a path rejects a method, diagnostics should include an actionable issue code and remediation.
+Metadata must never claim `RK4` or `Vern9` when the backend used `Tsit5`. If a path rejects a method, Sagittarius raises an actionable validation or solver diagnostic.
 
 ## Validation Rules
 
-Validation should run before Julia backend initialization where possible:
+Validation runs before Julia backend initialization where possible:
 
 - `method` must be one of `Tsit5`, `Vern9`, or `RK4`;
 - `adaptive` must be a boolean;
@@ -144,7 +144,7 @@ Validation should run before Julia backend initialization where possible:
 
 ## Verification Checklist
 
-Phase 12 implementation is complete only when tests prove:
+Phase 12 verification covers:
 
 - changing `SolverConfig.method` changes the OrdinaryDiffEq algorithm used by Julia;
 - `Tsit5` and `Vern9` run adaptively and honor `reltol`/`abstol`;

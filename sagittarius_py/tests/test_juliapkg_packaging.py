@@ -8,6 +8,7 @@ from juliapkg.deps import deps_files
 REQUIRED_JULIA_PACKAGES = {
     "DiffEqCallbacks",
     "OrdinaryDiffEq",
+    "OrdinaryDiffEqLowOrderRK",
     "SciMLBase",
     "StaticArrays",
 }

@@ -99,6 +99,8 @@ print(result.to_pandas().tail())
 
 For a reduced basis, set `SolverConfig(blockade_radius=...)` and allocate the initial state using the size returned by `sim.validate()`. See the [minimal examples](docs/getting-started/minimal-examples.md) for complete full- and reduced-basis workflows.
 
+Solver selection is explicit through `SolverConfig(method=...)`. The default is adaptive `Tsit5`; `Vern9` is available for higher-accuracy adaptive checks; fixed-step `RK4` requires `SolverConfig(method="RK4", adaptive=False, dt=...)`. Run manifests record both requested and effective solver settings.
+
 ## Julia Quick Start
 
 ```julia

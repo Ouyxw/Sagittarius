@@ -170,6 +170,11 @@ def test_run_manifest_schema_validates_generated_manifest():
     assert manifest["register"]["geometry"]["blockade_edge_count"] == 1
     assert manifest["pulse"]["omega"]["kind"] == "local_vector"
     assert manifest["solver"]["observables"] == {"pop0": 0}
+    assert manifest["solver"]["adaptive"] is True
+    assert manifest["solver"]["dt"] is None
+    assert manifest["solver"]["effective_method"] == "Tsit5"
+    assert manifest["solver"]["effective_adaptive"] is True
+    assert manifest["solver"]["effective_dt"] is None
     assert manifest["solver"]["observable_metadata"] == []
     assert manifest["backend_diagnostics"]["requested_backend"] == "CPU"
     assert manifest["backend_diagnostics"]["issue_details"] == []
@@ -192,6 +197,11 @@ def test_validate_run_manifest_rejects_unknown_event_id():
         "pulse": {"omega": {"kind": "scalar", "value": 1.0}, "delta": {"kind": "scalar", "value": 0.0}},
         "solver": {
             "method": "Tsit5",
+            "adaptive": True,
+            "dt": None,
+            "effective_method": "Tsit5",
+            "effective_adaptive": True,
+            "effective_dt": None,
             "t_span": [0.0, 1.0],
             "reltol": 1e-8,
             "abstol": 1e-8,

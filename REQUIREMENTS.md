@@ -116,17 +116,17 @@ This document outlines the development lifecycle of Sagittarius, from a function
 6. Result data and `shared-result/v1` preserve observable names and order; run manifests and serialized artifacts preserve observable types and parameters.
 7. Automated tests cover indexing, bitstring mapping, full/reduced parity, solver-path behavior, serialization metadata, invalid declarations, and representative Rydberg/MWIS use cases.
 
-## 🧮 Phase 12: Numerical Solver Configuration (Planned)
+## 🧮 Phase 12: Numerical Solver Configuration (Done)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
-| **Solver Method Dispatch** | High | Planned | Connect `SolverConfig.method` to the Julia backend so the configured method determines the OrdinaryDiffEq algorithm actually used. Initially support the explicit whitelist `Tsit5`, `Vern9`, and `RK4`; do not evaluate arbitrary Julia expressions or silently fall back to another method. |
-| **All Solver-Path Coverage** | High | Planned | Apply method dispatch consistently to Schrödinger, Lindblad, Monte Carlo trajectory, and supported GPU solver paths. A method must not be reported as supported if any applicable execution path silently ignores it. |
-| **Adaptive and Fixed-Step Options** | High | Planned | Extend `SolverConfig` with `adaptive: bool = True` and `dt: Optional[float] = None`. `Tsit5` and `Vern9` support adaptive tolerance-driven integration. Fixed-step `RK4` requires `adaptive=False` and a finite positive `dt`; invalid combinations must fail validation before solver execution. |
-| **Backend Algorithm Resolver** | High | Planned | Implement a Julia-side whitelist resolver that maps stable public names to OrdinaryDiffEq algorithm instances. Unsupported names must raise an actionable validation error that lists the supported methods. |
-| **Effective Configuration Metadata** | High | Planned | Record the algorithm and stepping options actually used by the backend in simulation diagnostics, run manifests, serialized result artifacts, and relevant solver start events. Requested and effective configuration must agree; metadata must never claim `RK4` or `Vern9` when the backend used `Tsit5`. |
-| **Backward Compatibility** | Medium | Planned | Preserve current behavior by keeping `method="Tsit5"` and adaptive stepping as defaults. Existing callers that do not specify `method`, `adaptive`, or `dt` must continue to use tolerance-controlled `Tsit5`. |
-| **Method Dispatch Verification** | High | Planned | Add Python/Julia integration tests proving that each supported method reaches the Julia resolver and is used by every applicable solver path. Add tests for unsupported names, invalid `dt`, incompatible RK4 stepping options, default behavior, metadata accuracy, and representative numerical agreement across methods. |
-| **Documentation** | Medium | Planned | Document the accuracy/cost tradeoffs of `Tsit5`, `Vern9`, and `RK4`, including that `reltol`/`abstol` primarily control adaptive methods while fixed-step RK4 accuracy is governed by `dt`. |
+| **Solver Method Dispatch** | High | Done | Connected `SolverConfig.method` to the Julia backend so the configured method determines the OrdinaryDiffEq algorithm actually used. Supports the explicit whitelist `Tsit5`, `Vern9`, and `RK4`; do not evaluate arbitrary Julia expressions or silently fall back to another method. |
+| **All Solver-Path Coverage** | High | Done | Applied method dispatch consistently to Schrödinger, Lindblad, Monte Carlo trajectory, and supported GPU solver paths. No applicable execution path silently ignores a supported method. |
+| **Adaptive and Fixed-Step Options** | High | Done | Extended `SolverConfig` with `adaptive: bool = True` and `dt: Optional[float] = None`. `Tsit5` and `Vern9` support adaptive tolerance-driven integration. Fixed-step `RK4` requires `adaptive=False` and a finite positive `dt`; invalid combinations fail validation before solver execution. |
+| **Backend Algorithm Resolver** | High | Done | Implemented a Julia-side whitelist resolver that maps stable public names to OrdinaryDiffEq algorithm instances. Unsupported names raise an actionable validation error that lists the supported methods. |
+| **Effective Configuration Metadata** | High | Done | Recorded the algorithm and stepping options actually used by the backend in simulation diagnostics, run manifests, serialized result artifacts, and relevant solver start events. Requested and effective configuration agree; metadata must never claim `RK4` or `Vern9` when the backend used `Tsit5`. |
+| **Backward Compatibility** | Medium | Done | Preserved current behavior by keeping `method="Tsit5"` and adaptive stepping as defaults. Existing callers that do not specify `method`, `adaptive`, or `dt` continue to use tolerance-controlled `Tsit5`. |
+| **Method Dispatch Verification** | High | Done | Added Python/Julia integration tests proving that each supported method reaches the Julia resolver and is used by applicable solver paths, including unsupported names, invalid `dt`, incompatible RK4 stepping options, default behavior, metadata accuracy, and representative numerical agreement across methods. |
+| **Documentation** | Medium | Done | Documented the accuracy/cost tradeoffs of `Tsit5`, `Vern9`, and `RK4`, including that `reltol`/`abstol` primarily control adaptive methods while fixed-step RK4 accuracy is governed by `dt`. |
 
 ### Phase 12 Acceptance Criteria
 
@@ -192,7 +192,7 @@ This backlog prioritizes example projects and validation studies for using Sagit
 | :--- | :---: | :--- | :--- | :--- |
 | **Pair-Correlation and Blockade-Violation Diagnostics** | Planned | Phase 11 Observable Library | Track `<n_i n_j>`, connected correlations, and constraint-violation counts directly. | Current shorthand supports single-site populations only; implement after typed observables land. |
 | **MWIS Cost Expectation and Bitstring Success Tracking** | Planned | Phase 11 Observable Library | Track weighted objective expectation, target bitstring probabilities, feasibility, and success metrics. | Pair with exact ILP baselines and disclosure controls before external claims. |
-| **Solver Method Sensitivity Study** | Planned | Phase 12 Solver Configuration | Compare `Tsit5`, `Vern9`, and fixed-step `RK4` for accuracy/cost tradeoffs on representative workflows. | Wait until `SolverConfig.method`, `adaptive`, and `dt` are connected to the Julia backend. |
+| **Solver Method Sensitivity Study** | Ready | Phase 12 Solver Configuration | Compare `Tsit5`, `Vern9`, and fixed-step `RK4` for accuracy/cost tradeoffs on representative workflows. | Phase 12 is implemented; use run manifests and `solver_start` metadata to audit method, `adaptive`, and `dt`. |
 
 ### P3: Advanced / Future Studies
 

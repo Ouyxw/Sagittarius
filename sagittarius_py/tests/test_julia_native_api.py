@@ -161,3 +161,37 @@ def test_julia_native_diagonal_observable_constructors_for_vector_and_density_ma
     }
     assert dict(report["vector"]) == expected
     assert dict(report["density"]) == expected
+
+
+def test_julia_solver_algorithm_resolver_whitelist():
+    jl, _ = get_julia()
+    report = jl.seval("""
+    begin
+        ok_messages = String[]
+        for expr in (
+            () -> Sagittarius.resolve_solver_algorithm("Bogus"),
+            () -> Sagittarius.resolve_solver_algorithm("RK4"; adaptive=true),
+            () -> Sagittarius.resolve_solver_algorithm("Tsit5"; adaptive=true, dt=0.01),
+        )
+            try
+                expr()
+                push!(ok_messages, "missing error")
+            catch err
+                push!(ok_messages, sprint(showerror, err))
+            end
+        end
+        Dict(
+            "tsit5" => string(typeof(Sagittarius.resolve_solver_algorithm("Tsit5"))),
+            "vern9" => string(typeof(Sagittarius.resolve_solver_algorithm("Vern9"))),
+            "rk4" => string(typeof(Sagittarius.resolve_solver_algorithm("RK4"; adaptive=false, dt=0.001))),
+            "errors" => ok_messages,
+        )
+    end
+    """)
+
+    assert "Tsit5" in report["tsit5"]
+    assert "Vern9" in report["vern9"]
+    assert "RK4" in report["rk4"]
+    assert "unsupported solver method" in report["errors"][0]
+    assert "adaptive=false" in report["errors"][1]
+    assert "dt=nothing" in report["errors"][2]

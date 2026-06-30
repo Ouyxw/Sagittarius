@@ -77,7 +77,7 @@ EVENT_CATALOG: Dict[str, EventSpec] = {
         component="solver",
         description="Simulation solve has started after input validation and backend diagnostics.",
         required_fields=("backend", "use_gpu", "reltol", "abstol", "blockade_radius"),
-        optional_fields=("method", "use_mc"),
+        optional_fields=("method", "adaptive", "dt", "use_mc"),
     ),
     "solver_finish": EventSpec(
         event_id="SAG-EVT-0006",

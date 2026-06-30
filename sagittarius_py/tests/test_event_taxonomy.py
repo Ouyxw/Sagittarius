@@ -17,6 +17,7 @@ def test_event_taxonomy_exposes_stable_catalog():
         "abstol",
         "blockade_radius",
     ]
+    assert taxonomy["events"]["solver_start"]["optional_fields"] == ["method", "adaptive", "dt", "use_mc"]
     assert get_event_spec("backend_init_failed").severity == "error"
     assert taxonomy["events"]["basis_generated"]["status"] == "active"
     assert taxonomy["events"]["hamiltonian_built"]["status"] == "active"
@@ -114,6 +115,9 @@ def test_julia_solver_and_cluster_emitters_use_structured_event_taxonomy():
             "solver_start_component" => solver_logs[1].kwargs[:component],
             "solver_start_backend" => solver_logs[1].kwargs[:backend],
             "solver_start_blockade_radius" => solver_logs[1].kwargs[:blockade_radius],
+            "solver_start_method" => solver_logs[1].kwargs[:method],
+            "solver_start_adaptive" => solver_logs[1].kwargs[:adaptive],
+            "solver_start_dt" => get(solver_logs[1].kwargs, :dt, missing),
             "solver_finish_id" => solver_logs[2].kwargs[:event_id],
             "solver_finish_result_type" => solver_logs[2].kwargs[:result_type],
             "solver_finish_basis_size" => solver_logs[2].kwargs[:basis_size],
@@ -130,6 +134,9 @@ def test_julia_solver_and_cluster_emitters_use_structured_event_taxonomy():
     assert report["solver_start_component"] == "solver"
     assert report["solver_start_backend"] == "CPU"
     assert report["solver_start_blockade_radius"] == 0.25
+    assert report["solver_start_method"] == "Tsit5"
+    assert report["solver_start_adaptive"] is True
+    assert report["solver_start_dt"] is None
     assert report["solver_finish_id"] == "SAG-EVT-0006"
     assert report["solver_finish_result_type"] == "schrodinger"
     assert report["solver_finish_basis_size"] == 2
