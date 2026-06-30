@@ -117,3 +117,111 @@ def test_simulation_forwards_blockade_radius_to_julia_solver(monkeypatch):
     assert calls["basis_radius"] == 0.6
     assert calls["hamiltonian"]["blockade_radius"] == 0.6
     assert calls["solver"]["blockade_radius"] == 0.6
+
+
+
+def test_saveat_count_sets_stable_observable_grid():
+    reg = Register([Atom(0, 0, 0)], C6=0.0)
+    psi0 = np.array([1.0, 0.0], dtype=complex)
+    cfg = SolverConfig(saveat=5)
+    sim = Simulation(reg, PulseSequence(omega=1.0), cfg)
+
+    result = sim.run(psi0, 0.0, 1.0, observables={"pop": 0})
+
+    assert np.allclose(result.data["t"], np.linspace(0.0, 1.0, 5))
+    assert result.manifest["solver"]["saveat"] == 5
+    assert np.allclose(result.manifest["solver"]["effective_saveat"], np.linspace(0.0, 1.0, 5))
+    assert result.diagnostics["simulation"]["saveat"] == 5
+    assert np.allclose(result.diagnostics["simulation"]["effective_saveat"], np.linspace(0.0, 1.0, 5))
+
+
+def test_saveat_explicit_grid_sets_stable_observable_grid():
+    reg = Register([Atom(0, 0, 0)], C6=0.0)
+    psi0 = np.array([1.0, 0.0], dtype=complex)
+    grid = [0.0, 0.25, 0.75, 1.0]
+    cfg = SolverConfig(saveat=grid)
+    sim = Simulation(reg, PulseSequence(omega=1.0), cfg)
+
+    result = sim.run(psi0, 0.0, 1.0, observables={"pop": 0})
+
+    assert np.allclose(result.data["t"], grid)
+    assert result.manifest["solver"]["saveat"] == grid
+    assert result.manifest["solver"]["effective_saveat"] == grid
+
+
+def test_invalid_seed_and_saveat_fail_validation():
+    reg = Register([Atom(0, 0, 0)], C6=0.0)
+    psi0 = np.array([1.0, 0.0], dtype=complex)
+
+    with pytest.raises(Exception) as seed_exc:
+        Simulation(reg, PulseSequence(), SolverConfig(seed=-1)).run(psi0, 0.0, 1.0, observables={"pop": 0})
+    assert seed_exc.value.issue.code == "VALIDATION_RANDOM_SEED_VALUE"
+
+    with pytest.raises(Exception) as saveat_exc:
+        Simulation(reg, PulseSequence(), SolverConfig(saveat=[0.0, 0.5, 0.5])).run(psi0, 0.0, 1.0, observables={"pop": 0})
+    assert saveat_exc.value.issue.code == "VALIDATION_SAVEAT_GRID_ORDER"
+
+
+def test_seed_and_saveat_forwarded_to_mcwf_solver(monkeypatch):
+    import sagittarius.api as api
+
+    calls = {}
+
+    class FakeAtom:
+        x = 0.0
+        y = 0.0
+        z = 0.0
+
+    class FakeRegister:
+        atoms = [FakeAtom()]
+        C6 = 0.0
+
+        @property
+        def jl_obj(self):
+            return self
+
+        def geometry_summary(self, **kwargs):
+            return {"atom_count": 1}
+
+    class FakePhys:
+        def build_hamiltonian_func(self, reg, omega_func, delta_func, **kwargs):
+            return lambda t: None
+
+        def get_jump_operators(self, n, gamma, gamma_phi):
+            return ["jump"]
+
+    class FakeSolver:
+        def RydbergPopulation(self, atom_idx, n, **kwargs):
+            return lambda state, t, integrator: 0.0
+
+        def solve_mc_trajectories(self, psi0, h_func, j_ops, tspan, **kwargs):
+            calls.update(kwargs)
+            return ([0.0, 0.5, 1.0], [[0.0], [0.1], [0.2]])
+
+    class FakeVectorFactory:
+        def __getitem__(self, dtype):
+            return lambda values: list(values)
+
+    class FakeJL:
+        Any = object
+        ComplexF64 = complex
+        Float64 = float
+        Vector = FakeVectorFactory()
+
+        def SVector(self, *values):
+            return tuple(values)
+
+    monkeypatch.setattr(api, "doctor", lambda backend: {"requested_backend": backend})
+    monkeypatch.setattr(api, "version_info", lambda: {"schema_version": "version-info/v1"})
+    monkeypatch.setattr(api, "get_modules", lambda: (FakeJL(), None, FakePhys(), FakeSolver()))
+    monkeypatch.setattr(api.Simulation, "_get_compiled_func", lambda self, pulse, n: (lambda t: [0.0] * n))
+
+    cfg = api.SolverConfig(gamma=0.1, use_mc=True, seed=123, saveat=3)
+    sim = api.Simulation(FakeRegister(), api.PulseSequence(), cfg)
+    result = sim.run(np.array([1.0, 0.0], dtype=complex), 0.0, 1.0, observables={"pop": 0})
+
+    assert calls["seed"] == 123
+    assert np.allclose(calls["saveat"], [0.0, 0.5, 1.0])
+    assert result.manifest["random"] == {"seed": 123, "effective_seed": 123, "n_trajectories": 100}
+    assert result.manifest["solver"]["saveat"] == 3
+    assert np.allclose(result.manifest["solver"]["effective_saveat"], [0.0, 0.5, 1.0])

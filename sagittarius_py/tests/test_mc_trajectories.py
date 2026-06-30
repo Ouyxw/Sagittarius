@@ -76,3 +76,21 @@ def test_mc_blockade():
 if __name__ == "__main__":
     test_mc_vs_lindblad()
     test_mc_blockade()
+
+
+def test_mcwf_seed_and_saveat_are_reproducible():
+    reg = Register([Atom(0, 0)], C6=0.0)
+    seq = PulseSequence(omega=0.0, delta=0.0)
+    psi0 = np.array([0, 1], dtype=complex)
+    cfg = SolverConfig(gamma=0.4, use_mc=True, n_trajectories=40, seed=123, saveat=9)
+
+    first = Simulation(reg, seq, cfg).run(psi0, 0.0, 2.0, observables={"pop": 0})
+    second = Simulation(reg, seq, cfg).run(psi0, 0.0, 2.0, observables={"pop": 0})
+
+    assert np.allclose(first.data["t"], np.linspace(0.0, 2.0, 9))
+    assert first.data["t"] == second.data["t"]
+    assert np.allclose(first.data["pop"], second.data["pop"])
+    assert first.manifest["random"]["seed"] == 123
+    assert first.manifest["random"]["effective_seed"] == 123
+    assert first.manifest["solver"]["saveat"] == 9
+    assert np.allclose(first.manifest["solver"]["effective_saveat"], np.linspace(0.0, 2.0, 9))

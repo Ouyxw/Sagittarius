@@ -7,7 +7,7 @@ Version: `solver-configuration-contract/draft`
 Last reviewed: 2026-06-30
 
 
-This page defines the planned Phase 12 numerical solver configuration contract. It is an implementation target, not a claim that every option below is already active. The current Python `SolverConfig` exposes `method`, `reltol`, `abstol`, `blockade_radius`, open-system settings, MCWF trajectory count, and GPU settings; the Julia solver paths currently use `Tsit5()` internally.
+This page defines the planned Phase 12 numerical solver configuration contract. It is an implementation target, not a claim that every option below is already active. The current Python `SolverConfig` exposes `method`, `reltol`, `abstol`, `blockade_radius`, open-system settings, MCWF trajectory count, `seed`, `saveat`, and GPU settings; the Julia solver paths currently use `Tsit5()` internally while honoring the Phase 15 `saveat` output grid and MCWF seed contract.
 
 Phase 12 connects the public solver configuration to the Julia OrdinaryDiffEq algorithm actually used by every supported execution path.
 
@@ -109,7 +109,7 @@ For production or publication-facing runs, compare observables under tighter tol
 
 ## Metadata Contract
 
-Diagnostics, run manifests, serialized result artifacts, and relevant `solver_start` events should record both requested and effective configuration. Requested and effective values must agree unless the run failed before execution.
+Diagnostics, run manifests, serialized result artifacts, and relevant `solver_start` events should record both requested and effective configuration. Requested and effective values must agree unless the run failed before execution. The Phase 15 `saveat` contract records both requested `saveat` and normalized `effective_saveat`; MCWF runs record requested and effective seed metadata in the run manifest `random` section.
 
 Target shape:
 

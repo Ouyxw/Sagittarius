@@ -46,6 +46,8 @@ RUN_MANIFEST_SCHEMA = {
             "use_gpu",
             "gpu_backend",
             "observables",
+            "saveat",
+            "effective_saveat",
         ],
         "initial_state": ["basis_size", "norm"],
         "backend_diagnostics": [
@@ -58,7 +60,7 @@ RUN_MANIFEST_SCHEMA = {
             "versions",
             "devices",
         ],
-        "random": ["seed", "n_trajectories"],
+        "random": ["seed", "effective_seed", "n_trajectories"],
     },
 }
 
@@ -309,6 +311,8 @@ class SolverConfig:
     gamma_phi: Union[float, List[float]] = 0.0  # T2 dephasing rate
     use_mc: bool = False                        # Use Monte Carlo Trajectories instead of Lindblad
     n_trajectories: int = 100                   # Number of trajectories for Monte Carlo
+    seed: Optional[int] = None                  # Seed for stochastic solver paths and sampling workflows
+    saveat: Optional[Union[int, List[float]]] = None  # Explicit output count or output time grid
     use_gpu: bool = False                       # Use GPU acceleration
     gpu_backend: str = "CUDA"                   # GPU backend: "CUDA", "AMDGPU", or "Metal"
 
@@ -495,6 +499,96 @@ def _json_compatible(value: Any) -> Any:
     return value
 
 
+def _normalize_seed(seed: Optional[int]) -> Optional[int]:
+    if seed is None:
+        return None
+    if _is_bool(seed) or not isinstance(seed, (int, np.integer)):
+        raise _validation_error(
+            "VALIDATION_RANDOM_SEED_TYPE",
+            f"SolverConfig.seed must be an integer or None, got {seed!r}.",
+            "Use a non-negative integer seed for reproducible stochastic workflows, or None for backend-default randomness.",
+        )
+    seed = int(seed)
+    if seed < 0:
+        raise _validation_error(
+            "VALIDATION_RANDOM_SEED_VALUE",
+            f"SolverConfig.seed must be non-negative, got {seed}.",
+            "Use a non-negative integer seed.",
+        )
+    return seed
+
+
+def _normalize_saveat(saveat: Any, *, t_start: float, t_end: float) -> Optional[List[float]]:
+    if saveat is None:
+        return None
+    start = float(t_start)
+    end = float(t_end)
+    if not np.isfinite(start) or not np.isfinite(end) or end <= start:
+        raise _validation_error(
+            "VALIDATION_TIME_SPAN",
+            f"Simulation time span must satisfy finite t_end > t_start, got [{t_start}, {t_end}].",
+            "Pass finite simulation bounds with t_end greater than t_start.",
+        )
+    if _is_bool(saveat):
+        raise _validation_error(
+            "VALIDATION_SAVEAT_TYPE",
+            "SolverConfig.saveat must be None, an integer output count, or a sequence of output times.",
+            "Use saveat=101 for a stable count or saveat=[0.0, 0.5, 1.0] for explicit times.",
+        )
+    if isinstance(saveat, (int, np.integer)):
+        count = int(saveat)
+        if count < 2:
+            raise _validation_error(
+                "VALIDATION_SAVEAT_COUNT",
+                f"SolverConfig.saveat integer count must be at least 2, got {count}.",
+                "Use at least two output samples so the grid includes start and end times.",
+            )
+        return [float(x) for x in np.linspace(start, end, count)]
+    if isinstance(saveat, np.ndarray):
+        raw = saveat.tolist()
+    elif isinstance(saveat, ABCSequence) and not isinstance(saveat, (str, bytes, bytearray)):
+        raw = list(saveat)
+    else:
+        raise _validation_error(
+            "VALIDATION_SAVEAT_TYPE",
+            f"SolverConfig.saveat must be None, an integer count, or a sequence of times, got {type(saveat).__name__}.",
+            "Use saveat=101 for a stable count or saveat=[0.0, 0.5, 1.0] for explicit times.",
+        )
+    if len(raw) < 2:
+        raise _validation_error(
+            "VALIDATION_SAVEAT_GRID_LENGTH",
+            "SolverConfig.saveat explicit grid must contain at least two time values.",
+            "Include both the start and end output times, or use an integer output count.",
+        )
+    try:
+        values = [float(x) for x in raw]
+    except (TypeError, ValueError) as exc:
+        raise _validation_error(
+            "VALIDATION_SAVEAT_GRID_VALUE",
+            "SolverConfig.saveat explicit grid must contain only numeric time values.",
+            "Convert every output time to a finite real number.",
+        ) from exc
+    if not all(np.isfinite(values)):
+        raise _validation_error(
+            "VALIDATION_SAVEAT_GRID_VALUE",
+            "SolverConfig.saveat explicit grid must contain only finite time values.",
+            "Remove NaN or infinite output times.",
+        )
+    if any(values[i] >= values[i + 1] for i in range(len(values) - 1)):
+        raise _validation_error(
+            "VALIDATION_SAVEAT_GRID_ORDER",
+            "SolverConfig.saveat explicit grid must be strictly increasing.",
+            "Sort the output times and remove duplicates.",
+        )
+    if values[0] < start or values[-1] > end:
+        raise _validation_error(
+            "VALIDATION_SAVEAT_GRID_BOUNDS",
+            f"SolverConfig.saveat times must lie within [{start}, {end}].",
+            "Use output times inside the simulation time span.",
+        )
+    return values
+
+
 def _explicit_pulse_kind(value: Any) -> Optional[str]:
     from .pulse import CallablePulse, GlobalPulse, LocalPulseVector
 
@@ -556,7 +650,14 @@ def _pulse_manifest(value: Any) -> Dict[str, Any]:
     return {"kind": "unsupported", "type": type(value).__name__, "repr": repr(value)}
 
 
-def _config_manifest(config: SolverConfig, *, t_start: float, t_end: float, observables: Optional[Dict[str, int]]) -> Dict[str, Any]:
+def _config_manifest(
+    config: SolverConfig,
+    *,
+    t_start: float,
+    t_end: float,
+    observables: Optional[Dict[str, int]],
+    effective_saveat: Optional[List[float]] = None,
+) -> Dict[str, Any]:
     return {
         "method": config.method,
         "t_span": [float(t_start), float(t_end)],
@@ -570,6 +671,8 @@ def _config_manifest(config: SolverConfig, *, t_start: float, t_end: float, obse
         "use_gpu": bool(config.use_gpu),
         "gpu_backend": str(config.gpu_backend).upper(),
         "observables": dict(observables or {}),
+        "saveat": _json_compatible(config.saveat),
+        "effective_saveat": _json_compatible(effective_saveat),
     }
 
 
@@ -604,6 +707,7 @@ def _build_run_manifest(
     diagnostics: Dict[str, Any],
     metadata: Dict[str, Any],
     result_type: str,
+    effective_saveat: Optional[List[float]] = None,
 ) -> Dict[str, Any]:
     n_atoms = len(register.atoms)
     return {
@@ -620,7 +724,7 @@ def _build_run_manifest(
             "omega": _pulse_manifest(sequence.omega),
             "delta": _pulse_manifest(sequence.delta),
         },
-        "solver": _config_manifest(config, t_start=t_start, t_end=t_end, observables=observables),
+        "solver": _config_manifest(config, t_start=t_start, t_end=t_end, observables=observables, effective_saveat=effective_saveat),
         "initial_state": {
             "basis_size": int(len(psi0)),
             "norm": float(np.linalg.norm(psi0)),
@@ -630,7 +734,8 @@ def _build_run_manifest(
         "event_taxonomy_schema": EVENT_TAXONOMY_SCHEMA_VERSION,
         "event_ids": _event_ids_for_run("solver_finish"),
         "random": {
-            "seed": None,
+            "seed": _normalize_seed(config.seed),
+            "effective_seed": _normalize_seed(config.seed),
             "n_trajectories": int(config.n_trajectories) if config.use_mc else None,
         },
     }
@@ -1094,6 +1199,7 @@ def _simulation_result_with_manifest(
     observables: Optional[Dict[str, int]],
     psi0: np.ndarray,
     result_type: str,
+    effective_saveat: Optional[List[float]] = None,
 ) -> "SimulationResult":
     manifest = _build_run_manifest(
         register=register,
@@ -1106,6 +1212,7 @@ def _simulation_result_with_manifest(
         diagnostics=diagnostics,
         metadata=metadata,
         result_type=result_type,
+        effective_saveat=effective_saveat,
     )
     validate_run_manifest(manifest)
     return SimulationResult(data, metadata=metadata, diagnostics=diagnostics, manifest=manifest)
@@ -1363,6 +1470,8 @@ class Simulation:
 
     def _run_impl(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, int]] = None) -> SimulationResult:
         self.validate_inputs(sample_time=float(t_start), observables=observables)
+        seed = _normalize_seed(self.config.seed)
+        effective_saveat = _normalize_saveat(self.config.saveat, t_start=float(t_start), t_end=float(t_end))
         jl, sgr, phys, solv = get_modules()
         backend_report = doctor(backend=self.config.gpu_backend if self.config.use_gpu else "CPU")
         log_event(
@@ -1385,6 +1494,9 @@ class Simulation:
             "reduced_basis_pruning_ratio": 1.0 - (basis_size / (2**N)),
             "use_gpu": self.config.use_gpu,
             "use_mc": self.config.use_mc,
+            "seed": seed,
+            "saveat": _json_compatible(self.config.saveat),
+            "effective_saveat": _json_compatible(effective_saveat),
         }
         diagnostics["register"] = self.register.geometry_summary(blockade_radius=self.config.blockade_radius, include_edges=False)
         
@@ -1424,6 +1536,10 @@ class Simulation:
                     for name in observable_names
                 ])
 
+        solver_extra_kwargs: Dict[str, Any] = {}
+        if effective_saveat is not None:
+            solver_extra_kwargs["saveat"] = jl.Vector[jl.Float64](effective_saveat)
+
         # 4. Determine if we use Lindblad, MC, or Schrodinger
         is_noisy = (np.any(np.array(self.config.gamma) > 0) or 
                     np.any(np.array(self.config.gamma_phi) > 0))
@@ -1452,7 +1568,9 @@ class Simulation:
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
                     abstol=float(self.config.abstol),
-                    blockade_radius=float(self.config.blockade_radius)
+                    blockade_radius=float(self.config.blockade_radius),
+                    seed=seed,
+                    **solver_extra_kwargs,
                 )
                 
                 if jl_obs:
@@ -1476,6 +1594,7 @@ class Simulation:
                         observables=observables,
                         psi0=np.asarray(psi0),
                         result_type=result_type,
+                        effective_saveat=effective_saveat,
                     )
                 log_event("solver_finish", result_type="raw_mcwf", basis_size=basis_size)
                 return result
@@ -1493,7 +1612,8 @@ class Simulation:
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
                     abstol=float(self.config.abstol),
-                    blockade_radius=float(self.config.blockade_radius)
+                    blockade_radius=float(self.config.blockade_radius),
+                    **solver_extra_kwargs,
                 )
         else:
             # Solve Schrodinger Equation
@@ -1522,7 +1642,8 @@ class Simulation:
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
                     abstol=float(self.config.abstol),
-                    blockade_radius=float(self.config.blockade_radius)
+                    blockade_radius=float(self.config.blockade_radius),
+                    **solver_extra_kwargs,
                 )
             else:
                 jl_psi0 = jl.Vector[jl.ComplexF64](psi0)
@@ -1533,7 +1654,8 @@ class Simulation:
                     observables=jl_obs,
                     reltol=float(self.config.reltol),
                     abstol=float(self.config.abstol),
-                    blockade_radius=float(self.config.blockade_radius)
+                    blockade_radius=float(self.config.blockade_radius),
+                    **solver_extra_kwargs,
                 )
         
         if jl_obs:
@@ -1556,6 +1678,7 @@ class Simulation:
                 observables=observables,
                 psi0=np.asarray(psi0),
                 result_type=result_type,
+                effective_saveat=effective_saveat,
             )
         
         log_event("solver_finish", result_type="raw", basis_size=basis_size)

@@ -177,7 +177,9 @@ def test_run_manifest_schema_validates_generated_manifest():
     assert manifest["versions"]["build"]["source"]["git_commit"] == "abc123"
     assert manifest["event_taxonomy_schema"] == "event-taxonomy/v1"
     assert manifest["event_ids"] == ["SAG-EVT-0004", "SAG-EVT-0005", "SAG-EVT-0006"]
-    assert manifest["random"] == {"seed": None, "n_trajectories": None}
+    assert manifest["solver"]["saveat"] is None
+    assert manifest["solver"]["effective_saveat"] is None
+    assert manifest["random"] == {"seed": None, "effective_seed": None, "n_trajectories": None}
 
 
 def test_validate_run_manifest_rejects_unknown_event_id():
@@ -200,6 +202,8 @@ def test_validate_run_manifest_rejects_unknown_event_id():
             "use_gpu": False,
             "gpu_backend": "CUDA",
             "observables": {},
+            "saveat": None,
+            "effective_saveat": None,
         },
         "initial_state": {"basis_size": 1, "norm": 1.0},
         "backend_diagnostics": {
@@ -215,7 +219,7 @@ def test_validate_run_manifest_rejects_unknown_event_id():
         "versions": {},
         "event_taxonomy_schema": "event-taxonomy/v1",
         "event_ids": ["SAG-EVT-9999"],
-        "random": {"seed": None, "n_trajectories": None},
+        "random": {"seed": None, "effective_seed": None, "n_trajectories": None},
     }
 
     with pytest.raises(SagittariusSerializationError) as excinfo:

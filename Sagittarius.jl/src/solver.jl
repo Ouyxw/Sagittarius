@@ -73,7 +73,7 @@ function RydbergPopulation(atom_idx, N_atoms; basis=nothing, basis_context=nothi
                 if isempty(indices) return 0.0 end
                 return Float64(sum(abs2, state[indices]))
             end
-        else 
+        else
             return 0.0
         end
     end
@@ -90,6 +90,22 @@ function _log_solver_start(; backend="CPU", use_gpu=false, reltol=1e-8, abstol=1
     )
 end
 
+
+function _saveat_kwargs(saveat)
+    return isnothing(saveat) ? NamedTuple() : (saveat=collect(saveat),)
+end
+
+function _saving_callback(save_func, saved_values, saveat)
+    if isnothing(saveat)
+        return SavingCallback(save_func, saved_values)
+    end
+    return SavingCallback(save_func, saved_values; saveat=collect(saveat))
+end
+
+function _ensemble_algorithm_for_seed(seed)
+    return isnothing(seed) ? EnsembleThreads() : EnsembleSerial()
+end
+
 function _log_solver_finish(result_type::AbstractString, basis_size::Integer; backend=nothing)
     if isnothing(backend)
         return log_event("solver_finish"; result_type=String(result_type), basis_size=basis_size)
@@ -97,17 +113,18 @@ function _log_solver_finish(result_type::AbstractString, basis_size::Integer; ba
     return log_event("solver_finish"; result_type=String(result_type), basis_size=basis_size, backend=backend)
 end
 
-function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0)
+function solve_schrodinger(ψ0::Vector{ComplexF64}, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0, saveat=nothing)
     _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
     f(ψ, p, t) = (H_func(t) * ψ) .* (-1im)
     saved_values = SavedValues(Float64, Any)
     cb = nothing
     if !isnothing(observables)
         save_func = (ψ, t, integrator) -> [func(ψ, t, integrator) for func in values(observables)]
-        cb = SavingCallback(save_func, saved_values)
+        cb = _saving_callback(save_func, saved_values, saveat)
     end
     prob = ODEProblem(f, ψ0, tspan)
-    sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    save_kwargs = _saveat_kwargs(saveat)
+    sol = solve(prob, Tsit5(); reltol=reltol, abstol=abstol, callback=cb, save_kwargs...)
     result_type = isnothing(observables) ? "schrodinger" : "schrodinger_observables"
     _log_solver_finish(result_type, length(ψ0); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
@@ -139,7 +156,7 @@ function _cached_gpu_sparse!(op)
     return op.cached_sparse_H
 end
 
-function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0)
+function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing)
     _log_solver_start(; backend=backend, use_gpu=true, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
     @eval using CUDA
     @eval using CUDA.CUSPARSE
@@ -160,21 +177,22 @@ function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1
             end
         end
     end
-    
+
     saved_values = SavedValues(Float64, Any)
     cb = nothing
     if !isnothing(observables)
         save_func = (ψ, t, integrator) -> [func(ψ, t, integrator) for func in values(observables)]
-        cb = SavingCallback(save_func, saved_values)
+        cb = _saving_callback(save_func, saved_values, saveat)
     end
     prob = ODEProblem(f, ψ0, tspan)
-    sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    save_kwargs = _saveat_kwargs(saveat)
+    sol = solve(prob, Tsit5(); reltol=reltol, abstol=abstol, callback=cb, save_kwargs...)
     result_type = isnothing(observables) ? "schrodinger_gpu" : "schrodinger_gpu_observables"
     _log_solver_finish(result_type, length(ψ0); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
-function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0)
+function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0, saveat=nothing)
     _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
     J_dagger_J = [J' * J for J in J_ops]
     J_dagger = [sparse(J') for J in J_ops]
@@ -193,19 +211,24 @@ function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observabl
     cb = nothing
     if !isnothing(observables)
         save_func = (ρ, t, integrator) -> [func(ρ, t, integrator) for func in values(observables)]
-        cb = SavingCallback(save_func, saved_values)
+        cb = _saving_callback(save_func, saved_values, saveat)
     end
     prob = ODEProblem(f, ρ0, tspan)
-    sol = solve(prob, Tsit5(), reltol=reltol, abstol=abstol, callback=cb)
+    save_kwargs = _saveat_kwargs(saveat)
+    sol = solve(prob, Tsit5(); reltol=reltol, abstol=abstol, callback=cb, save_kwargs...)
     result_type = isnothing(observables) ? "lindblad" : "lindblad_observables"
     _log_solver_finish(result_type, size(ρ0, 1); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
 end
 
-function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan; 
-                               n_trajectories=100, observables=nothing, 
-                               reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0)
+function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
+                               n_trajectories=100, observables=nothing,
+                               reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0,
+                               seed=nothing, saveat=nothing)
     _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius)
+    if !isnothing(seed)
+        Random.seed!(Int(seed))
+    end
     J_dagger_J = [J' * J for J in J_ops]
     sum_J_dagger_J = isempty(J_ops) ? spzeros(ComplexF64, length(ψ0), length(ψ0)) : sum(J_dagger_J)
     f(ψ, p, t) = begin
@@ -241,13 +264,14 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
     end
     ensemble_prob = EnsembleProblem(prob, prob_func=prob_func)
     if !isnothing(observables)
-        t_vals = range(tspan[1], tspan[2], length=200)
+        t_vals = isnothing(saveat) ? collect(range(tspan[1], tspan[2], length=200)) : collect(saveat)
         function output_func(sol, i)
             res = [ [func(sol(t) / norm(sol(t)), t, nothing) for func in values(observables)] for t in t_vals ]
             return (res, false)
         end
         ensemble_prob = EnsembleProblem(prob, prob_func=prob_func, output_func=output_func)
-        sim = solve(ensemble_prob, Tsit5(), EnsembleThreads(), trajectories=n_trajectories, 
+        ensemble_alg = _ensemble_algorithm_for_seed(seed)
+        sim = solve(ensemble_prob, Tsit5(), ensemble_alg; trajectories=n_trajectories,
                     callback=cb_jump, reltol=reltol, abstol=abstol, saveat=t_vals)
         n_obs = length(observables)
         avg_res = [zeros(n_obs) for _ in 1:length(t_vals)]
@@ -262,8 +286,10 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
         _log_solver_finish("mcwf_observables", length(ψ0); backend=backend)
         return (t_vals, avg_res)
     else
-        sim = solve(ensemble_prob, Tsit5(), EnsembleThreads(), trajectories=n_trajectories, 
-                    callback=cb_jump, reltol=reltol, abstol=abstol)
+        ensemble_alg = _ensemble_algorithm_for_seed(seed)
+        save_kwargs = _saveat_kwargs(saveat)
+        sim = solve(ensemble_prob, Tsit5(), ensemble_alg; trajectories=n_trajectories,
+                    callback=cb_jump, reltol=reltol, abstol=abstol, save_kwargs...)
         _log_solver_finish("mcwf", length(ψ0); backend=backend)
         return sim
     end

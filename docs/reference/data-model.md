@@ -89,7 +89,7 @@ Important distinction:
 | Normalized configuration | Python-validated and canonicalized values. |
 | Effective configuration | What the backend actually used. |
 
-Future Phase 12 and Phase 15 work should make effective solver method, `adaptive`, `dt`, seed, and output-grid information explicit in diagnostics, run manifests, and result artifacts.
+Phase 15 seed and output-grid fields are now represented through `SolverConfig.seed`, `SolverConfig.saveat`, diagnostics, run manifests, and result artifacts. Future Phase 12 work should make effective solver method, `adaptive`, and `dt` equally explicit.
 
 ## Result Object Model
 
@@ -169,7 +169,7 @@ See [`SPEC-GOV-004-benchmarking-plan.md`](../governance/SPEC-GOV-004-benchmarkin
 | Phase 11 | Typed observable declarations and observable metadata in manifests and artifacts. |
 | Phase 12 | Effective solver method, adaptive/fixed-step settings, and `dt` metadata. |
 | Phase 14 | Noise model metadata, custom Lindblad declarations, correlated noise, stochastic realization metadata. |
-| Phase 15 | Seed metadata, output-grid contracts, sampling results, experiment configs, sweep artifacts. |
+| Phase 15 | Implemented seed and output-grid metadata; planned sampling results, experiment configs, and sweep artifacts. |
 | Phase 16 | Optional readout noise and interop/export metadata. |
 
 ## Maintenance Triggers

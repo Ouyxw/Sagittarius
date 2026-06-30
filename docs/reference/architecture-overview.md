@@ -125,7 +125,7 @@ This layer allows results, benchmark claims, and public reports to be audited af
 - CUDA is experimental and requires explicit runtime diagnostics and parity evidence before performance claims.
 - AMDGPU and Metal are planned backend names, not mature execution paths.
 - Solver method dispatch is not fully connected to every backend path yet; Phase 12 tracks effective solver configuration.
-- Seed and output-grid contracts are planned in Phase 15 and are prerequisites for stronger MCWF, sampling, stochastic-noise, and benchmark reproducibility.
+- Seed and output-grid contracts are implemented for current solver paths; sampling, stochastic-noise ensembles, and benchmark scripts still need to build on that metadata consistently.
 - Advanced cluster/HPC execution is future Phase 17 work.
 
 ## Planned Architecture Evolution
