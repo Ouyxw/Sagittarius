@@ -210,6 +210,26 @@ This backlog prioritizes example projects and validation studies for using Sagit
 6. Open-system Lindblad/MCWF comparison.
 7. CPU/CUDA parity or benchmark-artifact generation where hardware is available.
 
+## 🌫️ Phase 14: Theoretical Noise Model Extensions (Planned)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Noise Model Specification** | High | Planned | Document the current local Markovian open-system baseline and define the extension path for theoretical noise models in `docs/physics/SPEC-PHYS-004-noise-models.md`, explicitly separating theory-oriented noise from hardware readout/calibration models. |
+| **Custom Lindblad Channels** | High | Planned | Add a validated API for user-defined Lindblad jump operators or structured operator declarations that work consistently in full and blockade-reduced bases, share `BasisContext`, and are recorded in run manifests and result artifacts. |
+| **Correlated Dephasing Channels** | High | Planned | Support structured correlated dephasing channels such as `L = sqrt(rate) * sum_i c_i n_i`, including global, regional, and weighted spatial profiles. Validate atom weights, basis mapping, solver-path compatibility, and metadata. |
+| **Collective Decay Channels** | Medium | Planned | Support structured collective decay channels such as `L = sqrt(rate) * sum_i c_i sigma_i^-` where physically appropriate, with explicit caveats about model assumptions and reduced-basis behavior. |
+| **Stochastic Hamiltonian Ensemble Runner** | High | Planned | Add an ensemble workflow for random Hamiltonian parameter fluctuations, including quasi-static detuning offsets, amplitude noise, colored detuning noise, and seeded realization averaging over observables. This depends on Phase 15 seed and output-grid contracts for reproducibility. |
+| **Time-Dependent Noise Rates** | Medium | Planned | Extend theory-noise declarations to support time-dependent rates or scheduled noise strengths where they can be validated and serialized. Unsupported combinations must fail explicitly. |
+| **Noise Metadata and Validation** | High | Planned | Record noise model type, parameters, random seeds, basis mode, solver path, and effective realization counts in diagnostics, run manifests, shared results where applicable, and serialized artifacts. |
+
+### Phase 14 Acceptance Criteria
+
+1. `SPEC-PHYS-004` clearly defines the current baseline: local Rydberg decay, local pure dephasing, Lindblad, and MCWF.
+2. Custom and structured Lindblad channels preserve trace and positivity in small-system tests and share the same `BasisContext` as Hamiltonians, observables, and jump operators.
+3. Correlated dephasing and collective decay declarations validate atom weights, rates, basis compatibility, and unsupported solver/backend combinations.
+4. Stochastic Hamiltonian runs support seeded realization generation, stable output grids, and manifest-linked averaged observables.
+5. Noise metadata is sufficient to reproduce or audit every non-default noise channel used in a run.
+6. Documentation distinguishes theoretical open-system/stochastic models from hardware readout or calibration error models.
+
 ## 🧾 Phase 15: Experiment Workflow & Readout Reproducibility (Planned)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
@@ -246,7 +266,7 @@ This backlog prioritizes example projects and validation studies for using Sagit
 2. Interop import/export paths preserve units, atom ordering, pulse timing, and unsupported-feature diagnostics.
 3. Documentation distinguishes simulation artifacts from hardware-control artifacts and passes governance review before public interop claims.
 
-## 🔬 Phase 14: HPC & Advanced Deployment (Future)
+## 🔬 Phase 17: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
 - **C++ FFI**: Direct bindings for C++ applications to leverage the Julia engine.

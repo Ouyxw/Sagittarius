@@ -27,6 +27,7 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Physical units and parameter selection](physics/SPEC-PHYS-001-units.md)
 - [Pulse shapes in neutral-atom simulations](physics/SPEC-PHYS-002-pulse-shapes.md)
 - [Observables in neutral-atom simulations](physics/SPEC-PHYS-003-observables.md)
+- [Noise models](physics/SPEC-PHYS-004-noise-models.md)
 
 ## Reference
 

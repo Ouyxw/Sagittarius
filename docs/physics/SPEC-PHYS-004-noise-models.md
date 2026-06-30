@@ -1,0 +1,260 @@
+# Noise Models
+
+Spec ID: `SPEC-PHYS-004`
+Status: `Planned contract`
+Roadmap: Phase 14
+Version: `noise-models/v1-draft`
+Last reviewed: 2026-06-30
+
+
+This document defines Sagittarius' current theory-oriented open-system noise model and the planned extension path. It does not define a full experimental readout, hardware calibration, or device-control noise model.
+
+## Scope
+
+Sagittarius is a Rydberg neutral-atom simulation SDK. Its noise model should support theoretical studies of decoherence and robustness while staying separate from hardware-specific readout errors, atom-loss calibration, pulse-upload behavior, and vendor device scheduling.
+
+The current supported baseline is:
+
+- local Markovian Rydberg population decay;
+- local Markovian pure dephasing;
+- Lindblad master-equation evolution;
+- Monte Carlo wavefunction / quantum-jump evolution;
+- scalar or per-atom rates;
+- full-basis and blockade-reduced-basis jump operators using the same `BasisContext` as the Hamiltonian.
+
+Planned extensions focus on custom Lindblad channels, correlated noise, and stochastic Hamiltonian ensembles.
+
+## Current Baseline
+
+The current Python configuration surface is:
+
+```python
+from sagittarius import SolverConfig
+
+cfg = SolverConfig(
+    gamma=0.0,
+    gamma_phi=0.0,
+    use_mc=False,
+    n_trajectories=100,
+)
+```
+
+`gamma` and `gamma_phi` may be scalars or per-atom vectors of length `N`.
+
+If either `gamma` or `gamma_phi` is positive, `Simulation.run()` uses the open-system path. With `use_mc=False`, Sagittarius solves a Lindblad master equation. With `use_mc=True`, it solves a Monte Carlo wavefunction ensemble.
+
+## Local Decay
+
+Rydberg population decay uses one local jump operator per atom with positive `gamma_i`:
+
+```text
+L_decay,i = sqrt(gamma_i) |g_i><r_i|
+```
+
+This maps Rydberg population on atom `i` into the ground state. Without drive, a single excited atom decays as:
+
+```text
+P_r(t) = exp(-gamma_i * t)
+```
+
+Use `gamma = 1 / T1` in the simulation time unit.
+
+## Local Pure Dephasing
+
+Pure dephasing uses one local occupation-projector jump operator per atom with positive `gamma_phi_i`:
+
+```text
+L_phi,i = sqrt(gamma_phi_i) n_i
+n_i = |r_i><r_i|
+```
+
+This does not change populations. It suppresses coherences involving different Rydberg occupations. With this implementation, isolated ground-Rydberg coherence decays at:
+
+```text
+gamma_phi_i / 2
+```
+
+For a desired pure-dephasing coherence time `T_phi`, use:
+
+```text
+gamma_phi = 2 / T_phi
+```
+
+With both population decay and pure dephasing, the modeled isolated coherence decay rate is:
+
+```text
+gamma / 2 + gamma_phi / 2
+```
+
+## Lindblad Evolution
+
+The Lindblad path evolves a density matrix:
+
+```text
+drho/dt = -i[H, rho] + sum_k (L_k rho L_k^dagger - 1/2 {L_k^dagger L_k, rho})
+```
+
+This path is deterministic and has no trajectory sampling error, but the density matrix scales as `dim x dim`. It is the preferred open-system reference for small systems.
+
+## MCWF Evolution
+
+The MCWF path evolves wavefunction trajectories under the effective Hamiltonian:
+
+```text
+H_eff = H - i/2 sum_k L_k^dagger L_k
+```
+
+Random jumps apply the selected `L_k`, and observables are averaged over `n_trajectories` trajectories. This is often more memory-efficient than Lindblad evolution, but it has sampling error.
+
+Current limitations:
+
+- there is no stable user-facing seed contract yet;
+- observable output uses an internal fixed grid for MCWF observable averaging;
+- convergence should be checked by increasing `n_trajectories`;
+- GPU open-system parity is not a mature public claim.
+
+Phase 15 is expected to add seed and output-grid contracts that make MCWF and stochastic ensembles more reproducible.
+
+## Reduced-Basis Behavior
+
+When `SolverConfig.blockade_radius > 0`, the open-system operators use the same reduced basis and mapping as the Hamiltonian.
+
+For local decay, a state containing atom `i` in `|r>` maps to the bitstring with that excitation removed. If the target bitstring is represented in the reduced basis, the matrix element is included. For local dephasing, the operator is diagonal over represented reduced-basis states.
+
+All future custom or correlated noise channels must share the same `BasisContext` as Hamiltonians, observables, jump operators, and MCWF trajectories.
+
+## Correlated Lindblad Noise
+
+Correlated noise means multiple atoms couple to a shared environment channel. The first planned structured form is correlated dephasing:
+
+```text
+L_corr = sqrt(rate) * sum_i c_i n_i
+```
+
+Examples:
+
+```text
+L_global = sqrt(rate) * sum_i n_i
+L_region = sqrt(rate) * sum_{i in region} n_i
+```
+
+This differs from independent dephasing:
+
+```text
+D_independent[rho] = sum_i gamma_i D[n_i][rho]
+D_correlated[rho] = rate * D[sum_i c_i n_i][rho]
+```
+
+The correlated form contains cross terms such as `n_i rho n_j`. It can preserve coherences within subspaces that have the same collective occupation eigenvalue. For example, global dephasing generated by `n_1 + n_2` does not dephase the coherence between `|rg>` and `|gr>` because both states have the same eigenvalue.
+
+Planned validation requirements:
+
+- `rate` must be finite and non-negative;
+- weights `c_i` must match the atom count or selected atom set;
+- atom indices must follow Python zero-based indexing at the SDK boundary;
+- reduced-basis construction must use the active `BasisContext`;
+- manifests must record type, rate, weights, atom set, and basis mode.
+
+## Collective Decay
+
+A second planned structured Lindblad form is collective decay:
+
+```text
+L_collective = sqrt(rate) * sum_i c_i sigma_i^-
+```
+
+This can model idealized shared radiative channels, superradiant/subradiant effects, or other collective-loss approximations when the assumptions are physically appropriate.
+
+This should remain opt-in and explicitly documented because it is not equivalent to independent spontaneous emission. Reduced-basis behavior and interpretation must be tested carefully.
+
+## Custom Lindblad Channels
+
+The most general planned Lindblad extension is a validated custom channel API. The goal is to let users add theory-specific collapse operators without Sagittarius hard-coding every possible mechanism.
+
+Possible declaration styles include:
+
+```python
+Noise.correlated_dephasing(rate=0.01, weights=[1.0, 1.0, 0.5])
+Noise.collective_decay(rate=0.001, weights=[1.0, 1.0, 1.0])
+Noise.custom_lindblad(kind="diagonal_bitstring", parameters={...})
+```
+
+A custom channel must be serializable or must explicitly mark itself as non-reproducible. Arbitrary opaque Python callbacks should not be accepted into reproducible manifests without clear limitations.
+
+## Stochastic Hamiltonian Noise
+
+Stochastic Hamiltonian noise models random fluctuations in Hamiltonian parameters rather than direct Lindblad dissipators. A single realization evolves under:
+
+```text
+H_k(t) = H_0(t) + H_noise,k(t)
+```
+
+Examples:
+
+```text
+Delta_i(t) = Delta_i^0(t) + xi_i(t)
+Omega_i(t) = Omega_i^0(t) * (1 + epsilon_i(t))
+V_ij(t) = V_ij^0 + delta V_ij(t)
+```
+
+Each realization may be unitary, but averaging over unknown noise realizations can dephase observables or density matrices.
+
+Planned stochastic noise types:
+
+| Type | Meaning |
+| :--- | :--- |
+| Quasi-static detuning offset | One random detuning shift per run or shot. |
+| Global detuning noise | Shared time-dependent `xi(t)` added to all atoms. |
+| Local detuning noise | Independent or spatially structured `xi_i(t)`. |
+| Amplitude noise | Multiplicative or additive noise on `Omega_i(t)`. |
+| Colored noise | Finite-correlation-time processes such as Ornstein-Uhlenbeck noise. |
+
+A stochastic Hamiltonian ensemble runner should generate seeded realizations, run each realization on a stable output grid, average observables, and record realization metadata. This depends on the Phase 15 seed and `saveat` contracts.
+
+## Relationship Between Stochastic Noise and Lindblad Noise
+
+Some stochastic Hamiltonian models reduce to Lindblad dephasing in a white-noise Markovian limit. For example:
+
+```text
+H_noise(t) = xi(t) A
+```
+
+with ideal white noise can produce an averaged equation proportional to:
+
+```text
+-[A, [A, rho]]
+```
+
+which is equivalent to dephasing generated by a Lindblad operator proportional to `A`.
+
+If `A = sum_i n_i`, this corresponds to global correlated dephasing. If each `A_i = n_i` has independent white noise, this corresponds to local dephasing.
+
+Colored noise, quasi-static noise, and motion-induced interaction fluctuations generally should not be represented as simple Markovian local dephasing without a model-specific justification.
+
+## Unsupported Scenarios
+
+The following are outside the current baseline and are not supported unless future roadmap items implement them:
+
+- correlated dephasing channels;
+- collective decay channels;
+- arbitrary custom Lindblad operators through the Python SDK;
+- stochastic Hamiltonian ensemble averaging;
+- time-dependent `gamma(t)` or `gamma_phi(t)`;
+- multi-level atom leakage models;
+- motion-induced decoherence or thermal position sampling;
+- blackbody-induced transitions between Rydberg states;
+- readout errors, atom detection errors, and hardware calibration noise.
+
+Readout and external hardware-oriented models are tracked separately in Phase 16.
+
+## Verification Expectations
+
+New theory-noise models should include:
+
+- small-system trace-preservation tests;
+- density-matrix positivity checks where applicable;
+- MCWF-vs-Lindblad agreement tests for Lindblad channels;
+- seeded reproducibility tests for stochastic ensembles;
+- full-vs-reduced basis parity checks;
+- serialization and manifest validation;
+- documentation updates in this spec and `docs/reference/known-limitations.md`.
