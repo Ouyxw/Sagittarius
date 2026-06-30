@@ -87,6 +87,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | :--- | :---: | :---: | :--- |
 | **Known Limitations** | High | Done | Document current scale limits, backend limitations, numerical assumptions, reproducibility gaps, and unsupported scenarios in `docs/reference/known-limitations.md`. |
 | **Verifiable Performance Claims** | High | Done | Added `docs/governance/SPEC-GOV-001-performance-claims.md` with claim requirements, artifact sources, and approved wording; updated README, MWIS notes, and historical GPU/MWIS conclusions to require `benchmark-artifact/v1` or `mwis-batch-verification/v1` evidence before public performance claims. |
+| **Benchmark Governance Plan** | High | Done | Added `docs/governance/SPEC-GOV-004-benchmarking-plan.md` to define benchmark layers, suite priorities, required row metadata, correctness gates, running discipline, release cadence, and roadmap alignment. |
 | **Minimal Examples with Expected Output** | Medium | Done | Add short examples with expected diagnostics shape, validation errors, indexing behavior, basis size, observable values, and serialization output in `docs/getting-started/minimal-examples.md`. |
 | **Dual SDK Documentation** | Medium | Done | Added `docs/getting-started/dual-sdk-examples.md` with paired Python and Julia workflows for algorithm prototyping, experiment-style pulse simulation, baseline validation, and hardware-demo preparation, linked from README, Julia API, and parity docs. |
 | **Prior-Art-Aware Technical Notes** | Medium | Done | Added `docs/governance/SPEC-GOV-003-prior-art-notes.md` to distinguish known Rydberg/MWIS mappings, hardness methodology, neutral-atom tooling, and generic numerical techniques from Sagittarius-specific schemas, diagnostics, parity tests, and execution-path implementation work. |
@@ -269,6 +270,7 @@ This backlog prioritizes example projects and validation studies for using Sagit
 ## 🔬 Phase 17: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
+- **Cluster and Sweep Benchmarks**: Extend benchmark workflows for cluster execution, parameter-sweep throughput, resumability, artifact aggregation, and hardware/backend-specific diagnostics. Public claims must follow `docs/governance/SPEC-GOV-004-benchmarking-plan.md` and `docs/governance/SPEC-GOV-001-performance-claims.md`.
 - **C++ FFI**: Direct bindings for C++ applications to leverage the Julia engine.
 - **Web Dashboard**: Interactive results explorer for large-scale sweeps.
 
