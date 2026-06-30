@@ -5,7 +5,7 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 ## API Stability
 
 - The Python SDK and Julia developer API are still evolving. Names, defaults, result fields, and error behavior may change before a stable release.
-- Scalar/list/dict/callable pulse inputs are supported today, but explicit typed pulse wrappers are still planned. See [`pulse-and-indexing-contract.md`](../api/pulse-and-indexing-contract.md) for the current contract.
+- Explicit `GlobalPulse`, `LocalPulseVector`, and `CallablePulse` wrappers are supported, while scalar/list/dict/callable shorthand forms remain backward-compatible. See [`pulse-and-indexing-contract.md`](../api/pulse-and-indexing-contract.md) for the current contract.
 - Python atom indices are zero-based and follow `Register.atoms` order. Julia internals are one-based; this boundary is documented in [`python-julia-parity.md`](../api/python-julia-parity.md) and covered by cross-language golden tests.
 
 ## Backend and Environment
@@ -18,15 +18,15 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 ## Scale and Performance
 
 - Full Hilbert-space simulation scales as `2^N`; practical atom counts are limited by memory, solver cost, and observable collection.
-- Blockade-reduced bases can reduce state space substantially. Basis generation is not yet cached; full and reduced sparse Hamiltonians reuse their CSC pattern once constructed.
-- GPU execution paths are still maturing. Sparse pattern reuse, CUDA sparse value-buffer reuse, and CPU/GPU parity tests exist; broader backend buffer reuse remains planned work.
+- Blockade-reduced bases can reduce state space substantially, and repeated reduced-basis construction is cached by geometry/blockade metadata. The reduced basis is still an approximation that must be selected and validated against the problem's physical error budget.
+- GPU execution paths are still maturing. Sparse pattern reuse, CUDA sparse value-buffer reuse, and CPU/GPU parity tests exist for the CUDA path, but CUDA remains experimental and AMDGPU/Metal are not parity-tested production backends.
 - Benchmark results are only meaningful with the exact hardware, `version-info/v1` metadata, backend settings, solver tolerances, and problem configuration used to produce them.
 
 ## Physics and Numerics
 
 - Sagittarius models idealized Rydberg neutral-atom analog dynamics. It is not a calibrated hardware control stack.
-- Units and conventions are documented in the repository [`README.md`](../../README.md); users are responsible for supplying parameters in those units.
-- Open-system Lindblad and MCWF workflows are available, but expanded positivity, trace-preservation, and MCWF-vs-Lindblad ensemble sanity checks are planned.
+- Units and conventions are documented in [`physics/units.md`](../physics/units.md); users are responsible for supplying parameters in a consistent unit system.
+- Open-system Lindblad and MCWF workflows are available, and `open_system_sanity_checks()` covers trace preservation, density-matrix positivity, and MCWF-vs-Lindblad observable agreement for small systems. New open-system assumptions should still be checked against problem-specific reference cases.
 - Reduced-basis simulations should be cross-checked against dense/full-basis evolution for small systems when introducing new physics assumptions.
 
 ## Data and Reproducibility
