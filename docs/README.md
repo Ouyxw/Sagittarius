@@ -15,6 +15,11 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Python / Julia parity](api/python-julia-parity.md)
 - [Pulse and indexing contract](api/pulse-and-indexing-contract.md)
 
+## Physics Guides
+
+- [Physical units and parameter selection](physics/units.md)
+- [Observables in neutral-atom simulations](physics/observables.md)
+
 ## Reference
 
 - [Backend maturity](reference/backends.md)
