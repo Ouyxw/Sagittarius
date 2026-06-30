@@ -1,5 +1,12 @@
 # Observable Library Contract
 
+Spec ID: `SPEC-API-004`
+Status: `Planned contract`
+Roadmap: Phase 11
+Version: `observable-library-contract/draft`
+Last reviewed: 2026-06-30
+
+
 This page defines the planned Phase 11 observable-library contract. It is an implementation target, not a claim that every declaration form below is already available. The current stable surface remains:
 
 - Julia: `RydbergPopulation(atom_idx, N_atoms; basis_context=nothing)` returns a solver-compatible callable.
@@ -52,7 +59,7 @@ Python atom indices are zero-based in `Register.atoms` order. Julia API calls us
 | `pauli_zz` | Two-site `Z_i Z_j` expectation. | `atoms` with two entries, optional `convention` | `PauliZZ` |
 | `parity` | Product of signed Z values over atoms. | `atoms`, optional `convention` | `Parity` |
 
-The physical meaning and recommended use cases for these quantities are documented in [`observables.md`](../physics/observables.md).
+The physical meaning and recommended use cases for these quantities are documented in [`SPEC-PHYS-003-observables.md`](../physics/SPEC-PHYS-003-observables.md).
 
 ## Python Declaration Format
 

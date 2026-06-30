@@ -5,7 +5,7 @@ Sagittarius supports two complementary entry points:
 - **Python SDK** for notebooks, algorithm prototyping, validation scripts, artifact handling, plotting, and integration with scientific Python tools.
 - **Julia native API** for direct access to registers, pulse ASTs, reduced bases, Hamiltonian operators, solver functions, jump operators, GPU entry points, and Julia logging.
 
-Both SDKs share the physical semantics documented in [`python-julia-parity.md`](../api/python-julia-parity.md): atom order is preserved, Python indices are zero-based, Julia indices are one-based, bitstrings use the same ascending integer order, and reduced-basis Hamiltonians, observables, and jump operators should share the same basis context.
+Both SDKs share the physical semantics documented in [`SPEC-API-002-python-julia-parity.md`](../api/SPEC-API-002-python-julia-parity.md): atom order is preserved, Python indices are zero-based, Julia indices are one-based, bitstrings use the same ascending integer order, and reduced-basis Hamiltonians, observables, and jump operators should share the same basis context.
 
 ## When to Use Each SDK
 
@@ -248,4 +248,4 @@ Before adding a dual SDK example or claiming parity, check:
 - Both snippets use the same `C6`, coordinates, blockade radius, pulse values, solver tolerances, and time span.
 - Reduced-basis snippets share a `BasisContext` on the Julia side and use the Python `Simulation.validate()` basis size on the Python side.
 - Result files use `result-artifact/v1`, embedded `shared-result/v1`, and validated `run-manifest/v1` when produced by Python.
-- Performance statements cite `benchmark-artifact/v1` or `mwis-batch-verification/v1` evidence as described in [`performance-claims.md`](../governance/performance-claims.md).
+- Performance statements cite `benchmark-artifact/v1` or `mwis-batch-verification/v1` evidence as described in [`SPEC-GOV-001-performance-claims.md`](../governance/SPEC-GOV-001-performance-claims.md).

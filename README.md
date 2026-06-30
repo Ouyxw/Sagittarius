@@ -111,13 +111,13 @@ H = hamiltonian(reg, fill(1.0, 3), zeros(3); basis_context=context)
 println("Reduced basis size: ", length(context.basis))
 ```
 
-See the [Julia native API](docs/api/julia-native-api.md) and [dual-SDK examples](docs/getting-started/dual-sdk-examples.md).
+See the [Julia native API](docs/api/SPEC-API-003-julia-native-api.md) and [dual-SDK examples](docs/getting-started/dual-sdk-examples.md).
 
 ## Physical Units and Indexing
 
-Numeric inputs do not carry units. Coordinates, times, angular frequencies, interaction coefficients, and decay rates must use one consistent unit system. See [physical units and parameter selection](docs/physics/units.md) for `blockade_radius`, `C6`, pulse parameters, and open-system rates.
+Numeric inputs do not carry units. Coordinates, times, angular frequencies, interaction coefficients, and decay rates must use one consistent unit system. See [physical units and parameter selection](docs/physics/SPEC-PHYS-001-units.md) for `blockade_radius`, `C6`, pulse parameters, and open-system rates.
 
-Python atom indices are zero-based and follow `Register.atoms` order; Julia indices are one-based. See the [pulse and indexing contract](docs/api/pulse-and-indexing-contract.md).
+Python atom indices are zero-based and follow `Register.atoms` order; Julia indices are one-based. See the [pulse and indexing contract](docs/api/SPEC-API-001-pulse-and-indexing-contract.md).
 
 ## GPU and Diagnostics
 
@@ -127,7 +127,7 @@ Enable GPU execution through `SolverConfig`:
 cfg = SolverConfig(use_gpu=True, gpu_backend="CUDA")
 ```
 
-Backend names include `CUDA`, `AMDGPU`, and `Metal`, but support and test coverage differ. Check the [backend maturity matrix](docs/reference/backends.md) before use.
+Backend names include `CUDA`, `AMDGPU`, and `Metal`, but support and test coverage differ. Check the [backend maturity matrix](docs/reference/SPEC-BACKEND-001-backends.md) before use.
 
 ```python
 from sagittarius import backend_maturity, doctor, version_info
@@ -158,15 +158,15 @@ uv run python check_env.py
 uv run python -m pytest tests/
 ```
 
-CPU tests do not require CUDA. GPU tests are opt-in and require a working backend. Performance results must include the hardware, solver settings, backend configuration, and version metadata described in the [performance claims policy](docs/governance/performance-claims.md).
+CPU tests do not require CUDA. GPU tests are opt-in and require a working backend. Performance results must include the hardware, solver settings, backend configuration, and version metadata described in the [performance claims policy](docs/governance/SPEC-GOV-001-performance-claims.md).
 
 ## Documentation
 
 - [Installation overview](docs/getting-started/installation.md)
 - [Minimal examples](docs/getting-started/minimal-examples.md)
-- [Physical units and parameter selection](docs/physics/units.md)
-- [Python/Julia parity contract](docs/api/python-julia-parity.md)
-- [Backend support](docs/reference/backends.md)
+- [Physical units and parameter selection](docs/physics/SPEC-PHYS-001-units.md)
+- [Python/Julia parity contract](docs/api/SPEC-API-002-python-julia-parity.md)
+- [Backend support](docs/reference/SPEC-BACKEND-001-backends.md)
 - [Known limitations](docs/reference/known-limitations.md)
 - [Containerized development](docs/getting-started/containerization.md)
 

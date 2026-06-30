@@ -1,5 +1,12 @@
 # Julia Native Developer API
 
+Spec ID: `SPEC-API-003`
+Status: `Current`
+Roadmap: Phase 8
+Version: `julia-native-api/v1`
+Last reviewed: 2026-06-30
+
+
 Sagittarius exposes a Julia-native API for users who want direct access to registers, pulse ASTs, bases, Hamiltonians, jump operators, solvers, and structured logging without going through the Python SDK. For side-by-side Python and Julia workflows, see [`dual-sdk-examples.md`](../getting-started/dual-sdk-examples.md).
 
 ## Registers
@@ -51,4 +58,4 @@ Julia native code can emit taxonomy-aligned structured logs with:
 log_event("hamiltonian_built"; atom_count=4, basis_size=8, use_gpu=false)
 ```
 
-The payload fields follow [`event-taxonomy.md`](../reference/event-taxonomy.md) and can be captured with Julia's standard `Logging` tools. Native solver calls emit `solver_start` and `solver_finish`; `setup_workers` emits `cluster_setup_start` and `cluster_setup_finish`; basis and Hamiltonian builders emit their physics events.
+The payload fields follow [`SPEC-OBS-001-event-taxonomy.md`](../reference/SPEC-OBS-001-event-taxonomy.md) and can be captured with Julia's standard `Logging` tools. Native solver calls emit `solver_start` and `solver_finish`; `setup_workers` emits `cluster_setup_start` and `cluster_setup_finish`; basis and Hamiltonian builders emit their physics events.

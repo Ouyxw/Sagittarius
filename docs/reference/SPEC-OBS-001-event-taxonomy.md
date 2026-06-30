@@ -1,5 +1,12 @@
 # Event Taxonomy
 
+Spec ID: `SPEC-OBS-001`
+Status: `Current`
+Roadmap: Phase 6
+Version: `event-taxonomy/v1`
+Last reviewed: 2026-06-30
+
+
 Sagittarius uses a stable event taxonomy for runtime logs, diagnostics, run manifests, and cross-language Python/Julia observability. The Python package exposes the catalog through `sagittarius.event_taxonomy()` and individual entries through `sagittarius.get_event_spec(name)`.
 
 Schema version: `event-taxonomy/v1`

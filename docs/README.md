@@ -16,27 +16,27 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 
 ## API Guides
 
-- [Julia native API](api/julia-native-api.md)
-- [Python / Julia parity](api/python-julia-parity.md)
-- [Pulse and indexing contract](api/pulse-and-indexing-contract.md)
-- [Observable library contract](api/observable-library.md)
-- [Solver configuration contract](api/solver-configuration.md)
+- [Julia native API](api/SPEC-API-003-julia-native-api.md)
+- [Python / Julia parity](api/SPEC-API-002-python-julia-parity.md)
+- [Pulse and indexing contract](api/SPEC-API-001-pulse-and-indexing-contract.md)
+- [Observable library contract](api/SPEC-API-004-observable-library.md)
+- [Solver configuration contract](api/SPEC-API-005-solver-configuration.md)
 
 ## Physics Guides
 
-- [Physical units and parameter selection](physics/units.md)
-- [Pulse shapes in neutral-atom simulations](physics/pulse-shapes.md)
-- [Observables in neutral-atom simulations](physics/observables.md)
+- [Physical units and parameter selection](physics/SPEC-PHYS-001-units.md)
+- [Pulse shapes in neutral-atom simulations](physics/SPEC-PHYS-002-pulse-shapes.md)
+- [Observables in neutral-atom simulations](physics/SPEC-PHYS-003-observables.md)
 
 ## Reference
 
-- [Backend maturity](reference/backends.md)
+- [Backend maturity](reference/SPEC-BACKEND-001-backends.md)
 - [Known limitations](reference/known-limitations.md)
-- [Shared result schema](reference/shared-result-schema.md)
-- [Event taxonomy](reference/event-taxonomy.md)
+- [Shared result schema](reference/SPEC-DATA-001-shared-result-schema.md)
+- [Event taxonomy](reference/SPEC-OBS-001-event-taxonomy.md)
 
 ## Governance
 
-- [Performance claims](governance/performance-claims.md)
-- [Prior-art notes](governance/prior-art-notes.md)
-- [Disclosure control](governance/disclosure-control.md)
+- [Performance claims](governance/SPEC-GOV-001-performance-claims.md)
+- [Prior-art notes](governance/SPEC-GOV-003-prior-art-notes.md)
+- [Disclosure control](governance/SPEC-GOV-002-disclosure-control.md)

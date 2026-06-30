@@ -1,5 +1,12 @@
 # Shared Result Schema
 
+Spec ID: `SPEC-DATA-001`
+Status: `Current`
+Roadmap: Phase 8
+Version: `shared-result/v1`
+Last reviewed: 2026-06-30
+
+
 Sagittarius shared simulation outputs use `shared-result/v1` as the language-neutral result payload. The Python `result-artifact/v1` envelope now embeds this payload in `shared_result` while preserving legacy `data`, `metadata`, `diagnostics`, and `manifest` fields.
 
 ## Required Fields

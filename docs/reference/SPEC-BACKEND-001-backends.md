@@ -1,5 +1,12 @@
 # Backend Maturity Matrix
 
+Spec ID: `SPEC-BACKEND-001`
+Status: `Current`
+Roadmap: Phase 5, Phase 10
+Version: `backend-maturity/v1`
+Last reviewed: 2026-06-30
+
+
 Sagittarius exposes backend names through the Python API, but backend availability and test coverage are not equivalent. Treat this matrix as the public maturity contract until parity tests and reproducible benchmark artifacts say otherwise.
 
 | Backend | Status | Runtime notes |

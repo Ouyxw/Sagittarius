@@ -1,5 +1,12 @@
 # Physical Units and Parameter Selection
 
+Spec ID: `SPEC-PHYS-001`
+Status: `Current`
+Roadmap: Phase 2, Phase 9
+Version: `physics-units/v1`
+Last reviewed: 2026-06-30
+
+
 Sagittarius does not attach units to numeric values. A simulation must therefore use one internally consistent unit system. The equations use \(\hbar=1\), so Hamiltonian coefficients are angular frequencies and time has the reciprocal unit.
 
 A convenient experimental convention is:
@@ -37,7 +44,7 @@ Here \(n_i=|r_i\rangle\langle r_i|\). Positive `delta` lowers the modeled Rydber
 | `gamma_phi` | Coefficient of the pure-dephasing jump operator \(\sqrt{\gamma_\phi}n\). With this implementation, isolated ground-Rydberg coherence decays at \(\gamma_\phi/2\). | For a desired pure-dephasing coherence time \(T_\phi\), use `gamma_phi = 2/T_phi`. With population decay, the modeled coherence rate is \(\gamma/2+\gamma_\phi/2\). |
 | `blockade_radius` | Hard geometric cutoff that removes basis states containing two Rydberg excitations separated by less than the radius. `0.0` keeps the full basis. | Derive it from an explicit interaction threshold and validate the reduced basis against full-basis dynamics for a representative small system. |
 
-`reltol`, `abstol`, solver `method`, GPU settings, and `n_trajectories` are numerical controls rather than physical parameters. The planned method-dispatch and fixed-step contract is documented in [`solver-configuration.md`](../api/solver-configuration.md). Tighten tolerances, reduce fixed time steps where applicable, and increase trajectory count until relevant observables are stable at the required precision.
+`reltol`, `abstol`, solver `method`, GPU settings, and `n_trajectories` are numerical controls rather than physical parameters. The planned method-dispatch and fixed-step contract is documented in [`SPEC-API-005-solver-configuration.md`](../api/SPEC-API-005-solver-configuration.md). Tighten tolerances, reduce fixed time steps where applicable, and increase trajectory count until relevant observables are stable at the required precision.
 
 ## Choosing `blockade_radius`
 

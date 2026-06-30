@@ -1,5 +1,12 @@
 # Prior-Art-Aware Technical Notes
 
+Spec ID: `SPEC-GOV-003`
+Status: `Policy`
+Roadmap: Phase 10
+Version: `prior-art-notes/v1`
+Last reviewed: 2026-06-30
+
+
 This internal note separates Sagittarius implementation work from known Rydberg neutral-atom, MWIS, and simulator prior art. It is an engineering review aid, not legal advice or a patentability opinion. Before public technical disclosures, update this note with the exact release date, artifact references, and any newly reviewed sources.
 
 ## Review Scope
@@ -63,9 +70,9 @@ Before publishing a README section, benchmark report, release note, blog post, p
 
 - Identify whether the text is about known physics/mapping background, Sagittarius implementation, measured performance, or patent-sensitive strategy.
 - Cite representative prior art when discussing Rydberg/MWIS mappings, hardware speedups, or neutral-atom software workflows.
-- Replace broad performance language with artifact-backed wording from [`performance-claims.md`](performance-claims.md).
+- Replace broad performance language with artifact-backed wording from [`SPEC-GOV-001-performance-claims.md`](SPEC-GOV-001-performance-claims.md).
 - Attach run manifests, shared result schemas, benchmark artifacts, and version metadata where measurements are discussed.
-- Record planned and actual public disclosure dates in [`disclosure-control.md`](disclosure-control.md).
+- Record planned and actual public disclosure dates in [`SPEC-GOV-002-disclosure-control.md`](SPEC-GOV-002-disclosure-control.md).
 
 ## Source Pointers
 

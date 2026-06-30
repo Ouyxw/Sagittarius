@@ -1,6 +1,13 @@
 # Pulse and Indexing Contract
 
-This document defines the current Python SDK pulse input contract and atom indexing semantics. For physical waveform selection and parameter guidance, see [`pulse-shapes.md`](../physics/pulse-shapes.md).
+Spec ID: `SPEC-API-001`
+Status: `Current`
+Roadmap: Phase 8
+Version: `pulse-contract/v1`
+Last reviewed: 2026-06-30
+
+
+This document defines the current Python SDK pulse input contract and atom indexing semantics. For physical waveform selection and parameter guidance, see [`SPEC-PHYS-002-pulse-shapes.md`](../physics/SPEC-PHYS-002-pulse-shapes.md).
 
 ## Atom Indexing
 

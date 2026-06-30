@@ -1,8 +1,15 @@
 # Verifiable Performance Claims
 
+Spec ID: `SPEC-GOV-001`
+Status: `Policy`
+Roadmap: Phase 10
+Version: `performance-claims-policy/v1`
+Last reviewed: 2026-06-30
+
+
 Sagittarius performance statements must be tied to reproducible benchmark artifacts. Use this page as the review checklist before publishing README text, reports, plots, release notes, or hardware-facing summaries.
 
-For claims involving Rydberg/MWIS mappings or neutral-atom simulator positioning, also check [`prior-art-notes.md`](prior-art-notes.md). For public releases or external reports, create or update a row in [`disclosure-control.md`](disclosure-control.md).
+For claims involving Rydberg/MWIS mappings or neutral-atom simulator positioning, also check [`SPEC-GOV-003-prior-art-notes.md`](SPEC-GOV-003-prior-art-notes.md). For public releases or external reports, create or update a row in [`SPEC-GOV-002-disclosure-control.md`](SPEC-GOV-002-disclosure-control.md).
 
 ## Claim Requirements
 

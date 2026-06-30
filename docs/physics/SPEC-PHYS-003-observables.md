@@ -1,8 +1,15 @@
 # Observables in Neutral-Atom Simulations
 
+Spec ID: `SPEC-PHYS-003`
+Status: `Mixed`
+Roadmap: Phase 11
+Version: `observable-physics/v1`
+Last reviewed: 2026-06-30
+
+
 Observables are quantities read out from the simulated quantum state during or after time evolution. The Hamiltonian determines how the state evolves; observables determine what physical information is extracted from that state.
 
-Sagittarius currently exposes `RydbergPopulation` as the built-in Julia observable and the Python shorthand `observables={"name": atom_index}` for single-atom Rydberg populations. The observable library planned in `REQUIREMENTS.md` extends this into a stable set of neutral-atom and optimization diagnostics; its planned API and metadata contract are documented in [`observable-library.md`](../api/observable-library.md). This page defines the physical meaning of those observables.
+Sagittarius currently exposes `RydbergPopulation` as the built-in Julia observable and the Python shorthand `observables={"name": atom_index}` for single-atom Rydberg populations. The observable library planned in `REQUIREMENTS.md` extends this into a stable set of neutral-atom and optimization diagnostics; its planned API and metadata contract are documented in [`SPEC-API-004-observable-library.md`](../api/SPEC-API-004-observable-library.md). This page defines the physical meaning of those observables.
 
 ## State and basis convention
 

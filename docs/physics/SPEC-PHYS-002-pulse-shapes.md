@@ -1,8 +1,15 @@
 # Pulse Shapes in Neutral-Atom Simulations
 
-Pulse shapes define the time dependence of `PulseSequence.omega` and `PulseSequence.delta`. Sagittarius does not attach units to pulse parameters; amplitudes use the same angular-frequency unit as the Hamiltonian coefficients, and durations use the simulation time unit. See [`units.md`](units.md) for the unit convention.
+Spec ID: `SPEC-PHYS-002`
+Status: `Current`
+Roadmap: Phase 8, Phase 10
+Version: `pulse-shapes/v1`
+Last reviewed: 2026-06-30
 
-This page explains the physical intent of the built-in pulse nodes and how to choose between global, local, piecewise, and callable pulse definitions. The API-level input contract and indexing rules are documented in [`pulse-and-indexing-contract.md`](../api/pulse-and-indexing-contract.md).
+
+Pulse shapes define the time dependence of `PulseSequence.omega` and `PulseSequence.delta`. Sagittarius does not attach units to pulse parameters; amplitudes use the same angular-frequency unit as the Hamiltonian coefficients, and durations use the simulation time unit. See [`SPEC-PHYS-001-units.md`](SPEC-PHYS-001-units.md) for the unit convention.
+
+This page explains the physical intent of the built-in pulse nodes and how to choose between global, local, piecewise, and callable pulse definitions. The API-level input contract and indexing rules are documented in [`SPEC-API-001-pulse-and-indexing-contract.md`](../api/SPEC-API-001-pulse-and-indexing-contract.md).
 
 ## Supported Pulse Nodes
 
@@ -115,7 +122,7 @@ For adiabatic or annealing workflows, pair the waveform choice with observable c
 
 ## Parameter Guidance
 
-- `amplitude`, `value`, `start`, and `end` use angular-frequency units, such as `rad/us` under the convention in [`units.md`](units.md).
+- `amplitude`, `value`, `start`, and `end` use angular-frequency units, such as `rad/us` under the convention in [`SPEC-PHYS-001-units.md`](SPEC-PHYS-001-units.md).
 - `duration`, `sigma`, `mu`, and `width` use the simulation time unit.
 - `mu` in `Pulse.gaussian` is the center time within the segment. If omitted, it is `duration / 2`.
 - `sigma` controls the Gaussian width; choose a duration long enough that the tails are acceptable for the intended approximation.

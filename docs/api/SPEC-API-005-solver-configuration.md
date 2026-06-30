@@ -1,5 +1,12 @@
 # Solver Configuration Contract
 
+Spec ID: `SPEC-API-005`
+Status: `Planned contract`
+Roadmap: Phase 12
+Version: `solver-configuration-contract/draft`
+Last reviewed: 2026-06-30
+
+
 This page defines the planned Phase 12 numerical solver configuration contract. It is an implementation target, not a claim that every option below is already active. The current Python `SolverConfig` exposes `method`, `reltol`, `abstol`, `blockade_radius`, open-system settings, MCWF trajectory count, and GPU settings; the Julia solver paths currently use `Tsit5()` internally.
 
 Phase 12 connects the public solver configuration to the Julia OrdinaryDiffEq algorithm actually used by every supported execution path.
