@@ -41,3 +41,4 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Performance claims](governance/SPEC-GOV-001-performance-claims.md)
 - [Prior-art notes](governance/SPEC-GOV-003-prior-art-notes.md)
 - [Disclosure control](governance/SPEC-GOV-002-disclosure-control.md)
+- [Benchmarking plan](governance/SPEC-GOV-004-benchmarking-plan.md)
