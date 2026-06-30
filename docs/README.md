@@ -48,3 +48,4 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Prior-art notes](governance/SPEC-GOV-003-prior-art-notes.md)
 - [Disclosure control](governance/SPEC-GOV-002-disclosure-control.md)
 - [Benchmarking plan](governance/SPEC-GOV-004-benchmarking-plan.md)
+- [Repository and versioning governance](governance/SPEC-GOV-005-repository-versioning.md)
