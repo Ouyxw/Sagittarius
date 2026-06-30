@@ -53,7 +53,7 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-For source installs, backend setup, package status, container setup, and environment troubleshooting, see the [installation overview](docs/getting-started/installation.md).
+For source installs, backend setup, package status, container setup, and environment troubleshooting, see the [installation overview](docs/getting-started/installation.md). Python-specific setup lives under [docs/getting-started/python](docs/getting-started/python/source-installation.md); Julia-native setup lives under [docs/getting-started/julia](docs/getting-started/julia/projects.md).
 
 ### Independent Python Projects
 
@@ -75,7 +75,7 @@ julia --project=. -e 'using Pkg; Pkg.develop(path="../Sagittarius/Sagittarius.jl
 julia --project=. scripts/rabi_simulation.jl
 ```
 
-Use `--project=.` instead of modifying `JULIA_LOAD_PATH`. The [Julia user projects guide](docs/getting-started/julia-projects.md) contains the recommended layout and a Julia example.
+Use `--project=.` instead of modifying `JULIA_LOAD_PATH`. The [Julia projects guide](docs/getting-started/julia/projects.md) contains the recommended layout and a Julia example.
 
 ## Python Quick Start
 
@@ -97,7 +97,7 @@ result = sim.run(psi0, 0.0, 0.5, observables={"pop_atom_0": 0})
 print(result.to_pandas().tail())
 ```
 
-For a reduced basis, set `SolverConfig(blockade_radius=...)` and allocate the initial state using the size returned by `sim.validate()`. See the [minimal examples](docs/getting-started/minimal-examples.md) for complete full- and reduced-basis workflows.
+For a reduced basis, set `SolverConfig(blockade_radius=...)` and allocate the initial state using the size returned by `sim.validate()`. See the [Python minimal examples](docs/getting-started/python/minimal-examples.md) for complete full- and reduced-basis workflows.
 
 Solver selection is explicit through `SolverConfig(method=...)`. The default is adaptive `Tsit5`; `Vern9` is available for higher-accuracy adaptive checks; fixed-step `RK4` requires `SolverConfig(method="RK4", adaptive=False, dt=...)`. Run manifests record both requested and effective solver settings.
 
@@ -165,7 +165,8 @@ CPU tests do not require CUDA. GPU tests are opt-in and require a working backen
 ## Documentation
 
 - [Installation overview](docs/getting-started/installation.md)
-- [Minimal examples](docs/getting-started/minimal-examples.md)
+- [Python minimal examples](docs/getting-started/python/minimal-examples.md)
+- [Julia minimal examples](docs/getting-started/julia/minimal-examples.md)
 - [Physical units and parameter selection](docs/physics/SPEC-PHYS-001-units.md)
 - [Python/Julia parity contract](docs/api/SPEC-API-002-python-julia-parity.md)
 - [Backend support](docs/reference/SPEC-BACKEND-001-backends.md)

@@ -5,12 +5,14 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 ## Start Here
 
 - [Installation overview](getting-started/installation.md)
-- [Source installation](getting-started/source-installation.md)
-- [Python experiment projects](getting-started/python-experiment-projects.md)
-- [Julia user projects](getting-started/julia-projects.md)
-- [Backend setup](getting-started/backend-setup.md)
-- [Package installation status](getting-started/package-installation.md)
-- [Minimal examples](getting-started/minimal-examples.md)
+- [Python source installation](getting-started/python/source-installation.md)
+- [Python experiment projects](getting-started/python/experiment-projects.md)
+- [Python package installation status](getting-started/python/package-installation.md)
+- [Python backend setup](getting-started/python/backend-setup.md)
+- [Python minimal examples](getting-started/python/minimal-examples.md)
+- [Julia projects](getting-started/julia/projects.md)
+- [Julia backend setup](getting-started/julia/backend-setup.md)
+- [Julia minimal examples](getting-started/julia/minimal-examples.md)
 - [Dual SDK examples](getting-started/dual-sdk-examples.md)
 - [Containerized development](getting-started/containerization.md)
 
