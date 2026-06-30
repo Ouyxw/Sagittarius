@@ -162,6 +162,54 @@ This document outlines the development lifecycle of Sagittarius, from a function
 8. CI tests installation artifacts across the declared Python, Julia, and operating-system support matrix.
 9. PyPI publication remains blocked until all release-readiness requirements and artifact smoke tests pass.
 
+## 🧪 Recommended Cold-Atom / Quantum-Simulation Project Backlog
+
+This backlog prioritizes example projects and validation studies for using Sagittarius as a cold-atom and quantum-computing simulation SDK. These are application milestones rather than core API feature commitments. Performance or hardware-facing conclusions from these projects must follow `docs/governance/performance-claims.md` and `docs/governance/disclosure-control.md`.
+
+### P0: Foundation Experiments
+
+| Project | Status | Purpose | Sagittarius capabilities exercised | Notes |
+| :--- | :---: | :--- | :--- | :--- |
+| **Single-Atom Rabi Oscillation and Pulse Calibration** | Recommended | Validate `omega`, pulse duration, unit conventions, Rabi period, and single-site `RydbergPopulation`. | `Register`, `PulseSequence`, `Pulse.constant`, `Pulse.sin_squared`, `Simulation.run`, observable shorthand. | First sanity check for all later simulations; verify expected half-period population transfer under known `omega`. |
+| **Two-Atom Rydberg Blockade** | Recommended | Demonstrate suppression of double excitation as distance, `C6`, drive strength, and blockade assumptions vary. | Two-atom registers, local/global drive, `C6/r^6` interaction, observable trajectories, optional `blockade_radius`. | Establish the core physical model before larger arrays. |
+| **Small-Chain Full-vs-Reduced Basis Validation** | Recommended | Compare full Hilbert-space dynamics with blockade-reduced dynamics on 3-5 atom chains. | `Register.chain()`, `SolverConfig.blockade_radius`, reduced-basis cache, `dense_vs_reduced_validation()`. | Use to choose a defensible blockade radius and approximation error budget. |
+| **Landau-Zener / Adiabatic Detuning Sweep** | Recommended | Simulate detuning ramps and adiabatic-transfer behavior. | `Pulse.ramp` on `delta`, smooth `omega` pulses, solver tolerances, observable trajectories. | Natural bridge from basic dynamics to AQC/annealing workflows. |
+
+### P1: Demonstration Workflows
+
+| Project | Status | Purpose | Sagittarius capabilities exercised | Notes |
+| :--- | :---: | :--- | :--- | :--- |
+| **Rydberg Chain Excitation Profiles** | Recommended | Study spatial excitation patterns under local addressing. | `Pulse.local`, sparse local dictionaries, `Register.atoms` ordering, multi-observable results. | Good demo for local addressing and pulse-shape documentation. |
+| **Open-System Decay and Dephasing Studies** | Recommended | Compare closed-system, Lindblad, and MCWF behavior under `gamma` and `gamma_phi`. | `SolverConfig.gamma`, `gamma_phi`, `use_mc`, `n_trajectories`, `open_system_sanity_checks()`. | Keep systems small enough for trace/positivity and MCWF-vs-Lindblad checks. |
+| **CPU/CUDA Parity Smoke Studies** | Recommended | Compare CPU and CUDA observable trajectories for representative small systems. | `doctor(backend="CUDA")`, `SolverConfig(use_gpu=True)`, CUDA parity tests, run manifests. | CUDA remains experimental; claims must cite benchmark/parity artifacts. |
+| **Small UDG/MWIS Simulation Examples** | Recommended | Map unit-disk graph constraints to Rydberg blockade dynamics and compare against exact baselines. | `Register.udg()`, `Register.from_udg_graph()`, detuning schedules, `batch_verify.py`, result artifacts. | Treat MWIS mapping as prior art; Sagittarius contribution is reproducible simulation and verification workflow. |
+
+### P2: Phase-Dependent Studies
+
+| Project | Status | Dependency | Purpose | Notes |
+| :--- | :---: | :--- | :--- | :--- |
+| **Pair-Correlation and Blockade-Violation Diagnostics** | Planned | Phase 11 Observable Library | Track `<n_i n_j>`, connected correlations, and constraint-violation counts directly. | Current shorthand supports single-site populations only; implement after typed observables land. |
+| **MWIS Cost Expectation and Bitstring Success Tracking** | Planned | Phase 11 Observable Library | Track weighted objective expectation, target bitstring probabilities, feasibility, and success metrics. | Pair with exact ILP baselines and disclosure controls before external claims. |
+| **Solver Method Sensitivity Study** | Planned | Phase 12 Solver Configuration | Compare `Tsit5`, `Vern9`, and fixed-step `RK4` for accuracy/cost tradeoffs on representative workflows. | Wait until `SolverConfig.method`, `adaptive`, and `dt` are connected to the Julia backend. |
+
+### P3: Advanced / Future Studies
+
+| Project | Status | Dependency | Purpose | Notes |
+| :--- | :---: | :--- | :--- | :--- |
+| **Large Parameter Sweeps and Phase-Diagram Scans** | Future | Stable small-system validations; optional cluster support | Sweep `omega`, `delta`, `blockade_radius`, geometry, and noise parameters. | Generate `benchmark-artifact/v1` outputs when reporting scaling or performance. |
+| **Hardware-Demo Preparation Workflow** | Future | Mature diagnostics, manifests, and disclosure review | Package diagnostics, run manifests, version metadata, and bounded wording for hardware-facing demos. | Sagittarius is not a calibrated hardware control stack. |
+| **2D Array Ordering and MIS-Like Pattern Formation** | Future | Observable library and scale validation | Study square-lattice or UDG excitation patterns and optimization-like final states. | Requires careful reduced-basis validation and richer observables. |
+
+### Recommended Execution Order
+
+1. Single-atom Rabi oscillation.
+2. Two-atom Rydberg blockade.
+3. Small-chain full-vs-reduced basis validation.
+4. Landau-Zener / adiabatic detuning sweep.
+5. Small UDG/MWIS example with exact baseline checks.
+6. Open-system Lindblad/MCWF comparison.
+7. CPU/CUDA parity or benchmark-artifact generation where hardware is available.
+
 ## 🔬 Phase 14: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
