@@ -1,16 +1,16 @@
 # Observable Library Contract
 
 Spec ID: `SPEC-API-004`
-Status: `Planned contract`
+Status: `Mixed`
 Roadmap: Phase 11
-Version: `observable-library-contract/draft`
+Version: `observable-library-contract/v1`
 Last reviewed: 2026-06-30
 
 
-This page defines the planned Phase 11 observable-library contract. It is an implementation target, not a claim that every declaration form below is already available. The current stable surface remains:
+This page defines the Phase 11 diagonal observable-library contract. The first-scope diagonal declarations below are implemented; off-diagonal observables remain future work. The backward-compatible surface remains:
 
-- Julia: `RydbergPopulation(atom_idx, N_atoms; basis_context=nothing)` returns a solver-compatible callable.
-- Python: `observables={"name": atom_index}` declares single-atom Rydberg populations with zero-based atom indices.
+- Julia: diagonal observable constructors such as `RydbergPopulation`, `TotalRydbergPopulation`, `PairCorrelation`, `BitstringProbability`, `MWISCost`, `PauliZ`, `PauliZZ`, and `Parity` return solver-compatible callables.
+- Python: `observables={"name": atom_index}` remains valid shorthand for single-atom Rydberg populations, and typed declarations such as `{"type": "pair_correlation", "atoms": [0, 1]}` are supported.
 
 The Phase 11 work extends that surface into a typed observable library while preserving the current shorthand.
 
@@ -63,7 +63,7 @@ The physical meaning and recommended use cases for these quantities are document
 
 ## Python Declaration Format
 
-Phase 11 Python declarations should accept a mapping from output series name to either the existing integer shorthand or a typed declaration object:
+Phase 11 Python declarations accept a mapping from output series name to either the existing integer shorthand or a typed declaration object:
 
 ```python
 observables = {
@@ -86,7 +86,7 @@ Declaration order is the insertion order of the Python mapping. Result series, `
 
 ## Julia Constructor Contract
 
-Julia constructors should accept one-based atom indices and return callable observables. Constructors that need basis information must accept `basis_context`; reduced-basis code should prefer that argument over passing raw basis arrays.
+Julia constructors accept one-based atom indices and return callable observables. Constructors that need basis information must accept `basis_context`; reduced-basis code should prefer that argument over passing raw basis arrays.
 
 ```julia
 context = reduced_basis_context(reg; blockade_radius=0.6)
@@ -115,7 +115,7 @@ Required state handling:
 
 ## Metadata Contract
 
-Phase 11 result artifacts and run manifests should preserve both compatibility and typed metadata. The existing `solver.observables` field may continue to hold shorthand-compatible data, but typed declarations should also be recorded in a stable metadata list:
+Phase 11 result artifacts and run manifests preserve both compatibility and typed metadata. The existing `solver.observables` field may continue to hold shorthand-compatible data, but typed declarations should also be recorded in a stable metadata list:
 
 ```json
 {

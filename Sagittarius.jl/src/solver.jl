@@ -15,68 +15,137 @@ using ..StructuredLogging: log_event
 # using Metal
 
 export solve_schrodinger, solve_lindblad, solve_mc_trajectories, RydbergPopulation
+export TotalRydbergPopulation, PairCorrelation, ConnectedPairCorrelation, BlockadeViolation
+export BitstringProbability, MWISCost, PauliZ, PauliZZ, Parity
 export solve_schrodinger_gpu
 
 """
     RydbergPopulation(atom_idx, N_atoms; basis=nothing)
-Returns a function that calculates the population of the Rydberg state for atom \`atom_idx\`.
+Returns a function that calculates the population of the Rydberg state for atom `atom_idx`.
 """
-function RydbergPopulation(atom_idx, N_atoms; basis=nothing, basis_context=nothing)
+function _observable_basis(N_atoms; basis=nothing, basis_context=nothing)
     if !isnothing(basis_context)
         basis_context.N == N_atoms || throw(ArgumentError("basis_context atom count $(basis_context.N) does not match N_atoms=$N_atoms"))
-        basis = basis_context.basis
+        return basis_context.basis
     end
-    mask = 1 << (atom_idx - 1)
-    return (state, t, integrator) -> begin
-        if state isa Vector
-            pop = 0.0
-            if isnothing(basis)
-                for i in 0:(2^N_atoms - 1)
-                    if (i & mask) != 0
-                        pop += abs2(state[i + 1])
-                    end
-                end
-            else
-                for (idx, bstate) in enumerate(basis)
-                    if (bstate & mask) != 0
-                        pop += abs2(state[idx])
-                    end
-                end
-            end
-            return pop
-        elseif state isa Matrix
-            # Lindblad density matrix: sum diagonal elements
-            pop = 0.0
-            if isnothing(basis)
-                for i in 0:(2^N_atoms - 1)
-                    if (i & mask) != 0
-                        pop += real(state[i + 1, i + 1])
-                    end
-                end
-            else
-                for (idx, bstate) in enumerate(basis)
-                    if (bstate & mask) != 0
-                        pop += real(state[idx, idx])
-                    end
-                end
-            end
-            return pop
-        elseif isdefined(@__MODULE__, :CUDA) && state isa CUDA.CuVector
-            # Optimized GPU implementation using broadcasting and reduction
-            if isnothing(basis)
-                # Correcting for 1-based indexing: (i-1) is the bitstring
-                indices = findall(i -> ((i-1) & mask) != 0, 1:length(state))
-                if isempty(indices) return 0.0 end
-                return Float64(sum(abs2, state[indices]))
-            else
-                indices = findall(bstate -> (bstate & mask) != 0, basis)
-                if isempty(indices) return 0.0 end
-                return Float64(sum(abs2, state[indices]))
-            end
-        else
-            return 0.0
+    return basis
+end
+
+function _state_probability(state, idx::Int)
+    if state isa AbstractMatrix
+        return Float64(real(state[idx, idx]))
+    end
+    if isdefined(@__MODULE__, :CUDA) && state isa CUDA.CuVector
+        return Float64(abs2(Array(state)[idx]))
+    end
+    return Float64(abs2(state[idx]))
+end
+
+function _diagonal_expectation(state, N_atoms::Integer, basis, value_func)
+    total = 0.0
+    if isnothing(basis)
+        for bitstring in 0:(2^N_atoms - 1)
+            total += _state_probability(state, bitstring + 1) * Float64(value_func(bitstring))
+        end
+    else
+        for (idx, bitstring) in enumerate(basis)
+            total += _state_probability(state, idx) * Float64(value_func(bitstring))
         end
     end
+    return Float64(total)
+end
+
+function _atom_masks(atoms)
+    return [1 << (Int(atom) - 1) for atom in atoms]
+end
+
+function _occupied(bitstring::Integer, mask::Integer)
+    return (bitstring & mask) != 0
+end
+
+function RydbergPopulation(atom_idx, N_atoms; basis=nothing, basis_context=nothing)
+    basis = _observable_basis(N_atoms; basis=basis, basis_context=basis_context)
+    mask = 1 << (Int(atom_idx) - 1)
+    return (state, t, integrator) -> _diagonal_expectation(state, N_atoms, basis, bitstring -> _occupied(bitstring, mask) ? 1.0 : 0.0)
+end
+
+function TotalRydbergPopulation(N_atoms; atoms=nothing, basis=nothing, basis_context=nothing)
+    basis = _observable_basis(N_atoms; basis=basis, basis_context=basis_context)
+    selected = isnothing(atoms) ? collect(1:N_atoms) : collect(atoms)
+    masks = _atom_masks(selected)
+    return (state, t, integrator) -> _diagonal_expectation(state, N_atoms, basis, bitstring -> sum(_occupied(bitstring, mask) ? 1.0 : 0.0 for mask in masks))
+end
+
+function PairCorrelation(atoms, N_atoms; basis=nothing, basis_context=nothing)
+    basis = _observable_basis(N_atoms; basis=basis, basis_context=basis_context)
+    masks = _atom_masks(atoms)
+    length(masks) == 2 || throw(ArgumentError("PairCorrelation requires exactly two atoms"))
+    return (state, t, integrator) -> _diagonal_expectation(state, N_atoms, basis, bitstring -> (_occupied(bitstring, masks[1]) && _occupied(bitstring, masks[2])) ? 1.0 : 0.0)
+end
+
+function ConnectedPairCorrelation(atoms, N_atoms; basis=nothing, basis_context=nothing)
+    pair = PairCorrelation(atoms, N_atoms; basis=basis, basis_context=basis_context)
+    pop_i = RydbergPopulation(atoms[1], N_atoms; basis=basis, basis_context=basis_context)
+    pop_j = RydbergPopulation(atoms[2], N_atoms; basis=basis, basis_context=basis_context)
+    return (state, t, integrator) -> Float64(pair(state, t, integrator) - pop_i(state, t, integrator) * pop_j(state, t, integrator))
+end
+
+function BlockadeViolation(edges, N_atoms; basis=nothing, basis_context=nothing)
+    basis = _observable_basis(N_atoms; basis=basis, basis_context=basis_context)
+    edge_masks = [Tuple(_atom_masks(edge)) for edge in edges]
+    return (state, t, integrator) -> _diagonal_expectation(
+        state,
+        N_atoms,
+        basis,
+        bitstring -> sum((_occupied(bitstring, edge[1]) && _occupied(bitstring, edge[2])) ? 1.0 : 0.0 for edge in edge_masks),
+    )
+end
+
+function BitstringProbability(target, N_atoms; basis=nothing, basis_context=nothing)
+    basis = _observable_basis(N_atoms; basis=basis, basis_context=basis_context)
+    target_int = Int(target)
+    return (state, t, integrator) -> _diagonal_expectation(state, N_atoms, basis, bitstring -> bitstring == target_int ? 1.0 : 0.0)
+end
+
+function MWISCost(weights, edges, penalty, N_atoms; basis=nothing, basis_context=nothing)
+    basis = _observable_basis(N_atoms; basis=basis, basis_context=basis_context)
+    weight_values = [Float64(w) for w in weights]
+    edge_masks = [Tuple(_atom_masks(edge)) for edge in edges]
+    penalty_value = Float64(penalty)
+    return (state, t, integrator) -> _diagonal_expectation(
+        state,
+        N_atoms,
+        basis,
+        bitstring -> begin
+            reward = sum(_occupied(bitstring, 1 << (i - 1)) ? weight_values[i] : 0.0 for i in 1:length(weight_values))
+            violations = sum((_occupied(bitstring, edge[1]) && _occupied(bitstring, edge[2])) ? 1.0 : 0.0 for edge in edge_masks)
+            reward - penalty_value * violations
+        end,
+    )
+end
+
+function _z_value(bitstring, mask, convention)
+    convention == "ground_plus" || throw(ArgumentError("unsupported Pauli-Z convention: $convention"))
+    return _occupied(bitstring, mask) ? -1.0 : 1.0
+end
+
+function PauliZ(atom, N_atoms; convention="ground_plus", basis=nothing, basis_context=nothing)
+    basis = _observable_basis(N_atoms; basis=basis, basis_context=basis_context)
+    mask = 1 << (Int(atom) - 1)
+    return (state, t, integrator) -> _diagonal_expectation(state, N_atoms, basis, bitstring -> _z_value(bitstring, mask, convention))
+end
+
+function PauliZZ(atoms, N_atoms; convention="ground_plus", basis=nothing, basis_context=nothing)
+    basis = _observable_basis(N_atoms; basis=basis, basis_context=basis_context)
+    masks = _atom_masks(atoms)
+    length(masks) == 2 || throw(ArgumentError("PauliZZ requires exactly two atoms"))
+    return (state, t, integrator) -> _diagonal_expectation(state, N_atoms, basis, bitstring -> _z_value(bitstring, masks[1], convention) * _z_value(bitstring, masks[2], convention))
+end
+
+function Parity(atoms, N_atoms; convention="ground_plus", basis=nothing, basis_context=nothing)
+    basis = _observable_basis(N_atoms; basis=basis, basis_context=basis_context)
+    masks = _atom_masks(atoms)
+    return (state, t, integrator) -> _diagonal_expectation(state, N_atoms, basis, bitstring -> prod(_z_value(bitstring, mask, convention) for mask in masks))
 end
 
 function _log_solver_start(; backend="CPU", use_gpu=false, reltol=1e-8, abstol=1e-8, blockade_radius=0.0)

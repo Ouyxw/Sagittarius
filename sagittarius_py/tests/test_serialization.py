@@ -170,6 +170,7 @@ def test_run_manifest_schema_validates_generated_manifest():
     assert manifest["register"]["geometry"]["blockade_edge_count"] == 1
     assert manifest["pulse"]["omega"]["kind"] == "local_vector"
     assert manifest["solver"]["observables"] == {"pop0": 0}
+    assert manifest["solver"]["observable_metadata"] == []
     assert manifest["backend_diagnostics"]["requested_backend"] == "CPU"
     assert manifest["backend_diagnostics"]["issue_details"] == []
     assert manifest["versions"] == metadata
@@ -202,6 +203,7 @@ def test_validate_run_manifest_rejects_unknown_event_id():
             "use_gpu": False,
             "gpu_backend": "CUDA",
             "observables": {},
+            "observable_metadata": [],
             "saveat": None,
             "effective_saveat": None,
         },

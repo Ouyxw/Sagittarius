@@ -120,3 +120,44 @@ def test_julia_basis_context_is_shared_by_hamiltonian_observable_and_jumps():
     assert report["same_mapping"] is True
     assert report["observable_value"] == 1.0
     assert list(report["jump_size"]) == [5, 5]
+
+
+
+def test_julia_native_diagonal_observable_constructors_for_vector_and_density_matrix():
+    jl, _ = get_julia()
+    report = jl.seval("""
+    begin
+        psi = zeros(ComplexF64, 8)
+        psi[6] = 1.0 # bitstring 5 == atoms 1 and 3 excited
+        rho = psi * psi'
+        obs = Dict(
+            "total" => Sagittarius.TotalRydbergPopulation(3),
+            "pair13" => Sagittarius.PairCorrelation([1, 3], 3),
+            "connected13" => Sagittarius.ConnectedPairCorrelation([1, 3], 3),
+            "violations" => Sagittarius.BlockadeViolation([[1, 3], [2, 3]], 3),
+            "target" => Sagittarius.BitstringProbability(5, 3),
+            "cost" => Sagittarius.MWISCost([1.0, 2.0, 4.0], [[1, 3]], 10.0, 3),
+            "z2" => Sagittarius.PauliZ(2, 3),
+            "zz13" => Sagittarius.PauliZZ([1, 3], 3),
+            "parity" => Sagittarius.Parity([1, 2, 3], 3),
+        )
+        Dict(
+            "vector" => Dict(k => f(psi, 0.0, nothing) for (k, f) in obs),
+            "density" => Dict(k => f(rho, 0.0, nothing) for (k, f) in obs),
+        )
+    end
+    """)
+
+    expected = {
+        "total": 2.0,
+        "pair13": 1.0,
+        "connected13": 0.0,
+        "violations": 1.0,
+        "target": 1.0,
+        "cost": -5.0,
+        "z2": 1.0,
+        "zz13": 1.0,
+        "parity": 1.0,
+    }
+    assert dict(report["vector"]) == expected
+    assert dict(report["density"]) == expected

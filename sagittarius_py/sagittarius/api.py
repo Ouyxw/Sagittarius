@@ -46,6 +46,7 @@ RUN_MANIFEST_SCHEMA = {
             "use_gpu",
             "gpu_backend",
             "observables",
+            "observable_metadata",
             "saveat",
             "effective_saveat",
         ],
@@ -589,6 +590,136 @@ def _normalize_saveat(saveat: Any, *, t_start: float, t_end: float) -> Optional[
     return values
 
 
+SUPPORTED_OBSERVABLE_TYPES = {
+    "rydberg_population",
+    "total_rydberg_population",
+    "pair_correlation",
+    "connected_pair_correlation",
+    "blockade_violation",
+    "bitstring_probability",
+    "mwis_cost",
+    "pauli_z",
+    "pauli_zz",
+    "parity",
+}
+
+
+def _validate_atom_list(values: Any, N: int, *, context: str, length: Optional[int] = None) -> List[int]:
+    if isinstance(values, np.ndarray):
+        raw = values.tolist()
+    elif isinstance(values, ABCSequence) and not isinstance(values, (str, bytes, bytearray)):
+        raw = list(values)
+    else:
+        raise _validation_error("VALIDATION_OBSERVABLE_ATOMS_TYPE", f"{context} atoms must be a sequence of atom indices.", "Provide atom indices as a list using Python zero-based Register.atoms order.")
+    if length is not None and len(raw) != length:
+        raise _validation_error("VALIDATION_OBSERVABLE_ATOMS_LENGTH", f"{context} requires exactly {length} atom indices, got {len(raw)}.", f"Provide exactly {length} atom indices.")
+    return [_validate_atom_index(value, N, context=f"{context}.atoms[{idx}]") for idx, value in enumerate(raw)]
+
+
+def _validate_edges(values: Any, N: int, *, context: str) -> List[List[int]]:
+    if values is None:
+        raise _validation_error("VALIDATION_OBSERVABLE_EDGES_REQUIRED", f"{context} requires an edges field.", "Provide edges as [[i, j], ...] using Python zero-based atom indices.")
+    if isinstance(values, np.ndarray):
+        raw_edges = values.tolist()
+    elif isinstance(values, ABCSequence) and not isinstance(values, (str, bytes, bytearray)):
+        raw_edges = list(values)
+    else:
+        raise _validation_error("VALIDATION_OBSERVABLE_EDGES_TYPE", f"{context} edges must be a sequence of two-element pairs.", "Provide edges as [[i, j], ...] using Python zero-based atom indices.")
+    edges = []
+    for edge_idx, edge in enumerate(raw_edges):
+        atoms = _validate_atom_list(edge, N, context=f"{context}.edges[{edge_idx}]", length=2)
+        if atoms[0] == atoms[1]:
+            raise _validation_error("VALIDATION_OBSERVABLE_EDGE_SELF_LOOP", f"{context}.edges[{edge_idx}] must not contain the same atom twice.", "Use two distinct atom indices for each edge.")
+        edges.append(atoms)
+    return edges
+
+
+def _normalize_bitstring(value: Any, N: int, *, context: str) -> int:
+    if isinstance(value, str):
+        if len(value) != N or any(ch not in "01" for ch in value):
+            raise _validation_error("VALIDATION_OBSERVABLE_BITSTRING_VALUE", f"{context} bitstring must be a {N}-character string containing only 0 or 1.", "Use a string such as '101' with one character per atom in Register.atoms order.")
+        return sum((1 << idx) for idx, ch in enumerate(value) if ch == "1")
+    if _is_bool(value) or not isinstance(value, (int, np.integer)):
+        raise _validation_error("VALIDATION_OBSERVABLE_BITSTRING_TYPE", f"{context} bitstring must be a string or non-negative integer.", "Use a binary string such as '101' or an integer basis bitstring.")
+    value = int(value)
+    if value < 0 or value >= 2**N:
+        raise _validation_error("VALIDATION_OBSERVABLE_BITSTRING_BOUNDS", f"{context} bitstring integer {value} is outside the {N}-atom basis range.", "Use an integer in [0, 2**N) or a binary string with one bit per atom.")
+    return value
+
+
+def _finite_float(value: Any, *, context: str) -> float:
+    if _is_bool(value):
+        raise _validation_error("VALIDATION_OBSERVABLE_NUMERIC_VALUE", f"{context} must be a finite numeric value.", "Provide a real number.")
+    try:
+        result = float(value)
+    except (TypeError, ValueError) as exc:
+        raise _validation_error("VALIDATION_OBSERVABLE_NUMERIC_VALUE", f"{context} must be a finite numeric value.", "Provide a real number.") from exc
+    if not np.isfinite(result):
+        raise _validation_error("VALIDATION_OBSERVABLE_NUMERIC_VALUE", f"{context} must be finite.", "Remove NaN or infinite observable parameters.")
+    return result
+
+
+def _normalize_observable_declarations(observables: Optional[Dict[str, Any]], N: int) -> List[Dict[str, Any]]:
+    if not observables:
+        return []
+    normalized = []
+    for declaration_index, (name, declaration) in enumerate(observables.items()):
+        if not isinstance(name, str):
+            raise _validation_error("VALIDATION_OBSERVABLE_NAME_TYPE", f"Observable names must be strings, got {type(name).__name__}.", "Use string keys for the observables mapping.")
+        context = f"Observable {name!r}"
+        if isinstance(declaration, (int, np.integer)) and not _is_bool(declaration):
+            atom = _validate_atom_index(declaration, N, context=context)
+            normalized.append({"name": name, "type": "rydberg_population", "parameters": {"atom": atom}, "declaration_index": declaration_index})
+            continue
+        if not isinstance(declaration, dict):
+            raise _validation_error("VALIDATION_OBSERVABLE_DECLARATION_TYPE", f"{context} must be an atom index shorthand or a typed declaration object.", "Use {'type': 'rydberg_population', 'atom': 0} or the shorthand {'name': 0}.")
+        type_id = declaration.get("type")
+        if type_id not in SUPPORTED_OBSERVABLE_TYPES:
+            raise _validation_error("VALIDATION_OBSERVABLE_TYPE", f"{context} has unsupported observable type {type_id!r}.", f"Choose one of: {', '.join(sorted(SUPPORTED_OBSERVABLE_TYPES))}.")
+        params: Dict[str, Any] = {}
+        if type_id == "rydberg_population":
+            params["atom"] = _validate_atom_index(declaration.get("atom"), N, context=f"{context}.atom")
+        elif type_id == "total_rydberg_population":
+            if declaration.get("atoms") is not None:
+                params["atoms"] = _validate_atom_list(declaration["atoms"], N, context=context)
+        elif type_id in {"pair_correlation", "connected_pair_correlation", "pauli_zz"}:
+            params["atoms"] = _validate_atom_list(declaration.get("atoms"), N, context=context, length=2)
+        elif type_id == "blockade_violation":
+            params["edges"] = _validate_edges(declaration.get("edges"), N, context=context)
+        elif type_id == "bitstring_probability":
+            if "bitstring" not in declaration:
+                raise _validation_error("VALIDATION_OBSERVABLE_BITSTRING_REQUIRED", f"{context} requires a bitstring field.", "Provide a target bitstring such as '101'.")
+            params["bitstring"] = _normalize_bitstring(declaration["bitstring"], N, context=context)
+        elif type_id == "mwis_cost":
+            weights = declaration.get("weights")
+            if isinstance(weights, np.ndarray):
+                weights = weights.tolist()
+            if not isinstance(weights, ABCSequence) or isinstance(weights, (str, bytes, bytearray)) or len(weights) != N:
+                raise _validation_error("VALIDATION_OBSERVABLE_WEIGHTS_LENGTH", f"{context} weights must contain exactly {N} values.", "Provide one numeric weight per atom in Register.atoms order.")
+            params["weights"] = [_finite_float(weight, context=f"{context}.weights[{idx}]") for idx, weight in enumerate(weights)]
+            params["edges"] = _validate_edges(declaration.get("edges"), N, context=context)
+            params["penalty"] = _finite_float(declaration.get("penalty"), context=f"{context}.penalty")
+        elif type_id == "pauli_z":
+            params["atom"] = _validate_atom_index(declaration.get("atom"), N, context=f"{context}.atom")
+        elif type_id == "parity":
+            params["atoms"] = _validate_atom_list(declaration.get("atoms"), N, context=context)
+        if type_id in {"pauli_z", "pauli_zz", "parity"}:
+            convention = declaration.get("convention", "ground_plus")
+            if convention != "ground_plus":
+                raise _validation_error("VALIDATION_OBSERVABLE_CONVENTION", f"{context} convention {convention!r} is unsupported.", "Use convention='ground_plus' for Z = 1 - 2n.")
+            params["convention"] = convention
+        normalized.append({"name": name, "type": type_id, "parameters": params, "declaration_index": declaration_index})
+    return normalized
+
+
+def _observable_manifest_metadata(normalized: List[Dict[str, Any]], *, basis_mode: str) -> List[Dict[str, Any]]:
+    return [{"name": item["name"], "type": item["type"], "parameters": _json_compatible(item["parameters"]), "basis_mode": basis_mode, "declaration_index": int(item["declaration_index"])} for item in normalized]
+
+
+def _observables_manifest_compat(observables: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    return _json_compatible(dict(observables or {}))
+
+
 def _explicit_pulse_kind(value: Any) -> Optional[str]:
     from .pulse import CallablePulse, GlobalPulse, LocalPulseVector
 
@@ -655,7 +786,8 @@ def _config_manifest(
     *,
     t_start: float,
     t_end: float,
-    observables: Optional[Dict[str, int]],
+    observables: Optional[Dict[str, Any]],
+    observable_metadata: Optional[List[Dict[str, Any]]] = None,
     effective_saveat: Optional[List[float]] = None,
 ) -> Dict[str, Any]:
     return {
@@ -670,7 +802,8 @@ def _config_manifest(
         "n_trajectories": int(config.n_trajectories),
         "use_gpu": bool(config.use_gpu),
         "gpu_backend": str(config.gpu_backend).upper(),
-        "observables": dict(observables or {}),
+        "observables": _observables_manifest_compat(observables),
+        "observable_metadata": _json_compatible(observable_metadata or []),
         "saveat": _json_compatible(config.saveat),
         "effective_saveat": _json_compatible(effective_saveat),
     }
@@ -702,8 +835,9 @@ def _build_run_manifest(
     config: SolverConfig,
     t_start: float,
     t_end: float,
-    observables: Optional[Dict[str, int]],
-    psi0: np.ndarray,
+    observables: Optional[Dict[str, Any]],
+    observable_metadata: Optional[List[Dict[str, Any]]] = None,
+    psi0: np.ndarray = None,
     diagnostics: Dict[str, Any],
     metadata: Dict[str, Any],
     result_type: str,
@@ -724,7 +858,7 @@ def _build_run_manifest(
             "omega": _pulse_manifest(sequence.omega),
             "delta": _pulse_manifest(sequence.delta),
         },
-        "solver": _config_manifest(config, t_start=t_start, t_end=t_end, observables=observables, effective_saveat=effective_saveat),
+        "solver": _config_manifest(config, t_start=t_start, t_end=t_end, observables=observables, observable_metadata=observable_metadata, effective_saveat=effective_saveat),
         "initial_state": {
             "basis_size": int(len(psi0)),
             "norm": float(np.linalg.norm(psi0)),
@@ -1078,7 +1212,7 @@ def open_system_sanity_checks(
     psi0: Optional[np.ndarray] = None,
     t_start: float = 0.0,
     t_end: float = 1.0,
-    observables: Optional[Dict[str, int]] = None,
+    observables: Optional[Dict[str, Any]] = None,
     n_trajectories: int = 300,
     trace_atol: float = 1e-6,
     positivity_atol: float = 1e-7,
@@ -1196,7 +1330,8 @@ def _simulation_result_with_manifest(
     config: SolverConfig,
     t_start: float,
     t_end: float,
-    observables: Optional[Dict[str, int]],
+    observables: Optional[Dict[str, Any]],
+    observable_metadata: Optional[List[Dict[str, Any]]],
     psi0: np.ndarray,
     result_type: str,
     effective_saveat: Optional[List[float]] = None,
@@ -1208,6 +1343,7 @@ def _simulation_result_with_manifest(
         t_start=t_start,
         t_end=t_end,
         observables=observables,
+        observable_metadata=observable_metadata,
         psi0=psi0,
         diagnostics=diagnostics,
         metadata=metadata,
@@ -1381,19 +1517,11 @@ class Simulation:
         self._mapping = None
         self._basis_context = None
 
-    def validate_inputs(self, *, sample_time: Optional[float] = None, observables: Optional[Dict[str, int]] = None) -> None:
+    def validate_inputs(self, *, sample_time: Optional[float] = None, observables: Optional[Dict[str, Any]] = None) -> None:
         N = len(self.register.atoms)
         _validate_pulse_config(self.sequence.omega, N, field_name="omega", sample_time=sample_time)
         _validate_pulse_config(self.sequence.delta, N, field_name="delta", sample_time=sample_time)
-        if observables:
-            for name, idx in observables.items():
-                if not isinstance(name, str):
-                    raise _validation_error(
-                        "VALIDATION_OBSERVABLE_NAME_TYPE",
-                        f"Observable names must be strings, got {type(name).__name__}",
-                        "Use string keys for the observables mapping.",
-                    )
-                _validate_atom_index(idx, N, context=f"Observable {name!r}")
+        _normalize_observable_declarations(observables, N)
 
     def validate(self) -> int:
         """Returns the size of the Hilbert space after pruning."""
@@ -1453,7 +1581,38 @@ class Simulation:
                 v = float(p_config)
                 return sgr.create_const_vec_func(v, N)
 
-    def run(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, int]] = None) -> SimulationResult:
+    def _build_julia_observable(self, item: Dict[str, Any], N: int, solv: Any, jl: Any) -> Any:
+        params = item["parameters"]
+        basis_kwargs = {"basis_context": self._basis_context} if self.config.blockade_radius > 0 else {}
+        type_id = item["type"]
+        if type_id == "rydberg_population":
+            return solv.RydbergPopulation(int(params["atom"]) + 1, N, **basis_kwargs)
+        if type_id == "total_rydberg_population":
+            if "atoms" in params:
+                return solv.TotalRydbergPopulation(N, atoms=jl.Vector[jl.Int]([int(atom) + 1 for atom in params["atoms"]]), **basis_kwargs)
+            return solv.TotalRydbergPopulation(N, **basis_kwargs)
+        if type_id == "pair_correlation":
+            return solv.PairCorrelation(jl.Vector[jl.Int]([int(atom) + 1 for atom in params["atoms"]]), N, **basis_kwargs)
+        if type_id == "connected_pair_correlation":
+            return solv.ConnectedPairCorrelation(jl.Vector[jl.Int]([int(atom) + 1 for atom in params["atoms"]]), N, **basis_kwargs)
+        if type_id == "blockade_violation":
+            edges = jl.Vector[jl.Any]([jl.Vector[jl.Int]([int(edge[0]) + 1, int(edge[1]) + 1]) for edge in params["edges"]])
+            return solv.BlockadeViolation(edges, N, **basis_kwargs)
+        if type_id == "bitstring_probability":
+            return solv.BitstringProbability(int(params["bitstring"]), N, **basis_kwargs)
+        if type_id == "mwis_cost":
+            weights = jl.Vector[jl.Float64]([float(weight) for weight in params["weights"]])
+            edges = jl.Vector[jl.Any]([jl.Vector[jl.Int]([int(edge[0]) + 1, int(edge[1]) + 1]) for edge in params["edges"]])
+            return solv.MWISCost(weights, edges, float(params["penalty"]), N, **basis_kwargs)
+        if type_id == "pauli_z":
+            return solv.PauliZ(int(params["atom"]) + 1, N, convention=params.get("convention", "ground_plus"), **basis_kwargs)
+        if type_id == "pauli_zz":
+            return solv.PauliZZ(jl.Vector[jl.Int]([int(atom) + 1 for atom in params["atoms"]]), N, convention=params.get("convention", "ground_plus"), **basis_kwargs)
+        if type_id == "parity":
+            return solv.Parity(jl.Vector[jl.Int]([int(atom) + 1 for atom in params["atoms"]]), N, convention=params.get("convention", "ground_plus"), **basis_kwargs)
+        raise _validation_error("VALIDATION_OBSERVABLE_TYPE", f"Unsupported observable type {type_id!r}.", "Use a supported diagonal observable type.")
+
+    def run(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, Any]] = None) -> SimulationResult:
         try:
             return self._run_impl(psi0, t_start, t_end, observables)
         except SagittariusError as exc:
@@ -1468,7 +1627,7 @@ class Simulation:
             emit_failure_diagnostic(issue, backend=self.config.gpu_backend if self.config.use_gpu else "CPU")
             raise SagittariusSolverError(issue) from exc
 
-    def _run_impl(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, int]] = None) -> SimulationResult:
+    def _run_impl(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, Any]] = None) -> SimulationResult:
         self.validate_inputs(sample_time=float(t_start), observables=observables)
         seed = _normalize_seed(self.config.seed)
         effective_saveat = _normalize_saveat(self.config.saveat, t_start=float(t_start), t_end=float(t_end))
@@ -1484,6 +1643,11 @@ class Simulation:
         )
         N = len(self.register.jl_obj.atoms)
         basis_size = self.validate()
+        normalized_observables = _normalize_observable_declarations(observables, N)
+        observable_metadata = _observable_manifest_metadata(
+            normalized_observables,
+            basis_mode="reduced" if self.config.blockade_radius > 0 else "full",
+        )
         diagnostics = dict(backend_report)
         diagnostics["simulation"] = {
             "solver_method": self.config.method,
@@ -1523,18 +1687,10 @@ class Simulation:
 
         # 3. Handle observables
         jl_obs = None
-        observable_names = list(observables.keys()) if observables else []
-        if observables:
-            if self.config.blockade_radius > 0:
-                jl_obs = jl.Vector[jl.Any]([
-                    solv.RydbergPopulation(observables[name] + 1, N, basis_context=self._basis_context)
-                    for name in observable_names
-                ])
-            else:
-                jl_obs = jl.Vector[jl.Any]([
-                    solv.RydbergPopulation(observables[name] + 1, N)
-                    for name in observable_names
-                ])
+        observable_names = [item["name"] for item in normalized_observables]
+        if normalized_observables:
+            jl_observable_values = [self._build_julia_observable(item, N, solv, jl) for item in normalized_observables]
+            jl_obs = jl.Vector[jl.Any](jl_observable_values)
 
         solver_extra_kwargs: Dict[str, Any] = {}
         if effective_saveat is not None:
@@ -1592,6 +1748,7 @@ class Simulation:
                         t_start=t_start,
                         t_end=t_end,
                         observables=observables,
+                        observable_metadata=observable_metadata,
                         psi0=np.asarray(psi0),
                         result_type=result_type,
                         effective_saveat=effective_saveat,
@@ -1676,6 +1833,7 @@ class Simulation:
                 t_start=t_start,
                 t_end=t_end,
                 observables=observables,
+                observable_metadata=observable_metadata,
                 psi0=np.asarray(psi0),
                 result_type=result_type,
                 effective_saveat=effective_saveat,
