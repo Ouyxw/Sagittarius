@@ -210,6 +210,42 @@ This backlog prioritizes example projects and validation studies for using Sagit
 6. Open-system Lindblad/MCWF comparison.
 7. CPU/CUDA parity or benchmark-artifact generation where hardware is available.
 
+## 🧾 Phase 15: Experiment Workflow & Readout Reproducibility (Planned)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Measurement / Sampling API** | High | Planned | Add a stable final-state sampling and measurement API for shot-based workflows, including final bitstring distribution extraction, `SimulationResult.sample(shots, seed=...)`, reduced-basis forbidden-bitstring handling, readout metadata in manifests, and compatibility with `shared-result/v1` result series. |
+| **Random Seed Control** | High | Planned | Add user-facing seed controls for MCWF trajectories, final-state sampling, randomized UDG/MWIS project generation, and benchmark/example scripts. Record requested and effective RNG metadata in run manifests, benchmark artifacts, and project reports. |
+| **Output Time Grid / Saveat Contract** | High | Planned | Extend solver configuration with a stable output sampling contract such as `saveat`, fixed output sample count, or explicit output time arrays. Record requested and effective output grids in diagnostics, run manifests, and serialized artifacts, and align Schrödinger, Lindblad, MCWF, CPU, and supported GPU paths. |
+| **Executable Experiment Recipes** | High | Planned | Promote the recommended P0/P1 project backlog into runnable examples with expected outputs and artifact generation, including single-atom Rabi, two-atom blockade, Landau-Zener sweep, open-system decay/dephasing, and small UDG/MWIS workflows. |
+| **State Preparation Helpers** | Medium | Planned | Add helpers for common initial states, including all-ground state, named bitstring states, single-excitation states, and optional uniform superpositions. Helpers must validate full/reduced basis compatibility and preserve state-preparation metadata. |
+| **Experiment Config Schema** | Medium | Planned | Define an `experiment-config/v1` schema that can describe register geometry, pulse schedule, solver options, observables/readout, seed controls, and output artifact paths. Provide load/run/save workflow and link generated run manifests back to the source config. |
+| **Parameter Sweep API and Artifacts** | Medium | Planned | Add a user-facing parameter sweep workflow for `omega`, `delta`, `blockade_radius`, geometry, noise, solver settings, and observable declarations. Emit resumable sweep artifacts with per-run manifest links, distinct from benchmark artifacts when the purpose is scientific exploration rather than performance measurement. |
+| **Documentation Governance Requirements** | Medium | Planned | Treat stable SPEC IDs, metadata headers, `docs/status.md`, and Markdown link validation as required documentation maintenance checks for future roadmap phases and public release preparation. |
+
+### Phase 15 Acceptance Criteria
+
+1. Users can sample final-state bitstrings with a declared shot count and seed, and the result is reproducible across equivalent runs.
+2. MCWF, sampling, randomized project scripts, and benchmark/demo workflows record requested/effective seed metadata.
+3. Users can request an explicit output time grid or stable output count, and every applicable solver path either honors it or rejects it with a documented diagnostic.
+4. P0/P1 experiment recipes run from the repository with expected output shapes, diagnostics, manifests, and serialization artifacts.
+5. Common initial-state helpers work consistently in full and reduced bases and fail clearly for forbidden reduced-basis bitstrings.
+6. `experiment-config/v1` can reproduce a run and link generated artifacts to the source configuration.
+7. Sweep artifacts preserve parameter values, result locations, run manifests, and resumability metadata.
+8. Documentation checks verify SPEC metadata and Markdown links before release-oriented documentation changes are accepted.
+
+## 🧩 Phase 16: Experimental Interop & Readout Models (Future)
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Readout Noise and Detection Error Models** | Medium | Future | Add optional shot-level readout error models for false positives, false negatives, atom loss, and confusion-matrix style post-processing. Readout errors must be explicitly opt-in and recorded in manifests and result artifacts. |
+| **External Neutral-Atom Tool Interop** | Low | Future | Explore bounded import/export workflows for neutral-atom schedules, geometries, or pulse descriptions used by tools such as Pulser, Bloqade-style workflows, or hardware-provider formats. Any interop claims must follow prior-art and disclosure controls and must not imply Sagittarius is a calibrated hardware control stack. |
+| **Hardware-Oriented Schedule Export** | Low | Future | Provide an optional export format for reviewed, simulation-derived schedules with unit metadata, pulse definitions, and backend diagnostics. Exported schedules are for review and translation, not direct hardware execution without a vendor calibration layer. |
+
+### Phase 16 Acceptance Criteria
+
+1. Readout error models are opt-in, parameterized, validated, and recorded in reproducibility metadata.
+2. Interop import/export paths preserve units, atom ordering, pulse timing, and unsupported-feature diagnostics.
+3. Documentation distinguishes simulation artifacts from hardware-control artifacts and passes governance review before public interop claims.
+
 ## 🔬 Phase 14: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
