@@ -38,6 +38,7 @@ Status values:
 | Document | Purpose | Roadmap link | Status | Update when |
 | :--- | :--- | :--- | :--- | :--- |
 | [`physics/units.md`](physics/units.md) | Unit conventions, Hamiltonian sign convention, parameter selection, blockade radius guidance. | Phase 2, Phase 9 | Current | Hamiltonian convention, rate definitions, blockade semantics, or numerical controls change. |
+| [`physics/pulse-shapes.md`](physics/pulse-shapes.md) | Physical intent, parameters, and usage patterns for built-in pulse waveforms. | Phase 8, Phase 10 | Current | Pulse node set, parameter semantics, compile behavior, or addressing guidance changes. |
 | [`physics/observables.md`](physics/observables.md) | Physical meaning of current and planned neutral-atom observables. | Phase 11 | Mixed: current primitive plus planned observable set | Observable library scope, sign conventions, or MWIS/cost definitions change. |
 
 ## Reference

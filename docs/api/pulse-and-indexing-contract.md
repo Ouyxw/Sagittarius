@@ -1,6 +1,6 @@
 # Pulse and Indexing Contract
 
-This document defines the current Python SDK pulse input contract and atom indexing semantics.
+This document defines the current Python SDK pulse input contract and atom indexing semantics. For physical waveform selection and parameter guidance, see [`pulse-shapes.md`](../physics/pulse-shapes.md).
 
 ## Atom Indexing
 

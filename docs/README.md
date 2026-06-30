@@ -25,6 +25,7 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 ## Physics Guides
 
 - [Physical units and parameter selection](physics/units.md)
+- [Pulse shapes in neutral-atom simulations](physics/pulse-shapes.md)
 - [Observables in neutral-atom simulations](physics/observables.md)
 
 ## Reference
