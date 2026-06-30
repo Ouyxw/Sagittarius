@@ -31,6 +31,9 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 
 ## Reference
 
+- [Architecture overview](reference/architecture-overview.md)
+- [Data model](reference/data-model.md)
+- [Technical stack](reference/technical-stack.md)
 - [Backend maturity](reference/SPEC-BACKEND-001-backends.md)
 - [Known limitations](reference/known-limitations.md)
 - [Shared result schema](reference/SPEC-DATA-001-shared-result-schema.md)
