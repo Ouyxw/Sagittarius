@@ -53,7 +53,7 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-For container setup, platform-specific notes, and environment troubleshooting, see the [installation guide](docs/getting-started/installation.md).
+For source installs, backend setup, package status, container setup, and environment troubleshooting, see the [installation overview](docs/getting-started/installation.md).
 
 ### Independent Python Projects
 
@@ -75,7 +75,7 @@ julia --project=. -e 'using Pkg; Pkg.develop(path="../Sagittarius/Sagittarius.jl
 julia --project=. scripts/rabi_simulation.jl
 ```
 
-Use `--project=.` instead of modifying `JULIA_LOAD_PATH`. The [installation guide](docs/getting-started/installation.md#julia-user-projects) contains the recommended layout and a Julia example.
+Use `--project=.` instead of modifying `JULIA_LOAD_PATH`. The [Julia user projects guide](docs/getting-started/julia-projects.md) contains the recommended layout and a Julia example.
 
 ## Python Quick Start
 
@@ -162,7 +162,7 @@ CPU tests do not require CUDA. GPU tests are opt-in and require a working backen
 
 ## Documentation
 
-- [Installation and workspace layout](docs/getting-started/installation.md)
+- [Installation overview](docs/getting-started/installation.md)
 - [Minimal examples](docs/getting-started/minimal-examples.md)
 - [Physical units and parameter selection](docs/physics/units.md)
 - [Python/Julia parity contract](docs/api/python-julia-parity.md)
