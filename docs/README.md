@@ -14,6 +14,7 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Julia native API](api/julia-native-api.md)
 - [Python / Julia parity](api/python-julia-parity.md)
 - [Pulse and indexing contract](api/pulse-and-indexing-contract.md)
+- [Observable library contract](api/observable-library.md)
 
 ## Physics Guides
 
