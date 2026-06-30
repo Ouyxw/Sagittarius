@@ -35,6 +35,7 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Known limitations](reference/known-limitations.md)
 - [Shared result schema](reference/SPEC-DATA-001-shared-result-schema.md)
 - [Event taxonomy](reference/SPEC-OBS-001-event-taxonomy.md)
+- [Development SOP](reference/development-sop.md)
 
 ## Governance
 
