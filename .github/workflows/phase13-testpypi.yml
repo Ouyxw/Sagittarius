@@ -1,0 +1,74 @@
+name: Phase 13 TestPyPI Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected-version:
+        description: "Expected sagittarius-py version to verify after TestPyPI install"
+        required: true
+        default: "0.1.0"
+
+jobs:
+  testpypi-candidate:
+    name: Build, check, publish to TestPyPI, and install
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      PYTHONNOUSERSITE: "1"
+      PYTHONPATH: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "sagittarius_py/uv.lock"
+
+      - name: Build artifacts
+        working-directory: sagittarius_py
+        run: uv build --wheel --sdist --out-dir dist
+
+      - name: Check package metadata
+        working-directory: sagittarius_py
+        run: uv run python -m twine check dist/*
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: sagittarius_py/dist
+          skip-existing: true
+
+      - name: Verify TestPyPI install
+        run: |
+          python -m venv /tmp/sagittarius-testpypi-venv
+          /tmp/sagittarius-testpypi-venv/bin/python -m pip install --upgrade pip
+          /tmp/sagittarius-testpypi-venv/bin/python -m pip install \
+            --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple/ \
+            sagittarius-py==${{ inputs.expected-version }}
+          cd /tmp
+          /tmp/sagittarius-testpypi-venv/bin/sagittarius backend resolve
+          /tmp/sagittarius-testpypi-venv/bin/python - <<'PY'
+          import json
+          import sagittarius
+          report = sagittarius.doctor()
+          assert report["backend_source"] == "package_resource", report["julia_backend"]
+          assert sagittarius.version_info()["package_version"] == "${{ inputs.expected-version }}"
+          print(json.dumps({"backend_source": report["backend_source"]}, sort_keys=True))
+          PY

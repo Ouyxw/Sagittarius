@@ -153,9 +153,9 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Cross-Platform Installation Matrix** | High | Planned | Validate supported Python and Julia versions on Linux, macOS, and Windows. Publish an explicit compatibility matrix and classify platform-specific Julia discovery or compilation limitations. |
 | **CI Clean Artifact Isolation** | High | Done | Adds `.github/workflows/phase13-clean-artifact.yml`, which runs the clean wheel smoke on Ubuntu from a fresh checkout with `PYTHONPATH` cleared. The smoke builds wheel/sdist artifacts, installs the wheel into a fresh venv outside the repository, runs installed `sagittarius backend resolve`, executes a CPU one-atom simulation, validates doctor/version/result metadata, and fails if `sagittarius` imports from the source checkout. |
 | **Uninstall/Reinstall Smoke Coverage** | Medium | Planned | Add release-artifact smoke tests that uninstall the wheel, reinstall the same wheel, reinstall after moving or hiding the original source checkout, and verify import, backend source metadata, JuliaPkg resolution behavior, and a minimal CPU simulation still work without stale package-resource or Julia environment assumptions. |
-| **Package Metadata Review** | Medium | Planned | Complete PyPI-facing metadata before publication: project URLs, long description/readme rendering, license classifiers, supported Python classifiers, author/maintainer fields, keywords, included license files, artifact content audit, and `twine check` or equivalent validation for wheel and sdist. |
-| **TestPyPI and Publication Policy** | Medium | Planned | Validate release candidates on TestPyPI before production PyPI. Decide and document the publication sequence for private development, MIT open-source release, repository visibility, and PyPI upload. Treat PyPI upload as public distribution of the Python and embedded Julia backend sources even if the Git repository is still private. |
-| **PyPI Release Readiness** | High | Mixed | PyPI publication remains blocked. Local artifact readiness checks, CPU-first dependency behavior, backend setup commands, Ubuntu clean artifact CI, and a gated CUDA wheel smoke now exist, but uninstall/reinstall smoke coverage, package metadata review, TestPyPI validation, publication policy, cross-platform support matrix completion, and GPU runner evidence are still required. |
+| **Package Metadata Review** | Medium | Done | PyPI-facing metadata now includes README rendering, MIT license expression and license file inclusion, supported Python classifiers, Julia/science classifiers, author field, keywords, project URLs, console script metadata, and artifact content checks. Packaging tests inspect wheel/sdist metadata and run `twine check` over built artifacts. |
+| **TestPyPI and Publication Policy** | Medium | Mixed | Added a TestPyPI publication policy document and manual `.github/workflows/phase13-testpypi.yml` workflow that builds artifacts, runs `twine check`, publishes to TestPyPI, and verifies install from TestPyPI. Production PyPI remains blocked until TestPyPI credentials/trusted publishing are configured, the workflow succeeds, and repository visibility/publication policy is approved. |
+| **PyPI Release Readiness** | High | Mixed | PyPI publication remains blocked. Local artifact readiness checks, CPU-first dependency behavior, backend setup commands, Ubuntu clean artifact CI, gated CUDA wheel smoke, package metadata checks, and TestPyPI workflow/policy now exist, but uninstall/reinstall smoke coverage, successful TestPyPI execution, publication approval, cross-platform support matrix completion, and GPU runner evidence are still required. |
 | **Installation Documentation** | Medium | Mixed | Documentation distinguishes source/editable setup, local wheel/sdist artifact status, backend source selection, release artifact smoke testing, and PyPI publication gates. Dedicated released-wheel upgrade/uninstall and cross-platform matrix documentation remain planned. |
 
 ### Phase 13 Acceptance Criteria
@@ -185,15 +185,12 @@ Before any public PyPI upload, complete these remaining blockers:
    - Verify import, backend source detection, JuliaPkg resolution, and minimal CPU simulation after reinstall.
    - Acceptance: reinstall workflows do not depend on stale package resources, stale Python metadata, or the original repository path.
 
-5. Package metadata review:
-   - Complete PyPI metadata fields, classifiers, license inclusion, long-description rendering, project URLs, maintainer information, and artifact checks.
-   - Run `twine check` or an equivalent metadata validation over wheel and sdist.
-   - Acceptance: wheel and sdist pass metadata validation and expose complete license/project information on the package index.
+5. Package metadata review: Done. Wheel/sdist metadata tests inspect README, license, classifiers, URLs, package data, and `twine check` output.
 
 6. TestPyPI and publication policy:
-   - Publish release candidates to TestPyPI before production PyPI and verify installation from TestPyPI in a clean environment.
-   - Decide whether the Git repository becomes public before, during, or after PyPI publication; document that PyPI artifacts publicly distribute Python and embedded Julia backend sources regardless of repository visibility.
-   - Add an explicit release checklist for MIT license readiness, repository visibility, issue tracker/docs readiness, and accidental-upload prevention such as a temporary private/do-not-upload classifier if needed.
+   - Manual TestPyPI workflow and publication policy are in place.
+   - Configure TestPyPI trusted publishing or token credentials, run the workflow, and verify install from TestPyPI in a clean environment before production PyPI.
+   - Approve repository visibility, issue tracker/docs readiness, MIT license publication, and accidental-upload controls before production release.
    - Acceptance: production PyPI upload is blocked until TestPyPI install succeeds and the open-source/publication policy is approved.
 
 7. GPU optional backend path:

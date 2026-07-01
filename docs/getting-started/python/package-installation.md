@@ -1,6 +1,6 @@
 # Python Package Installation Status
 
-The Python SDK is not yet published as an independent PyPI package. Do not advertise `pip install sagittarius-py` as a supported user installation path until Phase 13 release-readiness criteria are met.
+The Python SDK is not yet published as an independent PyPI package. Do not advertise `pip install sagittarius-py` as a supported user installation path until Phase 13 release-readiness criteria are met. See [PyPI publication policy](pypi-publication.md) for TestPyPI and production-release gates.
 
 ## Supported Today
 
@@ -45,6 +45,7 @@ The following are planned Phase 13 outcomes, not current installation promises:
 
 - independent `pip install sagittarius-py` from PyPI;
 - cross-platform wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix;
+- successful TestPyPI publication and clean install evidence;
 - hardware-backed CUDA wheel smoke execution on a real GPU runner;
 - uninstall/reinstall smoke tests for released wheel workflows.
 
@@ -61,7 +62,8 @@ A release artifact is ready only after these checks pass:
 - the wheel and sdist contain `Sagittarius.jl/Project.toml`, Julia source files, and required runtime metadata;
 - default CPU installation does not require CUDA.jl, an NVIDIA driver, or GPU hardware;
 - unsupported or missing Julia installations produce documented, actionable diagnostics;
-- Ubuntu CI runs the clean artifact smoke; cross-platform CI and hardware-backed CUDA wheel smoke evidence must still cover the declared compatibility matrix and GPU release claims.
+- wheel and sdist pass metadata checks, including `twine check`;
+- Ubuntu CI runs the clean artifact smoke; cross-platform CI, TestPyPI install evidence, and hardware-backed CUDA wheel smoke evidence must still cover the declared compatibility matrix and release claims.
 
 ## Upgrade and Uninstall Guidance
 

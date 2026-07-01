@@ -2,7 +2,31 @@
 name = "sagittarius-py"
 version = "0.1.0"
 description = "A neutral-atom quantum emulator with Julia and Python SDKs"
+readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Sagittarius contributors" },
+]
+keywords = [
+    "neutral atoms",
+    "rydberg",
+    "quantum simulation",
+    "julia",
+    "scientific computing",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Julia",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 dependencies = [
     "juliacall>=0.9.35",
     "numpy",
@@ -17,12 +41,20 @@ dependencies = [
     "click",
 ]
 
+[project.urls]
+Documentation = "https://github.com/SagittariusProject/Sagittarius/tree/main/docs"
+Homepage = "https://github.com/SagittariusProject/Sagittarius"
+Issues = "https://github.com/SagittariusProject/Sagittarius/issues"
+Source = "https://github.com/SagittariusProject/Sagittarius"
+
 [project.scripts]
 sagittarius = "sagittarius.cli:main"
 
 [dependency-groups]
 dev = [
     "pytest",
+    "tomli; python_version < '3.11'",
+    "twine",
 ]
 
 [build-system]

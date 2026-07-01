@@ -1,3 +1,4 @@
+import email
 import json
 import os
 import subprocess
@@ -70,6 +71,69 @@ def built_artifacts(tmp_path_factory):
     wheel = next(out_dir.glob("*.whl"))
     sdist = next(out_dir.glob("*.tar.gz"))
     return wheel, sdist
+
+
+def test_packaging_readme_and_license_match_repository_root():
+    assert (PY_PACKAGE_ROOT / "README.md").read_bytes() == (REPO_ROOT / "README.md").read_bytes()
+    assert (PY_PACKAGE_ROOT / "LICENSE").read_bytes() == (REPO_ROOT / "LICENSE").read_bytes()
+
+
+def test_python_package_metadata_is_release_ready():
+    try:
+        import tomllib
+    except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
+        import tomli as tomllib
+
+    pyproject = tomllib.loads((PY_PACKAGE_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    project = pyproject["project"]
+
+    assert project["readme"] == "README.md"
+    assert project["license"] == "MIT"
+    assert project["license-files"] == ["LICENSE"]
+    assert project["authors"] == [{"name": "Sagittarius contributors"}]
+    assert "neutral atoms" in project["keywords"]
+    assert "Programming Language :: Python :: 3.10" in project["classifiers"]
+    assert "Programming Language :: Python :: 3.11" in project["classifiers"]
+    assert "Programming Language :: Python :: 3.12" in project["classifiers"]
+    assert "Programming Language :: Julia" in project["classifiers"]
+    assert {"Homepage", "Documentation", "Source", "Issues"} <= project["urls"].keys()
+
+
+def test_wheel_metadata_contains_release_fields(built_artifacts):
+    wheel, _ = built_artifacts
+
+    with zipfile.ZipFile(wheel) as archive:
+        metadata_name = next(name for name in archive.namelist() if name.endswith(".dist-info/METADATA"))
+        metadata = email.message_from_bytes(archive.read(metadata_name))
+        names = set(archive.namelist())
+
+    assert metadata["Name"] == "sagittarius-py"
+    assert metadata["Summary"] == "A neutral-atom quantum emulator with Julia and Python SDKs"
+    assert metadata["License-Expression"] == "MIT" or metadata["License"] == "MIT"
+    classifiers = metadata.get_all("Classifier")
+    assert "Programming Language :: Python :: 3.10" in classifiers
+    assert "Programming Language :: Python :: 3.11" in classifiers
+    assert "Programming Language :: Python :: 3.12" in classifiers
+    assert metadata["Project-URL"] is not None
+    assert any(name.endswith(".dist-info/licenses/LICENSE") for name in names)
+    assert "Sagittarius is a research SDK" in metadata.get_payload()
+
+
+def test_sdist_contains_readme_license_and_pyproject_metadata(built_artifacts):
+    _, sdist = built_artifacts
+
+    with tarfile.open(sdist) as archive:
+        names = {name.partition("/")[2] for name in archive.getnames() if "/" in name}
+
+    assert "README.md" in names
+    assert "LICENSE" in names
+    assert "pyproject.toml" in names
+
+
+def test_built_artifacts_pass_twine_check(built_artifacts):
+    wheel, sdist = built_artifacts
+
+    _run([sys.executable, "-m", "twine", "check", str(wheel), str(sdist)])
 
 
 def test_embedded_julia_backend_resource_is_available():
