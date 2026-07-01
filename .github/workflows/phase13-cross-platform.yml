@@ -1,0 +1,60 @@
+name: Phase 13 Cross-Platform Artifact Matrix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  artifact-matrix:
+    name: ${{ matrix.os }} py${{ matrix.python-version }} julia${{ matrix.julia-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.10"
+            julia-version: "1.10.3"
+          - os: ubuntu-latest
+            python-version: "3.11"
+            julia-version: "1.11"
+          - os: ubuntu-latest
+            python-version: "3.12"
+            julia-version: "1.11"
+          - os: macos-latest
+            python-version: "3.11"
+            julia-version: "1.11"
+          - os: windows-latest
+            python-version: "3.11"
+            julia-version: "1.11"
+    env:
+      PYTHONNOUSERSITE: "1"
+      PYTHONPATH: ""
+      SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "sagittarius_py/uv.lock"
+
+      - name: Run package metadata and clean wheel smoke
+        working-directory: sagittarius_py
+        run: >-
+          uv run python -m pytest
+          tests/test_packaging_artifacts.py
+          tests/test_installation_docs.py
+          -q

@@ -1,6 +1,6 @@
 # Python Package Installation Status
 
-The Python SDK is not yet published as an independent PyPI package. Do not advertise `pip install sagittarius-py` as a supported user installation path until Phase 13 release-readiness criteria are met. See [PyPI publication policy](pypi-publication.md) for TestPyPI and production-release gates.
+The Python SDK is not yet published as an independent PyPI package. Do not advertise `pip install sagittarius-py` as a supported user installation path until Phase 13 release-readiness criteria are met. See [PyPI publication policy](pypi-publication.md) and [Python compatibility matrix](compatibility-matrix.md) for TestPyPI, platform, and production-release gates.
 
 ## Supported Today
 
@@ -44,7 +44,7 @@ The smoke test builds wheel/sdist artifacts, creates a clean seeded virtual envi
 The following are planned Phase 13 outcomes, not current installation promises:
 
 - independent `pip install sagittarius-py` from PyPI;
-- cross-platform wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix;
+- passing evidence from the cross-platform wheel/sdist matrix workflow across the declared Python, Julia, and operating-system rows;
 - successful TestPyPI publication and clean install evidence;
 - hardware-backed CUDA wheel smoke execution on a real GPU runner;
 - uninstall/reinstall smoke tests for released wheel workflows.
@@ -63,7 +63,7 @@ A release artifact is ready only after these checks pass:
 - default CPU installation does not require CUDA.jl, an NVIDIA driver, or GPU hardware;
 - unsupported or missing Julia installations produce documented, actionable diagnostics;
 - wheel and sdist pass metadata checks, including `twine check`;
-- Ubuntu CI runs the clean artifact smoke; cross-platform CI, TestPyPI install evidence, and hardware-backed CUDA wheel smoke evidence must still cover the declared compatibility matrix and release claims.
+- Ubuntu CI runs the clean artifact smoke; the manual cross-platform matrix workflow, TestPyPI install evidence, and hardware-backed CUDA wheel smoke evidence must still pass before release claims.
 
 ## Upgrade and Uninstall Guidance
 

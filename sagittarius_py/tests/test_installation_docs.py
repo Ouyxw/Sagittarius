@@ -40,3 +40,23 @@ def test_phase13_source_install_baseline_roadmap_status_is_done():
     roadmap = _read("REQUIREMENTS.md")
 
     assert "| **Source Installation Baseline** | High | Done |" in roadmap
+
+
+def test_phase13_cross_platform_matrix_is_documented():
+    docs = "\n\n".join(
+        [
+            _read("docs/getting-started/python/package-installation.md"),
+            _read("docs/getting-started/python/compatibility-matrix.md"),
+            _read("REQUIREMENTS.md"),
+        ]
+    )
+
+    assert "Python compatibility matrix" in docs or "Python Compatibility Matrix" in docs
+    assert "Linux x86_64" in docs
+    assert "macOS" in docs
+    assert "Windows" in docs
+    assert "Python 3.10" in docs or "3.10" in docs
+    assert "Python 3.12" in docs or "3.12" in docs
+    assert "Julia 1.10.3" in docs or "1.10.3" in docs
+    assert "phase13-cross-platform.yml" in docs
+    assert "Cross-Platform Installation Matrix** | High | Mixed" in docs
