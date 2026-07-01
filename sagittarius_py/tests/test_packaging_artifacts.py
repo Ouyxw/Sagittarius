@@ -41,9 +41,13 @@ def _run(command, *, cwd=PY_PACKAGE_ROOT, env=None):
 
 
 def _venv_python(venv_dir: Path) -> Path:
-    binary = "python.exe" if sys.platform == "win32" else "python"
+    return _venv_executable(venv_dir, "python")
+
+
+def _venv_executable(venv_dir: Path, name: str) -> Path:
+    suffix = ".exe" if sys.platform == "win32" else ""
     scripts = "Scripts" if sys.platform == "win32" else "bin"
-    return venv_dir / scripts / binary
+    return venv_dir / scripts / f"{name}{suffix}"
 
 
 @pytest.fixture(scope="session")
@@ -106,7 +110,8 @@ def test_clean_venv_installed_wheel_release_smoke(built_artifacts, tmp_path):
     env.pop("PYTHONPATH", None)
     env.pop("SAGITTARIUS_JULIA_BACKEND_PATH", None)
     _run([str(python), "-m", "pip", "install", "--force-reinstall", str(wheel)], cwd=work_dir, env=env)
-    _run([str(python), "-m", "juliapkg", "resolve"], cwd=work_dir, env=env)
+    sagittarius_cli = _venv_executable(venv_dir, "sagittarius")
+    _run([str(sagittarius_cli), "backend", "resolve"], cwd=work_dir, env=env)
 
     script = """
 import json

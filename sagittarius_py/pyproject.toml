@@ -17,6 +17,9 @@ dependencies = [
     "click",
 ]
 
+[project.scripts]
+sagittarius = "sagittarius.cli:main"
+
 [dependency-groups]
 dev = [
     "pytest",

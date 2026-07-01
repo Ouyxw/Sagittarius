@@ -37,14 +37,13 @@ SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1 \
   uv run python -m pytest tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_release_smoke
 ```
 
-The smoke test builds wheel/sdist artifacts, creates a clean seeded virtual environment outside the source tree, installs the built wheel with the venv's `python -m pip install`, runs `python -m juliapkg resolve`, runs a one-atom CPU simulation, saves a result artifact, and validates the result artifact schema, run manifest schema, shared-result schema, doctor `backend_source`, and version metadata.
+The smoke test builds wheel/sdist artifacts, creates a clean seeded virtual environment outside the source tree, installs the built wheel with the venv's `python -m pip install`, runs the installed `sagittarius backend resolve` command, runs a one-atom CPU simulation, saves a result artifact, and validates the result artifact schema, run manifest schema, shared-result schema, doctor `backend_source`, and version metadata.
 
 ## Not Supported Yet for Python Users
 
 The following are planned Phase 13 outcomes, not current installation promises:
 
 - independent `pip install sagittarius-py` from PyPI;
-- user-facing backend setup commands such as `sagittarius backend resolve` or `sagittarius backend install cuda`;
 - clean-environment wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix;
 - uninstall/reinstall smoke tests for released wheel workflows.
 
@@ -54,7 +53,7 @@ A release artifact is ready only after these checks pass:
 
 - `pip install <built-wheel>` succeeds in a clean virtual environment outside the source repository;
 - `import sagittarius` remains lightweight and does not initialize or download Julia packages;
-- `python -m juliapkg resolve` succeeds from the clean environment;
+- `sagittarius backend resolve` succeeds from the clean environment;
 - a CPU one-atom simulation succeeds after explicit backend resolution with no source checkout present;
 - result artifacts, run manifests, shared results, doctor output, and version metadata identify the embedded `package_resource` backend correctly;
 - moving or deleting the original repository does not break the installed wheel;

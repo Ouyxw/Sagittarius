@@ -21,12 +21,16 @@ DOCTOR_SCHEMA_VERSION = "doctor/v2.1"
 BACKEND_PROBE_SCHEMA_VERSION = "backend-probe/v2.1"
 FAILURE_DIAGNOSTIC_SCHEMA_VERSION = "failure-diagnostic/v1"
 VERSION_INFO_SCHEMA_VERSION = "version-info/v1"
+BACKEND_SETUP_SCHEMA_VERSION = "backend-setup/v1"
 MIN_RECOMMENDED_CUDAJL_VERSION = "6.2.0"
 CUDA_12_8_MIN_LINUX_DRIVER = "570.26"
 CUDA_12_8_MIN_WINDOWS_DRIVER = "570.65"
 BLACKWELL_COMPUTE_MAJOR_MIN = 10
 JULIA_BACKEND_PATH_ENV = "SAGITTARIUS_JULIA_BACKEND_PATH"
 PACKAGE_BACKEND_RESOURCE = ("julia", "Sagittarius.jl")
+OPTIONAL_BACKEND_PROFILE_RESOURCES = {
+    "CUDA": "juliapkg-cuda.json",
+}
 
 REQUIRED_CPU_JULIA_PACKAGES = (
     "OrdinaryDiffEq",
@@ -200,6 +204,130 @@ def _package_backend_resource_path() -> Optional[Path]:
     except TypeError:
         return None
     return path if _valid_julia_backend_path(path) else None
+
+
+def _optional_backend_profile_payload(backend: str) -> Dict[str, Any]:
+    normalized = backend.upper()
+    resource_name = OPTIONAL_BACKEND_PROFILE_RESOURCES.get(normalized)
+    if resource_name is None:
+        raise SagittariusValidationError(DiagnosticIssue(
+            code="UNSUPPORTED_BACKEND_SETUP",
+            message=f"Backend setup profile is not available for {backend}.",
+            remediation=f"Choose one of: {', '.join(sorted(OPTIONAL_BACKEND_PROFILE_RESOURCES))}.",
+        ))
+
+    profile = resources.files("sagittarius").joinpath(resource_name)
+    try:
+        return json.loads(profile.read_text())
+    except Exception as exc:
+        raise SagittariusRuntimeError(DiagnosticIssue(
+            code="BACKEND_PROFILE_LOAD_FAILED",
+            message=f"Could not load backend setup profile: {resource_name}",
+            remediation="Reinstall the package and verify the wheel includes Sagittarius package data.",
+        )) from exc
+
+
+def optional_backend_profiles() -> Dict[str, Dict[str, Any]]:
+    profiles: Dict[str, Dict[str, Any]] = {}
+    for backend in sorted(OPTIONAL_BACKEND_PROFILE_RESOURCES):
+        payload = _optional_backend_profile_payload(backend)
+        profiles[backend] = {
+            "resource": OPTIONAL_BACKEND_PROFILE_RESOURCES[backend],
+            "packages": sorted(payload.get("packages", {}).keys()),
+        }
+    return profiles
+
+
+def resolve_backend_dependencies() -> Dict[str, Any]:
+    command = [sys.executable, "-m", "juliapkg", "resolve"]
+    try:
+        completed = subprocess.run(
+            command,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise SagittariusRuntimeError(DiagnosticIssue(
+            code="JULIAPKG_RESOLVE_FAILED",
+            message="JuliaPkg dependency resolution failed.",
+            remediation="Inspect command output, verify Julia is installable, then rerun `sagittarius backend resolve`.",
+        )) from exc
+
+    return {
+        "schema_version": BACKEND_SETUP_SCHEMA_VERSION,
+        "action": "resolve",
+        "backend": "CPU",
+        "command": command,
+        "returncode": completed.returncode,
+        "output": completed.stdout,
+    }
+
+
+def install_backend_profile(backend: str, *, resolve: bool = True, initialize_backend: bool = False) -> Dict[str, Any]:
+    normalized = backend.upper()
+    if normalized == "CPU":
+        return resolve_backend_dependencies()
+
+    payload = _optional_backend_profile_payload(normalized)
+    packages = payload.get("packages", {})
+    if not packages:
+        raise SagittariusValidationError(DiagnosticIssue(
+            code="BACKEND_PROFILE_EMPTY",
+            message=f"Backend setup profile {normalized} does not declare any packages.",
+            remediation="Reinstall the package and verify the backend profile package data.",
+        ))
+
+    resolve_result = resolve_backend_dependencies() if resolve else None
+
+    try:
+        _configure_juliacall_environment()
+        from juliacall import Main as jl
+
+        specs = json.dumps([
+            {"name": name, **spec}
+            for name, spec in sorted(packages.items())
+        ])
+        jl.seval(f"""
+            using Pkg
+            using UUIDs
+            specs = {specs}
+            for spec in specs
+                version = haskey(spec, "version") ? VersionNumber(spec["version"]) : nothing
+                package_spec = isnothing(version) ?
+                    Pkg.PackageSpec(name=spec["name"], uuid=UUID(spec["uuid"])) :
+                    Pkg.PackageSpec(name=spec["name"], uuid=UUID(spec["uuid"]), version=version)
+                Pkg.add(package_spec)
+            end
+            Pkg.resolve()
+            """)
+    except Exception as exc:
+        detail = _classify_exception(exc)
+        raise SagittariusRuntimeError(DiagnosticIssue(
+            code="BACKEND_PROFILE_INSTALL_FAILED",
+            message=f"Failed to install {normalized} backend dependencies: {detail['message']}",
+            remediation=f"Inspect Julia package output, verify network/registry access, then rerun `sagittarius backend install {normalized.lower()}`.",
+        )) from exc
+
+    report: Dict[str, Any] = {
+        "schema_version": BACKEND_SETUP_SCHEMA_VERSION,
+        "action": "install",
+        "backend": normalized,
+        "profile": OPTIONAL_BACKEND_PROFILE_RESOURCES[normalized],
+        "packages": sorted(packages.keys()),
+        "resolved_default_profile": resolve_result is not None,
+    }
+    if resolve_result is not None:
+        report["resolve"] = {
+            "schema_version": resolve_result["schema_version"],
+            "action": resolve_result["action"],
+            "backend": resolve_result["backend"],
+            "returncode": resolve_result["returncode"],
+        }
+    if initialize_backend:
+        report["doctor"] = doctor(backend=normalized, initialize_backend=True)
+    return report
 
 
 def _project_path() -> Path:

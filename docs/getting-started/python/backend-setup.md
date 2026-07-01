@@ -115,14 +115,22 @@ SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python -m pytest tests/test_gpu_accelerati
 
 CUDA requires a compatible host driver, device passthrough if containerized, CUDA runtime compatibility, Julia CUDA packages, and a visible GPU device. See [Backend maturity](../../reference/SPEC-BACKEND-001-backends.md) and [Containerized development](../containerization.md).
 
-## Planned Backend Commands
+## Backend Commands
 
-Phase 13 plans a user-facing backend setup workflow such as:
+The Python package provides a user-facing backend setup workflow:
 
 ```bash
 sagittarius backend resolve
-sagittarius backend install cuda
 sagittarius doctor
 ```
 
-Those commands are not documented as currently available here. Until they exist, use `uv run python -m juliapkg resolve` and `doctor()` as the explicit setup and diagnostics path.
+`backend resolve` resolves the default CPU-first JuliaPkg environment. It is the preferred command for installed wheels and source checkouts; `uv run python -m juliapkg resolve` remains the lower-level equivalent for debugging.
+
+CUDA setup is explicit and experimental:
+
+```bash
+sagittarius backend install cuda
+sagittarius doctor --backend CUDA --initialize-backend
+```
+
+`backend install cuda` uses the packaged `juliapkg-cuda.json` profile. It may download Julia CUDA packages and still requires compatible NVIDIA driver, runtime, device visibility, and parity validation before using CUDA results for claims.

@@ -109,9 +109,8 @@ Current support is source-checkout oriented:
 - resolve Julia dependencies with `python -m juliapkg resolve`;
 - keep `Sagittarius.jl/` and `sagittarius_py/` together unless using explicit development overrides.
 
-Phase 13 packaging work now includes relocatable wheel artifacts, installed-package resource lookup, and a CPU-first dependency profile that does not require CUDA for regular CPU users. Remaining release-readiness work includes:
+Phase 13 packaging work now includes relocatable wheel artifacts, installed-package resource lookup, a CPU-first dependency profile that does not require CUDA for regular CPU users, and `sagittarius backend` setup commands. Remaining release-readiness work includes:
 
-- backend setup commands or equivalent explicit workflows;
 - clean-environment wheel and sdist tests;
 - cross-platform installation matrix;
 - PyPI release readiness criteria.
