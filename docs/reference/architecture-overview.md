@@ -121,7 +121,7 @@ This layer allows results, benchmark claims, and public reports to be audited af
 
 ## Current Architecture Constraints
 
-- Python artifacts now embed the Julia backend under `sagittarius/julia/Sagittarius.jl`; Phase 13 still tracks clean-environment artifact tests, CPU-first dependency work, and release-readiness gates.
+- Python artifacts now embed the Julia backend under `sagittarius/julia/Sagittarius.jl`; local release smoke covers clean-venv wheel installation, JuliaPkg resolution, CPU simulation, and artifact metadata. Phase 13 still tracks CPU-first dependency work, CI artifact isolation, uninstall/reinstall smoke coverage, cross-platform validation, and PyPI release gates.
 - CUDA is experimental and requires explicit runtime diagnostics and parity evidence before performance claims.
 - AMDGPU and Metal are planned backend names, not mature execution paths.
 - Solver method dispatch is implemented for current solver paths through an auditable `method`/`adaptive`/`dt` contract; unsupported backend paths must reject explicitly rather than silently substituting algorithms.
@@ -134,7 +134,7 @@ This layer allows results, benchmark claims, and public reports to be audited af
 | :--- | :--- |
 | Phase 11 | Adds typed observable declarations and observable metadata across solver paths and artifacts. |
 | Phase 12 | Implemented solver method dispatch and effective solver configuration metadata. |
-| Phase 13 | Reduces source-checkout coupling through relocatable packaging and package-resource lookup. |
+| Phase 13 | Reduces source-checkout coupling through embedded Julia backend resources, editable/source checkout preference, release artifact smoke tests, and package-resource lookup. |
 | Phase 14 | Extends open-system and stochastic-noise architecture around shared basis and metadata contracts. |
 | Phase 15 | Adds seed, output-grid, sampling, experiment recipe, and sweep reproducibility contracts. |
 | Phase 17 | Expands cluster, sweep, and advanced deployment architecture. |

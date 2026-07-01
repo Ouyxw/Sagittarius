@@ -111,7 +111,7 @@ Phase 12 solver fields and Phase 15 seed/output-grid fields are represented thro
 | `event-taxonomy/v1` | Stable event ID and payload catalog. |
 | `doctor/v2.1` | Lightweight runtime and backend diagnostics report. |
 | `backend-probe/v2.1` | Initialized backend probe report. |
-| `version-info/v1` | Runtime, package, git, build, container, and backend metadata. |
+| `version-info/v1` | Runtime, package, git, build, container, and backend metadata, including Julia backend source (`env_override`, `source_checkout`, or `package_resource`). |
 | `run-manifest/v1` | Per-simulation reproducibility manifest. |
 | `result-artifact/v1` | Persistent `SimulationResult` envelope. |
 | `shared-result/v1` | Language-neutral result payload. |
@@ -145,7 +145,7 @@ A `run-manifest/v1` should describe:
 - solver options and backend settings;
 - time span and observables;
 - initial state basis size;
-- backend diagnostics;
+- backend diagnostics, including selected Julia backend source metadata;
 - version and runtime metadata;
 - random and trajectory metadata where applicable;
 - event taxonomy schema and emitted event IDs.
