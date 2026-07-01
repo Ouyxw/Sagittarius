@@ -109,17 +109,24 @@ def test_clean_venv_installed_wheel_release_smoke(built_artifacts, tmp_path):
     env = os.environ.copy()
     env.pop("PYTHONPATH", None)
     env.pop("SAGITTARIUS_JULIA_BACKEND_PATH", None)
+    env["PYTHONNOUSERSITE"] = "1"
+    env["SAGITTARIUS_SOURCE_ROOT_FOR_TEST"] = str(REPO_ROOT)
     _run([str(python), "-m", "pip", "install", "--force-reinstall", str(wheel)], cwd=work_dir, env=env)
     sagittarius_cli = _venv_executable(venv_dir, "sagittarius")
     _run([str(sagittarius_cli), "backend", "resolve"], cwd=work_dir, env=env)
 
     script = """
 import json
+import os
 from pathlib import Path
 
 import numpy as np
 import sagittarius
 from importlib.resources import files
+
+source_root = Path(os.environ["SAGITTARIUS_SOURCE_ROOT_FOR_TEST"]).resolve()
+package_file = Path(sagittarius.__file__).resolve()
+assert not package_file.is_relative_to(source_root), package_file
 
 default_juliapkg = json.loads(files("sagittarius").joinpath("juliapkg.json").read_text())
 cuda_juliapkg = json.loads(files("sagittarius").joinpath("juliapkg-cuda.json").read_text())

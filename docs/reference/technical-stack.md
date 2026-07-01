@@ -111,7 +111,6 @@ Current support is source-checkout oriented:
 
 Phase 13 packaging work now includes relocatable wheel artifacts, installed-package resource lookup, a CPU-first dependency profile that does not require CUDA for regular CPU users, and `sagittarius backend` setup commands. Remaining release-readiness work includes:
 
-- clean-environment wheel and sdist tests;
 - cross-platform installation matrix;
 - PyPI release readiness criteria.
 

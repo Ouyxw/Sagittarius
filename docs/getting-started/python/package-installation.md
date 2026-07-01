@@ -44,7 +44,7 @@ The smoke test builds wheel/sdist artifacts, creates a clean seeded virtual envi
 The following are planned Phase 13 outcomes, not current installation promises:
 
 - independent `pip install sagittarius-py` from PyPI;
-- clean-environment wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix;
+- cross-platform wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix;
 - uninstall/reinstall smoke tests for released wheel workflows.
 
 ## Python Wheel and Source Distribution Criteria
@@ -60,7 +60,7 @@ A release artifact is ready only after these checks pass:
 - the wheel and sdist contain `Sagittarius.jl/Project.toml`, Julia source files, and required runtime metadata;
 - default CPU installation does not require CUDA.jl, an NVIDIA driver, or GPU hardware;
 - unsupported or missing Julia installations produce documented, actionable diagnostics;
-- CI tests installation artifacts across the declared compatibility matrix.
+- Ubuntu CI runs the clean artifact smoke; cross-platform CI must still cover the declared compatibility matrix.
 
 ## Upgrade and Uninstall Guidance
 
