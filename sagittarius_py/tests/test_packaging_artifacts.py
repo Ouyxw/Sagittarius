@@ -40,6 +40,19 @@ def _run(command, *, cwd=PY_PACKAGE_ROOT, env=None):
     )
 
 
+def _json_from_output(output: str):
+    decoder = json.JSONDecoder()
+    for index, char in enumerate(output):
+        if char != "{":
+            continue
+        try:
+            payload, _ = decoder.raw_decode(output[index:])
+        except json.JSONDecodeError:
+            continue
+        return payload
+    raise AssertionError(f"No JSON object found in command output: {output}")
+
+
 def _venv_python(venv_dir: Path) -> Path:
     return _venv_executable(venv_dir, "python")
 
@@ -176,3 +189,119 @@ print(json.dumps({
     assert result["manifest_schema"] == "run-manifest/v1"
     assert result["shared_result_schema"] == "shared-result/v1"
     assert result["rows"] >= 2
+
+
+def test_clean_venv_installed_wheel_cuda_smoke_and_parity(built_artifacts, tmp_path):
+    if os.environ.get("SAGITTARIUS_RUN_CUDA_WHEEL_SMOKE") != "1":
+        pytest.skip("Set SAGITTARIUS_RUN_CUDA_WHEEL_SMOKE=1 to run the clean wheel CUDA smoke test.")
+    if os.environ.get("SAGITTARIUS_ENABLE_GPU_TESTS") != "1":
+        pytest.skip("Set SAGITTARIUS_ENABLE_GPU_TESTS=1 to confirm CUDA hardware-backed tests are allowed.")
+
+    wheel, _ = built_artifacts
+    venv_dir = tmp_path / "cuda-venv"
+    work_dir = tmp_path / "outside-repo-cuda"
+    work_dir.mkdir()
+
+    _run(["uv", "venv", "--seed", str(venv_dir)])
+    python = _venv_python(venv_dir)
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    env.pop("SAGITTARIUS_JULIA_BACKEND_PATH", None)
+    env["PYTHONNOUSERSITE"] = "1"
+    env["SAGITTARIUS_SOURCE_ROOT_FOR_TEST"] = str(REPO_ROOT)
+    _run([str(python), "-m", "pip", "install", "--force-reinstall", str(wheel)], cwd=work_dir, env=env)
+    sagittarius_cli = _venv_executable(venv_dir, "sagittarius")
+
+    install_report = _json_from_output(
+        _run([str(sagittarius_cli), "backend", "install", "cuda"], cwd=work_dir, env=env).stdout
+    )
+    assert install_report["schema_version"] == "backend-setup/v1"
+    assert install_report["backend"] == "CUDA"
+    assert install_report["profile"]["schema_version"] == "backend-profile/v1"
+    assert install_report["profile"]["packages"]["CUDA"]["version"] == "6.2.0"
+    assert install_report["resolved_default_profile"] is True
+
+    doctor_report = _json_from_output(
+        _run([str(sagittarius_cli), "doctor", "--backend", "CUDA", "--initialize-backend"], cwd=work_dir, env=env).stdout
+    )
+    assert doctor_report["available"] is True
+    assert doctor_report["backend_source"] == "package_resource"
+    probe = doctor_report["backend_probe"]
+    assert probe["backend"] == "CUDA"
+    assert probe["available"] is True
+    assert probe["versions"]["CUDA.jl"]
+    assert probe["runtime"]["cuda_functional"] is True
+    assert probe["runtime"]["driver_version"]
+    assert probe["runtime"]["runtime_version"]
+    assert probe["devices"]
+
+    script = """
+import json
+import os
+from pathlib import Path
+
+import numpy as np
+import sagittarius
+
+source_root = Path(os.environ["SAGITTARIUS_SOURCE_ROOT_FOR_TEST"]).resolve()
+package_file = Path(sagittarius.__file__).resolve()
+assert not package_file.is_relative_to(source_root), package_file
+
+doctor_report = sagittarius.doctor(backend="CUDA", initialize_backend=True)
+assert doctor_report["available"] is True
+assert doctor_report["backend_source"] == "package_resource"
+assert doctor_report["backend_probe"]["versions"].get("CUDA.jl")
+assert doctor_report["backend_probe"].get("devices")
+
+register = sagittarius.Register.chain(3, spacing=5.0, C6=25.0)
+sequence = sagittarius.PulseSequence(omega=2 * np.pi * 0.35, delta=2 * np.pi * 0.05)
+psi0 = np.zeros(2 ** len(register.atoms), dtype=complex)
+psi0[0] = 1.0
+observables = {"left": 0, "right": len(register.atoms) - 1}
+saveat = np.linspace(0.0, 0.2, 5)
+
+cpu_config = sagittarius.SolverConfig(saveat=saveat, reltol=1e-7, abstol=1e-7, use_gpu=False)
+gpu_config = sagittarius.SolverConfig(saveat=saveat, reltol=1e-7, abstol=1e-7, use_gpu=True, gpu_backend="CUDA")
+
+cpu_result = sagittarius.Simulation(register, sequence, cpu_config).run(psi0, 0.0, 0.2, observables=observables)
+gpu_result = sagittarius.Simulation(register, sequence, gpu_config).run(psi0, 0.0, 0.2, observables=observables)
+
+max_abs_error = 0.0
+for name in observables:
+    cpu_values = np.asarray(cpu_result.data[name], dtype=float)
+    gpu_values = np.asarray(gpu_result.data[name], dtype=float)
+    max_abs_error = max(max_abs_error, float(np.max(np.abs(cpu_values - gpu_values))))
+    assert np.allclose(cpu_values, gpu_values, rtol=5e-4, atol=5e-5), name
+
+out = Path("cuda-result.json")
+gpu_result.save(out)
+payload = json.loads(out.read_text())
+assert payload["schema_version"] == sagittarius.RESULT_ARTIFACT_SCHEMA_VERSION
+assert payload["manifest"]["schema_version"] == sagittarius.RUN_MANIFEST_SCHEMA_VERSION
+assert payload["manifest"]["versions"]["julia"]["source"] == "package_resource"
+assert payload["diagnostics"]["requested_backend"] == "CUDA"
+assert payload["diagnostics"]["simulation"]["use_gpu"] is True
+assert payload["shared_result"]["schema_version"] == sagittarius.SHARED_RESULT_SCHEMA_VERSION
+
+print(json.dumps({
+    "backend_source": doctor_report["backend_source"],
+    "cuda_jl": doctor_report["backend_probe"]["versions"]["CUDA.jl"],
+    "device_count": len(doctor_report["backend_probe"].get("devices", [])),
+    "driver_version": doctor_report["backend_probe"]["runtime"]["driver_version"],
+    "runtime_version": doctor_report["backend_probe"]["runtime"]["runtime_version"],
+    "max_abs_error": max_abs_error,
+    "artifact_schema": payload["schema_version"],
+    "manifest_schema": payload["manifest"]["schema_version"],
+}, sort_keys=True))
+"""
+    completed = _run([str(python), "-c", script], cwd=work_dir, env=env)
+    result = json.loads(completed.stdout.strip().splitlines()[-1])
+
+    assert result["backend_source"] == "package_resource"
+    assert result["cuda_jl"]
+    assert result["device_count"] >= 1
+    assert result["driver_version"]
+    assert result["runtime_version"]
+    assert result["max_abs_error"] <= 1e-4
+    assert result["artifact_schema"] == "result-artifact/v1"
+    assert result["manifest_schema"] == "run-manifest/v1"

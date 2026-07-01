@@ -1,0 +1,44 @@
+name: Phase 13 CUDA Wheel Smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cuda-wheel-smoke:
+    name: CUDA wheel smoke and CPU/CUDA parity
+    runs-on: [self-hosted, linux, x64, cuda]
+    timeout-minutes: 90
+    env:
+      PYTHONNOUSERSITE: "1"
+      PYTHONPATH: ""
+      SAGITTARIUS_RUN_CUDA_WHEEL_SMOKE: "1"
+      SAGITTARIUS_ENABLE_GPU_TESTS: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "sagittarius_py/uv.lock"
+
+      - name: Show CUDA host visibility
+        run: nvidia-smi
+
+      - name: Run CUDA wheel smoke and parity
+        working-directory: sagittarius_py
+        run: >-
+          uv run python -m pytest
+          tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_cuda_smoke_and_parity
+          -q

@@ -136,3 +136,13 @@ sagittarius doctor --backend CUDA --initialize-backend
 ```
 
 `backend profiles` lists the packaged optional backend profiles and `backend install cuda --dry-run` prints the CUDA profile without changing the Julia environment. `backend install cuda` uses the packaged `juliapkg-cuda.json` profile and may download Julia CUDA packages. CUDA still requires compatible NVIDIA driver, runtime, device visibility, and parity validation before using CUDA results for claims.
+
+Hardware-backed wheel validation is available as an opt-in smoke test:
+
+```bash
+cd sagittarius_py
+SAGITTARIUS_RUN_CUDA_WHEEL_SMOKE=1 SAGITTARIUS_ENABLE_GPU_TESTS=1 \
+  uv run python -m pytest tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_cuda_smoke_and_parity
+```
+
+The smoke installs the built wheel into a clean virtual environment outside the repository, runs `sagittarius backend install cuda`, checks `sagittarius doctor --backend CUDA --initialize-backend`, executes a small CPU/CUDA parity simulation, and validates result artifact and manifest metadata.

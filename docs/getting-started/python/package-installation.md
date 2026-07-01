@@ -45,6 +45,7 @@ The following are planned Phase 13 outcomes, not current installation promises:
 
 - independent `pip install sagittarius-py` from PyPI;
 - cross-platform wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix;
+- hardware-backed CUDA wheel smoke execution on a real GPU runner;
 - uninstall/reinstall smoke tests for released wheel workflows.
 
 ## Python Wheel and Source Distribution Criteria
@@ -60,7 +61,7 @@ A release artifact is ready only after these checks pass:
 - the wheel and sdist contain `Sagittarius.jl/Project.toml`, Julia source files, and required runtime metadata;
 - default CPU installation does not require CUDA.jl, an NVIDIA driver, or GPU hardware;
 - unsupported or missing Julia installations produce documented, actionable diagnostics;
-- Ubuntu CI runs the clean artifact smoke; cross-platform CI must still cover the declared compatibility matrix.
+- Ubuntu CI runs the clean artifact smoke; cross-platform CI and hardware-backed CUDA wheel smoke evidence must still cover the declared compatibility matrix and GPU release claims.
 
 ## Upgrade and Uninstall Guidance
 
