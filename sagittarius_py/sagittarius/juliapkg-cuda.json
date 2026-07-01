@@ -1,4 +1,9 @@
 {
+    "schema_version": "backend-profile/v1",
+    "backend": "CUDA",
+    "maturity": "experimental",
+    "default": false,
+    "description": "Opt-in CUDA Julia backend dependencies for Sagittarius GPU diagnostics and experimental CUDA simulations.",
     "julia": "^1.10.3",
     "packages": {
         "CUDA": {

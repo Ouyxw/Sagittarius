@@ -9,6 +9,7 @@ from .runtime import (
     SagittariusError,
     doctor as runtime_doctor,
     install_backend_profile,
+    optional_backend_profiles,
     package_version,
     resolve_backend_dependencies,
 )
@@ -56,11 +57,21 @@ def backend_resolve_command() -> None:
         _raise_click_error(exc)
 
 
+@backend_group.command("profiles")
+def backend_profiles_command() -> None:
+    """List explicit optional backend profiles as JSON."""
+    try:
+        _echo_json({"profiles": optional_backend_profiles()})
+    except Exception as exc:
+        _raise_click_error(exc)
+
+
 @backend_group.command("install")
 @click.argument("backend", type=click.Choice(["cuda"], case_sensitive=False))
 @click.option("--skip-resolve", is_flag=True, help="Do not run the default CPU resolve step before installing the backend profile.")
 @click.option("--initialize-backend", is_flag=True, help="Run initialized doctor diagnostics after installation.")
-def backend_install_command(backend: str, skip_resolve: bool, initialize_backend: bool) -> None:
+@click.option("--dry-run", is_flag=True, help="Print the selected backend profile without installing packages.")
+def backend_install_command(backend: str, skip_resolve: bool, initialize_backend: bool, dry_run: bool) -> None:
     """Install an explicit optional backend profile."""
     try:
         _echo_json(
@@ -68,6 +79,7 @@ def backend_install_command(backend: str, skip_resolve: bool, initialize_backend
                 backend,
                 resolve=not skip_resolve,
                 initialize_backend=initialize_backend,
+                dry_run=dry_run,
             )
         )
     except Exception as exc:

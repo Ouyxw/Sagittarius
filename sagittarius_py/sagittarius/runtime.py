@@ -227,14 +227,29 @@ def _optional_backend_profile_payload(backend: str) -> Dict[str, Any]:
         )) from exc
 
 
+def _backend_profile_report(backend: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    normalized = backend.upper()
+    packages = payload.get("packages", {})
+    return {
+        "schema_version": payload.get("schema_version", "backend-profile/v1"),
+        "backend": payload.get("backend", normalized),
+        "resource": OPTIONAL_BACKEND_PROFILE_RESOURCES[normalized],
+        "maturity": payload.get("maturity", BACKEND_MATURITY.get(normalized, {}).get("status", "unknown")),
+        "default": bool(payload.get("default", False)),
+        "description": payload.get("description"),
+        "julia": payload.get("julia"),
+        "packages": {name: dict(spec) for name, spec in sorted(packages.items())},
+        "package_names": sorted(packages.keys()),
+        "install_command": f"sagittarius backend install {normalized.lower()}",
+        "doctor_command": f"sagittarius doctor --backend {normalized} --initialize-backend",
+    }
+
+
 def optional_backend_profiles() -> Dict[str, Dict[str, Any]]:
     profiles: Dict[str, Dict[str, Any]] = {}
     for backend in sorted(OPTIONAL_BACKEND_PROFILE_RESOURCES):
         payload = _optional_backend_profile_payload(backend)
-        profiles[backend] = {
-            "resource": OPTIONAL_BACKEND_PROFILE_RESOURCES[backend],
-            "packages": sorted(payload.get("packages", {}).keys()),
-        }
+        profiles[backend] = _backend_profile_report(backend, payload)
     return profiles
 
 
@@ -265,12 +280,13 @@ def resolve_backend_dependencies() -> Dict[str, Any]:
     }
 
 
-def install_backend_profile(backend: str, *, resolve: bool = True, initialize_backend: bool = False) -> Dict[str, Any]:
+def install_backend_profile(backend: str, *, resolve: bool = True, initialize_backend: bool = False, dry_run: bool = False) -> Dict[str, Any]:
     normalized = backend.upper()
     if normalized == "CPU":
         return resolve_backend_dependencies()
 
     payload = _optional_backend_profile_payload(normalized)
+    profile_report = _backend_profile_report(normalized, payload)
     packages = payload.get("packages", {})
     if not packages:
         raise SagittariusValidationError(DiagnosticIssue(
@@ -278,6 +294,17 @@ def install_backend_profile(backend: str, *, resolve: bool = True, initialize_ba
             message=f"Backend setup profile {normalized} does not declare any packages.",
             remediation="Reinstall the package and verify the backend profile package data.",
         ))
+
+    if dry_run:
+        return {
+            "schema_version": BACKEND_SETUP_SCHEMA_VERSION,
+            "action": "install",
+            "backend": normalized,
+            "dry_run": True,
+            "profile": profile_report,
+            "packages": sorted(packages.keys()),
+            "resolved_default_profile": False,
+        }
 
     resolve_result = resolve_backend_dependencies() if resolve else None
 
@@ -314,7 +341,7 @@ def install_backend_profile(backend: str, *, resolve: bool = True, initialize_ba
         "schema_version": BACKEND_SETUP_SCHEMA_VERSION,
         "action": "install",
         "backend": normalized,
-        "profile": OPTIONAL_BACKEND_PROFILE_RESOURCES[normalized],
+        "profile": profile_report,
         "packages": sorted(packages.keys()),
         "resolved_default_profile": resolve_result is not None,
     }

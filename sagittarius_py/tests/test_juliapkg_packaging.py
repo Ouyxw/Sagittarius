@@ -32,5 +32,9 @@ def test_cuda_juliapkg_profile_is_packaged_but_not_default_discoverable():
     assert Path(config).resolve() not in {Path(path).resolve() for path in deps_files()}
 
     payload = json.loads(config.read_text())
+    assert payload["schema_version"] == "backend-profile/v1"
+    assert payload["backend"] == "CUDA"
+    assert payload["maturity"] == "experimental"
+    assert payload["default"] is False
     assert set(payload["packages"]) == {"CUDA"}
     assert payload["packages"]["CUDA"]["version"] == "6.2.0"

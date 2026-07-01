@@ -56,8 +56,8 @@ def test_backend_resolve_command_outputs_setup_report(monkeypatch):
 def test_backend_install_cuda_command_uses_optional_profile(monkeypatch):
     calls = []
 
-    def fake_install(backend, *, resolve, initialize_backend):
-        calls.append((backend, resolve, initialize_backend))
+    def fake_install(backend, *, resolve, initialize_backend, dry_run):
+        calls.append((backend, resolve, initialize_backend, dry_run))
         return {
             "schema_version": "backend-setup/v1",
             "action": "install",
@@ -70,10 +70,37 @@ def test_backend_install_cuda_command_uses_optional_profile(monkeypatch):
     result = CliRunner().invoke(cli.main, ["backend", "install", "cuda", "--skip-resolve", "--initialize-backend"])
 
     assert result.exit_code == 0
-    assert calls == [("cuda", False, True)]
+    assert calls == [("cuda", False, True, False)]
     payload = json.loads(result.output)
     assert payload["backend"] == "CUDA"
     assert payload["packages"] == ["CUDA"]
+
+
+def test_backend_profiles_command_lists_cuda_profile():
+    result = CliRunner().invoke(cli.main, ["backend", "profiles"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    cuda = payload["profiles"]["CUDA"]
+    assert cuda["schema_version"] == "backend-profile/v1"
+    assert cuda["maturity"] == "experimental"
+    assert cuda["default"] is False
+    assert cuda["package_names"] == ["CUDA"]
+    assert cuda["packages"]["CUDA"]["version"] == "6.2.0"
+    assert cuda["install_command"] == "sagittarius backend install cuda"
+
+
+def test_backend_install_cuda_dry_run_reports_profile_without_installing():
+    result = CliRunner().invoke(cli.main, ["backend", "install", "cuda", "--dry-run"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["schema_version"] == "backend-setup/v1"
+    assert payload["backend"] == "CUDA"
+    assert payload["dry_run"] is True
+    assert payload["packages"] == ["CUDA"]
+    assert payload["profile"]["resource"] == "juliapkg-cuda.json"
+    assert payload["profile"]["packages"]["CUDA"]["uuid"] == "052768ef-5323-5732-b1bb-66c8b64840ba"
 
 
 def test_cli_errors_use_diagnostic_issue(monkeypatch):
@@ -96,8 +123,12 @@ def test_cli_errors_use_diagnostic_issue(monkeypatch):
 def test_optional_cuda_profile_metadata_is_available():
     profiles = optional_backend_profiles()
 
+    assert profiles["CUDA"]["schema_version"] == "backend-profile/v1"
     assert profiles["CUDA"]["resource"] == "juliapkg-cuda.json"
-    assert profiles["CUDA"]["packages"] == ["CUDA"]
+    assert profiles["CUDA"]["maturity"] == "experimental"
+    assert profiles["CUDA"]["default"] is False
+    assert profiles["CUDA"]["package_names"] == ["CUDA"]
+    assert profiles["CUDA"]["packages"]["CUDA"]["version"] == "6.2.0"
 
 
 def test_resolve_backend_dependencies_runs_juliapkg(monkeypatch):

@@ -93,7 +93,7 @@ uv run python check_env.py
 uv run python -m pytest tests/
 ```
 
-The default `sagittarius/juliapkg.json` profile is CPU-first and does not install CUDA.jl. CUDA remains opt-in through the packaged `sagittarius/juliapkg-cuda.json` profile and the planned backend setup command path.
+The default `sagittarius/juliapkg.json` profile is CPU-first and does not install CUDA.jl. CUDA remains opt-in through the packaged `sagittarius/juliapkg-cuda.json` profile and the `sagittarius backend install cuda` command.
 
 ## CUDA Setup
 
@@ -129,8 +129,10 @@ sagittarius doctor
 CUDA setup is explicit and experimental:
 
 ```bash
+sagittarius backend profiles
+sagittarius backend install cuda --dry-run
 sagittarius backend install cuda
 sagittarius doctor --backend CUDA --initialize-backend
 ```
 
-`backend install cuda` uses the packaged `juliapkg-cuda.json` profile. It may download Julia CUDA packages and still requires compatible NVIDIA driver, runtime, device visibility, and parity validation before using CUDA results for claims.
+`backend profiles` lists the packaged optional backend profiles and `backend install cuda --dry-run` prints the CUDA profile without changing the Julia environment. `backend install cuda` uses the packaged `juliapkg-cuda.json` profile and may download Julia CUDA packages. CUDA still requires compatible NVIDIA driver, runtime, device visibility, and parity validation before using CUDA results for claims.
