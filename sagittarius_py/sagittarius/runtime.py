@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
-from importlib import metadata
+from importlib import metadata, resources
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -25,6 +25,8 @@ MIN_RECOMMENDED_CUDAJL_VERSION = "6.2.0"
 CUDA_12_8_MIN_LINUX_DRIVER = "570.26"
 CUDA_12_8_MIN_WINDOWS_DRIVER = "570.65"
 BLACKWELL_COMPUTE_MAJOR_MIN = 10
+JULIA_BACKEND_PATH_ENV = "SAGITTARIUS_JULIA_BACKEND_PATH"
+PACKAGE_BACKEND_RESOURCE = ("julia", "Sagittarius.jl")
 
 REQUIRED_CPU_JULIA_PACKAGES = (
     "OrdinaryDiffEq",
@@ -180,8 +182,55 @@ def package_version() -> str:
         return "0.1.0"
 
 
-def _project_path() -> Path:
+def _valid_julia_backend_path(path: Path) -> bool:
+    return (path / "Project.toml").is_file() and (path / "src" / "Sagittarius.jl").is_file()
+
+
+def _source_checkout_backend_path() -> Path:
     return Path(__file__).resolve().parents[2] / "Sagittarius.jl"
+
+
+def _package_backend_resource_path() -> Optional[Path]:
+    candidate = resources.files("sagittarius")
+    for part in PACKAGE_BACKEND_RESOURCE:
+        candidate = candidate.joinpath(part)
+
+    try:
+        path = Path(candidate)
+    except TypeError:
+        return None
+    return path if _valid_julia_backend_path(path) else None
+
+
+def _project_path() -> Path:
+    override = os.environ.get(JULIA_BACKEND_PATH_ENV)
+    if override:
+        return Path(override).expanduser().resolve()
+
+    packaged = _package_backend_resource_path()
+    if packaged is not None:
+        return packaged
+
+    return _source_checkout_backend_path()
+
+
+def _julia_backend_source(path: Path) -> str:
+    if os.environ.get(JULIA_BACKEND_PATH_ENV):
+        return "override"
+    if _package_backend_resource_path() == path:
+        return "package_resource"
+    return "source_checkout"
+
+
+def _julia_backend_metadata() -> Dict[str, Any]:
+    path = _project_path()
+    source = _julia_backend_source(path)
+    return {
+        "project_path": str(path),
+        "source": source,
+        "path_env": JULIA_BACKEND_PATH_ENV if source == "override" else None,
+        "available": _valid_julia_backend_path(path),
+    }
 
 
 def _julia_project_version() -> Optional[str]:
@@ -320,7 +369,7 @@ def _host_abi_metadata() -> Dict[str, Any]:
         "julia": {
             "version": str(_jl.VERSION) if _jl is not None else None,
             "sagittarius_julia_version": _julia_project_version(),
-            "project_path": str(_project_path()),
+            **_julia_backend_metadata(),
         },
     }
 
@@ -626,6 +675,14 @@ def get_julia(*, setup: bool = True):
 
     log_event("backend_init_start", setup=setup)
     try:
+        project_path = _project_path()
+        if not _valid_julia_backend_path(project_path):
+            raise SagittariusRuntimeError(DiagnosticIssue(
+                code="JULIA_BACKEND_PATH_INVALID",
+                message=f"Julia backend path is missing Project.toml or src/Sagittarius.jl: {project_path}",
+                remediation=f"Set {JULIA_BACKEND_PATH_ENV} to a Sagittarius.jl backend directory or reinstall the package with Julia backend resources.",
+            ))
+
         _configure_juliacall_environment()
         from juliacall import Main as jl
 
@@ -650,7 +707,7 @@ def get_julia(*, setup: bool = True):
                 """
             )
 
-        jl.include(str(_project_path() / "src" / "Sagittarius.jl"))
+        jl.include(str(project_path / "src" / "Sagittarius.jl"))
         _jl = jl
         _sgr = jl.Sagittarius
         log_event("backend_init_finish", julia_version=str(jl.VERSION))
@@ -700,7 +757,7 @@ def version_info(*, initialize_backend: bool = False) -> Dict[str, Any]:
         julia={
             "version": julia_version,
             "sagittarius_julia_version": sagittarius_julia_version,
-            "project_path": str(_project_path()),
+            **_julia_backend_metadata(),
         },
         build=build,
         container=container,

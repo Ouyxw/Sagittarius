@@ -1,4 +1,7 @@
 import sys
+from pathlib import Path
+
+import pytest
 
 
 def test_import_does_not_initialize_juliacall():
@@ -24,6 +27,66 @@ def test_doctor_cpu_without_backend_initialization(monkeypatch):
     assert report["available"] is True
     assert report["runtime"]["package_version"]
     assert version_info()["julia_version"] is None
+
+
+def _make_backend_tree(path: Path) -> Path:
+    (path / "src").mkdir(parents=True)
+    (path / "Project.toml").write_text('name = "Sagittarius"\nversion = "0.1.0"\n', encoding="utf-8")
+    (path / "src" / "Sagittarius.jl").write_text("module Sagittarius\nend\n", encoding="utf-8")
+    return path
+
+
+def test_julia_backend_path_prefers_explicit_override(monkeypatch, tmp_path):
+    import sagittarius.runtime as runtime
+
+    override = _make_backend_tree(tmp_path / "override" / "Sagittarius.jl")
+    package_backend = _make_backend_tree(tmp_path / "package" / "julia" / "Sagittarius.jl")
+
+    monkeypatch.setenv(runtime.JULIA_BACKEND_PATH_ENV, str(override))
+    monkeypatch.setattr(runtime.resources, "files", lambda package: package_backend.parents[1])
+
+    assert runtime._project_path() == override.resolve()
+    assert runtime._julia_backend_metadata()["source"] == "override"
+    assert runtime._julia_backend_metadata()["path_env"] == runtime.JULIA_BACKEND_PATH_ENV
+
+
+def test_julia_backend_path_uses_package_resource(monkeypatch, tmp_path):
+    import sagittarius.runtime as runtime
+
+    package_root = tmp_path / "package"
+    package_backend = _make_backend_tree(package_root / "julia" / "Sagittarius.jl")
+
+    monkeypatch.delenv(runtime.JULIA_BACKEND_PATH_ENV, raising=False)
+    monkeypatch.setattr(runtime.resources, "files", lambda package: package_root)
+
+    assert runtime._project_path() == package_backend
+    assert runtime._julia_backend_metadata()["source"] == "package_resource"
+    assert runtime._julia_backend_metadata()["available"] is True
+
+
+def test_julia_backend_path_falls_back_to_source_checkout(monkeypatch):
+    import sagittarius.runtime as runtime
+
+    monkeypatch.delenv(runtime.JULIA_BACKEND_PATH_ENV, raising=False)
+    monkeypatch.setattr(runtime, "_package_backend_resource_path", lambda: None)
+
+    assert runtime._project_path() == runtime._source_checkout_backend_path()
+    assert runtime._julia_backend_metadata()["source"] == "source_checkout"
+
+
+def test_invalid_julia_backend_path_fails_before_juliacall_import(monkeypatch, tmp_path):
+    import sagittarius.runtime as runtime
+
+    monkeypatch.setattr(runtime, "_jl", None)
+    monkeypatch.setattr(runtime, "_sgr", None)
+    monkeypatch.setenv(runtime.JULIA_BACKEND_PATH_ENV, str(tmp_path / "missing" / "Sagittarius.jl"))
+    monkeypatch.delitem(sys.modules, "juliacall", raising=False)
+
+    with pytest.raises(runtime.SagittariusRuntimeError) as exc_info:
+        runtime.get_julia()
+
+    assert exc_info.value.issue.code == "JULIA_BACKEND_PATH_INVALID"
+    assert "juliacall" not in sys.modules
 
 
 
@@ -136,6 +199,7 @@ def test_required_cpu_julia_packages_include_solver_dependencies():
 
     assert set(runtime.REQUIRED_CPU_JULIA_PACKAGES) == {
         "OrdinaryDiffEq",
+        "OrdinaryDiffEqLowOrderRK",
         "StaticArrays",
         "DiffEqCallbacks",
         "SciMLBase",

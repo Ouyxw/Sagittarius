@@ -16,7 +16,28 @@ Windows PowerShell:
 $env:PYTHON_JULIACALL_EXE = "C:\absolute\path\to\julia.exe"
 ```
 
+## Julia Backend Source Override
+
+Python runtime backend discovery uses this order:
+
+1. `SAGITTARIUS_JULIA_BACKEND_PATH`, when set, pointing at a `Sagittarius.jl` directory that contains `Project.toml` and `src/Sagittarius.jl`;
+2. packaged Julia backend resources inside the installed Python package;
+3. the adjacent repository checkout fallback used by current source installations.
+
+Use the override only for development or local debugging:
+
+```bash
+export SAGITTARIUS_JULIA_BACKEND_PATH=/absolute/path/to/Sagittarius.jl
+```
+
+Windows PowerShell:
+
+```powershell
+$env:SAGITTARIUS_JULIA_BACKEND_PATH = "C:\absolute\path\to\Sagittarius.jl"
+```
+
 ## JuliaPkg Runtime Is Not on PATH
+
 
 If `uv run python -m juliapkg resolve` succeeds but the shell reports `julia: command not found`, do not install a second Julia runtime immediately. First query the executable selected by JuliaPkg:
 
