@@ -27,6 +27,18 @@ Editable installs still depend on the configured source checkout for Python code
 
 Local wheel and source-distribution builds now include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`, including `Project.toml`, `Manifest.toml`, and `src/*.jl`. Packaging tests verify those artifact contents and run an installed-wheel smoke test from outside the repository using the `package_resource` backend source. Editable/source installs continue to prefer the adjacent `source_checkout` backend for development.
 
+## Release Artifact Smoke Test
+
+Run the opt-in release smoke test before treating a local wheel as release-candidate material:
+
+```bash
+cd sagittarius_py
+SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1 \
+  uv run python -m pytest tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_release_smoke
+```
+
+The smoke test builds wheel/sdist artifacts, creates a clean seeded virtual environment outside the source tree, installs the built wheel with the venv's `python -m pip install`, runs `python -m juliapkg resolve`, runs a one-atom CPU simulation, saves a result artifact, and validates the result artifact schema, run manifest schema, shared-result schema, doctor `backend_source`, and version metadata.
+
 ## Not Supported Yet for Python Users
 
 The following are planned Phase 13 outcomes, not current installation promises:
@@ -34,7 +46,8 @@ The following are planned Phase 13 outcomes, not current installation promises:
 - independent `pip install sagittarius-py` from PyPI;
 - default CPU installation that avoids CUDA.jl resolution entirely;
 - user-facing backend setup commands such as `sagittarius backend resolve` or `sagittarius backend install cuda`;
-- clean-environment wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix.
+- clean-environment wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix;
+- uninstall/reinstall smoke tests for released wheel workflows.
 
 ## Python Wheel and Source Distribution Criteria
 
@@ -42,7 +55,9 @@ A release artifact is ready only after these checks pass:
 
 - `pip install <built-wheel>` succeeds in a clean virtual environment outside the source repository;
 - `import sagittarius` remains lightweight and does not initialize or download Julia packages;
+- `python -m juliapkg resolve` succeeds from the clean environment;
 - a CPU one-atom simulation succeeds after explicit backend resolution with no source checkout present;
+- result artifacts, run manifests, shared results, doctor output, and version metadata identify the embedded `package_resource` backend correctly;
 - moving or deleting the original repository does not break the installed wheel;
 - the wheel and sdist contain `Sagittarius.jl/Project.toml`, Julia source files, and required runtime metadata;
 - default CPU installation does not require CUDA.jl, an NVIDIA driver, or GPU hardware;

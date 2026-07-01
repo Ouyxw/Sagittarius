@@ -142,15 +142,18 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Source Installation Baseline** | High | Done | Defines the currently supported installation model as a complete repository checkout followed by `uv sync` and `python -m juliapkg resolve`. Documents `pip install -e .` as a development-only editable install that still depends on the repository layout, and explicitly states that an independent PyPI installation is not yet supported. |
-| **Relocatable Wheel** | High | Planned | Build a Python wheel that contains the Julia backend sources and required Julia project metadata. An installed wheel must continue to run after the source checkout is moved or deleted. |
+| **Relocatable Wheel** | High | Mixed | Local wheel artifacts contain the embedded Julia backend and pass repo-external package-resource and opt-in clean-venv smoke coverage. Full release status remains gated on uninstall/reinstall coverage, CI execution outside the source tree, and cross-platform validation. |
 | **Package Resource Lookup** | High | Done | Replaces direct repository-relative backend discovery with a centralized lookup that prefers the explicit `SAGITTARIUS_JULIA_BACKEND_PATH` environment override, then an editable/source checkout backend, then installed-package resources; diagnostics report `env_override`, `source_checkout`, or `package_resource`. |
 | **Julia Package Data** | High | Done | Includes `Sagittarius.jl/Project.toml`, `Manifest.toml`, Julia source files, and runtime metadata as Python package data under `sagittarius/julia/Sagittarius.jl/`, with artifact tests verifying wheel and source distributions contain the embedded backend. |
 | **CPU-First Dependency Profile** | High | Planned | Make the default installation usable for CPU simulations without CUDA, an NVIDIA driver, or CUDA.jl. Move CUDA and future GPU backend setup to explicit optional workflows rather than resolving CUDA for every user. |
 | **Backend Setup Command** | Medium | Planned | Provide a user-facing CLI or equivalent explicit workflow for Julia dependency resolution and backend setup, such as `sagittarius backend resolve`, `sagittarius backend install cuda`, and `sagittarius doctor`. Backend installation failures must return actionable diagnostics. |
-| **Clean-Environment Artifact Tests** | High | Planned | Build wheel and sdist artifacts in CI, install them into clean virtual environments outside the repository, and run import, backend initialization, one-atom simulation, serialization, and uninstall/reinstall smoke tests. Tests executed from the source tree alone are insufficient. |
+| **Clean-Environment Artifact Tests** | High | Mixed | Added artifact tests for wheel/sdist contents plus an opt-in `SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1` clean-venv release smoke that installs the wheel, runs `python -m juliapkg resolve`, executes a one-atom CPU simulation, and validates result artifact, manifest, doctor, and version metadata. The local smoke passes; CI matrix execution and uninstall/reinstall smoke coverage remain planned. |
 | **Cross-Platform Installation Matrix** | High | Planned | Validate supported Python and Julia versions on Linux, macOS, and Windows. Publish an explicit compatibility matrix and classify platform-specific Julia discovery or compilation limitations. |
-| **PyPI Release Readiness** | High | Planned | Publish to PyPI only after wheel/sdist isolation tests pass, CPU installation is independent of CUDA, package metadata and licensing are complete, Julia initialization errors are actionable, and the supported version matrix is documented. |
-| **Installation Documentation** | Medium | Planned | Keep local source installation, editable development installation, wheel installation, Julia executable overrides, CPU/GPU setup, upgrade, and uninstall instructions distinct. Do not advertise `pip install sagittarius-py` until a released artifact satisfies the acceptance criteria below. |
+| **CI Clean Artifact Isolation** | High | Planned | Promote the local release smoke to CI: build wheel and sdist from a clean checkout, install the wheel into a fresh virtual environment outside the repository, clear source-tree `PYTHONPATH` leakage, run `python -m juliapkg resolve`, execute a CPU one-atom simulation, and validate doctor/version/result metadata. CI must fail if tests accidentally import from the source tree. |
+| **Uninstall/Reinstall Smoke Coverage** | Medium | Planned | Add release-artifact smoke tests that uninstall the wheel, reinstall the same wheel, reinstall after moving or hiding the original source checkout, and verify import, backend source metadata, JuliaPkg resolution behavior, and a minimal CPU simulation still work without stale package-resource or Julia environment assumptions. |
+| **Package Metadata Review** | Medium | Planned | Complete PyPI-facing metadata before publication: project URLs, long description/readme rendering, license classifiers, supported Python classifiers, author/maintainer fields, keywords, included license files, artifact content audit, and `twine check` or equivalent validation for wheel and sdist. |
+| **PyPI Release Readiness** | High | Mixed | PyPI publication remains blocked. Local artifact readiness checks now exist, but CPU-first dependencies, backend setup commands, clean CI isolation, uninstall/reinstall smoke coverage, package metadata review, and cross-platform support matrix completion are still required. |
+| **Installation Documentation** | Medium | Mixed | Documentation distinguishes source/editable setup, local wheel/sdist artifact status, backend source selection, release artifact smoke testing, and PyPI publication gates. Dedicated released-wheel upgrade/uninstall and cross-platform matrix documentation remain planned. |
 
 ### Phase 13 Acceptance Criteria
 
@@ -163,6 +166,40 @@ This document outlines the development lifecycle of Sagittarius, from a function
 7. Unsupported or missing Julia installations produce documented, actionable diagnostics.
 8. CI tests installation artifacts across the declared Python, Julia, and operating-system support matrix.
 9. PyPI publication remains blocked until all release-readiness requirements and artifact smoke tests pass.
+
+### Phase 13 PyPI Readiness Completion Plan
+
+Before any public PyPI upload, complete these remaining blockers:
+
+1. CPU-first dependency profile:
+   - Split JuliaPkg configuration so the default CPU path resolves only CPU-required Julia packages.
+   - Move CUDA and future GPU packages into explicit optional workflows.
+   - Acceptance: a clean CPU wheel install and `python -m juliapkg resolve` succeed without CUDA.jl, NVIDIA drivers, CUDA runtime libraries, or GPU hardware.
+
+2. Backend setup commands:
+   - Add a user-facing backend setup CLI or equivalent entry point for `backend resolve`, backend-specific optional installation such as CUDA, and `doctor` diagnostics.
+   - Ensure failures normalize to actionable diagnostic codes and remediation messages.
+   - Acceptance: users can complete CPU setup through the documented command path without knowing JuliaPkg internals, while GPU setup remains explicit and opt-in.
+
+3. CI clean artifact isolation:
+   - Run wheel/sdist builds in CI, install artifacts into fresh virtual environments outside the repository, and remove source-tree import paths.
+   - Run import-lightweight, `python -m juliapkg resolve`, CPU one-atom simulation, serialization, doctor/version metadata, and artifact content checks.
+   - Acceptance: CI fails if package data is missing, runtime imports from the source checkout, or the installed wheel cannot run with `backend_source=package_resource`.
+
+4. Uninstall/reinstall smoke coverage:
+   - Test wheel uninstall, reinstall, and reinstall after moving or hiding the source checkout.
+   - Verify import, backend source detection, JuliaPkg resolution, and minimal CPU simulation after reinstall.
+   - Acceptance: reinstall workflows do not depend on stale package resources, stale Python metadata, or the original repository path.
+
+5. Package metadata review:
+   - Complete PyPI metadata fields, classifiers, license inclusion, long-description rendering, project URLs, maintainer information, and artifact checks.
+   - Run `twine check` or an equivalent metadata validation over wheel and sdist.
+   - Acceptance: wheel and sdist pass metadata validation and expose complete license/project information on the package index.
+
+6. Cross-platform support matrix:
+   - Validate the declared Python and Julia versions on Linux, macOS, and Windows.
+   - Document platform-specific Julia discovery, path handling, precompile, and optional GPU limitations.
+   - Acceptance: docs publish the supported OS/Python/Julia matrix and classify unsupported or experimental combinations before PyPI release.
 
 ## 🧪 Recommended Cold-Atom / Quantum-Simulation Project Backlog
 
