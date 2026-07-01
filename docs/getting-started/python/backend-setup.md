@@ -93,7 +93,7 @@ uv run python check_env.py
 uv run python -m pytest tests/
 ```
 
-The current dependency profile may still resolve CUDA.jl because `sagittarius/juliapkg.json` includes it. A CPU-first default profile with optional GPU setup is planned Phase 13 work.
+The default `sagittarius/juliapkg.json` profile is CPU-first and does not install CUDA.jl. CUDA remains opt-in through the packaged `sagittarius/juliapkg-cuda.json` profile and the planned backend setup command path.
 
 ## CUDA Setup
 

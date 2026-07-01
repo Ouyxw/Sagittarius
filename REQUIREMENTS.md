@@ -138,15 +138,15 @@ This document outlines the development lifecycle of Sagittarius, from a function
 6. Schrödinger, Lindblad, MCWF, CPU, and supported GPU paths either honor the selected method or reject it with a documented error.
 7. Automated tests verify dispatch, validation, metadata, backward compatibility, and numerical sanity.
 
-## 📦 Phase 13: Packaging & Installation (Planned)
+## 📦 Phase 13: Packaging & Installation (Mixed)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Source Installation Baseline** | High | Done | Defines the currently supported installation model as a complete repository checkout followed by `uv sync` and `python -m juliapkg resolve`. Documents `pip install -e .` as a development-only editable install that still depends on the repository layout, and explicitly states that an independent PyPI installation is not yet supported. |
 | **Relocatable Wheel** | High | Mixed | Local wheel artifacts contain the embedded Julia backend and pass repo-external package-resource and opt-in clean-venv smoke coverage. Full release status remains gated on uninstall/reinstall coverage, CI execution outside the source tree, and cross-platform validation. |
 | **Package Resource Lookup** | High | Done | Replaces direct repository-relative backend discovery with a centralized lookup that prefers the explicit `SAGITTARIUS_JULIA_BACKEND_PATH` environment override, then an editable/source checkout backend, then installed-package resources; diagnostics report `env_override`, `source_checkout`, or `package_resource`. |
 | **Julia Package Data** | High | Done | Includes `Sagittarius.jl/Project.toml`, `Manifest.toml`, Julia source files, and runtime metadata as Python package data under `sagittarius/julia/Sagittarius.jl/`, with artifact tests verifying wheel and source distributions contain the embedded backend. |
-| **CPU-First Dependency Profile** | High | Planned | Make the default installation usable for CPU simulations without CUDA, an NVIDIA driver, or CUDA.jl. Move CUDA and future GPU backend setup to explicit optional workflows rather than resolving CUDA for every user. |
-| **Optional GPU Backend Profiles** | High | Planned | Define explicit optional backend profiles for CUDA first, and later AMDGPU/Metal when mature. GPU packages must not be part of the default CPU resolve path; CUDA setup must be opt-in through backend setup commands and diagnostics. |
+| **CPU-First Dependency Profile** | High | Done | Default `juliapkg.json` and the embedded Julia backend project now resolve CPU-required Julia packages without CUDA.jl, an NVIDIA driver, or GPU hardware. CUDA is split into the packaged opt-in `juliapkg-cuda.json` profile for future backend setup workflows. |
+| **Optional GPU Backend Profiles** | High | Mixed | A packaged opt-in CUDA JuliaPkg profile exists and is not discovered by default CPU resolution. User-facing setup commands and later AMDGPU/Metal profiles remain planned. |
 | **Backend Setup Command** | Medium | Planned | Provide a user-facing CLI or equivalent explicit workflow for Julia dependency resolution and backend setup, such as `sagittarius backend resolve`, `sagittarius backend install cuda`, and `sagittarius doctor`. Backend installation failures must return actionable diagnostics. |
 | **CUDA Wheel Smoke and Parity** | High | Planned | Add a clean-venv wheel smoke for explicit CUDA setup: install wheel, run CUDA backend setup, run `doctor(backend="CUDA", initialize_backend=True)`, execute a small CPU/CUDA parity simulation, and verify driver/device/CUDA.jl/backend metadata in doctor, manifests, and result artifacts. Requires real NVIDIA GPU hardware or a dedicated GPU runner before release validation. |
 | **Clean-Environment Artifact Tests** | High | Mixed | Added artifact tests for wheel/sdist contents plus an opt-in `SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1` clean-venv release smoke that installs the wheel, runs `python -m juliapkg resolve`, executes a one-atom CPU simulation, and validates result artifact, manifest, doctor, and version metadata. The local smoke passes; CI matrix execution and uninstall/reinstall smoke coverage remain planned. |
@@ -155,7 +155,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Uninstall/Reinstall Smoke Coverage** | Medium | Planned | Add release-artifact smoke tests that uninstall the wheel, reinstall the same wheel, reinstall after moving or hiding the original source checkout, and verify import, backend source metadata, JuliaPkg resolution behavior, and a minimal CPU simulation still work without stale package-resource or Julia environment assumptions. |
 | **Package Metadata Review** | Medium | Planned | Complete PyPI-facing metadata before publication: project URLs, long description/readme rendering, license classifiers, supported Python classifiers, author/maintainer fields, keywords, included license files, artifact content audit, and `twine check` or equivalent validation for wheel and sdist. |
 | **TestPyPI and Publication Policy** | Medium | Planned | Validate release candidates on TestPyPI before production PyPI. Decide and document the publication sequence for private development, MIT open-source release, repository visibility, and PyPI upload. Treat PyPI upload as public distribution of the Python and embedded Julia backend sources even if the Git repository is still private. |
-| **PyPI Release Readiness** | High | Mixed | PyPI publication remains blocked. Local artifact readiness checks now exist, but CPU-first dependencies, backend setup commands, clean CI isolation, uninstall/reinstall smoke coverage, package metadata review, TestPyPI validation, publication policy, and cross-platform support matrix completion are still required. |
+| **PyPI Release Readiness** | High | Mixed | PyPI publication remains blocked. Local artifact readiness checks and CPU-first dependency behavior now exist, but backend setup commands, clean CI isolation, uninstall/reinstall smoke coverage, package metadata review, TestPyPI validation, publication policy, and cross-platform support matrix completion are still required. |
 | **Installation Documentation** | Medium | Mixed | Documentation distinguishes source/editable setup, local wheel/sdist artifact status, backend source selection, release artifact smoke testing, and PyPI publication gates. Dedicated released-wheel upgrade/uninstall and cross-platform matrix documentation remain planned. |
 
 ### Phase 13 Acceptance Criteria
@@ -174,10 +174,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 
 Before any public PyPI upload, complete these remaining blockers:
 
-1. CPU-first dependency profile:
-   - Split JuliaPkg configuration so the default CPU path resolves only CPU-required Julia packages.
-   - Move CUDA and future GPU packages into explicit optional workflows.
-   - Acceptance: a clean CPU wheel install and `python -m juliapkg resolve` succeed without CUDA.jl, NVIDIA drivers, CUDA runtime libraries, or GPU hardware.
+1. CPU-first dependency profile: Done. Default JuliaPkg and backend project metadata resolve CPU-required packages without CUDA.jl; CUDA is available only through the packaged opt-in profile.
 
 2. Backend setup commands:
    - Add a user-facing backend setup CLI or equivalent entry point for `backend resolve`, backend-specific optional installation such as CUDA, and `doctor` diagnostics.

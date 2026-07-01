@@ -17,10 +17,6 @@
         "SciMLBase": {
             "uuid": "0bca4576-84f4-4d90-8ffe-ffa030f20462"
         },
-        "CUDA": {
-            "uuid": "052768ef-5323-5732-b1bb-66c8b64840ba",
-            "version": "6.2.0"
-        },
         "PythonCall": {
             "uuid": "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
         },

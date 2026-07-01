@@ -33,4 +33,4 @@ Common issue codes include `CUDA_PASSTHROUGH_UNAVAILABLE`, `CUDA_BLACKWELL_DRIVE
 
 ## CUDA parity container policy
 
-The devcontainer and default `sagittarius_py/juliapkg.json` environment are CUDA-only: they pin CUDA.jl 6.2.x and intentionally do not install AMDGPU.jl or Metal.jl. The planned AMDGPU/Metal packages currently introduce dependency constraints that can prevent CUDA.jl 6.2.x from resolving. Use a separate backend-specific Julia environment when experimenting with AMDGPU or Metal.
+The default `sagittarius_py/juliapkg.json` environment is CPU-first and intentionally excludes CUDA.jl. CUDA setup is explicit through the packaged `sagittarius_py/sagittarius/juliapkg-cuda.json` profile and the planned backend setup command path; the devcontainer remains the CUDA parity environment for hardware-backed validation. The planned AMDGPU/Metal packages currently introduce dependency constraints that can prevent CUDA.jl 6.2.x from resolving. Use a separate backend-specific Julia environment when experimenting with AMDGPU or Metal.

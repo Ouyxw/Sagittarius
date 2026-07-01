@@ -44,7 +44,6 @@ The smoke test builds wheel/sdist artifacts, creates a clean seeded virtual envi
 The following are planned Phase 13 outcomes, not current installation promises:
 
 - independent `pip install sagittarius-py` from PyPI;
-- default CPU installation that avoids CUDA.jl resolution entirely;
 - user-facing backend setup commands such as `sagittarius backend resolve` or `sagittarius backend install cuda`;
 - clean-environment wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix;
 - uninstall/reinstall smoke tests for released wheel workflows.

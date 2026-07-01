@@ -15,6 +15,8 @@ PY_PACKAGE_ROOT = REPO_ROOT / "sagittarius_py"
 EMBEDDED_BACKEND = PY_PACKAGE_ROOT / "sagittarius" / "julia" / "Sagittarius.jl"
 CANONICAL_BACKEND = REPO_ROOT / "Sagittarius.jl"
 REQUIRED_BACKEND_FILES = {
+    "sagittarius/juliapkg.json",
+    "sagittarius/juliapkg-cuda.json",
     "sagittarius/julia/Sagittarius.jl/Project.toml",
     "sagittarius/julia/Sagittarius.jl/Manifest.toml",
     "sagittarius/julia/Sagittarius.jl/src/Sagittarius.jl",
@@ -112,6 +114,12 @@ from pathlib import Path
 
 import numpy as np
 import sagittarius
+from importlib.resources import files
+
+default_juliapkg = json.loads(files("sagittarius").joinpath("juliapkg.json").read_text())
+cuda_juliapkg = json.loads(files("sagittarius").joinpath("juliapkg-cuda.json").read_text())
+assert "CUDA" not in default_juliapkg["packages"]
+assert set(cuda_juliapkg["packages"]) == {"CUDA"}
 
 report = sagittarius.doctor()
 assert report["backend_source"] == "package_resource", report["julia_backend"]

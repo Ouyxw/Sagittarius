@@ -32,6 +32,7 @@ packages = ["sagittarius"]
 [tool.setuptools.package-data]
 sagittarius = [
     "juliapkg.json",
+    "juliapkg-cuda.json",
     "julia/Sagittarius.jl/Project.toml",
     "julia/Sagittarius.jl/Manifest.toml",
     "julia/Sagittarius.jl/src/*.jl",

@@ -69,4 +69,4 @@ This is preferred over invoking the full path to `Sagittarius/sagittarius_py/.ve
 
 ## CPU and GPU Notes
 
-The current `juliapkg.json` also includes CUDA.jl. Consequently, `uv run python -m juliapkg resolve` may install Julia CUDA packages even for CPU-only experiments. Separating the default CPU dependency profile from optional GPU setup is planned packaging work. See [Python backend setup](backend-setup.md) for the current CPU/GPU boundary.
+The default `juliapkg.json` is CPU-first: `uv run python -m juliapkg resolve` installs the Julia packages needed for CPU simulations without CUDA.jl, an NVIDIA driver, or GPU hardware. CUDA setup is explicit and experimental; see [Python backend setup](backend-setup.md) for the current CPU/GPU boundary.
