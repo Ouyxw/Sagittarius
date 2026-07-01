@@ -23,7 +23,8 @@ def test_phase13_source_install_baseline_is_documented():
     assert "python -m juliapkg resolve" in docs
     assert "pip install -e ." in docs
     assert "development-only" in docs
-    assert "repository layout" in docs
+    assert "source checkout" in docs
+    assert "embedded Julia backend" in docs
     assert "not supported yet" in docs
     assert "pip install sagittarius-py" in docs
 

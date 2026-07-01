@@ -21,15 +21,17 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-Editable installs still depend on the repository layout. They are not relocatable and should not be treated as a wheel-install equivalent.
+Editable installs still depend on the configured source checkout for Python code updates and should not be treated as a released wheel-install equivalent.
+
+## Local Artifact Status
+
+Local wheel and source-distribution builds now include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`, including `Project.toml`, `Manifest.toml`, and `src/*.jl`. Packaging tests verify those artifact contents and run an installed-wheel smoke test from outside the repository using the embedded backend resource.
 
 ## Not Supported Yet for Python Users
 
 The following are planned Phase 13 outcomes, not current installation promises:
 
 - independent `pip install sagittarius-py` from PyPI;
-- a relocatable wheel that works after the source checkout is moved or deleted;
-- a source distribution that packages all required Julia backend files and metadata;
 - default CPU installation that avoids CUDA.jl resolution entirely;
 - user-facing backend setup commands such as `sagittarius backend resolve` or `sagittarius backend install cuda`;
 - clean-environment wheel/sdist CI smoke tests across the declared Python, Julia, and operating-system matrix.

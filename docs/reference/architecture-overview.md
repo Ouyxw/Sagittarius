@@ -121,7 +121,7 @@ This layer allows results, benchmark claims, and public reports to be audited af
 
 ## Current Architecture Constraints
 
-- Source checkout layout is still important for the Python SDK and Julia backend relationship. Phase 13 tracks relocatable wheel and package-resource lookup work.
+- Python artifacts now embed the Julia backend under `sagittarius/julia/Sagittarius.jl`; Phase 13 still tracks clean-environment artifact tests, CPU-first dependency work, and release-readiness gates.
 - CUDA is experimental and requires explicit runtime diagnostics and parity evidence before performance claims.
 - AMDGPU and Metal are planned backend names, not mature execution paths.
 - Solver method dispatch is implemented for current solver paths through an auditable `method`/`adaptive`/`dt` contract; unsupported backend paths must reject explicitly rather than silently substituting algorithms.

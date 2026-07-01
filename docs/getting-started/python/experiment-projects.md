@@ -40,7 +40,7 @@ uv sync --reinstall-package sagittarius-py
 uv run python -m juliapkg resolve
 ```
 
-## Current Editable-Install Limitation
+## Current Editable-Install Notes
 
 The generated `pyproject.toml` records the local source dependency through a uv source entry equivalent to:
 
@@ -54,9 +54,7 @@ dependencies = [
 sagittarius-py = { path = "../Sagittarius/sagittarius_py", editable = true }
 ```
 
-Because the current editable installation locates the Julia backend from the source repository, keep the complete `Sagittarius/` checkout in the configured relative location. Moving it requires updating the uv source path and running `uv sync` again.
-
-A relocatable wheel that works after the source checkout is moved or deleted is planned Phase 13 work. See [Python package installation status](package-installation.md).
+The Python runtime loads the embedded Julia backend resource from the installed `sagittarius-py` package when available. The editable dependency still points to the local checkout for Python source updates, so moving the checkout requires updating the uv source path and running `uv sync` again. Local wheel artifacts now embed the Julia backend; independent PyPI installation remains gated by Phase 13 release-readiness work. See [Python package installation status](package-installation.md).
 
 ## Run Experiment Scripts
 

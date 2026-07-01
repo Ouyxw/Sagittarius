@@ -17,7 +17,7 @@ git clone <repository_url> Sagittarius
 cd Sagittarius
 ```
 
-The current Python runtime still expects the repository checkout to keep `Sagittarius.jl/` and `sagittarius_py/` together:
+A complete checkout keeps the canonical Julia-native backend beside the Python package, while the Python runtime loads the packaged backend resource embedded under `sagittarius_py/sagittarius/julia/Sagittarius.jl`:
 
 ```text
 Sagittarius/
@@ -48,7 +48,7 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-This `pip install -e .` workflow is development-only. It still depends on the repository layout and is not equivalent to a relocatable wheel or independent PyPI install. Independent `pip install sagittarius-py` from PyPI is not supported yet.
+This `pip install -e .` workflow is development-only. It still depends on the editable source checkout for Python code updates and is not equivalent to an independent PyPI install. Local wheel artifacts now embed the Julia backend, but independent `pip install sagittarius-py` from PyPI is not supported yet.
 
 If Julia is installed but cannot be found automatically, specify its executable before resolving:
 

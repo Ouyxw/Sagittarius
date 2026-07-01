@@ -30,7 +30,12 @@ build-backend = "setuptools.build_meta"
 packages = ["sagittarius"]
 
 [tool.setuptools.package-data]
-sagittarius = ["juliapkg.json"]
+sagittarius = [
+    "juliapkg.json",
+    "julia/Sagittarius.jl/Project.toml",
+    "julia/Sagittarius.jl/Manifest.toml",
+    "julia/Sagittarius.jl/src/*.jl",
+]
 
 [tool.pytest.ini_options]
 markers = [
