@@ -146,13 +146,16 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **Package Resource Lookup** | High | Done | Replaces direct repository-relative backend discovery with a centralized lookup that prefers the explicit `SAGITTARIUS_JULIA_BACKEND_PATH` environment override, then an editable/source checkout backend, then installed-package resources; diagnostics report `env_override`, `source_checkout`, or `package_resource`. |
 | **Julia Package Data** | High | Done | Includes `Sagittarius.jl/Project.toml`, `Manifest.toml`, Julia source files, and runtime metadata as Python package data under `sagittarius/julia/Sagittarius.jl/`, with artifact tests verifying wheel and source distributions contain the embedded backend. |
 | **CPU-First Dependency Profile** | High | Planned | Make the default installation usable for CPU simulations without CUDA, an NVIDIA driver, or CUDA.jl. Move CUDA and future GPU backend setup to explicit optional workflows rather than resolving CUDA for every user. |
+| **Optional GPU Backend Profiles** | High | Planned | Define explicit optional backend profiles for CUDA first, and later AMDGPU/Metal when mature. GPU packages must not be part of the default CPU resolve path; CUDA setup must be opt-in through backend setup commands and diagnostics. |
 | **Backend Setup Command** | Medium | Planned | Provide a user-facing CLI or equivalent explicit workflow for Julia dependency resolution and backend setup, such as `sagittarius backend resolve`, `sagittarius backend install cuda`, and `sagittarius doctor`. Backend installation failures must return actionable diagnostics. |
+| **CUDA Wheel Smoke and Parity** | High | Planned | Add a clean-venv wheel smoke for explicit CUDA setup: install wheel, run CUDA backend setup, run `doctor(backend="CUDA", initialize_backend=True)`, execute a small CPU/CUDA parity simulation, and verify driver/device/CUDA.jl/backend metadata in doctor, manifests, and result artifacts. Requires real NVIDIA GPU hardware or a dedicated GPU runner before release validation. |
 | **Clean-Environment Artifact Tests** | High | Mixed | Added artifact tests for wheel/sdist contents plus an opt-in `SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1` clean-venv release smoke that installs the wheel, runs `python -m juliapkg resolve`, executes a one-atom CPU simulation, and validates result artifact, manifest, doctor, and version metadata. The local smoke passes; CI matrix execution and uninstall/reinstall smoke coverage remain planned. |
 | **Cross-Platform Installation Matrix** | High | Planned | Validate supported Python and Julia versions on Linux, macOS, and Windows. Publish an explicit compatibility matrix and classify platform-specific Julia discovery or compilation limitations. |
 | **CI Clean Artifact Isolation** | High | Planned | Promote the local release smoke to CI: build wheel and sdist from a clean checkout, install the wheel into a fresh virtual environment outside the repository, clear source-tree `PYTHONPATH` leakage, run `python -m juliapkg resolve`, execute a CPU one-atom simulation, and validate doctor/version/result metadata. CI must fail if tests accidentally import from the source tree. |
 | **Uninstall/Reinstall Smoke Coverage** | Medium | Planned | Add release-artifact smoke tests that uninstall the wheel, reinstall the same wheel, reinstall after moving or hiding the original source checkout, and verify import, backend source metadata, JuliaPkg resolution behavior, and a minimal CPU simulation still work without stale package-resource or Julia environment assumptions. |
 | **Package Metadata Review** | Medium | Planned | Complete PyPI-facing metadata before publication: project URLs, long description/readme rendering, license classifiers, supported Python classifiers, author/maintainer fields, keywords, included license files, artifact content audit, and `twine check` or equivalent validation for wheel and sdist. |
-| **PyPI Release Readiness** | High | Mixed | PyPI publication remains blocked. Local artifact readiness checks now exist, but CPU-first dependencies, backend setup commands, clean CI isolation, uninstall/reinstall smoke coverage, package metadata review, and cross-platform support matrix completion are still required. |
+| **TestPyPI and Publication Policy** | Medium | Planned | Validate release candidates on TestPyPI before production PyPI. Decide and document the publication sequence for private development, MIT open-source release, repository visibility, and PyPI upload. Treat PyPI upload as public distribution of the Python and embedded Julia backend sources even if the Git repository is still private. |
+| **PyPI Release Readiness** | High | Mixed | PyPI publication remains blocked. Local artifact readiness checks now exist, but CPU-first dependencies, backend setup commands, clean CI isolation, uninstall/reinstall smoke coverage, package metadata review, TestPyPI validation, publication policy, and cross-platform support matrix completion are still required. |
 | **Installation Documentation** | Medium | Mixed | Documentation distinguishes source/editable setup, local wheel/sdist artifact status, backend source selection, release artifact smoke testing, and PyPI publication gates. Dedicated released-wheel upgrade/uninstall and cross-platform matrix documentation remain planned. |
 
 ### Phase 13 Acceptance Criteria
@@ -196,7 +199,19 @@ Before any public PyPI upload, complete these remaining blockers:
    - Run `twine check` or an equivalent metadata validation over wheel and sdist.
    - Acceptance: wheel and sdist pass metadata validation and expose complete license/project information on the package index.
 
-6. Cross-platform support matrix:
+6. TestPyPI and publication policy:
+   - Publish release candidates to TestPyPI before production PyPI and verify installation from TestPyPI in a clean environment.
+   - Decide whether the Git repository becomes public before, during, or after PyPI publication; document that PyPI artifacts publicly distribute Python and embedded Julia backend sources regardless of repository visibility.
+   - Add an explicit release checklist for MIT license readiness, repository visibility, issue tracker/docs readiness, and accidental-upload prevention such as a temporary private/do-not-upload classifier if needed.
+   - Acceptance: production PyPI upload is blocked until TestPyPI install succeeds and the open-source/publication policy is approved.
+
+7. GPU optional backend path:
+   - Build on CPU-first dependencies by adding explicit optional CUDA setup, then later AMDGPU/Metal only when backend maturity improves.
+   - Add CUDA wheel smoke and CPU/CUDA parity tests that run from a clean wheel install on real GPU hardware.
+   - Record CUDA.jl version, driver, device, backend source, and parity metadata in doctor reports, run manifests, and result artifacts.
+   - Acceptance: CUDA wheel support is marked release-validated only after explicit setup, doctor, parity, artifact metadata, and GPU runner evidence pass; otherwise it remains experimental/local only.
+
+8. Cross-platform support matrix:
    - Validate the declared Python and Julia versions on Linux, macOS, and Windows.
    - Document platform-specific Julia discovery, path handling, precompile, and optional GPU limitations.
    - Acceptance: docs publish the supported OS/Python/Julia matrix and classify unsupported or experimental combinations before PyPI release.
@@ -250,6 +265,9 @@ This backlog prioritizes example projects and validation studies for using Sagit
 7. CPU/CUDA parity or benchmark-artifact generation where hardware is available.
 
 ## 🌫️ Phase 14: Theoretical Noise Model Extensions (Planned)
+
+Phase 14 implementation should start after the Phase 13 critical packaging path is stable enough for repeatable validation: CPU-first dependency profile, backend setup commands, and CI clean artifact isolation. This avoids expanding solver and metadata surface area on top of unstable install behavior.
+
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Noise Model Specification** | High | Planned | Document the current local Markovian open-system baseline and define the extension path for theoretical noise models in `docs/physics/SPEC-PHYS-004-noise-models.md`, explicitly separating theory-oriented noise from hardware readout/calibration models. |
@@ -270,12 +288,16 @@ This backlog prioritizes example projects and validation studies for using Sagit
 6. Documentation distinguishes theoretical open-system/stochastic models from hardware readout or calibration error models.
 
 ## 🧾 Phase 15: Experiment Workflow & Readout Reproducibility (Planned)
+
+Phase 15 executable recipes may begin after the Phase 13 CPU-first, backend setup, and clean artifact isolation work is in place, so examples can target stable source and wheel installation paths. Wheel-installed recipes are part of the release-readiness bridge between Phase 13 and user-facing experiment workflows.
+
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Measurement / Sampling API** | High | Planned | Add a stable final-state sampling and measurement API for shot-based workflows, including final bitstring distribution extraction, `SimulationResult.sample(shots, seed=...)`, reduced-basis forbidden-bitstring handling, readout metadata in manifests, and compatibility with `shared-result/v1` result series. |
 | **Random Seed Control** | High | Done | Added user-facing `SolverConfig.seed` control for current MCWF trajectories and record requested/effective RNG metadata in run manifests and result artifacts. Future final-state sampling, randomized project scripts, and benchmark/demo workflows should adopt the same seed metadata contract when they land. |
 | **Output Time Grid / Saveat Contract** | High | Done | Added `SolverConfig.saveat` as either a fixed output sample count or explicit output time array. Sagittarius records requested `saveat` and normalized `effective_saveat` in diagnostics, run manifests, and serialized artifacts, and forwards the grid to Schrödinger, Lindblad, MCWF, CPU, and supported GPU solver paths. |
 | **Executable Experiment Recipes** | High | Planned | Promote the recommended P0/P1 project backlog into runnable examples with expected outputs and artifact generation, including single-atom Rabi, two-atom blockade, Landau-Zener sweep, open-system decay/dephasing, and small UDG/MWIS workflows. |
+| **Wheel-Installed Experiment Recipes** | Medium | Planned | Add external-user recipes that run from an installed wheel outside the source checkout, starting with a small UDG/MWIS workflow using only public `sagittarius` APIs and ordinary Python dependencies. Repo-local `projects/` scripts may remain source-checkout examples, but wheel recipes must not depend on project files being packaged. |
 | **State Preparation Helpers** | Medium | Planned | Add helpers for common initial states, including all-ground state, named bitstring states, single-excitation states, and optional uniform superpositions. Helpers must validate full/reduced basis compatibility and preserve state-preparation metadata. |
 | **Experiment Config Schema** | Medium | Planned | Define an `experiment-config/v1` schema that can describe register geometry, pulse schedule, solver options, observables/readout, seed controls, and output artifact paths. Provide load/run/save workflow and link generated run manifests back to the source config. |
 | **Parameter Sweep API and Artifacts** | Medium | Planned | Add a user-facing parameter sweep workflow for `omega`, `delta`, `blockade_radius`, geometry, noise, solver settings, and observable declarations. Emit resumable sweep artifacts with per-run manifest links, distinct from benchmark artifacts when the purpose is scientific exploration rather than performance measurement. |
@@ -287,10 +309,11 @@ This backlog prioritizes example projects and validation studies for using Sagit
 2. MCWF, sampling, randomized project scripts, and benchmark/demo workflows record requested/effective seed metadata.
 3. Users can request an explicit output time grid or stable output count, and every applicable solver path either honors it or rejects it with a documented diagnostic.
 4. P0/P1 experiment recipes run from the repository with expected output shapes, diagnostics, manifests, and serialization artifacts.
-5. Common initial-state helpers work consistently in full and reduced bases and fail clearly for forbidden reduced-basis bitstrings.
-6. `experiment-config/v1` can reproduce a run and link generated artifacts to the source configuration.
-7. Sweep artifacts preserve parameter values, result locations, run manifests, and resumability metadata.
-8. Documentation checks verify SPEC metadata and Markdown links before release-oriented documentation changes are accepted.
+5. At least one wheel-installed external experiment recipe, preferably small UDG/MWIS, runs outside the source checkout using only public package APIs and emits reproducible artifacts.
+6. Common initial-state helpers work consistently in full and reduced bases and fail clearly for forbidden reduced-basis bitstrings.
+7. `experiment-config/v1` can reproduce a run and link generated artifacts to the source configuration.
+8. Sweep artifacts preserve parameter values, result locations, run manifests, and resumability metadata.
+9. Documentation checks verify SPEC metadata and Markdown links before release-oriented documentation changes are accepted.
 
 ## 🧩 Phase 16: Experimental Interop & Readout Models (Future)
 | Requirement | Priority | Status | Description |
