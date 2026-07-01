@@ -37,6 +37,6 @@ cd my_julia_experiment
 julia --project=. -e 'using Pkg; Pkg.develop(path="../Sagittarius/Sagittarius.jl"); Pkg.instantiate()'
 ```
 
-The Python SDK resolves the Julia backend through an explicit lookup order: `SAGITTARIUS_JULIA_BACKEND_PATH` for development overrides, packaged backend resources embedded under `sagittarius/julia/Sagittarius.jl`, and the adjacent source checkout fallback. Source checkouts still keep the canonical `Sagittarius.jl/` tree for Julia-native development, but Python runtime loading no longer depends on that adjacent checkout when package resources are available. Julia-native users depend on `Sagittarius.jl` directly and do not need the Python wheel path.
+The Python SDK resolves the Julia backend through an explicit lookup order: `SAGITTARIUS_JULIA_BACKEND_PATH` for environment overrides, an adjacent editable/source checkout, and packaged backend resources embedded under `sagittarius/julia/Sagittarius.jl`. Editable source installs prefer the checkout so Julia source edits take effect immediately; wheel installs use the packaged backend resource when no adjacent checkout exists. Julia-native users depend on `Sagittarius.jl` directly and do not need the Python wheel path.
 
 Phase 13 packaging now embeds the Julia backend sources and project metadata in Python artifacts. Remaining release-readiness work still covers clean-environment dependency profiles, backend setup commands, cross-platform artifact tests, and PyPI publication gates. The embedded copy does not replace `Sagittarius.jl` as the native Julia entry point.

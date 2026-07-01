@@ -21,8 +21,8 @@ $env:PYTHON_JULIACALL_EXE = "C:\absolute\path\to\julia.exe"
 Python runtime backend discovery uses this order:
 
 1. `SAGITTARIUS_JULIA_BACKEND_PATH`, when set, pointing at a `Sagittarius.jl` directory that contains `Project.toml` and `src/Sagittarius.jl`;
-2. packaged Julia backend resources inside the installed Python package;
-3. the adjacent repository checkout fallback used by current source installations.
+2. the adjacent editable/source checkout backend, so Julia source edits take effect immediately during development;
+3. packaged Julia backend resources inside an installed wheel or source distribution.
 
 Use the override only for development or local debugging:
 

@@ -36,7 +36,7 @@ Keep long-running experiments in a separate project rather than under this repos
 
 Requirements: Git, Julia 1.10.3 or newer, a Python version supported by `sagittarius_py/pyproject.toml`, and optionally `uv`.
 
-The supported Python installation path is a complete source checkout followed by Python dependency synchronization and JuliaPkg resolution. Clone the complete repository; the Python package embeds the Julia backend under `sagittarius/julia/Sagittarius.jl` while the top-level `Sagittarius.jl/` remains the canonical Julia-native source.
+The supported Python installation path is a complete source checkout followed by Python dependency synchronization and JuliaPkg resolution. Clone the complete repository; editable/source installs prefer the top-level `Sagittarius.jl/` backend so Julia edits take effect immediately, while wheel installs use the embedded backend under `sagittarius/julia/Sagittarius.jl`.
 
 ```bash
 git clone <repository_url> Sagittarius

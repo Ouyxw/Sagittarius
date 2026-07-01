@@ -36,7 +36,7 @@ def _make_backend_tree(path: Path) -> Path:
     return path
 
 
-def test_julia_backend_path_prefers_explicit_override(monkeypatch, tmp_path):
+def test_julia_backend_path_prefers_env_override(monkeypatch, tmp_path):
     import sagittarius.runtime as runtime
 
     override = _make_backend_tree(tmp_path / "override" / "Sagittarius.jl")
@@ -46,17 +46,34 @@ def test_julia_backend_path_prefers_explicit_override(monkeypatch, tmp_path):
     monkeypatch.setattr(runtime.resources, "files", lambda package: package_backend.parents[1])
 
     assert runtime._project_path() == override.resolve()
-    assert runtime._julia_backend_metadata()["source"] == "override"
+    assert runtime._julia_backend_metadata()["source"] == "env_override"
     assert runtime._julia_backend_metadata()["path_env"] == runtime.JULIA_BACKEND_PATH_ENV
 
 
-def test_julia_backend_path_uses_package_resource(monkeypatch, tmp_path):
+def test_julia_backend_path_prefers_source_checkout_over_package_resource(monkeypatch, tmp_path):
+    import sagittarius.runtime as runtime
+
+    source_backend = _make_backend_tree(tmp_path / "checkout" / "Sagittarius.jl")
+    package_root = tmp_path / "package"
+    _make_backend_tree(package_root / "julia" / "Sagittarius.jl")
+
+    monkeypatch.delenv(runtime.JULIA_BACKEND_PATH_ENV, raising=False)
+    monkeypatch.setattr(runtime, "_source_checkout_backend_path", lambda: source_backend)
+    monkeypatch.setattr(runtime.resources, "files", lambda package: package_root)
+
+    assert runtime._project_path() == source_backend
+    assert runtime._julia_backend_metadata()["source"] == "source_checkout"
+    assert runtime._julia_backend_metadata()["available"] is True
+
+
+def test_julia_backend_path_uses_package_resource_when_source_checkout_missing(monkeypatch, tmp_path):
     import sagittarius.runtime as runtime
 
     package_root = tmp_path / "package"
     package_backend = _make_backend_tree(package_root / "julia" / "Sagittarius.jl")
 
     monkeypatch.delenv(runtime.JULIA_BACKEND_PATH_ENV, raising=False)
+    monkeypatch.setattr(runtime, "_source_checkout_backend_path", lambda: tmp_path / "missing" / "Sagittarius.jl")
     monkeypatch.setattr(runtime.resources, "files", lambda package: package_root)
 
     assert runtime._project_path() == package_backend
@@ -64,14 +81,17 @@ def test_julia_backend_path_uses_package_resource(monkeypatch, tmp_path):
     assert runtime._julia_backend_metadata()["available"] is True
 
 
-def test_julia_backend_path_falls_back_to_source_checkout(monkeypatch):
+def test_julia_backend_path_falls_back_to_missing_source_checkout(monkeypatch, tmp_path):
     import sagittarius.runtime as runtime
 
+    missing_source = tmp_path / "missing" / "Sagittarius.jl"
     monkeypatch.delenv(runtime.JULIA_BACKEND_PATH_ENV, raising=False)
+    monkeypatch.setattr(runtime, "_source_checkout_backend_path", lambda: missing_source)
     monkeypatch.setattr(runtime, "_package_backend_resource_path", lambda: None)
 
-    assert runtime._project_path() == runtime._source_checkout_backend_path()
+    assert runtime._project_path() == missing_source
     assert runtime._julia_backend_metadata()["source"] == "source_checkout"
+    assert runtime._julia_backend_metadata()["available"] is False
 
 
 def test_invalid_julia_backend_path_fails_before_juliacall_import(monkeypatch, tmp_path):
@@ -144,6 +164,9 @@ def test_doctor_runtime_includes_version_metadata(monkeypatch):
 
     assert report["runtime"]["schema_version"] == "version-info/v1"
     assert {"python", "julia", "build", "container", "backend_toolchains", "abi"} <= set(report["runtime"])
+    assert report["backend_source"] == report["runtime"]["julia"]["source"]
+    assert report["julia_backend"] == report["runtime"]["julia"]
+    assert report["backend_source"] in {"env_override", "source_checkout", "package_resource"}
     assert report["container"] == report["runtime"]["container"]
     assert report["capabilities"]["backend"] == report["requested_backend"]
     assert report["capabilities"]["abi"]["host"] == report["runtime"]["abi"]

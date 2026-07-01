@@ -207,16 +207,22 @@ def _project_path() -> Path:
     if override:
         return Path(override).expanduser().resolve()
 
+    source_checkout = _source_checkout_backend_path()
+    if _valid_julia_backend_path(source_checkout):
+        return source_checkout
+
     packaged = _package_backend_resource_path()
     if packaged is not None:
         return packaged
 
-    return _source_checkout_backend_path()
+    return source_checkout
 
 
 def _julia_backend_source(path: Path) -> str:
     if os.environ.get(JULIA_BACKEND_PATH_ENV):
-        return "override"
+        return "env_override"
+    if path == _source_checkout_backend_path() and _valid_julia_backend_path(path):
+        return "source_checkout"
     if _package_backend_resource_path() == path:
         return "package_resource"
     return "source_checkout"
@@ -228,7 +234,7 @@ def _julia_backend_metadata() -> Dict[str, Any]:
     return {
         "project_path": str(path),
         "source": source,
-        "path_env": JULIA_BACKEND_PATH_ENV if source == "override" else None,
+        "path_env": JULIA_BACKEND_PATH_ENV if source == "env_override" else None,
         "available": _valid_julia_backend_path(path),
     }
 
@@ -907,6 +913,8 @@ def doctor(*, backend: str = "CPU", initialize_backend: bool = False) -> Dict[st
         "gpu": {},
         "backend_probe": None,
         "capabilities": _backend_capability_summary(requested, runtime_info),
+        "backend_source": runtime_info["julia"]["source"],
+        "julia_backend": runtime_info["julia"],
         "available": True,
         "issues": [],
         "issue_details": [],
@@ -957,6 +965,8 @@ def doctor(*, backend: str = "CPU", initialize_backend: bool = False) -> Dict[st
             report["julia_loaded"] = True
             report["runtime"] = version_info(initialize_backend=False)
             report["capabilities"] = _backend_capability_summary(requested, report["runtime"])
+            report["backend_source"] = report["runtime"]["julia"]["source"]
+            report["julia_backend"] = report["runtime"]["julia"]
             try:
                 probe = _probe_julia_backend(jl, requested)
                 report["backend_probe"] = probe

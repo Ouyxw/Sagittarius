@@ -17,7 +17,7 @@ git clone <repository_url> Sagittarius
 cd Sagittarius
 ```
 
-A complete checkout keeps the canonical Julia-native backend beside the Python package, while the Python runtime loads the packaged backend resource embedded under `sagittarius_py/sagittarius/julia/Sagittarius.jl`:
+A complete checkout keeps the canonical Julia-native backend beside the Python package. In editable/source mode, the Python runtime prefers this adjacent checkout so Julia source edits take effect immediately; wheel installs use the packaged backend resource embedded under `sagittarius/julia/Sagittarius.jl`:
 
 ```text
 Sagittarius/
