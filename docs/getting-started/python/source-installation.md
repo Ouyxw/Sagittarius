@@ -1,6 +1,6 @@
 # Python Source Installation
 
-This guide describes how to install and test the Python SDK from a complete Sagittarius source checkout.
+This guide describes the currently supported Python installation baseline: install and test the Python SDK from a complete Sagittarius source checkout, then resolve Julia dependencies in that Python environment.
 
 ## Prerequisites
 
@@ -48,7 +48,7 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-This `pip install -e .` workflow is development-only. It still depends on the repository layout and is not equivalent to a relocatable wheel or independent PyPI install.
+This `pip install -e .` workflow is development-only. It still depends on the repository layout and is not equivalent to a relocatable wheel or independent PyPI install. Independent `pip install sagittarius-py` from PyPI is not supported yet.
 
 If Julia is installed but cannot be found automatically, specify its executable before resolving:
 
@@ -59,7 +59,7 @@ export PYTHON_JULIACALL_EXE=/absolute/path/to/julia
 Windows PowerShell:
 
 ```powershell
-$env:PYTHON_JULIACALL_EXE = "C:bsolute\path	o\julia.exe"
+$env:PYTHON_JULIACALL_EXE = "C:\absolute\path\to\julia.exe"
 ```
 
 See [Python backend setup](backend-setup.md) for Julia executable discovery, JuliaPkg runtime notes, and CPU/GPU backend setup.
