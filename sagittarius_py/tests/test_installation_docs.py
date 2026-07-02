@@ -80,3 +80,27 @@ def test_phase13_uninstall_reinstall_smoke_is_documented():
     assert "Uninstall/Reinstall Smoke Coverage** | Medium | Done" in docs
     assert "package_resource" in docs
     assert "no longer importable" in docs
+
+
+def test_phase13_ci_workflow_policy_is_documented():
+    docs = "\n\n".join(
+        [
+            _read("docs/getting-started/python/package-installation.md"),
+            _read("REQUIREMENTS.md"),
+            _read(".github/workflows/pr-fast-ci.yml"),
+            _read(".github/workflows/phase13-clean-artifact.yml"),
+            _read(".github/workflows/phase13-cross-platform.yml"),
+            _read(".github/workflows/phase13-testpypi.yml"),
+            _read(".github/workflows/phase13-cuda-wheel.yml"),
+        ]
+    )
+
+    assert ".github/workflows/pr-fast-ci.yml" in docs
+    assert "Automatic on pull requests" in docs
+    assert "workflow_dispatch" in _read(".github/workflows/phase13-cross-platform.yml")
+    assert "pull_request" not in _read(".github/workflows/phase13-cross-platform.yml")
+    assert "pull_request" not in _read(".github/workflows/phase13-testpypi.yml")
+    assert "pull_request" not in _read(".github/workflows/phase13-cuda-wheel.yml")
+    assert "pull_request" not in _read(".github/workflows/phase13-clean-artifact.yml")
+    assert "Automatic on relevant pushes to `main`" in docs
+    assert "Manual only" in docs

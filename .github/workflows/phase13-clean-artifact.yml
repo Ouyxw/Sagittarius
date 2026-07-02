@@ -1,16 +1,15 @@
 name: Phase 13 Clean Artifact Smoke
 
 on:
-  pull_request:
+  push:
+    branches:
+      - main
     paths:
       - "Sagittarius.jl/**"
       - "sagittarius_py/**"
       - "docs/getting-started/**"
       - "REQUIREMENTS.md"
       - ".github/workflows/phase13-clean-artifact.yml"
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:

@@ -1,0 +1,52 @@
+name: PR Fast CI
+
+on:
+  pull_request:
+    branches:
+      - develop/v1.0.0
+      - develop/v.1.0.0
+      - main
+    paths:
+      - "Sagittarius.jl/**"
+      - "sagittarius_py/**"
+      - "docs/**"
+      - "REQUIREMENTS.md"
+      - ".github/workflows/pr-fast-ci.yml"
+      - ".github/workflows/phase13-*.yml"
+  workflow_dispatch:
+
+jobs:
+  python-fast-tests:
+    name: Python fast tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONNOUSERSITE: "1"
+      PYTHONPATH: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "sagittarius_py/uv.lock"
+
+      - name: Run fast PR tests
+        working-directory: sagittarius_py
+        run: >-
+          uv run python -m pytest
+          tests/test_installation_docs.py
+          tests/test_benchmark_artifacts.py
+          tests/test_packaging_artifacts.py::test_python_package_metadata_is_release_ready
+          tests/test_packaging_artifacts.py::test_wheel_metadata_contains_release_fields
+          tests/test_packaging_artifacts.py::test_sdist_contains_readme_license_and_pyproject_metadata
+          tests/test_packaging_artifacts.py::test_wheel_contains_embedded_julia_backend
+          tests/test_packaging_artifacts.py::test_sdist_contains_embedded_julia_backend
+          -q
