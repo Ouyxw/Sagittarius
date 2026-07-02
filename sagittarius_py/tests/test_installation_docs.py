@@ -60,3 +60,18 @@ def test_phase13_cross_platform_matrix_is_documented():
     assert "Julia 1.10.3" in docs or "1.10.3" in docs
     assert "phase13-cross-platform.yml" in docs
     assert "Cross-Platform Installation Matrix** | High | Mixed" in docs
+
+
+def test_phase13_uninstall_reinstall_smoke_is_documented():
+    docs = "\n\n".join(
+        [
+            _read("docs/getting-started/python/package-installation.md"),
+            _read("REQUIREMENTS.md"),
+            _read(".github/workflows/phase13-clean-artifact.yml"),
+        ]
+    )
+
+    assert "test_clean_venv_installed_wheel_uninstall_reinstall_smoke" in docs
+    assert "Uninstall/Reinstall Smoke Coverage** | Medium | Done" in docs
+    assert "package_resource" in docs
+    assert "no longer importable" in docs

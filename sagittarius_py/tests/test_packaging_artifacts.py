@@ -64,6 +64,62 @@ def _venv_executable(venv_dir: Path, name: str) -> Path:
     return venv_dir / scripts / f"{name}{suffix}"
 
 
+def _clean_wheel_cpu_probe_script(output_name: str = "result.json") -> str:
+    return f"""
+import json
+import os
+from pathlib import Path
+
+import numpy as np
+import sagittarius
+from importlib.resources import files
+
+source_root = Path(os.environ["SAGITTARIUS_SOURCE_ROOT_FOR_TEST"]).resolve()
+package_file = Path(sagittarius.__file__).resolve()
+assert not package_file.is_relative_to(source_root), package_file
+
+default_juliapkg = json.loads(files("sagittarius").joinpath("juliapkg.json").read_text())
+cuda_juliapkg = json.loads(files("sagittarius").joinpath("juliapkg-cuda.json").read_text())
+assert "CUDA" not in default_juliapkg["packages"]
+assert set(cuda_juliapkg["packages"]) == {{"CUDA"}}
+
+report = sagittarius.doctor()
+assert report["backend_source"] == "package_resource", report["julia_backend"]
+assert report["runtime"]["julia"]["source"] == "package_resource"
+assert report["runtime"]["julia"]["available"] is True
+assert report["runtime"]["julia_version"] is None
+assert report["runtime"]["schema_version"] == sagittarius.VERSION_INFO_SCHEMA_VERSION
+assert report["runtime"]["julia"]["project_path"].endswith("sagittarius/julia/Sagittarius.jl")
+
+reg = sagittarius.Register([sagittarius.Atom(0.0, 0.0, 0.0)], C6=0.0)
+sim = sagittarius.Simulation(
+    reg,
+    sagittarius.PulseSequence(omega=0.0, delta=0.0),
+    sagittarius.SolverConfig(saveat=[0.0, 0.1]),
+)
+result = sim.run(np.array([1.0, 0.0], dtype=complex), 0.0, 0.1, observables={{"pop0": 0}})
+df = result.to_pandas()
+assert "pop0" in df.columns
+out = Path({output_name!r})
+result.save(out)
+payload = json.loads(out.read_text())
+assert payload["schema_version"] == sagittarius.RESULT_ARTIFACT_SCHEMA_VERSION
+assert payload["manifest"]["schema_version"] == sagittarius.RUN_MANIFEST_SCHEMA_VERSION
+assert payload["manifest"]["versions"]["schema_version"] == sagittarius.VERSION_INFO_SCHEMA_VERSION
+assert payload["manifest"]["versions"]["julia"]["source"] == "package_resource"
+assert payload["manifest"]["versions"]["julia"]["available"] is True
+assert payload["shared_result"]["schema_version"] == sagittarius.SHARED_RESULT_SCHEMA_VERSION
+assert "pop0" in payload["shared_result"]["series"]
+print(json.dumps({{
+    "backend_source": report["backend_source"],
+    "artifact_schema": payload["schema_version"],
+    "manifest_schema": payload["manifest"]["schema_version"],
+    "shared_result_schema": payload["shared_result"]["schema_version"],
+    "rows": len(df),
+}}, sort_keys=True))
+"""
+
+
 @pytest.fixture(scope="session")
 def built_artifacts(tmp_path_factory):
     out_dir = tmp_path_factory.mktemp("sagittarius-artifacts")
@@ -192,60 +248,7 @@ def test_clean_venv_installed_wheel_release_smoke(built_artifacts, tmp_path):
     sagittarius_cli = _venv_executable(venv_dir, "sagittarius")
     _run([str(sagittarius_cli), "backend", "resolve"], cwd=work_dir, env=env)
 
-    script = """
-import json
-import os
-from pathlib import Path
-
-import numpy as np
-import sagittarius
-from importlib.resources import files
-
-source_root = Path(os.environ["SAGITTARIUS_SOURCE_ROOT_FOR_TEST"]).resolve()
-package_file = Path(sagittarius.__file__).resolve()
-assert not package_file.is_relative_to(source_root), package_file
-
-default_juliapkg = json.loads(files("sagittarius").joinpath("juliapkg.json").read_text())
-cuda_juliapkg = json.loads(files("sagittarius").joinpath("juliapkg-cuda.json").read_text())
-assert "CUDA" not in default_juliapkg["packages"]
-assert set(cuda_juliapkg["packages"]) == {"CUDA"}
-
-report = sagittarius.doctor()
-assert report["backend_source"] == "package_resource", report["julia_backend"]
-assert report["runtime"]["julia"]["source"] == "package_resource"
-assert report["runtime"]["julia"]["available"] is True
-assert report["runtime"]["julia_version"] is None
-assert report["runtime"]["schema_version"] == sagittarius.VERSION_INFO_SCHEMA_VERSION
-assert report["runtime"]["julia"]["project_path"].endswith("sagittarius/julia/Sagittarius.jl")
-
-reg = sagittarius.Register([sagittarius.Atom(0.0, 0.0, 0.0)], C6=0.0)
-sim = sagittarius.Simulation(
-    reg,
-    sagittarius.PulseSequence(omega=0.0, delta=0.0),
-    sagittarius.SolverConfig(saveat=[0.0, 0.1]),
-)
-result = sim.run(np.array([1.0, 0.0], dtype=complex), 0.0, 0.1, observables={"pop0": 0})
-df = result.to_pandas()
-assert "pop0" in df.columns
-out = Path("result.json")
-result.save(out)
-payload = json.loads(out.read_text())
-assert payload["schema_version"] == sagittarius.RESULT_ARTIFACT_SCHEMA_VERSION
-assert payload["manifest"]["schema_version"] == sagittarius.RUN_MANIFEST_SCHEMA_VERSION
-assert payload["manifest"]["versions"]["schema_version"] == sagittarius.VERSION_INFO_SCHEMA_VERSION
-assert payload["manifest"]["versions"]["julia"]["source"] == "package_resource"
-assert payload["manifest"]["versions"]["julia"]["available"] is True
-assert payload["shared_result"]["schema_version"] == sagittarius.SHARED_RESULT_SCHEMA_VERSION
-assert "pop0" in payload["shared_result"]["series"]
-print(json.dumps({
-    "backend_source": report["backend_source"],
-    "artifact_schema": payload["schema_version"],
-    "manifest_schema": payload["manifest"]["schema_version"],
-    "shared_result_schema": payload["shared_result"]["schema_version"],
-    "rows": len(df),
-}, sort_keys=True))
-"""
-    completed = _run([str(python), "-c", script], cwd=work_dir, env=env)
+    completed = _run([str(python), "-c", _clean_wheel_cpu_probe_script()], cwd=work_dir, env=env)
     result = json.loads(completed.stdout.strip().splitlines()[-1])
 
     assert result["backend_source"] == "package_resource"
@@ -253,6 +256,59 @@ print(json.dumps({
     assert result["manifest_schema"] == "run-manifest/v1"
     assert result["shared_result_schema"] == "shared-result/v1"
     assert result["rows"] >= 2
+
+
+@pytest.mark.requires_julia_backend
+def test_clean_venv_installed_wheel_uninstall_reinstall_smoke(built_artifacts, tmp_path):
+    if os.environ.get("SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE") != "1":
+        pytest.skip("Set SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1 to run the uninstall/reinstall smoke test.")
+
+    wheel, _ = built_artifacts
+    venv_dir = tmp_path / "reinstall-venv"
+    work_dir = tmp_path / "outside-repo-reinstall"
+    work_dir.mkdir()
+
+    _run(["uv", "venv", "--seed", str(venv_dir)])
+    python = _venv_python(venv_dir)
+    sagittarius_cli = _venv_executable(venv_dir, "sagittarius")
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    env.pop("SAGITTARIUS_JULIA_BACKEND_PATH", None)
+    env["PYTHONNOUSERSITE"] = "1"
+    env["SAGITTARIUS_SOURCE_ROOT_FOR_TEST"] = str(REPO_ROOT)
+
+    _run([str(python), "-m", "pip", "install", "--force-reinstall", str(wheel)], cwd=work_dir, env=env)
+    _run([str(sagittarius_cli), "backend", "resolve"], cwd=work_dir, env=env)
+    first = json.loads(
+        _run([str(python), "-c", _clean_wheel_cpu_probe_script("first-result.json")], cwd=work_dir, env=env)
+        .stdout.strip()
+        .splitlines()[-1]
+    )
+    assert first["backend_source"] == "package_resource"
+
+    _run([str(python), "-m", "pip", "uninstall", "-y", "sagittarius-py"], cwd=work_dir, env=env)
+    _run(
+        [
+            str(python),
+            "-c",
+            "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('sagittarius') is None else 1)",
+        ],
+        cwd=work_dir,
+        env=env,
+    )
+
+    _run([str(python), "-m", "pip", "install", str(wheel)], cwd=work_dir, env=env)
+    _run([str(sagittarius_cli), "backend", "resolve"], cwd=work_dir, env=env)
+    second = json.loads(
+        _run([str(python), "-c", _clean_wheel_cpu_probe_script("second-result.json")], cwd=work_dir, env=env)
+        .stdout.strip()
+        .splitlines()[-1]
+    )
+
+    assert second["backend_source"] == "package_resource"
+    assert second["artifact_schema"] == "result-artifact/v1"
+    assert second["manifest_schema"] == "run-manifest/v1"
+    assert second["rows"] >= 2
 
 
 def test_clean_venv_installed_wheel_cuda_smoke_and_parity(built_artifacts, tmp_path):

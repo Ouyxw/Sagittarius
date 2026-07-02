@@ -47,4 +47,5 @@ jobs:
         run: >-
           uv run python -m pytest
           tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_release_smoke
+          tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_uninstall_reinstall_smoke
           -q
