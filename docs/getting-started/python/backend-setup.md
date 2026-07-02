@@ -16,6 +16,16 @@ Windows PowerShell:
 $env:PYTHON_JULIACALL_EXE = "C:\absolute\path\to\julia.exe"
 ```
 
+If you set JuliaCall overrides directly, set the executable and project together. JuliaCall rejects a partial configuration where only one of `PYTHON_JULIACALL_EXE` or `PYTHON_JULIACALL_PROJECT` is present:
+
+```bash
+export PYTHON_JULIACALL_EXE=/absolute/path/to/julia
+export PYTHON_JULIACALL_PROJECT=/absolute/path/to/juliapkg/project
+export PYTHON_JULIACALL_BINDIR="$("$PYTHON_JULIACALL_EXE" --startup-file=no -e 'print(Sys.BINDIR)')"
+```
+
+`PYTHON_JULIAPKG_PROJECT` is used by JuliaPkg and is not a substitute for `PYTHON_JULIACALL_PROJECT`. In the VS Code devcontainer, `.devcontainer/setup-juliacall-env.sh` derives the JuliaCall variables dynamically and writes them to `/etc/profile.d/sagittarius-juliacall.sh`; rebuild the container or run that script manually if an older container only has a partial JuliaCall environment.
+
 ## Julia Backend Source Override
 
 Python runtime backend discovery uses this order:
@@ -60,6 +70,12 @@ find "$HOME/.julia" -type f -path '*/bin/julia'
 ```
 
 JuliaPkg and Juliaup commonly place versioned runtimes below `~/.julia`. Avoid documenting or scripting a fixed version path because it changes after a Julia upgrade.
+
+When Julia was installed through Juliaup, `command -v julia` may return a shim such as `$HOME/.juliaup/bin/julia`. Do not use `dirname "$PYTHON_JULIACALL_EXE"` as `PYTHON_JULIACALL_BINDIR` in that case. Query `Sys.BINDIR` through Julia so JuliaCall receives the real runtime directory:
+
+```bash
+export PYTHON_JULIACALL_BINDIR="$("$PYTHON_JULIACALL_EXE" --startup-file=no -e 'print(Sys.BINDIR)')"
+```
 
 To make the selected executable available as `julia`, add its `bin` directory to `PATH`, then restart the shell or source its startup file:
 

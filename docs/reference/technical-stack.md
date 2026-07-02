@@ -66,7 +66,8 @@ Current behavior:
 - importing `sagittarius` is intended to stay lightweight;
 - Julia initializes lazily when simulation, pulse compilation, backend initialization, or explicit diagnostics require it;
 - source installs expect `Sagittarius.jl/` and `sagittarius_py/` to remain available together;
-- `sagittarius_py/sagittarius/juliapkg.json` declares the Julia dependency environment used by Python workflows.
+- `sagittarius_py/sagittarius/juliapkg.json` declares the Julia dependency environment used by Python workflows;
+- the CUDA devcontainer generates JuliaCall shell configuration at post-create time with `.devcontainer/setup-juliacall-env.sh`, deriving `PYTHON_JULIACALL_EXE`, `PYTHON_JULIACALL_PROJECT`, and `PYTHON_JULIACALL_BINDIR` from the container runtime instead of hard-coding Juliaup versioned paths.
 
 Phase 13 tracks the transition toward relocatable wheels, package-resource lookup, and cleaner CPU-first installation behavior.
 
@@ -125,6 +126,7 @@ Important constraints:
 - container images do not guarantee host GPU availability;
 - host driver compatibility and device passthrough must be validated at runtime;
 - CUDA 12.8 and Blackwell-class GPUs require current driver/CUDA.jl compatibility checks;
+- JuliaCall overrides must be complete and internally consistent; setting only `PYTHON_JULIACALL_EXE` or deriving `PYTHON_JULIACALL_BINDIR` from a Juliaup shim can prevent diagnostics from reaching CUDA checks;
 - AMDGPU and Metal should use separate backend-specific environments until dependency constraints are mature.
 
 ## Benchmark and Governance Stack

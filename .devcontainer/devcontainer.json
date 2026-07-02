@@ -33,6 +33,6 @@
         "JULIA_CUDA_RUNTIME": "local",
         "PYTHON_JULIACALL_HANDLE_SIGNALS": "yes"
     },
-    "postCreateCommand": "cd sagittarius_py && uv sync",
+    "postCreateCommand": ".devcontainer/setup-juliacall-env.sh && cd sagittarius_py && uv sync",
     "remoteUser": "root"
 }
