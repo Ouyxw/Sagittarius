@@ -212,54 +212,6 @@ Before any public PyPI upload, complete these remaining blockers:
    - Run `.github/workflows/phase13-cross-platform.yml` for release candidates and attach pass evidence for every row.
    - Acceptance: production PyPI remains blocked until all documented OS/Python/Julia matrix rows pass and unsupported or experimental combinations stay clearly classified.
 
-## 🧪 Recommended Cold-Atom / Quantum-Simulation Project Backlog
-
-This backlog prioritizes example projects and validation studies for using Sagittarius as a cold-atom and quantum-computing simulation SDK. These are application milestones rather than core API feature commitments. Performance or hardware-facing conclusions from these projects must follow `docs/governance/SPEC-GOV-001-performance-claims.md` and `docs/governance/SPEC-GOV-002-disclosure-control.md`.
-
-### P0: Foundation Experiments
-
-| Project | Status | Purpose | Sagittarius capabilities exercised | Notes |
-| :--- | :---: | :--- | :--- | :--- |
-| **Single-Atom Rabi Oscillation and Pulse Calibration** | Recommended | Validate `omega`, pulse duration, unit conventions, Rabi period, and single-site `RydbergPopulation`. | `Register`, `PulseSequence`, `Pulse.constant`, `Pulse.sin_squared`, `Simulation.run`, observable shorthand. | First sanity check for all later simulations; verify expected half-period population transfer under known `omega`. |
-| **Two-Atom Rydberg Blockade** | Recommended | Demonstrate suppression of double excitation as distance, `C6`, drive strength, and blockade assumptions vary. | Two-atom registers, local/global drive, `C6/r^6` interaction, observable trajectories, optional `blockade_radius`. | Establish the core physical model before larger arrays. |
-| **Small-Chain Full-vs-Reduced Basis Validation** | Recommended | Compare full Hilbert-space dynamics with blockade-reduced dynamics on 3-5 atom chains. | `Register.chain()`, `SolverConfig.blockade_radius`, reduced-basis cache, `dense_vs_reduced_validation()`. | Use to choose a defensible blockade radius and approximation error budget. |
-| **Landau-Zener / Adiabatic Detuning Sweep** | Recommended | Simulate detuning ramps and adiabatic-transfer behavior. | `Pulse.ramp` on `delta`, smooth `omega` pulses, solver tolerances, observable trajectories. | Natural bridge from basic dynamics to AQC/annealing workflows. |
-
-### P1: Demonstration Workflows
-
-| Project | Status | Purpose | Sagittarius capabilities exercised | Notes |
-| :--- | :---: | :--- | :--- | :--- |
-| **Rydberg Chain Excitation Profiles** | Recommended | Study spatial excitation patterns under local addressing. | `Pulse.local`, sparse local dictionaries, `Register.atoms` ordering, multi-observable results. | Good demo for local addressing and pulse-shape documentation. |
-| **Open-System Decay and Dephasing Studies** | Recommended | Compare closed-system, Lindblad, and MCWF behavior under `gamma` and `gamma_phi`. | `SolverConfig.gamma`, `gamma_phi`, `use_mc`, `n_trajectories`, `open_system_sanity_checks()`. | Keep systems small enough for trace/positivity and MCWF-vs-Lindblad checks. |
-| **CPU/CUDA Parity Smoke Studies** | Recommended | Compare CPU and CUDA observable trajectories for representative small systems. | `doctor(backend="CUDA")`, `SolverConfig(use_gpu=True)`, CUDA parity tests, run manifests. | CUDA remains experimental; claims must cite benchmark/parity artifacts. |
-| **Small UDG/MWIS Simulation Examples** | Recommended | Map unit-disk graph constraints to Rydberg blockade dynamics and compare against exact baselines. | `Register.udg()`, `Register.from_udg_graph()`, detuning schedules, `batch_verify.py`, result artifacts. | Treat MWIS mapping as prior art; Sagittarius contribution is reproducible simulation and verification workflow. |
-
-### P2: Phase-Dependent Studies
-
-| Project | Status | Dependency | Purpose | Notes |
-| :--- | :---: | :--- | :--- | :--- |
-| **Pair-Correlation and Blockade-Violation Diagnostics** | Planned | Phase 11 Observable Library | Track `<n_i n_j>`, connected correlations, and constraint-violation counts directly. | Current shorthand supports single-site populations only; implement after typed observables land. |
-| **MWIS Cost Expectation and Bitstring Success Tracking** | Planned | Phase 11 Observable Library | Track weighted objective expectation, target bitstring probabilities, feasibility, and success metrics. | Pair with exact ILP baselines and disclosure controls before external claims. |
-| **Solver Method Sensitivity Study** | Ready | Phase 12 Solver Configuration | Compare `Tsit5`, `Vern9`, and fixed-step `RK4` for accuracy/cost tradeoffs on representative workflows. | Phase 12 is implemented; use run manifests and `solver_start` metadata to audit method, `adaptive`, and `dt`. |
-
-### P3: Advanced / Future Studies
-
-| Project | Status | Dependency | Purpose | Notes |
-| :--- | :---: | :--- | :--- | :--- |
-| **Large Parameter Sweeps and Phase-Diagram Scans** | Future | Stable small-system validations; optional cluster support | Sweep `omega`, `delta`, `blockade_radius`, geometry, and noise parameters. | Generate `benchmark-artifact/v1` outputs when reporting scaling or performance. |
-| **Hardware-Demo Preparation Workflow** | Future | Mature diagnostics, manifests, and disclosure review | Package diagnostics, run manifests, version metadata, and bounded wording for hardware-facing demos. | Sagittarius is not a calibrated hardware control stack. |
-| **2D Array Ordering and MIS-Like Pattern Formation** | Future | Observable library and scale validation | Study square-lattice or UDG excitation patterns and optimization-like final states. | Requires careful reduced-basis validation and richer observables. |
-
-### Recommended Execution Order
-
-1. Single-atom Rabi oscillation.
-2. Two-atom Rydberg blockade.
-3. Small-chain full-vs-reduced basis validation.
-4. Landau-Zener / adiabatic detuning sweep.
-5. Small UDG/MWIS example with exact baseline checks.
-6. Open-system Lindblad/MCWF comparison.
-7. CPU/CUDA parity or benchmark-artifact generation where hardware is available.
-
 ## 🌫️ Phase 14: Theoretical Noise Model Extensions (Planned)
 
 Phase 14 implementation should start after the Phase 13 critical packaging path is stable enough for repeatable validation: CPU-first dependency profile, backend setup commands, and CI clean artifact isolation. This avoids expanding solver and metadata surface area on top of unstable install behavior.
@@ -292,7 +244,7 @@ Phase 15 executable recipes may begin after the Phase 13 CPU-first, backend setu
 | **Measurement / Sampling API** | High | Planned | Add a stable final-state sampling and measurement API for shot-based workflows, including final bitstring distribution extraction, `SimulationResult.sample(shots, seed=...)`, reduced-basis forbidden-bitstring handling, readout metadata in manifests, and compatibility with `shared-result/v1` result series. |
 | **Random Seed Control** | High | Done | Added user-facing `SolverConfig.seed` control for current MCWF trajectories and record requested/effective RNG metadata in run manifests and result artifacts. Future final-state sampling, randomized project scripts, and benchmark/demo workflows should adopt the same seed metadata contract when they land. |
 | **Output Time Grid / Saveat Contract** | High | Done | Added `SolverConfig.saveat` as either a fixed output sample count or explicit output time array. Sagittarius records requested `saveat` and normalized `effective_saveat` in diagnostics, run manifests, and serialized artifacts, and forwards the grid to Schrödinger, Lindblad, MCWF, CPU, and supported GPU solver paths. |
-| **Executable Experiment Recipes** | High | Planned | Promote the recommended P0/P1 project backlog into runnable examples with expected outputs and artifact generation, including single-atom Rabi, two-atom blockade, Landau-Zener sweep, open-system decay/dephasing, and small UDG/MWIS workflows. |
+| **Executable Experiment Recipes** | High | Planned | Provide user-facing runnable examples with expected outputs and artifact generation, including single-atom Rabi, two-atom blockade, Landau-Zener sweep, open-system decay/dephasing, and small UDG/MWIS workflows. Benchmark-grade promotion of these recipes belongs to Phase 16. |
 | **Wheel-Installed Experiment Recipes** | Medium | Planned | Add external-user recipes that run from an installed wheel outside the source checkout, starting with a small UDG/MWIS workflow using only public `sagittarius` APIs and ordinary Python dependencies. Repo-local `projects/` scripts may remain source-checkout examples, but wheel recipes must not depend on project files being packaged. |
 | **State Preparation Helpers** | Medium | Planned | Add helpers for common initial states, including all-ground state, named bitstring states, single-excitation states, and optional uniform superpositions. Helpers must validate full/reduced basis compatibility and preserve state-preparation metadata. |
 | **Experiment Config Schema** | Medium | Planned | Define an `experiment-config/v1` schema that can describe register geometry, pulse schedule, solver options, observables/readout, seed controls, and output artifact paths. Provide load/run/save workflow and link generated run manifests back to the source config. |
@@ -311,23 +263,71 @@ Phase 15 executable recipes may begin after the Phase 13 CPU-first, backend setu
 8. Sweep artifacts preserve parameter values, result locations, run manifests, and resumability metadata.
 9. Documentation checks verify SPEC metadata and Markdown links before release-oriented documentation changes are accepted.
 
-## 🧩 Phase 16: Experimental Interop & Readout Models (Future)
+## 🧪 Phase 16: Benchmarking & Application Validation Suite (Planned)
+
+Phase 16 turns the earlier cold-atom project backlog into a systematic benchmark and application-validation suite. Its purpose is to produce reproducible scientific and performance evidence for Sagittarius without mixing exploratory local studies with public claims. Public performance or hardware-facing conclusions from this phase must follow `docs/governance/SPEC-GOV-001-performance-claims.md`, `docs/governance/SPEC-GOV-002-disclosure-control.md`, and `docs/governance/SPEC-GOV-004-benchmarking-plan.md`.
+
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Benchmark Taxonomy and Protocol Docs** | High | Done | Added `docs/benchmarks/` with a suite taxonomy, running instructions, artifact conventions, evidence-retention guidance, and interpretation rules that distinguish exploratory local results from release-grade benchmark evidence. |
+| **Benchmark Artifact Contracts** | High | Planned | Define benchmark-family aggregate artifacts for application benchmarks, including case IDs, seeds, parameters, backend/runtime metadata, result artifact links, run manifest links, correctness metrics, performance metrics, failure diagnostics, and disclosure status. Reuse `benchmark-artifact/v1` where sufficient and version any new family-specific envelopes explicitly. |
+| **Physics Baseline Benchmarks** | High | Planned | Promote single-atom Rabi oscillation, two-atom Rydberg blockade, Landau-Zener/adiabatic sweep, and small-chain full-vs-reduced validation into runnable benchmark tiers with expected output shapes, analytic or dense-reference checks, run manifests, and artifact output. |
+| **Cold-Atom Dynamics Benchmarks** | Medium | Planned | Add Rydberg chain excitation profiles, local-addressing stress cases, Z2/antiferromagnetic ordering dynamics, and 2D array pattern-formation benchmarks that exercise pulse compilation, register geometry, observables, reduced bases, and solver-method metadata. |
+| **Open-System Benchmarks** | Medium | Planned | Add Lindblad decay/dephasing scaling, MCWF-vs-Lindblad agreement, and decoherence-impact studies with trace/positivity checks, trajectory-count sensitivity, runtime/memory metrics, and reproducibility metadata. |
+| **Optimization Benchmark Suite** | High | Planned | Promote UDG/MWIS and weighted MWIS workflows into benchmark tiers with exact ILP baselines for small instances, feasibility checks, objective/approximation metrics, schedule metadata, seed-controlled graph generation, and artifact-backed conclusions. |
+| **MWIS/UDG GPU Benchmark Protocol** | High | Planned | Define and implement a local-first CUDA benchmark protocol for MIS/UDG scale limits, precision, speed, CPU/CUDA parity, GPU memory behavior, timeout/failure boundaries, and result interpretation on hardware such as the local RTX 5070 Ti. |
+| **Solver and Backend Performance Benchmarks** | High | Planned | Standardize dense-vs-sparse-vs-reduced ablation, CPU/CUDA parity and speed, solver method sensitivity (`Tsit5`, `Vern9`, fixed-step `RK4`), GPU setup overhead, and CUDA cached sparse-buffer behavior. |
+| **Parameter Sweep and Cluster Benchmarking** | Medium | Planned | Extend benchmark workflows for parameter-sweep throughput, resumability, artifact aggregation, and cluster execution using `ParallelSimulation`, while keeping benchmark artifacts distinct from user-facing experiment sweep artifacts. |
+| **Benchmark Failure Reporting** | High | Planned | Record failed cases as first-class benchmark rows with failure stage, exception type, diagnostic issue code, backend probe, timeout, memory-at-failure where available, and remediation hints. Scale-limit conclusions must include failures, not only successful rows. |
+| **Benchmark Documentation and Examples** | Medium | Planned | Provide concise examples for running smoke, correctness, parity, scaling, and stress tiers locally. Include guidance for CUDA-only local evidence, release-grade evidence, and how benchmark outputs should be cited in README, papers, demos, or release notes. |
+
+### Phase 16 Benchmark Families
+
+| Family | Initial scenarios | Primary evidence |
+| :--- | :--- | :--- |
+| **Physics baselines** | Single-atom Rabi, two-atom blockade, Landau-Zener sweep, dense-vs-reduced small chains. | Analytic/dense-reference errors, basis sizes, pruning ratios, solver metadata, artifact output. |
+| **Cold-atom dynamics** | Rydberg chain excitation profiles, local addressing, Z2 ordering, 2D pattern formation. | Observable trajectories, correlations, blockade violations, solver/backend metadata. |
+| **Open-system dynamics** | Lindblad decay/dephasing, MCWF-vs-Lindblad, decoherence impact on blockade/ordering. | Trace/positivity checks, trajectory variance, runtime/memory scaling, seed metadata. |
+| **Optimization/AQC** | UDG/MWIS, weighted MWIS, schedule sensitivity, planted or structured graph families. | Feasibility, exact optimum where available, objective value, approximation ratio, success probability when sampling lands. |
+| **Backend performance** | Dense/sparse/reduced ablation, CPU/CUDA parity, solver method sensitivity, CUDA cached path. | Runtime, memory, GPU memory where available, max trajectory error, speedup with bounded wording. |
+| **Sweep/cluster execution** | Parameter sweeps, phase-diagram scans, cluster throughput. | Jobs/sec, resumability, per-run manifest links, aggregate artifacts, failure rows. |
+
+### Phase 16 Benchmark Tiers
+
+1. **Smoke tier**: small systems, one or two seeds, CPU-first, fast enough for local or optional PR validation.
+2. **Correctness tier**: small and medium systems with analytic, dense, or exact ILP baselines.
+3. **Parity tier**: CPU/CUDA or solver-method comparisons with fixed seeds, shared schedules, and bounded tolerances.
+4. **Scaling tier**: increasing size, density, basis size, or trajectory count until timeout, memory pressure, or numerical failure.
+5. **Stress tier**: local hardware-specific exploration such as RTX 5070 Ti CUDA scale limits; these results are not public claims unless promoted through governance review.
+
+### Phase 16 Acceptance Criteria
+
+1. Benchmark documentation explains suite taxonomy, benchmark tiers, required metadata, artifact layout, and the difference between exploratory local results and release-grade evidence.
+2. Each benchmark family emits machine-readable aggregate artifacts plus linked run manifests or result artifacts where simulations are produced.
+3. Physics baseline benchmarks include analytic, dense, or reduced-reference correctness checks with stable tolerances.
+4. MWIS/UDG benchmarks include seeded instance generation, graph metadata, exact ILP baselines where tractable, feasibility checks, objective metrics, and failure rows.
+5. CUDA benchmark protocols record initialized CUDA doctor metadata, CPU/CUDA parity evidence where tractable, GPU device/driver/runtime metadata, and local hardware caveats.
+6. Benchmark failures are preserved in aggregate outputs with diagnostic codes and enough context to audit scale-limit conclusions.
+7. Public benchmark or performance statements cite artifact IDs, commit SHA, hardware/runtime metadata, and applicable disclosure/performance-claim reviews.
+8. Benchmark scripts remain optional for ordinary PR CI unless explicitly designated as smoke-tier checks.
+
+## 🧩 Phase 17: Experimental Interop & Readout Models (Future)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Readout Noise and Detection Error Models** | Medium | Future | Add optional shot-level readout error models for false positives, false negatives, atom loss, and confusion-matrix style post-processing. Readout errors must be explicitly opt-in and recorded in manifests and result artifacts. |
 | **External Neutral-Atom Tool Interop** | Low | Future | Explore bounded import/export workflows for neutral-atom schedules, geometries, or pulse descriptions used by tools such as Pulser, Bloqade-style workflows, or hardware-provider formats. Any interop claims must follow prior-art and disclosure controls and must not imply Sagittarius is a calibrated hardware control stack. |
 | **Hardware-Oriented Schedule Export** | Low | Future | Provide an optional export format for reviewed, simulation-derived schedules with unit metadata, pulse definitions, and backend diagnostics. Exported schedules are for review and translation, not direct hardware execution without a vendor calibration layer. |
 
-### Phase 16 Acceptance Criteria
+### Phase 17 Acceptance Criteria
 
 1. Readout error models are opt-in, parameterized, validated, and recorded in reproducibility metadata.
 2. Interop import/export paths preserve units, atom ordering, pulse timing, and unsupported-feature diagnostics.
 3. Documentation distinguishes simulation artifacts from hardware-control artifacts and passes governance review before public interop claims.
 
-## 🔬 Phase 17: HPC & Advanced Deployment (Future)
+## 🔬 Phase 18: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
-- **Cluster and Sweep Benchmarks**: Extend benchmark workflows for cluster execution, parameter-sweep throughput, resumability, artifact aggregation, and hardware/backend-specific diagnostics. Public claims must follow `docs/governance/SPEC-GOV-004-benchmarking-plan.md` and `docs/governance/SPEC-GOV-001-performance-claims.md`.
+- **Cluster and Sweep Benchmarks**: Extend Phase 16 benchmark workflows for cluster execution, parameter-sweep throughput, resumability, artifact aggregation, and hardware/backend-specific diagnostics. Public claims must follow `docs/governance/SPEC-GOV-004-benchmarking-plan.md` and `docs/governance/SPEC-GOV-001-performance-claims.md`.
 - **C++ FFI**: Direct bindings for C++ applications to leverage the Julia engine.
 - **Web Dashboard**: Interactive results explorer for large-scale sweeps.
 

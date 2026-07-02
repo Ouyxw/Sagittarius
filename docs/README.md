@@ -31,6 +31,14 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Observables in neutral-atom simulations](physics/SPEC-PHYS-003-observables.md)
 - [Noise models](physics/SPEC-PHYS-004-noise-models.md)
 
+## Benchmark Protocols
+
+- [Benchmark protocols overview](benchmarks/README.md)
+- [Phase 16 benchmark protocol](benchmarks/protocol.md)
+- [Benchmark tiers](benchmarks/tiers.md)
+- [Benchmark families](benchmarks/families.md)
+- [Benchmark artifact contracts](benchmarks/artifact-contracts.md)
+
 ## Reference
 
 - [Architecture overview](reference/architecture-overview.md)
