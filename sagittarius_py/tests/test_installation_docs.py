@@ -91,8 +91,12 @@ def test_phase13_ci_workflow_policy_is_documented():
     assert "reference/ci-workflows.md" in package_docs
     assert "reference/ci-workflows.md" in status_docs
     assert "Phase 13 CI and Release Automation" in roadmap
+    pr_fast_ci = _read(".github/workflows/pr-fast-ci.yml")
     assert ".github/workflows/pr-fast-ci.yml" in ci_docs
     assert "Automatic on pull requests" in ci_docs
+    assert "direct pushes to `develop/**`" in ci_docs
+    assert "push:" in pr_fast_ci
+    assert "develop/**" in pr_fast_ci
     assert "workflow_dispatch" in _read(".github/workflows/phase13-cross-platform.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-cross-platform.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-testpypi.yml")

@@ -162,7 +162,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
-| **Fast PR CI** | High | Done | `.github/workflows/pr-fast-ci.yml` runs lightweight docs, benchmark-artifact, and packaging metadata/content checks automatically for pull requests to development and release branches. |
+| **Fast PR CI** | High | Done | `.github/workflows/pr-fast-ci.yml` runs lightweight docs, benchmark-artifact, and packaging metadata/content checks automatically for pull requests to development and release branches, plus direct pushes to `develop/**` as a fallback. |
 | **Clean Artifact Release Smoke** | High | Done | `.github/workflows/phase13-clean-artifact.yml` runs clean wheel install and uninstall/reinstall smokes automatically on relevant pushes to `main` and manually on demand. |
 | **Cross-Platform Matrix Evidence** | High | Mixed | `.github/workflows/phase13-cross-platform.yml` remains manual and uploads per-row OS/Python/Julia evidence artifacts; release validation still requires a successful retained run for every matrix row. |
 | **TestPyPI Publication Evidence** | Medium | Mixed | `.github/workflows/phase13-testpypi.yml` remains manual until TestPyPI trusted publishing or token credentials are configured and a clean install succeeds. |

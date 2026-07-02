@@ -8,7 +8,7 @@ Sagittarius separates day-to-day pull-request validation from release-candidate 
 
 | Workflow | Trigger | Runs on | Purpose | Expected use |
 | :--- | :--- | :--- | :--- | :--- |
-| `.github/workflows/pr-fast-ci.yml` | Automatic on pull requests to `develop/v1.0.0`, `develop/v.1.0.0`, and `main`; manual on demand | `ubuntu-latest` | Fast documentation, metadata, artifact-content, and portable benchmark import checks. | Every feature, documentation, packaging, and CI PR. |
+| `.github/workflows/pr-fast-ci.yml` | Automatic on pull requests to `develop/**` and `main`; automatic on direct pushes to `develop/**` as a fallback; manual on demand | `ubuntu-latest` | Fast documentation, metadata, artifact-content, and portable benchmark import checks. | Every feature, documentation, packaging, and CI PR; direct develop pushes are still discouraged but covered. |
 | `.github/workflows/phase13-clean-artifact.yml` | Automatic on relevant pushes to `main`; manual on demand | `ubuntu-latest` | Clean wheel install plus uninstall/reinstall release smoke outside the source checkout. | Release-prep, packaging/backend changes, or manual verification before publication. |
 | `.github/workflows/phase13-cross-platform.yml` | Manual only | Linux, macOS, Windows matrix | Release-candidate OS/Python/Julia artifact matrix with uploaded per-row evidence. | Run before marking cross-platform wheel evidence complete. |
 | `.github/workflows/phase13-testpypi.yml` | Manual only | `ubuntu-latest` | Build, check, publish to TestPyPI, and verify clean TestPyPI install. | Run only after TestPyPI credentials/trusted publishing and publication policy are ready. |
@@ -16,7 +16,7 @@ Sagittarius separates day-to-day pull-request validation from release-candidate 
 
 ## Pull Request CI
 
-Ordinary PRs should rely on `pr-fast-ci.yml`. It deliberately avoids JuliaPkg clean-environment release smokes and cross-platform matrix jobs because those can take many minutes per platform.
+Ordinary PRs should rely on `pr-fast-ci.yml`. It deliberately avoids JuliaPkg clean-environment release smokes and cross-platform matrix jobs because those can take many minutes per platform. Direct pushes to `develop/**` also run this workflow as a safety net, but feature work should still enter `develop/**` through PRs when branch protection is available.
 
 The fast PR workflow currently runs:
 
