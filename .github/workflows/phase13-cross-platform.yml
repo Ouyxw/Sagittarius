@@ -58,3 +58,47 @@ jobs:
           tests/test_packaging_artifacts.py
           tests/test_installation_docs.py
           -q
+
+      - name: Write matrix evidence
+        shell: bash
+        env:
+          MATRIX_OS: ${{ matrix.os }}
+          MATRIX_PYTHON: ${{ matrix.python-version }}
+          MATRIX_JULIA: ${{ matrix.julia-version }}
+          GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          from datetime import datetime, timezone
+          from pathlib import Path
+          import os
+
+          evidence_dir = Path("phase13-cross-platform-evidence")
+          evidence_dir.mkdir(exist_ok=True)
+          os_name = os.environ["MATRIX_OS"]
+          python_version = os.environ["MATRIX_PYTHON"]
+          julia_version = os.environ["MATRIX_JULIA"]
+          filename = f"{os_name}-py{python_version}-julia{julia_version}.md".replace("/", "-")
+          path = evidence_dir / filename
+          lines = [
+              "# Phase 13 Cross-Platform Evidence",
+              "",
+              "- Status: passed",
+              f"- OS runner: {os_name}",
+              f"- Python: {python_version}",
+              f"- Julia: {julia_version}",
+              "- Workflow: phase13-cross-platform.yml",
+              f"- Run URL: {os.environ['GITHUB_RUN_URL']}",
+              f"- Commit: {os.environ['GITHUB_SHA']}",
+              f"- Ref: {os.environ['GITHUB_REF']}",
+              f"- Recorded at: {datetime.now(timezone.utc).isoformat()}",
+              "- Validation command: uv run python -m pytest tests/test_packaging_artifacts.py tests/test_installation_docs.py -q",
+          ]
+          path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload matrix evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase13-cross-platform-${{ matrix.os }}-py${{ matrix.python-version }}-julia${{ matrix.julia-version }}
+          path: phase13-cross-platform-evidence/*.md
+          if-no-files-found: error

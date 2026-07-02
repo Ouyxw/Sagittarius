@@ -48,6 +48,7 @@ def test_phase13_cross_platform_matrix_is_documented():
             _read("docs/getting-started/python/package-installation.md"),
             _read("docs/getting-started/python/compatibility-matrix.md"),
             _read("REQUIREMENTS.md"),
+            _read(".github/workflows/phase13-cross-platform.yml"),
         ]
     )
 
@@ -60,6 +61,10 @@ def test_phase13_cross_platform_matrix_is_documented():
     assert "Julia 1.10.3" in docs or "1.10.3" in docs
     assert "phase13-cross-platform.yml" in docs
     assert "Cross-Platform Installation Matrix** | High | Mixed" in docs
+    assert "phase13-cross-platform-evidence" in docs
+    assert "actions/upload-artifact" in docs
+    assert "Run URL" in docs
+    assert "Commit" in docs
 
 
 def test_phase13_uninstall_reinstall_smoke_is_documented():
