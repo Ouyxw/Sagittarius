@@ -8,3 +8,4 @@ __pycache__/
 GEMINI.md
 AGENTS.md
 *build/
+CI_artifacts/
