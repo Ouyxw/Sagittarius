@@ -29,17 +29,7 @@ Local wheel and source-distribution builds now include the embedded Julia backen
 
 ## CI Workflow Policy
 
-Sagittarius keeps ordinary PR validation separate from release-candidate installation validation:
-
-| Workflow | Trigger | Purpose |
-| :--- | :--- | :--- |
-| `.github/workflows/pr-fast-ci.yml` | Automatic on pull requests to `develop/v1.0.0`, `develop/v.1.0.0`, and `main`; also manual | Fast documentation, metadata, artifact-content, and portable benchmark import checks for day-to-day development. |
-| `.github/workflows/phase13-clean-artifact.yml` | Automatic on relevant pushes to `main`; manual on demand | Ubuntu clean wheel install and uninstall/reinstall release smoke. Use for release-prep or packaging/backend changes, not every feature PR. |
-| `.github/workflows/phase13-cross-platform.yml` | Manual only | Release-candidate OS/Python/Julia matrix evidence with uploaded per-row artifacts. |
-| `.github/workflows/phase13-testpypi.yml` | Manual only | TestPyPI publication and clean install verification after credentials/publishing policy are ready. |
-| `.github/workflows/phase13-cuda-wheel.yml` | Manual only on self-hosted CUDA runner | Hardware-backed CUDA wheel smoke and CPU/CUDA parity evidence. |
-
-Full Phase 13 release readiness still requires the manual matrix, TestPyPI, and CUDA evidence gates where applicable.
+Ordinary pull requests use the lightweight automatic PR workflow. Clean wheel, cross-platform, TestPyPI, and CUDA workflows are release gates and are either `main`-only or manual. See [CI workflows](../../reference/ci-workflows.md) for the authoritative trigger matrix, release evidence requirements, and maintenance rules.
 
 ## Release Artifact Smoke Test
 

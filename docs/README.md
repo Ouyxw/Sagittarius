@@ -41,6 +41,7 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Shared result schema](reference/SPEC-DATA-001-shared-result-schema.md)
 - [Event taxonomy](reference/SPEC-OBS-001-event-taxonomy.md)
 - [Development SOP](reference/development-sop.md)
+- [CI workflows](reference/ci-workflows.md)
 
 ## Governance
 

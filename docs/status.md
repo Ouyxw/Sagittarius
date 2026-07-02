@@ -63,6 +63,7 @@ Status values:
 | `SPEC-DATA-001` | [`reference/SPEC-DATA-001-shared-result-schema.md`](reference/SPEC-DATA-001-shared-result-schema.md) | `shared-result/v1` language-neutral result payload. | Phase 8 | Current | Shared result schema, result artifact envelope, or Julia serialization behavior changes. |
 | `SPEC-OBS-001` | [`reference/SPEC-OBS-001-event-taxonomy.md`](reference/SPEC-OBS-001-event-taxonomy.md) | `event-taxonomy/v1` event IDs, severity, payload compatibility. | Phase 6 | Current | Event IDs, required fields, severity, or compatibility rules change. |
 | - | [`reference/development-sop.md`](reference/development-sop.md) | Reusable logging, diagnostics, artifact, manifest, benchmark, and public-claim SOP derived from Sagittarius contracts. | Phase 6, Phase 8, Phase 10 | Current | Logging contracts, artifact schemas, benchmark governance, or documentation maintenance process changes. |
+| - | [`reference/ci-workflows.md`](reference/ci-workflows.md) | Automatic PR CI, manual release gates, workflow triggers, and release-evidence retention rules. | Phase 13 | Current | GitHub Actions triggers, workflow scope, release gates, or CI evidence requirements change. |
 
 ## Governance
 

@@ -83,24 +83,21 @@ def test_phase13_uninstall_reinstall_smoke_is_documented():
 
 
 def test_phase13_ci_workflow_policy_is_documented():
-    docs = "\n\n".join(
-        [
-            _read("docs/getting-started/python/package-installation.md"),
-            _read("REQUIREMENTS.md"),
-            _read(".github/workflows/pr-fast-ci.yml"),
-            _read(".github/workflows/phase13-clean-artifact.yml"),
-            _read(".github/workflows/phase13-cross-platform.yml"),
-            _read(".github/workflows/phase13-testpypi.yml"),
-            _read(".github/workflows/phase13-cuda-wheel.yml"),
-        ]
-    )
+    ci_docs = _read("docs/reference/ci-workflows.md")
+    package_docs = _read("docs/getting-started/python/package-installation.md")
+    status_docs = _read("docs/status.md")
+    roadmap = _read("REQUIREMENTS.md")
 
-    assert ".github/workflows/pr-fast-ci.yml" in docs
-    assert "Automatic on pull requests" in docs
+    assert "reference/ci-workflows.md" in package_docs
+    assert "reference/ci-workflows.md" in status_docs
+    assert "Phase 13 CI and Release Automation" in roadmap
+    assert ".github/workflows/pr-fast-ci.yml" in ci_docs
+    assert "Automatic on pull requests" in ci_docs
     assert "workflow_dispatch" in _read(".github/workflows/phase13-cross-platform.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-cross-platform.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-testpypi.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-cuda-wheel.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-clean-artifact.yml")
-    assert "Automatic on relevant pushes to `main`" in docs
-    assert "Manual only" in docs
+    assert "Automatic on relevant pushes to `main`" in ci_docs
+    assert "Manual only" in ci_docs
+    assert "Evidence Retention" in ci_docs
