@@ -89,7 +89,7 @@ assert report["runtime"]["julia"]["source"] == "package_resource"
 assert report["runtime"]["julia"]["available"] is True
 assert report["runtime"]["julia_version"] is None
 assert report["runtime"]["schema_version"] == sagittarius.VERSION_INFO_SCHEMA_VERSION
-assert report["runtime"]["julia"]["project_path"].endswith("sagittarius/julia/Sagittarius.jl")
+assert Path(report["runtime"]["julia"]["project_path"]).as_posix().endswith("sagittarius/julia/Sagittarius.jl")
 
 reg = sagittarius.Register([sagittarius.Atom(0.0, 0.0, 0.0)], C6=0.0)
 sim = sagittarius.Simulation(
