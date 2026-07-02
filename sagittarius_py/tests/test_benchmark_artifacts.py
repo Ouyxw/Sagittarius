@@ -1,6 +1,7 @@
 import csv
 import json
 
+import sagittarius.benchmarking as benchmarking
 from sagittarius import (
     BENCHMARK_ARTIFACT_SCHEMA_VERSION,
     BENCHMARK_ARTIFACT_TYPE,
@@ -29,6 +30,17 @@ def test_make_benchmark_artifact_contains_reproducibility_metadata():
     assert "platform" in artifact["hardware"]
     assert artifact["diagnostics"]["requested_backend"] == "CPU"
     assert artifact["run_manifests"][0]["manifest"]["schema_version"] == "run-manifest/v1"
+
+
+def test_current_memory_usage_handles_missing_resource_module(monkeypatch):
+    monkeypatch.setattr(benchmarking, "_resource", None)
+
+    memory = benchmarking.current_memory_usage()
+
+    assert memory["max_rss"] is None
+    assert memory["max_rss_unit"] is None
+    assert memory["available"] is False
+    assert "resource module" in memory["reason"]
 
 
 def test_markdown_table_formats_rows():

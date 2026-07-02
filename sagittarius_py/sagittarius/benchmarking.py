@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import csv
 import json
-import resource
 from datetime import datetime, timezone
+
+try:
+    import resource as _resource
+except ModuleNotFoundError:  # pragma: no cover - exercised on Windows runners
+    _resource = None
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional
 
@@ -16,12 +20,21 @@ BENCHMARK_ARTIFACT_TYPE = "sagittarius.benchmark"
 
 def current_memory_usage() -> Dict[str, Any]:
     """Return process memory metadata in a platform-stable shape."""
-    usage = resource.getrusage(resource.RUSAGE_SELF)
-    # Linux reports ru_maxrss in KiB; macOS reports bytes. The project benchmark
-    # environment is Linux/container oriented, but keep the source unit explicit.
+    if _resource is None:
+        return {
+            "max_rss": None,
+            "max_rss_unit": None,
+            "available": False,
+            "reason": "The Python resource module is unavailable on this platform.",
+        }
+
+    usage = _resource.getrusage(_resource.RUSAGE_SELF)
+    # Linux reports ru_maxrss in KiB; macOS reports bytes. Keep the source unit
+    # explicit because benchmark artifacts are compared across platforms.
     return {
         "max_rss": int(usage.ru_maxrss),
         "max_rss_unit": "KiB on Linux, bytes on macOS",
+        "available": True,
     }
 
 
