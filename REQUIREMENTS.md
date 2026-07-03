@@ -348,8 +348,23 @@ Phase 19 adds a user-facing visualization and lightweight reporting layer on top
 | **Bitstring Distribution Visualization** | High | Planned | Add helpers to plot final bitstring probability distributions from `SimulationResult.final_bitstring_distribution()`, including `top_k`, sorting, reduced-basis forbidden-bitstring exclusion metadata, basis-mode labels, and saved-artifact round trips through `load_result()`. |
 | **Shot Count Histogram Visualization** | High | Planned | Add helpers to plot `measurement-samples/v1` outputs from `SimulationResult.sample(shots, seed=...)`, including counts/frequencies, shot count, seed metadata, and consistent bitstring ordering. |
 | **MWIS/UDG Result Visualization** | Medium | Planned | Add optional helpers for UDG/MWIS workflows that overlay selected bitstrings, weights, graph edges, and constraint violations on register layouts. These helpers should support experiment recipes and Phase 16 benchmarks without making optimization-performance claims by themselves. |
+| **Basis and Reduced-Basis Visualization** | Medium | Planned | Add small-system helpers to inspect represented basis bitstrings, forbidden bitstrings, full-vs-reduced basis sizes, pruning ratio, and the relationship between blockade edges and reduced-basis validity. These views should be clearly marked as diagnostic and should preserve Sagittarius bitstring ordering. |
+| **Interaction and Blockade Graph Visualization** | High | Planned | Add backend-free plots or data helpers for atom pair distances, van der Waals interaction matrices, blockade adjacency, and UDG graph overlays. These diagnostics should help users validate geometry, units, and blockade-radius choices before expensive solver runs. |
+| **Correlation Matrix Visualization** | Medium | Planned | Add helpers for pair-correlation, connected-correlation, Pauli-ZZ, and blockade-violation matrix or edge heatmap views when the result contains compatible observable series or metadata. Missing observables should produce actionable diagnostics rather than silent empty plots. |
+| **Time-Resolved Spatial Population Views** | Medium | Planned | Add spatial snapshots and optional small-multiple or animation-ready data helpers that color atoms by population or selected observable value at one or more output times. Animation may remain optional, but the extracted frame data should be stable and artifact-compatible. |
+| **Solver and Open-System Diagnostic Plots** | Medium | Planned | Add diagnostic views for output grids, saveat samples, Lindblad trace/positivity checks, MCWF-vs-Lindblad comparisons, and trajectory mean/variance or confidence bands where the underlying data are available. These should support Phase 14 and Phase 16 validation workflows without replacing numerical verification. |
+| **Parameter Sweep Visualization** | Medium | Planned | Add helpers for sweep heatmaps, line slices, final-observable maps, and failed-run masks once user-facing sweep artifacts land. Sweep plots must preserve parameter values, result locations, failure rows, and run-manifest links. |
+| **Benchmark Plotting Helpers** | Medium | Planned | Add governed plotting helpers for benchmark artifacts, including runtime vs atom count, memory vs basis size, CPU/GPU parity error, solver-method comparison, and success/failure summaries. These helpers must consume benchmark artifacts or retained evidence and follow performance-claim governance. |
+| **State Vector and Density-Matrix Diagnostics** | Low | Planned | Add small-system debug views for state probability vectors, density-matrix diagonals, density-matrix magnitude heatmaps, and phase heatmaps. These helpers should be explicitly limited to small Hilbert spaces and should fail clearly when data are unavailable or too large. |
+| **Figure Export and Report Bundles** | Low | Planned | Add convenience helpers for saving PNG/SVG/PDF figures and optional metadata sidecar JSON. Exported figures should retain enough metadata to identify source result artifacts, schema versions, seeds, backend, basis mode, and plot parameters. |
 | **Artifact-Aware Reporting** | Medium | Planned | Add lightweight report helpers that summarize result artifacts with plots, schema versions, backend/runtime metadata, basis mode, seed/output-grid metadata, and linked manifests. Reports must distinguish exploratory visualization from benchmark or public-claim evidence. |
-| **Documentation and Examples** | High | Planned | Provide minimal examples for register plots, pulse waveform plots, observable trajectories, population heatmaps, bitstring probability histograms, and sample-count histograms. Examples should include expected output shapes and state whether they are backend-free or Julia-backed. |
+| **Documentation and Examples** | High | Planned | Provide minimal examples for register plots, pulse waveform plots, observable trajectories, population heatmaps, interaction/blockade diagnostics, bitstring probability histograms, sample-count histograms, and artifact-aware reports. Examples should include expected output shapes and state whether they are backend-free or Julia-backed. |
+
+### Phase 19 Visualization Tiers
+
+1. **P0 basic views**: register layout, interaction/blockade graph, pulse waveform, observable trajectory, final bitstring distribution, sample-count histogram, and final bitstring overlay on register.
+2. **P1 scientific diagnostics**: population heatmaps, basis-pruning views, pair/connected-correlation matrices, open-system sanity plots, time-resolved spatial population frames, and parameter-sweep heatmaps.
+3. **P2 reporting and advanced views**: benchmark artifact plots, artifact-aware report bundles, animation-ready helpers, state-vector/density-matrix diagnostics, and figure export sidecars.
 
 ### Phase 19 Acceptance Criteria
 
@@ -363,7 +378,15 @@ Phase 19 adds a user-facing visualization and lightweight reporting layer on top
 8. MWIS/UDG visualizations can overlay selected nodes, weighted nodes, graph edges, and violation edges for small examples.
 9. Visualization helpers separate data extraction from plotting wrappers and return reusable Python objects suitable for notebooks, scripts, and saved figures.
 10. Visualization documentation explains that plots are analysis/reporting aids; benchmark or performance claims still require governed benchmark artifacts and disclosure controls.
-11. Automated tests use a non-interactive matplotlib backend and cover smoke rendering, input validation, artifact round trips, reduced-basis bitstring handling, and no-unexpected-backend-initialization paths where applicable.
+11. Users can inspect basis pruning, represented bitstrings, forbidden bitstrings, interaction matrices, and blockade adjacency for small systems before running a solver.
+12. Users can visualize pair/connected correlations, Pauli-ZZ correlations, or blockade-violation structure when compatible observable data exist.
+13. Users can create time-resolved spatial population snapshots or frame data with atom positions, values, and time metadata preserved.
+14. Users can visualize open-system diagnostics such as trace error, positivity metrics, Lindblad-vs-MCWF comparisons, or trajectory uncertainty bands when those reports provide the required data.
+15. Parameter-sweep visualizations preserve parameter axes, failed-run masks, result artifact paths, and run-manifest links.
+16. Benchmark plotting helpers consume governed benchmark artifacts or retained evidence and do not turn local ad hoc timings into project performance claims.
+17. Small-system state-vector and density-matrix diagnostic plots fail clearly for missing data or unsafe Hilbert-space sizes.
+18. Figure export helpers can save plots with optional metadata sidecars that identify source artifacts, schema versions, seeds, backend, basis mode, and plot parameters.
+19. Automated tests use a non-interactive matplotlib backend and cover smoke rendering, input validation, artifact round trips, reduced-basis bitstring handling, and no-unexpected-backend-initialization paths where applicable.
 
 ---
 
