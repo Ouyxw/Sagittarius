@@ -61,6 +61,14 @@ Status values:
 | - | [`benchmarks/families.md`](benchmarks/families.md) | Family-specific benchmark protocols for physics, dynamics, open systems, optimization, backend performance, and sweeps. | Phase 16 | Planned contract | Benchmark families, scenario coverage, correctness gates, or required evidence change. |
 | - | [`benchmarks/artifact-contracts.md`](benchmarks/artifact-contracts.md) | Phase 16 aggregate artifact, row, metric, failure, and evidence-retention expectations. | Phase 16 | Planned contract | Benchmark artifact schemas, metric names, failure rows, or retention rules change. |
 
+## Development Workflows
+
+| Spec ID | Document | Purpose | Roadmap link | Status | Update when |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| - | [`development/README.md`](development/README.md) | Index for reusable contributor and AI-agent development workflow templates. | Cross-phase development workflow | Template | Development workflow templates, agent collaboration process, or branch customization policy changes. |
+| - | [`development/agent-workflow-template.md`](development/agent-workflow-template.md) | Reusable AI-agent workflow template for feature, development, release, benchmark, and documentation branches. | Cross-phase development workflow | Template | Agent collaboration process, branch workflow expectations, test matrix, or handoff requirements change. |
+| - | [`development/prompt-context.md`](development/prompt-context.md) | Bilingual prompt standards for starting, resuming, implementing, reviewing, and closing AI-assisted branch work. | Cross-phase AI-assisted development workflow | Template | Prompt templates, branch context expectations, or AI handoff requirements change. |
+
 ## Reference
 
 | Spec ID | Document | Purpose | Roadmap link | Status | Update when |

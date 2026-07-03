@@ -39,6 +39,12 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Benchmark families](benchmarks/families.md)
 - [Benchmark artifact contracts](benchmarks/artifact-contracts.md)
 
+## Development Workflows
+
+- [Development workflows overview](development/README.md)
+- [Agent workflow template](development/agent-workflow-template.md)
+- [Prompt context standards](development/prompt-context.md)
+
 ## Reference
 
 - [Architecture overview](reference/architecture-overview.md)

@@ -6,6 +6,5 @@ __pycache__/
 *.csv
 *.png
 GEMINI.md
-AGENTS.md
 *build/
 CI_artifacts/
