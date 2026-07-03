@@ -186,6 +186,15 @@ def test_run_manifest_schema_validates_generated_manifest():
     assert manifest["solver"]["saveat"] is None
     assert manifest["solver"]["effective_saveat"] is None
     assert manifest["random"] == {"seed": None, "effective_seed": None, "n_trajectories": None}
+    assert manifest["readout"] == {
+        "basis_mode": "full",
+        "atom_count": 2,
+        "basis_bitstrings": ["00", "10", "01", "11"],
+        "forbidden_bitstrings_excluded": False,
+        "forbidden_bitstring_count": 0,
+        "final_distribution_key": None,
+        "supports_sampling": False,
+    }
 
 
 def test_validate_run_manifest_rejects_unknown_event_id():
@@ -232,6 +241,15 @@ def test_validate_run_manifest_rejects_unknown_event_id():
         "event_taxonomy_schema": "event-taxonomy/v1",
         "event_ids": ["SAG-EVT-9999"],
         "random": {"seed": None, "effective_seed": None, "n_trajectories": None},
+        "readout": {
+            "basis_mode": "full",
+            "atom_count": 0,
+            "basis_bitstrings": [],
+            "forbidden_bitstrings_excluded": False,
+            "forbidden_bitstring_count": 0,
+            "final_distribution_key": None,
+            "supports_sampling": False,
+        },
     }
 
     with pytest.raises(SagittariusSerializationError) as excinfo:

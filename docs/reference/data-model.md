@@ -3,7 +3,7 @@
 Status: `Current`
 Roadmap: Phase 1, Phase 6, Phase 8, Phase 10, Phase 11, Phase 12, Phase 14, Phase 15
 Version: `data-model/v1`
-Last reviewed: 2026-06-30
+Last reviewed: 2026-07-03
 
 
 This page summarizes the Sagittarius data model across user-facing Python objects, Julia physics objects, runtime diagnostics, manifests, and persistent artifacts. For module boundaries, see [`architecture-overview.md`](architecture-overview.md). For schema design practice, see [`development-sop.md`](development-sop.md).
@@ -41,7 +41,7 @@ Persistent artifacts
 | `PulseSequence` | Python | User-facing omega/delta pulse container. | Accepts scalar, local vector, dict, callable, and explicit pulse wrapper forms under the pulse contract. |
 | `SolverConfig` | Python | Solver, basis, backend, open-system, and GPU options. | Carries `method`, `adaptive`, `dt`, seed, and output-grid contracts with requested/effective metadata. |
 | `Simulation` | Python | Coordinates validation, backend calls, solver execution, diagnostics, and result wrapping. | Main lifecycle object. |
-| `SimulationResult` | Python | In-memory result plus metadata, diagnostics, manifest, save/load helpers. | Writes `result-artifact/v1` and embeds `shared-result/v1`. |
+| `SimulationResult` | Python | In-memory result plus metadata, diagnostics, manifest, save/load helpers. | Writes `result-artifact/v1`, embeds `shared-result/v1`, and exposes final-state readout sampling when a distribution is available. |
 
 Pulse and indexing details are defined in [`SPEC-API-001-pulse-and-indexing-contract.md`](../api/SPEC-API-001-pulse-and-indexing-contract.md).
 
@@ -89,7 +89,7 @@ Important distinction:
 | Normalized configuration | Python-validated and canonicalized values. |
 | Effective configuration | What the backend actually used. |
 
-Phase 12 solver fields and Phase 15 seed/output-grid fields are represented through `SolverConfig`, diagnostics, run manifests, and result artifacts. Effective solver metadata records `effective_method`, `effective_adaptive`, and `effective_dt`; effective output metadata records `effective_saveat`.
+Phase 12 solver fields and Phase 15 seed/output-grid fields are represented through `SolverConfig`, diagnostics, run manifests, and result artifacts. Effective solver metadata records `effective_method`, `effective_adaptive`, and `effective_dt`; effective output metadata records `effective_saveat`. Phase 15 readout metadata records final bitstring distributions, represented basis bitstrings, reduced-basis forbidden-bitstring exclusion, and sampling support.
 
 ## Result Object Model
 
@@ -101,6 +101,8 @@ Phase 12 solver fields and Phase 15 seed/output-grid fields are represented thro
 | `metadata` | Result type, runtime metadata, basis information, and related descriptive fields. |
 | `diagnostics` | Backend report, issue details, capability summaries, and runtime diagnostics. |
 | `manifest` | `run-manifest/v1` reproducibility record for the run. |
+
+Readout-capable results store `metadata.readout.final_bitstring_probabilities` and expose it through `SimulationResult.final_bitstring_distribution()`. `SimulationResult.sample(shots, seed=...)` draws reproducible shot counts from that stored final-state distribution and returns a `measurement-samples/v1` dictionary.
 
 `SimulationResult.to_shared_result()` projects the result into the stable `shared-result/v1` payload documented in [`SPEC-DATA-001-shared-result-schema.md`](SPEC-DATA-001-shared-result-schema.md).
 

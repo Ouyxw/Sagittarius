@@ -29,6 +29,7 @@ RUN_MANIFEST_SCHEMA = {
         "event_taxonomy_schema",
         "event_ids",
         "random",
+        "readout",
     ],
     "sections": {
         "register": ["atom_count", "C6", "atoms", "geometry"],
@@ -67,6 +68,15 @@ RUN_MANIFEST_SCHEMA = {
             "devices",
         ],
         "random": ["seed", "effective_seed", "n_trajectories"],
+        "readout": [
+            "basis_mode",
+            "atom_count",
+            "basis_bitstrings",
+            "forbidden_bitstrings_excluded",
+            "forbidden_bitstring_count",
+            "final_distribution_key",
+            "supports_sampling",
+        ],
     },
 }
 
@@ -435,10 +445,14 @@ def make_shared_result(
     *,
     manifest: Optional[Dict[str, Any]] = None,
     result_type: Optional[str] = None,
+    extra_series: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     manifest = manifest or {}
     time_key = "t" if "t" in data else None
     observable_names = [key for key in data.keys() if key != time_key]
+    series = _json_compatible(data)
+    if extra_series:
+        series.update(_json_compatible(extra_series))
     basis_size = None
     if isinstance(manifest.get("initial_state"), dict):
         basis_size = manifest["initial_state"].get("basis_size")
@@ -446,7 +460,7 @@ def make_shared_result(
         "schema_version": SHARED_RESULT_SCHEMA_VERSION,
         "artifact_type": SHARED_RESULT_TYPE,
         "result_type": result_type or manifest.get("result_type") or "series",
-        "series": _json_compatible(data),
+        "series": series,
         "time_key": time_key,
         "observable_names": observable_names,
         "basis_size": basis_size,
@@ -524,6 +538,89 @@ def _normalize_seed(seed: Optional[int]) -> Optional[int]:
             "Use a non-negative integer seed.",
         )
     return seed
+
+
+def _normalize_shots(shots: Any) -> int:
+    if _is_bool(shots) or not isinstance(shots, (int, np.integer)):
+        raise _validation_error(
+            "VALIDATION_SAMPLE_SHOTS_TYPE",
+            f"sample(shots=...) requires a positive integer shot count, got {shots!r}.",
+            "Use a positive integer such as result.sample(1000, seed=123).",
+        )
+    shots = int(shots)
+    if shots <= 0:
+        raise _validation_error(
+            "VALIDATION_SAMPLE_SHOTS_VALUE",
+            f"sample(shots=...) requires a positive integer shot count, got {shots}.",
+            "Use at least one shot.",
+        )
+    return shots
+
+
+def _bitstring_label(value: int, atom_count: int) -> str:
+    return "".join("1" if value & (1 << idx) else "0" for idx in range(atom_count))
+
+
+def _basis_bitstrings(atom_count: int, basis: Optional[List[int]]) -> List[str]:
+    if basis is None:
+        return [_bitstring_label(value, atom_count) for value in range(2**atom_count)]
+    return [_bitstring_label(int(value), atom_count) for value in basis]
+
+
+def _state_probabilities(final_state: Any) -> List[float]:
+    arr = np.asarray(final_state)
+    if arr.ndim == 1:
+        probs = np.abs(arr.astype(np.complex128)) ** 2
+    elif arr.ndim == 2 and arr.shape[0] == arr.shape[1]:
+        probs = np.real(np.diag(arr.astype(np.complex128)))
+    else:
+        raise _validation_error(
+            "VALIDATION_READOUT_STATE_SHAPE",
+            f"Final state must be a wavefunction vector or square density matrix, got shape {arr.shape}.",
+            "Use Schrodinger or Lindblad result objects with a final quantum state available.",
+        )
+    probs = np.maximum(probs.astype(float), 0.0)
+    total = float(np.sum(probs))
+    if not np.isfinite(total) or total <= 0.0:
+        raise _validation_error(
+            "VALIDATION_READOUT_PROBABILITIES",
+            "Final-state probabilities are not normalizable.",
+            "Check the solver output and initial-state normalization before sampling.",
+        )
+    return [float(value / total) for value in probs]
+
+
+def _final_bitstring_distribution(final_state: Any, *, atom_count: int, basis: Optional[List[int]]) -> Dict[str, float]:
+    labels = _basis_bitstrings(atom_count, basis)
+    probabilities = _state_probabilities(final_state)
+    if len(probabilities) != len(labels):
+        raise _validation_error(
+            "VALIDATION_READOUT_BASIS_SIZE",
+            f"Final-state probability count {len(probabilities)} does not match basis size {len(labels)}.",
+            "Ensure the final state was produced in the same full or reduced basis as the run manifest.",
+        )
+    return {label: float(prob) for label, prob in zip(labels, probabilities)}
+
+
+def _readout_manifest(
+    *,
+    atom_count: int,
+    basis: Optional[List[int]],
+    final_distribution_key: Optional[str],
+    supports_sampling: bool,
+) -> Dict[str, Any]:
+    basis_mode = "reduced" if basis is not None else "full"
+    basis_values = None if basis is None else [int(value) for value in basis]
+    forbidden_count = 0 if basis is None else (2**atom_count - len(basis_values))
+    return {
+        "basis_mode": basis_mode,
+        "atom_count": int(atom_count),
+        "basis_bitstrings": _basis_bitstrings(atom_count, basis_values),
+        "forbidden_bitstrings_excluded": bool(basis is not None),
+        "forbidden_bitstring_count": int(forbidden_count),
+        "final_distribution_key": final_distribution_key,
+        "supports_sampling": bool(supports_sampling),
+    }
 
 
 SUPPORTED_SOLVER_METHODS = {"Tsit5", "Vern9", "RK4"}
@@ -943,6 +1040,7 @@ def _build_run_manifest(
     result_type: str,
     effective_saveat: Optional[List[float]] = None,
     effective_solver: Optional[Dict[str, Any]] = None,
+    readout: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     n_atoms = len(register.atoms)
     return {
@@ -973,6 +1071,12 @@ def _build_run_manifest(
             "effective_seed": _normalize_seed(config.seed),
             "n_trajectories": int(config.n_trajectories) if config.use_mc else None,
         },
+        "readout": readout or _readout_manifest(
+            atom_count=n_atoms,
+            basis=None,
+            final_distribution_key=None,
+            supports_sampling=False,
+        ),
     }
 
 
@@ -1437,7 +1541,33 @@ def _simulation_result_with_manifest(
     result_type: str,
     effective_saveat: Optional[List[float]] = None,
     effective_solver: Optional[Dict[str, Any]] = None,
+    final_state: Optional[Any] = None,
+    basis: Optional[List[int]] = None,
 ) -> "SimulationResult":
+    readout_distribution = None
+    distribution_key = None
+    if final_state is not None:
+        distribution_key = "final_bitstring_probabilities"
+        readout_distribution = _final_bitstring_distribution(
+            final_state,
+            atom_count=len(register.atoms),
+            basis=basis,
+        )
+    readout = _readout_manifest(
+        atom_count=len(register.atoms),
+        basis=basis,
+        final_distribution_key=distribution_key,
+        supports_sampling=readout_distribution is not None,
+    )
+    if readout_distribution is not None:
+        metadata = dict(metadata)
+        metadata["readout"] = {
+            "schema_version": "readout-metadata/v1",
+            "final_bitstring_probabilities": readout_distribution,
+        }
+        diagnostics = dict(diagnostics)
+        diagnostics["readout"] = readout
+
     manifest = _build_run_manifest(
         register=register,
         sequence=sequence,
@@ -1452,6 +1582,7 @@ def _simulation_result_with_manifest(
         result_type=result_type,
         effective_saveat=effective_saveat,
         effective_solver=effective_solver,
+        readout=readout,
     )
     validate_run_manifest(manifest)
     return SimulationResult(data, metadata=metadata, diagnostics=diagnostics, manifest=manifest)
@@ -1471,9 +1602,65 @@ class SimulationResult:
         self.manifest = manifest or {}
         self.t = np.array(data.get('t', []))
 
+    def final_bitstring_distribution(self) -> Dict[str, float]:
+        """Return the final-state bitstring probability distribution when available."""
+        readout = self.metadata.get("readout", {}) if isinstance(self.metadata, dict) else {}
+        distribution = readout.get("final_bitstring_probabilities")
+        if not isinstance(distribution, dict):
+            raise _validation_error(
+                "VALIDATION_READOUT_DISTRIBUTION_MISSING",
+                "SimulationResult does not contain a final bitstring distribution.",
+                "Run a Schrodinger or Lindblad simulation result that preserves final-state readout metadata before calling sample().",
+            )
+        return {str(key): float(value) for key, value in distribution.items()}
+
+    def sample(self, shots: int, seed: Optional[int] = None) -> Dict[str, Any]:
+        """Sample final-state bitstrings from the stored readout distribution."""
+        shots = _normalize_shots(shots)
+        seed = _normalize_seed(seed)
+        distribution = self.final_bitstring_distribution()
+        labels = list(distribution.keys())
+        probabilities = np.asarray([distribution[label] for label in labels], dtype=float)
+        total = float(np.sum(probabilities))
+        if not np.isfinite(total) or total <= 0.0:
+            raise _validation_error(
+                "VALIDATION_READOUT_PROBABILITIES",
+                "Stored final-state probabilities are not normalizable.",
+                "Regenerate the result artifact or inspect metadata['readout']['final_bitstring_probabilities'].",
+            )
+        probabilities = probabilities / total
+        rng = np.random.default_rng(seed)
+        draws = rng.choice(len(labels), size=shots, p=probabilities)
+        counts = {label: 0 for label in labels}
+        for draw in draws:
+            counts[labels[int(draw)]] += 1
+        counts = {label: count for label, count in counts.items() if count}
+        readout = self.manifest.get("readout", {}) if isinstance(self.manifest, dict) else {}
+        return {
+            "schema_version": "measurement-samples/v1",
+            "artifact_type": "sagittarius.measurement_samples",
+            "shots": shots,
+            "seed": seed,
+            "effective_seed": seed,
+            "counts": counts,
+            "frequencies": {label: count / shots for label, count in counts.items()},
+            "probabilities": distribution,
+            "basis_mode": readout.get("basis_mode"),
+            "forbidden_bitstrings_excluded": readout.get("forbidden_bitstrings_excluded", False),
+            "forbidden_bitstring_count": readout.get("forbidden_bitstring_count", 0),
+            "manifest_schema": self.manifest.get("schema_version") if isinstance(self.manifest, dict) else None,
+        }
+
+    def _shared_extra_series(self) -> Dict[str, Any]:
+        try:
+            distribution = self.final_bitstring_distribution()
+        except SagittariusValidationError:
+            return {}
+        return {"final_bitstring_probabilities": distribution}
+
     def to_shared_result(self) -> Dict[str, Any]:
         """Return the language-neutral shared-result/v1 payload."""
-        return make_shared_result(self.data, manifest=self.manifest)
+        return make_shared_result(self.data, manifest=self.manifest, extra_series=self._shared_extra_series())
 
     def to_envelope(self) -> Dict[str, Any]:
         """Return the stable JSON artifact envelope for this result."""
@@ -1941,6 +2128,8 @@ class Simulation:
             result_type = "observables"
             log_event("solver_finish", result_type=result_type, basis_size=basis_size)
             metadata = version_info()
+            final_state = list(sol.u)[-1]
+            basis = [int(value) for value in self._basis] if self._basis is not None else None
             return _simulation_result_with_manifest(
                 data,
                 metadata=metadata,
@@ -1956,6 +2145,8 @@ class Simulation:
                 result_type=result_type,
                 effective_saveat=effective_saveat,
                 effective_solver=effective_solver,
+                final_state=final_state,
+                basis=basis,
             )
         
         log_event("solver_finish", result_type="raw", basis_size=basis_size)
