@@ -1,6 +1,9 @@
+from pathlib import Path
+
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig
 
@@ -13,7 +16,13 @@ psi0 = np.array([1.0, 0.0], dtype=complex)
 result = sim.run(psi0, 0.0, 0.5, observables={"pop_atom_0": 0})
 
 # Current lightweight plotting helper. Use show=False for scripts and tests.
-result.plot(show=True)
+result.plot(show=False)
+artifact_dir = Path(__file__).with_name("artifacts")
+artifact_dir.mkdir(parents=True, exist_ok=True)
+figure_path = artifact_dir / "observable_trajectory.png"
+plt.gcf().savefig(figure_path, dpi=150, bbox_inches="tight")
+plt.close()
+print(f"saved figure: {figure_path}")
 
 df = result.to_pandas()
 print(list(df.columns))

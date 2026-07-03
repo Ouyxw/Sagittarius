@@ -205,9 +205,12 @@ True
 The current Python SDK includes a lightweight `SimulationResult.plot()` helper for observable time series and `SimulationResult.to_pandas()` for downstream plotting with pandas, seaborn, or matplotlib. Sagittarius does not yet expose the full Phase 19 visualization API; the example below uses the implemented result API and avoids opening a GUI window.
 
 ```python
+from pathlib import Path
+
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig
 
@@ -221,15 +224,22 @@ result = sim.run(psi0, 0.0, 0.5, observables={"pop_atom_0": 0})
 
 # Current lightweight plotting helper. Use show=False for scripts and tests.
 result.plot(show=False)
+artifact_dir = Path(__file__).with_name("artifacts")
+artifact_dir.mkdir(parents=True, exist_ok=True)
+figure_path = artifact_dir / "observable_trajectory.png"
+plt.gcf().savefig(figure_path, dpi=150, bbox_inches="tight")
+plt.close()
+print(f"saved figure: {figure_path}")
 
 df = result.to_pandas()
 print(list(df.columns))
 print([round(value, 2) for value in df["pop_atom_0"].tolist()])
 ```
 
-Expected output shape:
+Example output shape; the figure path depends on the script location:
 
 ```text
+saved figure: <script-dir>/artifacts/observable_trajectory.png
 ['pop_atom_0', 't']
 [0.0, 0.5, 1.0]
 ```
