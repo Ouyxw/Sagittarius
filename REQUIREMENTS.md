@@ -334,6 +334,39 @@ Phase 16 turns the earlier cold-atom project backlog into a systematic benchmark
 
 ---
 
+## 📊 Phase 19: Visualization & Reporting API (Planned)
+
+Phase 19 adds a user-facing visualization and lightweight reporting layer on top of existing Sagittarius data, metadata, manifests, and artifacts. The goal is to make common experiment and analysis views easy to produce without weakening the separation between simulation data, reproducibility metadata, and public benchmark claims. Visualization helpers should prefer backend-free data extraction and plotting from Python objects or saved artifacts; they must not imply hardware calibration or performance evidence unless linked to governed artifacts.
+
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Visualization API Contract** | High | Planned | Define a stable Python visualization surface for register layouts, pulse waveforms, observable trajectories, population heatmaps, final-state bitstring distributions, seeded sample histograms, and lightweight result reports. Document which helpers are data extractors, which are plotting wrappers, and which return matplotlib objects. |
+| **Register Layout Visualization** | High | Planned | Add backend-free helpers such as `plot_register(register, blockade_radius=None, edges=True, labels=True, ax=None)` for 2D atom layouts, topology metadata, atom labels, UDG/blockade edges, and selected-bitstring overlays where applicable. 3D register visualization may be optional or explicitly limited. |
+| **Pulse Waveform Sampling and Plots** | High | Planned | Add deterministic pulse sampling helpers for `PulseSequence` omega/delta waveforms over an explicit time grid, including global, local vector, dict, callable, and Pulse AST inputs where supported. Plot helpers should support selected atoms, fields, axes injection, and return sampled data plus matplotlib axes without unexpectedly initializing Julia unless required by a documented Pulse AST path. |
+| **Observable Trajectory Plot Improvements** | Medium | Planned | Extend `SimulationResult.plot()` or add `plot_observables(result, names=None, ax=None, show=False)` so users can select series, pass axes, receive matplotlib objects, and preserve backward compatibility with existing observable trajectory plots. |
+| **Population Heatmap Visualization** | Medium | Planned | Add helpers for atom-by-time population heatmaps using Rydberg-population observable metadata or conventional population series names, with explicit atom ordering and missing-series diagnostics. |
+| **Bitstring Distribution Visualization** | High | Planned | Add helpers to plot final bitstring probability distributions from `SimulationResult.final_bitstring_distribution()`, including `top_k`, sorting, reduced-basis forbidden-bitstring exclusion metadata, basis-mode labels, and saved-artifact round trips through `load_result()`. |
+| **Shot Count Histogram Visualization** | High | Planned | Add helpers to plot `measurement-samples/v1` outputs from `SimulationResult.sample(shots, seed=...)`, including counts/frequencies, shot count, seed metadata, and consistent bitstring ordering. |
+| **MWIS/UDG Result Visualization** | Medium | Planned | Add optional helpers for UDG/MWIS workflows that overlay selected bitstrings, weights, graph edges, and constraint violations on register layouts. These helpers should support experiment recipes and Phase 16 benchmarks without making optimization-performance claims by themselves. |
+| **Artifact-Aware Reporting** | Medium | Planned | Add lightweight report helpers that summarize result artifacts with plots, schema versions, backend/runtime metadata, basis mode, seed/output-grid metadata, and linked manifests. Reports must distinguish exploratory visualization from benchmark or public-claim evidence. |
+| **Documentation and Examples** | High | Planned | Provide minimal examples for register plots, pulse waveform plots, observable trajectories, population heatmaps, bitstring probability histograms, and sample-count histograms. Examples should include expected output shapes and state whether they are backend-free or Julia-backed. |
+
+### Phase 19 Acceptance Criteria
+
+1. Users can plot a 2D register layout with atom labels and optional UDG/blockade edges without initializing Julia.
+2. Users can sample and plot omega/delta waveforms over an explicit time grid for supported pulse declaration forms, with local addressing shown in register order.
+3. Observable trajectory plotting supports selecting series, passing matplotlib axes, returning axes or figure objects, and preserving existing `SimulationResult.plot()` behavior.
+4. Users can plot atom-by-time Rydberg population heatmaps when the result contains compatible population series or observable metadata.
+5. Users can plot final bitstring probability histograms from readout-capable results loaded directly or through `load_result()`.
+6. Users can plot seeded shot-count or frequency histograms from `measurement-samples/v1` sample outputs.
+7. Reduced-basis visualizations clearly identify represented bitstrings and forbidden-bitstring exclusion metadata.
+8. MWIS/UDG visualizations can overlay selected nodes, weighted nodes, graph edges, and violation edges for small examples.
+9. Visualization helpers separate data extraction from plotting wrappers and return reusable Python objects suitable for notebooks, scripts, and saved figures.
+10. Visualization documentation explains that plots are analysis/reporting aids; benchmark or performance claims still require governed benchmark artifacts and disclosure controls.
+11. Automated tests use a non-interactive matplotlib backend and cover smoke rendering, input validation, artifact round trips, reduced-basis bitstring handling, and no-unexpected-backend-initialization paths where applicable.
+
+---
+
 ## 🛠️ Maintenance & Verification
 All features are verified via the `tests/` and `sagittarius_py/tests/` suites.
 Run the full verification: `cd sagittarius_py && uv run python -m pytest tests/`
