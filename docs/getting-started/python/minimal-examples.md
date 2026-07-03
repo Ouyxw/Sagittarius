@@ -198,3 +198,40 @@ True
 [0, 1, 2, 4, 5]
 0.375
 ```
+
+
+## 9. Visualization-Ready Observable Series (Julia-backed)
+
+The current Python SDK includes a lightweight `SimulationResult.plot()` helper for observable time series and `SimulationResult.to_pandas()` for downstream plotting with pandas, seaborn, or matplotlib. Sagittarius does not yet expose the full Phase 19 visualization API; the example below uses the implemented result API and avoids opening a GUI window.
+
+```python
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+
+from sagittarius import Atom, Register, Simulation, PulseSequence, SolverConfig
+
+reg = Register([Atom(0.0, 0.0, 0.0)], C6=0.0)
+seq = PulseSequence(omega=2.0 * np.pi, delta=0.0)
+cfg = SolverConfig(reltol=1e-7, abstol=1e-7, saveat=[0.0, 0.25, 0.5])
+
+sim = Simulation(reg, seq, cfg)
+psi0 = np.array([1.0, 0.0], dtype=complex)
+result = sim.run(psi0, 0.0, 0.5, observables={"pop_atom_0": 0})
+
+# Current lightweight plotting helper. Use show=False for scripts and tests.
+result.plot(show=False)
+
+df = result.to_pandas()
+print(list(df.columns))
+print([round(value, 2) for value in df["pop_atom_0"].tolist()])
+```
+
+Expected output shape:
+
+```text
+['pop_atom_0', 't']
+[0.0, 0.5, 1.0]
+```
+
+Small numerical variation is expected if solver tolerances, output times, or matplotlib/pandas versions change. Future Phase 19 helpers are planned for register layouts, pulse waveforms, population heatmaps, bitstring histograms, and artifact-aware reports.

@@ -87,3 +87,45 @@ Expected output:
 ```text
 2
 ```
+
+
+## 6. Visualization-Ready Observable Series
+
+Sagittarius.jl does not yet expose a dedicated Julia plotting API. Current Julia-native solver outputs are visualization-ready: `saved.t` stores output times and `saved.saveval` stores observable values in declaration order. These arrays can be passed to plotting packages such as Plots.jl or Makie.jl. The example below keeps the check dependency-free by printing a small ASCII population bar.
+
+```julia
+using Sagittarius
+
+reg = chain_register(1; spacing=1.0, C6=0.0)
+H_func = build_hamiltonian_func(reg, t -> [2π], t -> [0.0])
+psi0 = ComplexF64[1.0, 0.0]
+obs = Dict("pop0" => RydbergPopulation(1, 1))
+
+sol, saved = solve_schrodinger(
+    psi0,
+    H_func,
+    (0.0, 0.5);
+    observables=obs,
+    saveat=[0.0, 0.25, 0.5],
+    reltol=1e-8,
+    abstol=1e-8,
+)
+
+times = collect(saved.t)
+populations = [Float64(values[1]) for values in saved.saveval]
+
+for (t, pop) in zip(times, populations)
+    width = round(Int, 10 * pop)
+    println(round(t, digits=2), " ", repeat("#", width), " ", round(pop, digits=2))
+end
+```
+
+Expected output shape:
+
+```text
+0.0  0.0
+0.25 ##### 0.5
+0.5 ########## 1.0
+```
+
+Small numerical variation is expected if solver tolerances or output times change. For graphical output, use the same `times` and `populations` arrays with a plotting package in the user's Julia project.
