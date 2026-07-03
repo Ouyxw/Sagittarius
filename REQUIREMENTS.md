@@ -142,21 +142,32 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Source Installation Baseline** | High | Done | Defines the currently supported installation model as a complete repository checkout followed by `uv sync` and `python -m juliapkg resolve`. Documents `pip install -e .` as a development-only editable install that still depends on the repository layout, and explicitly states that an independent PyPI installation is not yet supported. |
-| **Relocatable Wheel** | High | Mixed | Local wheel artifacts contain the embedded Julia backend and pass repo-external package-resource and opt-in clean-venv smoke coverage. Full release status remains gated on uninstall/reinstall coverage, CI execution outside the source tree, and cross-platform validation. |
+| **Relocatable Wheel** | High | Mixed | Local wheel artifacts contain the embedded Julia backend and pass repo-external package-resource, clean-venv, and uninstall/reinstall smoke coverage. Full release status remains gated on cross-platform matrix evidence, TestPyPI validation, and release approval. |
 | **Package Resource Lookup** | High | Done | Replaces direct repository-relative backend discovery with a centralized lookup that prefers the explicit `SAGITTARIUS_JULIA_BACKEND_PATH` environment override, then an editable/source checkout backend, then installed-package resources; diagnostics report `env_override`, `source_checkout`, or `package_resource`. |
 | **Julia Package Data** | High | Done | Includes `Sagittarius.jl/Project.toml`, `Manifest.toml`, Julia source files, and runtime metadata as Python package data under `sagittarius/julia/Sagittarius.jl/`, with artifact tests verifying wheel and source distributions contain the embedded backend. |
 | **CPU-First Dependency Profile** | High | Done | Default `juliapkg.json` and the embedded Julia backend project now resolve CPU-required Julia packages without CUDA.jl, an NVIDIA driver, or GPU hardware. CUDA is split into the packaged opt-in `juliapkg-cuda.json` profile for future backend setup workflows. |
 | **Optional GPU Backend Profiles** | High | Mixed | The CUDA profile is complete: `juliapkg-cuda.json` carries `backend-profile/v1` metadata, is excluded from default CPU resolution, appears in `sagittarius backend profiles`, supports `sagittarius backend install cuda --dry-run`, and is installable through `sagittarius backend install cuda`. Later AMDGPU/Metal profiles remain planned. |
 | **Backend Setup Command** | Medium | Done | Adds the `sagittarius` console script with `sagittarius backend resolve`, `sagittarius backend install cuda`, and `sagittarius doctor`. Commands emit JSON setup/diagnostic reports and normalize setup failures to actionable diagnostic messages. |
 | **CUDA Wheel Smoke and Parity** | High | Mixed | Added a hardware-gated clean-venv CUDA wheel smoke and manual self-hosted CUDA workflow. The smoke installs the wheel, runs `sagittarius backend install cuda`, runs initialized CUDA doctor diagnostics, executes a small CPU/CUDA parity simulation, and verifies CUDA.jl, driver, runtime, device, backend source, result artifact, manifest, and diagnostics metadata. Release validation still requires execution evidence on real NVIDIA GPU hardware. |
-| **Clean-Environment Artifact Tests** | High | Mixed | Artifact tests verify wheel/sdist contents, and `SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1` clean-venv release smoke installs the wheel, runs `sagittarius backend resolve`, executes a one-atom CPU simulation, and validates result artifact, manifest, doctor, version metadata, and source-tree import isolation. The smoke passes locally and is wired into Ubuntu CI; cross-platform matrix and uninstall/reinstall coverage remain separate planned items. |
-| **Cross-Platform Installation Matrix** | High | Mixed | Added `docs/getting-started/python/compatibility-matrix.md` and manual `.github/workflows/phase13-cross-platform.yml` covering Linux Python 3.10/3.11/3.12 with Julia 1.10.3/1.11 plus macOS and Windows CPU wheel smokes on Python 3.11/Julia 1.11. Release validation still requires successful workflow evidence on all matrix rows. |
-| **CI Clean Artifact Isolation** | High | Done | Adds `.github/workflows/phase13-clean-artifact.yml`, which runs the clean wheel smoke on Ubuntu from a fresh checkout with `PYTHONPATH` cleared. The smoke builds wheel/sdist artifacts, installs the wheel into a fresh venv outside the repository, runs installed `sagittarius backend resolve`, executes a CPU one-atom simulation, validates doctor/version/result metadata, and fails if `sagittarius` imports from the source checkout. |
-| **Uninstall/Reinstall Smoke Coverage** | Medium | Planned | Add release-artifact smoke tests that uninstall the wheel, reinstall the same wheel, reinstall after moving or hiding the original source checkout, and verify import, backend source metadata, JuliaPkg resolution behavior, and a minimal CPU simulation still work without stale package-resource or Julia environment assumptions. |
+| **Clean-Environment Artifact Tests** | High | Done | Artifact tests verify wheel/sdist contents, and `SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1` clean-venv release smokes install the wheel, run `sagittarius backend resolve`, execute a one-atom CPU simulation, validate result artifact, manifest, doctor, version metadata, source-tree import isolation, and verify uninstall/reinstall behavior in a repo-external environment. The smokes are wired into Ubuntu CI. |
+| **Cross-Platform Installation Matrix** | High | Done | `docs/getting-started/python/compatibility-matrix.md` and manual `.github/workflows/phase13-cross-platform.yml` cover Linux Python 3.10/3.11/3.12 with Julia 1.10.3/1.11 plus macOS and Windows CPU wheel smokes on Python 3.11/Julia 1.11. All five declared rows passed in GitHub Actions run `28577379030`, with retained evidence artifacts under `CI_artifacts/phase13-cross-platform-*`. |
+| **CI Clean Artifact Isolation** | High | Done | Clean wheel and uninstall/reinstall smokes run in GitHub Actions as release gates. Day-to-day PRs use a separate fast CI workflow. Detailed trigger policy and evidence retention rules live in `docs/reference/ci-workflows.md`. |
+| **Uninstall/Reinstall Smoke Coverage** | Medium | Done | Added a release-artifact smoke test that installs the wheel, runs backend resolution and a minimal CPU simulation, uninstalls the wheel, verifies `sagittarius` is no longer importable, reinstalls the same wheel outside the source checkout, and verifies package-resource backend metadata, JuliaPkg resolution behavior, and a minimal CPU simulation after reinstall. |
 | **Package Metadata Review** | Medium | Done | PyPI-facing metadata now includes README rendering, MIT license expression and license file inclusion, supported Python classifiers, Julia/science classifiers, author field, keywords, project URLs, console script metadata, and artifact content checks. Packaging tests inspect wheel/sdist metadata and run `twine check` over built artifacts. |
 | **TestPyPI and Publication Policy** | Medium | Mixed | Added a TestPyPI publication policy document and manual `.github/workflows/phase13-testpypi.yml` workflow that builds artifacts, runs `twine check`, publishes to TestPyPI, and verifies install from TestPyPI. Production PyPI remains blocked until TestPyPI credentials/trusted publishing are configured, the workflow succeeds, and repository visibility/publication policy is approved. |
-| **PyPI Release Readiness** | High | Mixed | PyPI publication remains blocked. Local artifact readiness checks, CPU-first dependency behavior, backend setup commands, Ubuntu clean artifact CI, gated CUDA wheel smoke, package metadata checks, TestPyPI workflow/policy, and a cross-platform matrix workflow now exist, but uninstall/reinstall smoke coverage, successful TestPyPI execution, publication approval, matrix pass evidence, and GPU runner evidence are still required. |
-| **Installation Documentation** | Medium | Mixed | Documentation distinguishes source/editable setup, local wheel/sdist artifact status, backend source selection, release artifact smoke testing, and PyPI publication gates. Dedicated released-wheel upgrade/uninstall and cross-platform matrix documentation remain planned. |
+| **PyPI Release Readiness** | High | Mixed | PyPI publication remains blocked. Fast PR CI, local artifact readiness checks, CPU-first dependency behavior, backend setup commands, Ubuntu clean artifact and reinstall CI coverage, gated CUDA wheel smoke, package metadata checks, TestPyPI workflow/policy, and retained cross-platform matrix pass evidence now exist, but successful TestPyPI execution, publication approval, and GPU runner evidence are still required. |
+| **Installation Documentation** | Medium | Done | Documentation distinguishes source/editable setup, local wheel/sdist artifact status, backend source selection, release artifact smoke testing, uninstall/reinstall verification, released-wheel upgrade/uninstall guidance, cross-platform matrix workflow, and PyPI publication gates. |
+
+### Phase 13 CI and Release Automation
+
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Fast PR CI** | High | Done | `.github/workflows/pr-fast-ci.yml` runs lightweight docs, benchmark-artifact, and packaging metadata/content checks automatically for pull requests to development and release branches, plus direct pushes to `develop/**` as a fallback. |
+| **Clean Artifact Release Smoke** | High | Done | `.github/workflows/phase13-clean-artifact.yml` runs clean wheel install and uninstall/reinstall smokes automatically on relevant pushes to `main` and manually on demand. |
+| **Cross-Platform Matrix Evidence** | High | Done | `.github/workflows/phase13-cross-platform.yml` remains manual and uploads per-row OS/Python/Julia evidence artifacts. GitHub Actions run `28577379030` passed all five declared rows, and retained artifacts are stored under `CI_artifacts/phase13-cross-platform-*`. |
+| **TestPyPI Publication Evidence** | Medium | Mixed | `.github/workflows/phase13-testpypi.yml` remains manual until TestPyPI trusted publishing or token credentials are configured and a clean install succeeds. |
+| **CUDA Hardware Evidence** | High | Mixed | `.github/workflows/phase13-cuda-wheel.yml` remains manual on a self-hosted CUDA runner; CUDA wheel support is release-validated only after hardware-backed smoke and parity evidence pass. |
+| **CI Documentation** | Medium | Done | `docs/reference/ci-workflows.md` defines automatic workflows, manual release gates, evidence retention, and maintenance rules. |
 
 ### Phase 13 Acceptance Criteria
 
@@ -178,12 +189,9 @@ Before any public PyPI upload, complete these remaining blockers:
 
 2. Backend setup commands: Done. `sagittarius backend resolve`, `sagittarius backend install cuda`, and `sagittarius doctor` provide the documented command path; CUDA setup remains explicit and opt-in.
 
-3. CI clean artifact isolation: Done. Ubuntu CI runs the clean wheel smoke from a fresh checkout, clears source-tree import paths, installs the wheel into a repo-external venv, runs `sagittarius backend resolve`, validates CPU simulation artifacts and metadata, and fails on source-checkout imports.
+3. CI and release automation: Done for fast PR CI, clean artifact smoke, CI documentation, and retained cross-platform matrix evidence. TestPyPI and CUDA workflows remain manual release gates until their retained evidence passes. See `docs/reference/ci-workflows.md`.
 
-4. Uninstall/reinstall smoke coverage:
-   - Test wheel uninstall, reinstall, and reinstall after moving or hiding the source checkout.
-   - Verify import, backend source detection, JuliaPkg resolution, and minimal CPU simulation after reinstall.
-   - Acceptance: reinstall workflows do not depend on stale package resources, stale Python metadata, or the original repository path.
+4. Uninstall/reinstall smoke coverage: Done. The release-artifact smoke installs the wheel, resolves the backend, runs a minimal CPU simulation, uninstalls the package, verifies it is no longer importable, reinstalls the same wheel outside the source checkout, and verifies backend source detection, JuliaPkg resolution, artifact metadata, and minimal CPU simulation after reinstall.
 
 5. Package metadata review: Done. Wheel/sdist metadata tests inspect README, license, classifiers, URLs, package data, and `twine check` output.
 
@@ -200,56 +208,10 @@ Before any public PyPI upload, complete these remaining blockers:
 
 8. Cross-platform support matrix:
    - Compatibility matrix documentation and manual GitHub Actions workflow are in place.
-   - Run `.github/workflows/phase13-cross-platform.yml` for release candidates and attach pass evidence for every row.
-   - Acceptance: production PyPI remains blocked until all documented OS/Python/Julia matrix rows pass and unsupported or experimental combinations stay clearly classified.
-
-## 🧪 Recommended Cold-Atom / Quantum-Simulation Project Backlog
-
-This backlog prioritizes example projects and validation studies for using Sagittarius as a cold-atom and quantum-computing simulation SDK. These are application milestones rather than core API feature commitments. Performance or hardware-facing conclusions from these projects must follow `docs/governance/SPEC-GOV-001-performance-claims.md` and `docs/governance/SPEC-GOV-002-disclosure-control.md`.
-
-### P0: Foundation Experiments
-
-| Project | Status | Purpose | Sagittarius capabilities exercised | Notes |
-| :--- | :---: | :--- | :--- | :--- |
-| **Single-Atom Rabi Oscillation and Pulse Calibration** | Recommended | Validate `omega`, pulse duration, unit conventions, Rabi period, and single-site `RydbergPopulation`. | `Register`, `PulseSequence`, `Pulse.constant`, `Pulse.sin_squared`, `Simulation.run`, observable shorthand. | First sanity check for all later simulations; verify expected half-period population transfer under known `omega`. |
-| **Two-Atom Rydberg Blockade** | Recommended | Demonstrate suppression of double excitation as distance, `C6`, drive strength, and blockade assumptions vary. | Two-atom registers, local/global drive, `C6/r^6` interaction, observable trajectories, optional `blockade_radius`. | Establish the core physical model before larger arrays. |
-| **Small-Chain Full-vs-Reduced Basis Validation** | Recommended | Compare full Hilbert-space dynamics with blockade-reduced dynamics on 3-5 atom chains. | `Register.chain()`, `SolverConfig.blockade_radius`, reduced-basis cache, `dense_vs_reduced_validation()`. | Use to choose a defensible blockade radius and approximation error budget. |
-| **Landau-Zener / Adiabatic Detuning Sweep** | Recommended | Simulate detuning ramps and adiabatic-transfer behavior. | `Pulse.ramp` on `delta`, smooth `omega` pulses, solver tolerances, observable trajectories. | Natural bridge from basic dynamics to AQC/annealing workflows. |
-
-### P1: Demonstration Workflows
-
-| Project | Status | Purpose | Sagittarius capabilities exercised | Notes |
-| :--- | :---: | :--- | :--- | :--- |
-| **Rydberg Chain Excitation Profiles** | Recommended | Study spatial excitation patterns under local addressing. | `Pulse.local`, sparse local dictionaries, `Register.atoms` ordering, multi-observable results. | Good demo for local addressing and pulse-shape documentation. |
-| **Open-System Decay and Dephasing Studies** | Recommended | Compare closed-system, Lindblad, and MCWF behavior under `gamma` and `gamma_phi`. | `SolverConfig.gamma`, `gamma_phi`, `use_mc`, `n_trajectories`, `open_system_sanity_checks()`. | Keep systems small enough for trace/positivity and MCWF-vs-Lindblad checks. |
-| **CPU/CUDA Parity Smoke Studies** | Recommended | Compare CPU and CUDA observable trajectories for representative small systems. | `doctor(backend="CUDA")`, `SolverConfig(use_gpu=True)`, CUDA parity tests, run manifests. | CUDA remains experimental; claims must cite benchmark/parity artifacts. |
-| **Small UDG/MWIS Simulation Examples** | Recommended | Map unit-disk graph constraints to Rydberg blockade dynamics and compare against exact baselines. | `Register.udg()`, `Register.from_udg_graph()`, detuning schedules, `batch_verify.py`, result artifacts. | Treat MWIS mapping as prior art; Sagittarius contribution is reproducible simulation and verification workflow. |
-
-### P2: Phase-Dependent Studies
-
-| Project | Status | Dependency | Purpose | Notes |
-| :--- | :---: | :--- | :--- | :--- |
-| **Pair-Correlation and Blockade-Violation Diagnostics** | Planned | Phase 11 Observable Library | Track `<n_i n_j>`, connected correlations, and constraint-violation counts directly. | Current shorthand supports single-site populations only; implement after typed observables land. |
-| **MWIS Cost Expectation and Bitstring Success Tracking** | Planned | Phase 11 Observable Library | Track weighted objective expectation, target bitstring probabilities, feasibility, and success metrics. | Pair with exact ILP baselines and disclosure controls before external claims. |
-| **Solver Method Sensitivity Study** | Ready | Phase 12 Solver Configuration | Compare `Tsit5`, `Vern9`, and fixed-step `RK4` for accuracy/cost tradeoffs on representative workflows. | Phase 12 is implemented; use run manifests and `solver_start` metadata to audit method, `adaptive`, and `dt`. |
-
-### P3: Advanced / Future Studies
-
-| Project | Status | Dependency | Purpose | Notes |
-| :--- | :---: | :--- | :--- | :--- |
-| **Large Parameter Sweeps and Phase-Diagram Scans** | Future | Stable small-system validations; optional cluster support | Sweep `omega`, `delta`, `blockade_radius`, geometry, and noise parameters. | Generate `benchmark-artifact/v1` outputs when reporting scaling or performance. |
-| **Hardware-Demo Preparation Workflow** | Future | Mature diagnostics, manifests, and disclosure review | Package diagnostics, run manifests, version metadata, and bounded wording for hardware-facing demos. | Sagittarius is not a calibrated hardware control stack. |
-| **2D Array Ordering and MIS-Like Pattern Formation** | Future | Observable library and scale validation | Study square-lattice or UDG excitation patterns and optimization-like final states. | Requires careful reduced-basis validation and richer observables. |
-
-### Recommended Execution Order
-
-1. Single-atom Rabi oscillation.
-2. Two-atom Rydberg blockade.
-3. Small-chain full-vs-reduced basis validation.
-4. Landau-Zener / adiabatic detuning sweep.
-5. Small UDG/MWIS example with exact baseline checks.
-6. Open-system Lindblad/MCWF comparison.
-7. CPU/CUDA parity or benchmark-artifact generation where hardware is available.
+   - The workflow uploads per-row `phase13-cross-platform-<os>-py<python>-julia<julia>` evidence artifacts with run URL, commit, ref, and validation command metadata.
+   - GitHub Actions run `28577379030` passed all five declared rows: Ubuntu Python 3.10/Julia 1.10.3, Ubuntu Python 3.11/Julia 1.11, Ubuntu Python 3.12/Julia 1.11, macOS Python 3.11/Julia 1.11, and Windows Python 3.11/Julia 1.11.
+   - Retained evidence artifacts are stored under `CI_artifacts/phase13-cross-platform-*`.
+   - Acceptance: Done for the declared OS/Python/Julia matrix; unsupported or experimental combinations remain clearly classified.
 
 ## 🌫️ Phase 14: Theoretical Noise Model Extensions (Planned)
 
@@ -283,7 +245,7 @@ Phase 15 executable recipes may begin after the Phase 13 CPU-first, backend setu
 | **Measurement / Sampling API** | High | Planned | Add a stable final-state sampling and measurement API for shot-based workflows, including final bitstring distribution extraction, `SimulationResult.sample(shots, seed=...)`, reduced-basis forbidden-bitstring handling, readout metadata in manifests, and compatibility with `shared-result/v1` result series. |
 | **Random Seed Control** | High | Done | Added user-facing `SolverConfig.seed` control for current MCWF trajectories and record requested/effective RNG metadata in run manifests and result artifacts. Future final-state sampling, randomized project scripts, and benchmark/demo workflows should adopt the same seed metadata contract when they land. |
 | **Output Time Grid / Saveat Contract** | High | Done | Added `SolverConfig.saveat` as either a fixed output sample count or explicit output time array. Sagittarius records requested `saveat` and normalized `effective_saveat` in diagnostics, run manifests, and serialized artifacts, and forwards the grid to Schrödinger, Lindblad, MCWF, CPU, and supported GPU solver paths. |
-| **Executable Experiment Recipes** | High | Planned | Promote the recommended P0/P1 project backlog into runnable examples with expected outputs and artifact generation, including single-atom Rabi, two-atom blockade, Landau-Zener sweep, open-system decay/dephasing, and small UDG/MWIS workflows. |
+| **Executable Experiment Recipes** | High | Planned | Provide user-facing runnable examples with expected outputs and artifact generation, including single-atom Rabi, two-atom blockade, Landau-Zener sweep, open-system decay/dephasing, and small UDG/MWIS workflows. Benchmark-grade promotion of these recipes belongs to Phase 16. |
 | **Wheel-Installed Experiment Recipes** | Medium | Planned | Add external-user recipes that run from an installed wheel outside the source checkout, starting with a small UDG/MWIS workflow using only public `sagittarius` APIs and ordinary Python dependencies. Repo-local `projects/` scripts may remain source-checkout examples, but wheel recipes must not depend on project files being packaged. |
 | **State Preparation Helpers** | Medium | Planned | Add helpers for common initial states, including all-ground state, named bitstring states, single-excitation states, and optional uniform superpositions. Helpers must validate full/reduced basis compatibility and preserve state-preparation metadata. |
 | **Experiment Config Schema** | Medium | Planned | Define an `experiment-config/v1` schema that can describe register geometry, pulse schedule, solver options, observables/readout, seed controls, and output artifact paths. Provide load/run/save workflow and link generated run manifests back to the source config. |
@@ -302,23 +264,71 @@ Phase 15 executable recipes may begin after the Phase 13 CPU-first, backend setu
 8. Sweep artifacts preserve parameter values, result locations, run manifests, and resumability metadata.
 9. Documentation checks verify SPEC metadata and Markdown links before release-oriented documentation changes are accepted.
 
-## 🧩 Phase 16: Experimental Interop & Readout Models (Future)
+## 🧪 Phase 16: Benchmarking & Application Validation Suite (Planned)
+
+Phase 16 turns the earlier cold-atom project backlog into a systematic benchmark and application-validation suite. Its purpose is to produce reproducible scientific and performance evidence for Sagittarius without mixing exploratory local studies with public claims. Public performance or hardware-facing conclusions from this phase must follow `docs/governance/SPEC-GOV-001-performance-claims.md`, `docs/governance/SPEC-GOV-002-disclosure-control.md`, and `docs/governance/SPEC-GOV-004-benchmarking-plan.md`.
+
+| Requirement | Priority | Status | Description |
+| :--- | :---: | :---: | :--- |
+| **Benchmark Taxonomy and Protocol Docs** | High | Done | Added `docs/benchmarks/` with a suite taxonomy, running instructions, artifact conventions, evidence-retention guidance, and interpretation rules that distinguish exploratory local results from release-grade benchmark evidence. |
+| **Benchmark Artifact Contracts** | High | Planned | Define benchmark-family aggregate artifacts for application benchmarks, including case IDs, seeds, parameters, backend/runtime metadata, result artifact links, run manifest links, correctness metrics, performance metrics, failure diagnostics, and disclosure status. Reuse `benchmark-artifact/v1` where sufficient and version any new family-specific envelopes explicitly. |
+| **Physics Baseline Benchmarks** | High | Planned | Promote single-atom Rabi oscillation, two-atom Rydberg blockade, Landau-Zener/adiabatic sweep, and small-chain full-vs-reduced validation into runnable benchmark tiers with expected output shapes, analytic or dense-reference checks, run manifests, and artifact output. |
+| **Cold-Atom Dynamics Benchmarks** | Medium | Planned | Add Rydberg chain excitation profiles, local-addressing stress cases, Z2/antiferromagnetic ordering dynamics, and 2D array pattern-formation benchmarks that exercise pulse compilation, register geometry, observables, reduced bases, and solver-method metadata. |
+| **Open-System Benchmarks** | Medium | Planned | Add Lindblad decay/dephasing scaling, MCWF-vs-Lindblad agreement, and decoherence-impact studies with trace/positivity checks, trajectory-count sensitivity, runtime/memory metrics, and reproducibility metadata. |
+| **Optimization Benchmark Suite** | High | Planned | Promote UDG/MWIS and weighted MWIS workflows into benchmark tiers with exact ILP baselines for small instances, feasibility checks, objective/approximation metrics, schedule metadata, seed-controlled graph generation, and artifact-backed conclusions. |
+| **MWIS/UDG GPU Benchmark Protocol** | High | Planned | Define and implement a local-first CUDA benchmark protocol for MIS/UDG scale limits, precision, speed, CPU/CUDA parity, GPU memory behavior, timeout/failure boundaries, and result interpretation on hardware such as the local RTX 5070 Ti. |
+| **Solver and Backend Performance Benchmarks** | High | Planned | Standardize dense-vs-sparse-vs-reduced ablation, CPU/CUDA parity and speed, solver method sensitivity (`Tsit5`, `Vern9`, fixed-step `RK4`), GPU setup overhead, and CUDA cached sparse-buffer behavior. |
+| **Parameter Sweep and Cluster Benchmarking** | Medium | Planned | Extend benchmark workflows for parameter-sweep throughput, resumability, artifact aggregation, and cluster execution using `ParallelSimulation`, while keeping benchmark artifacts distinct from user-facing experiment sweep artifacts. |
+| **Benchmark Failure Reporting** | High | Planned | Record failed cases as first-class benchmark rows with failure stage, exception type, diagnostic issue code, backend probe, timeout, memory-at-failure where available, and remediation hints. Scale-limit conclusions must include failures, not only successful rows. |
+| **Benchmark Documentation and Examples** | Medium | Planned | Provide concise examples for running smoke, correctness, parity, scaling, and stress tiers locally. Include guidance for CUDA-only local evidence, release-grade evidence, and how benchmark outputs should be cited in README, papers, demos, or release notes. |
+
+### Phase 16 Benchmark Families
+
+| Family | Initial scenarios | Primary evidence |
+| :--- | :--- | :--- |
+| **Physics baselines** | Single-atom Rabi, two-atom blockade, Landau-Zener sweep, dense-vs-reduced small chains. | Analytic/dense-reference errors, basis sizes, pruning ratios, solver metadata, artifact output. |
+| **Cold-atom dynamics** | Rydberg chain excitation profiles, local addressing, Z2 ordering, 2D pattern formation. | Observable trajectories, correlations, blockade violations, solver/backend metadata. |
+| **Open-system dynamics** | Lindblad decay/dephasing, MCWF-vs-Lindblad, decoherence impact on blockade/ordering. | Trace/positivity checks, trajectory variance, runtime/memory scaling, seed metadata. |
+| **Optimization/AQC** | UDG/MWIS, weighted MWIS, schedule sensitivity, planted or structured graph families. | Feasibility, exact optimum where available, objective value, approximation ratio, success probability when sampling lands. |
+| **Backend performance** | Dense/sparse/reduced ablation, CPU/CUDA parity, solver method sensitivity, CUDA cached path. | Runtime, memory, GPU memory where available, max trajectory error, speedup with bounded wording. |
+| **Sweep/cluster execution** | Parameter sweeps, phase-diagram scans, cluster throughput. | Jobs/sec, resumability, per-run manifest links, aggregate artifacts, failure rows. |
+
+### Phase 16 Benchmark Tiers
+
+1. **Smoke tier**: small systems, one or two seeds, CPU-first, fast enough for local or optional PR validation.
+2. **Correctness tier**: small and medium systems with analytic, dense, or exact ILP baselines.
+3. **Parity tier**: CPU/CUDA or solver-method comparisons with fixed seeds, shared schedules, and bounded tolerances.
+4. **Scaling tier**: increasing size, density, basis size, or trajectory count until timeout, memory pressure, or numerical failure.
+5. **Stress tier**: local hardware-specific exploration such as RTX 5070 Ti CUDA scale limits; these results are not public claims unless promoted through governance review.
+
+### Phase 16 Acceptance Criteria
+
+1. Benchmark documentation explains suite taxonomy, benchmark tiers, required metadata, artifact layout, and the difference between exploratory local results and release-grade evidence.
+2. Each benchmark family emits machine-readable aggregate artifacts plus linked run manifests or result artifacts where simulations are produced.
+3. Physics baseline benchmarks include analytic, dense, or reduced-reference correctness checks with stable tolerances.
+4. MWIS/UDG benchmarks include seeded instance generation, graph metadata, exact ILP baselines where tractable, feasibility checks, objective metrics, and failure rows.
+5. CUDA benchmark protocols record initialized CUDA doctor metadata, CPU/CUDA parity evidence where tractable, GPU device/driver/runtime metadata, and local hardware caveats.
+6. Benchmark failures are preserved in aggregate outputs with diagnostic codes and enough context to audit scale-limit conclusions.
+7. Public benchmark or performance statements cite artifact IDs, commit SHA, hardware/runtime metadata, and applicable disclosure/performance-claim reviews.
+8. Benchmark scripts remain optional for ordinary PR CI unless explicitly designated as smoke-tier checks.
+
+## 🧩 Phase 17: Experimental Interop & Readout Models (Future)
 | Requirement | Priority | Status | Description |
 | :--- | :---: | :---: | :--- |
 | **Readout Noise and Detection Error Models** | Medium | Future | Add optional shot-level readout error models for false positives, false negatives, atom loss, and confusion-matrix style post-processing. Readout errors must be explicitly opt-in and recorded in manifests and result artifacts. |
 | **External Neutral-Atom Tool Interop** | Low | Future | Explore bounded import/export workflows for neutral-atom schedules, geometries, or pulse descriptions used by tools such as Pulser, Bloqade-style workflows, or hardware-provider formats. Any interop claims must follow prior-art and disclosure controls and must not imply Sagittarius is a calibrated hardware control stack. |
 | **Hardware-Oriented Schedule Export** | Low | Future | Provide an optional export format for reviewed, simulation-derived schedules with unit metadata, pulse definitions, and backend diagnostics. Exported schedules are for review and translation, not direct hardware execution without a vendor calibration layer. |
 
-### Phase 16 Acceptance Criteria
+### Phase 17 Acceptance Criteria
 
 1. Readout error models are opt-in, parameterized, validated, and recorded in reproducibility metadata.
 2. Interop import/export paths preserve units, atom ordering, pulse timing, and unsupported-feature diagnostics.
 3. Documentation distinguishes simulation artifacts from hardware-control artifacts and passes governance review before public interop claims.
 
-## 🔬 Phase 17: HPC & Advanced Deployment (Future)
+## 🔬 Phase 18: HPC & Advanced Deployment (Future)
 - **Slurm Integration**: Native support for `ClusterManagers.jl` to manage multi-node jobs.
 - **MPI Backend**: Distributed-memory Hamiltonian evolution for $N > 40$ atoms.
-- **Cluster and Sweep Benchmarks**: Extend benchmark workflows for cluster execution, parameter-sweep throughput, resumability, artifact aggregation, and hardware/backend-specific diagnostics. Public claims must follow `docs/governance/SPEC-GOV-004-benchmarking-plan.md` and `docs/governance/SPEC-GOV-001-performance-claims.md`.
+- **Cluster and Sweep Benchmarks**: Extend Phase 16 benchmark workflows for cluster execution, parameter-sweep throughput, resumability, artifact aggregation, and hardware/backend-specific diagnostics. Public claims must follow `docs/governance/SPEC-GOV-004-benchmarking-plan.md` and `docs/governance/SPEC-GOV-001-performance-claims.md`.
 - **C++ FFI**: Direct bindings for C++ applications to leverage the Julia engine.
 - **Web Dashboard**: Interactive results explorer for large-scale sweeps.
 

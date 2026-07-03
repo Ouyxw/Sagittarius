@@ -48,6 +48,7 @@ def test_phase13_cross_platform_matrix_is_documented():
             _read("docs/getting-started/python/package-installation.md"),
             _read("docs/getting-started/python/compatibility-matrix.md"),
             _read("REQUIREMENTS.md"),
+            _read(".github/workflows/phase13-cross-platform.yml"),
         ]
     )
 
@@ -60,3 +61,47 @@ def test_phase13_cross_platform_matrix_is_documented():
     assert "Julia 1.10.3" in docs or "1.10.3" in docs
     assert "phase13-cross-platform.yml" in docs
     assert "Cross-Platform Installation Matrix** | High | Mixed" in docs
+    assert "phase13-cross-platform-evidence" in docs
+    assert "actions/upload-artifact" in docs
+    assert "Run URL" in docs
+    assert "Commit" in docs
+
+
+def test_phase13_uninstall_reinstall_smoke_is_documented():
+    docs = "\n\n".join(
+        [
+            _read("docs/getting-started/python/package-installation.md"),
+            _read("REQUIREMENTS.md"),
+            _read(".github/workflows/phase13-clean-artifact.yml"),
+        ]
+    )
+
+    assert "test_clean_venv_installed_wheel_uninstall_reinstall_smoke" in docs
+    assert "Uninstall/Reinstall Smoke Coverage** | Medium | Done" in docs
+    assert "package_resource" in docs
+    assert "no longer importable" in docs
+
+
+def test_phase13_ci_workflow_policy_is_documented():
+    ci_docs = _read("docs/reference/ci-workflows.md")
+    package_docs = _read("docs/getting-started/python/package-installation.md")
+    status_docs = _read("docs/status.md")
+    roadmap = _read("REQUIREMENTS.md")
+
+    assert "reference/ci-workflows.md" in package_docs
+    assert "reference/ci-workflows.md" in status_docs
+    assert "Phase 13 CI and Release Automation" in roadmap
+    pr_fast_ci = _read(".github/workflows/pr-fast-ci.yml")
+    assert ".github/workflows/pr-fast-ci.yml" in ci_docs
+    assert "Automatic on pull requests" in ci_docs
+    assert "direct pushes to `develop/**`" in ci_docs
+    assert "push:" in pr_fast_ci
+    assert "develop/**" in pr_fast_ci
+    assert "workflow_dispatch" in _read(".github/workflows/phase13-cross-platform.yml")
+    assert "pull_request" not in _read(".github/workflows/phase13-cross-platform.yml")
+    assert "pull_request" not in _read(".github/workflows/phase13-testpypi.yml")
+    assert "pull_request" not in _read(".github/workflows/phase13-cuda-wheel.yml")
+    assert "pull_request" not in _read(".github/workflows/phase13-clean-artifact.yml")
+    assert "Automatic on relevant pushes to `main`" in ci_docs
+    assert "Manual only" in ci_docs
+    assert "Evidence Retention" in ci_docs

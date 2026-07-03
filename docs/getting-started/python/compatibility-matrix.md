@@ -23,3 +23,5 @@ This matrix is the Phase 13 release-validation target for Python package artifac
 ## Workflow
 
 Run `.github/workflows/phase13-cross-platform.yml` manually for release candidates. The workflow builds artifacts, runs metadata checks, installs the wheel in a fresh virtual environment outside the repository, runs `sagittarius backend resolve`, and executes the minimal CPU simulation smoke.
+
+Each passing matrix row writes a `phase13-cross-platform-evidence/*.md` file and uploads it with an artifact name of the form `phase13-cross-platform-<os>-py<python>-julia<julia>`. Keep those artifacts, the workflow run URL, the commit SHA, and the release-candidate tag or branch together with release notes before marking the matrix evidence gate complete in `REQUIREMENTS.md`.

@@ -51,6 +51,16 @@ Status values:
 | `SPEC-PHYS-003` | [`physics/SPEC-PHYS-003-observables.md`](physics/SPEC-PHYS-003-observables.md) | Physical meaning of current and planned neutral-atom observables. | Phase 11 | Mixed | Observable library scope, sign conventions, or MWIS/cost definitions change. |
 | `SPEC-PHYS-004` | [`physics/SPEC-PHYS-004-noise-models.md`](physics/SPEC-PHYS-004-noise-models.md) | Current and planned theoretical noise models for open-system and stochastic simulations. | Phase 14 | Planned contract | Noise channels, jump-operator semantics, stochastic ensemble behavior, or readout-scope boundaries change. |
 
+## Benchmark Protocols
+
+| Spec ID | Document | Purpose | Roadmap link | Status | Update when |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| - | [`benchmarks/README.md`](benchmarks/README.md) | Phase 16 benchmark protocol index and evidence-level routing. | Phase 16 | Planned contract | Benchmark document set, evidence levels, or governance references change. |
+| - | [`benchmarks/protocol.md`](benchmarks/protocol.md) | Cross-suite benchmark execution protocol, correctness-before-performance rules, and evidence classification. | Phase 16 | Planned contract | Benchmark execution stages, pre-run metadata, warmup discipline, or evidence classes change. |
+| - | [`benchmarks/tiers.md`](benchmarks/tiers.md) | Smoke, correctness, parity, scaling, and stress tier requirements. | Phase 16 | Planned contract | Tier definitions, CI policy, local GPU protocol, or scale-limit rules change. |
+| - | [`benchmarks/families.md`](benchmarks/families.md) | Family-specific benchmark protocols for physics, dynamics, open systems, optimization, backend performance, and sweeps. | Phase 16 | Planned contract | Benchmark families, scenario coverage, correctness gates, or required evidence change. |
+| - | [`benchmarks/artifact-contracts.md`](benchmarks/artifact-contracts.md) | Phase 16 aggregate artifact, row, metric, failure, and evidence-retention expectations. | Phase 16 | Planned contract | Benchmark artifact schemas, metric names, failure rows, or retention rules change. |
+
 ## Reference
 
 | Spec ID | Document | Purpose | Roadmap link | Status | Update when |
@@ -63,6 +73,7 @@ Status values:
 | `SPEC-DATA-001` | [`reference/SPEC-DATA-001-shared-result-schema.md`](reference/SPEC-DATA-001-shared-result-schema.md) | `shared-result/v1` language-neutral result payload. | Phase 8 | Current | Shared result schema, result artifact envelope, or Julia serialization behavior changes. |
 | `SPEC-OBS-001` | [`reference/SPEC-OBS-001-event-taxonomy.md`](reference/SPEC-OBS-001-event-taxonomy.md) | `event-taxonomy/v1` event IDs, severity, payload compatibility. | Phase 6 | Current | Event IDs, required fields, severity, or compatibility rules change. |
 | - | [`reference/development-sop.md`](reference/development-sop.md) | Reusable logging, diagnostics, artifact, manifest, benchmark, and public-claim SOP derived from Sagittarius contracts. | Phase 6, Phase 8, Phase 10 | Current | Logging contracts, artifact schemas, benchmark governance, or documentation maintenance process changes. |
+| - | [`reference/ci-workflows.md`](reference/ci-workflows.md) | Automatic PR CI, manual release gates, workflow triggers, and release-evidence retention rules. | Phase 13 | Current | GitHub Actions triggers, workflow scope, release gates, or CI evidence requirements change. |
 
 ## Governance
 
@@ -71,7 +82,7 @@ Status values:
 | `SPEC-GOV-001` | [`governance/SPEC-GOV-001-performance-claims.md`](governance/SPEC-GOV-001-performance-claims.md) | Artifact-backed performance claim policy. | Phase 10 | Policy | Benchmark artifact schema, benchmark scripts, or public wording rules change. |
 | `SPEC-GOV-002` | [`governance/SPEC-GOV-002-disclosure-control.md`](governance/SPEC-GOV-002-disclosure-control.md) | Disclosure register and review workflow. | Phase 10 | Policy | A public release/report/demo/paper is planned or published. |
 | `SPEC-GOV-003` | [`governance/SPEC-GOV-003-prior-art-notes.md`](governance/SPEC-GOV-003-prior-art-notes.md) | Prior-art boundaries for Rydberg, MWIS, neutral-atom tooling, and numerical methods. | Phase 10 | Policy | New public disclosure, paper draft, benchmark claim, or reviewed source changes the boundary. |
-| `SPEC-GOV-004` | [`governance/SPEC-GOV-004-benchmarking-plan.md`](governance/SPEC-GOV-004-benchmarking-plan.md) | Benchmark suite structure, required metadata, correctness gates, and release cadence. | Phase 9, Phase 10, Phase 17 | Policy | Benchmark suite scope, benchmark artifact fields, correctness gates, or release benchmarking workflow changes. |
+| `SPEC-GOV-004` | [`governance/SPEC-GOV-004-benchmarking-plan.md`](governance/SPEC-GOV-004-benchmarking-plan.md) | Benchmark suite structure, required metadata, correctness gates, and release cadence. | Phase 9, Phase 10, Phase 16, Phase 18 | Policy | Benchmark suite scope, benchmark artifact fields, correctness gates, or release benchmarking workflow changes. |
 | `SPEC-GOV-005` | [`governance/SPEC-GOV-005-repository-versioning.md`](governance/SPEC-GOV-005-repository-versioning.md) | Hybrid monorepo policy, package boundaries, version compatibility, and repository-split criteria. | Phase 13, Phase 17 | Policy | Repository layout, package release boundaries, compatibility matrix, or split-repository policy changes. |
 
 ## Maintenance Checklist
@@ -82,4 +93,5 @@ Before marking a roadmap phase complete, check this table for every document tie
 - Phase 12 is complete; future solver configuration changes should update [`api/SPEC-API-005-solver-configuration.md`](api/SPEC-API-005-solver-configuration.md), [`api/SPEC-API-002-python-julia-parity.md`](api/SPEC-API-002-python-julia-parity.md), [`reference/SPEC-OBS-001-event-taxonomy.md`](reference/SPEC-OBS-001-event-taxonomy.md), and [`reference/known-limitations.md`](reference/known-limitations.md).
 - Phase 13 completion should update all installation pages, [`reference/SPEC-BACKEND-001-backends.md`](reference/SPEC-BACKEND-001-backends.md), [`reference/known-limitations.md`](reference/known-limitations.md), root [`README.md`](../README.md), and any packaging release notes.
 - Phase 14 completion should update [`physics/SPEC-PHYS-004-noise-models.md`](physics/SPEC-PHYS-004-noise-models.md), [`api/SPEC-API-002-python-julia-parity.md`](api/SPEC-API-002-python-julia-parity.md), [`api/SPEC-API-004-observable-library.md`](api/SPEC-API-004-observable-library.md), and [`reference/known-limitations.md`](reference/known-limitations.md).
+- Phase 16 completion should update [`benchmarks/README.md`](benchmarks/README.md), [`benchmarks/protocol.md`](benchmarks/protocol.md), [`benchmarks/tiers.md`](benchmarks/tiers.md), [`benchmarks/families.md`](benchmarks/families.md), [`benchmarks/artifact-contracts.md`](benchmarks/artifact-contracts.md), [`governance/SPEC-GOV-004-benchmarking-plan.md`](governance/SPEC-GOV-004-benchmarking-plan.md), [`governance/SPEC-GOV-001-performance-claims.md`](governance/SPEC-GOV-001-performance-claims.md), and [`reference/known-limitations.md`](reference/known-limitations.md).
 - Repository layout or package-boundary changes should be checked against [`governance/SPEC-GOV-005-repository-versioning.md`](governance/SPEC-GOV-005-repository-versioning.md). Any public benchmark or hardware-facing claim should be checked against [`governance/SPEC-GOV-004-benchmarking-plan.md`](governance/SPEC-GOV-004-benchmarking-plan.md), [`governance/SPEC-GOV-001-performance-claims.md`](governance/SPEC-GOV-001-performance-claims.md), [`governance/SPEC-GOV-003-prior-art-notes.md`](governance/SPEC-GOV-003-prior-art-notes.md), and [`governance/SPEC-GOV-002-disclosure-control.md`](governance/SPEC-GOV-002-disclosure-control.md).

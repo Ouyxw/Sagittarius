@@ -2,7 +2,7 @@
 
 Spec ID: `SPEC-GOV-004`
 Status: `Policy`
-Roadmap: Phase 9, Phase 10, Phase 11, Phase 12, Phase 14, Phase 15, Phase 17
+Roadmap: Phase 9, Phase 10, Phase 11, Phase 12, Phase 14, Phase 15, Phase 16, Phase 18
 Version: `benchmarking-plan/v1`
 Last reviewed: 2026-06-30
 
@@ -125,7 +125,8 @@ For public reports, create or update a disclosure row in [`SPEC-GOV-002-disclosu
 - Phase 12 should add effective solver configuration and solver-sensitivity benchmarks.
 - Phase 14 should add theory-noise benchmark scenarios and noise metadata.
 - Phase 15 should add seed and output-grid reproducibility for MCWF, sampling, stochastic noise, and benchmark scripts.
-- Phase 17 should add cluster and advanced deployment benchmarks without weakening artifact or disclosure requirements.
+- Phase 16 defines application benchmark protocols and artifact expectations.
+- Phase 18 should add cluster and advanced deployment benchmarks without weakening artifact or disclosure requirements.
 
 ## Maintenance Triggers
 

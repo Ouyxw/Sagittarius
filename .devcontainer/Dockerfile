@@ -40,7 +40,7 @@ WORKDIR /workspaces/Sagittarius
 
 # 拷贝项目文件 (使用通配符确保即使 uv.lock 不存在也不会报错)
 COPY Sagittarius.jl/Project.toml ./Sagittarius.jl/
-COPY sagittarius_py/pyproject.toml sagittarius_py/uv.lock* sagittarius_py/juliapkg.json ./sagittarius_py/
+COPY sagittarius_py/pyproject.toml sagittarius_py/uv.lock* ./sagittarius_py/
 
 # 强制重新生成 CUDA-only 项目环境，并锁定使用本地 CUDA 运行时。
 # CUDA.jl 6.2.x includes current CUDA 13.x runtime selection fixes while remaining compatible with CUDA 12.8+ driver/toolkit workflows.
