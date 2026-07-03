@@ -43,6 +43,7 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 
 - [Development workflows overview](development/README.md)
 - [Agent workflow template](development/agent-workflow-template.md)
+- [Prompt context standards](development/prompt-context.md)
 
 ## Reference
 

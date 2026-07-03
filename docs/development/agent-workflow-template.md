@@ -8,21 +8,17 @@ Last reviewed: 2026-07-03
 
 This template defines a reusable workflow for AI-assisted Sagittarius development. Copy or reference it for feature branches, development branches, release branches, benchmark work, documentation work, or experiment-project work. Branch owners may specialize the checklist, but they should not remove scientific correctness, reproducibility, artifact-contract, or documentation-maintenance gates without recording why.
 
+For standard session prompts, see [`prompt-context.md`](prompt-context.md). Prompt text may be written in English or Chinese; the workflow requirements are the same.
+
 ## How To Use This Template
 
-At the start of a branch or feature, create a short branch-local workflow note in the pull request description, issue, or a branch document. Fill in the placeholders below.
+At the start of a branch or feature, create a branch-local workflow note in the pull request description, issue, or a branch document. For long-running feature branches, use a file such as:
 
 ```text
-Branch or feature: <name>
-Roadmap phase: <phase or N/A>
-Primary owner: <person/team>
-Target surface: <Python SDK | Julia backend | docs | benchmark | packaging | experiment workflow>
-Primary specs: <docs paths>
-Required tests: <commands>
-Required artifacts: <schemas/files>
-Out of scope: <explicit non-goals>
-Release or public-claim impact: <yes/no and governance docs>
+docs/development/branches/phase14-noise-models.md
 ```
+
+Branch-local workflow documents are working records. Before merging, decide whether to delete them, keep them as retained development records, or extract the durable content into formal specs, docs, or the PR description.
 
 Use `AGENTS.md` as the standing agent behavior policy. Use this file as the per-task operating workflow.
 
@@ -34,6 +30,8 @@ Minimum context:
 
 ```bash
 git status --short
+git branch --show-current
+git rev-parse --short HEAD
 sed -n '1,220p' AGENTS.md
 sed -n '1,320p' REQUIREMENTS.md
 sed -n '1,180p' docs/status.md
@@ -54,26 +52,44 @@ Then read only the specs relevant to the current task:
 | Packaging or release | `docs/getting-started/python/package-installation.md`, `docs/reference/ci-workflows.md`, packaging tests |
 | Public claim, demo, paper, or report | Governance docs `SPEC-GOV-001`, `SPEC-GOV-002`, `SPEC-GOV-003`, `SPEC-GOV-004` |
 
-Suggested session prompt:
-
-```text
-Read AGENTS.md, REQUIREMENTS.md, docs/status.md, and the specs relevant to <task>.
-Before editing, summarize the affected code, tests, docs, schemas, artifacts, and CI gates.
-Then implement the smallest correct change, run targeted tests, update docs, and report residual risks.
-```
-
 ## Branch Customization Block
 
-Copy this block into the PR, issue, or branch-local planning doc.
+Copy this block into the PR, issue, or branch-local planning doc. Fill it before implementation begins.
 
 ```markdown
+# Branch Workflow: <branch-or-feature-name>
+
+Status: Branch-local working document
+Merge policy: <remove before merge | retain as development record | extract into formal docs/PR description>
+
 ## Agent Workflow Customization
+
+### Branch Baseline
+- Base branch:
+- Base commit:
+- Current branch:
+- Created at:
+- Initial working tree status:
 
 ### Scope
 - Roadmap phase:
 - Feature or bug:
 - In scope:
 - Out of scope:
+
+### Requirement Items
+
+| ID | Requirement | Priority | Source | Specs | Status | Tests | Docs | Notes |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| <P14-R1> | <requirement text> | <High/Medium/Low> | `REQUIREMENTS.md` Phase <N> | <docs paths> | Planned | TBD | TBD | <notes> |
+
+Status values: `Planned`, `In progress`, `Implemented`, `Verified`, `Deferred`, `Blocked`.
+
+### Cross-Phase Dependencies
+
+| Dependency | Direction | Reason | Status | Impact |
+| :--- | :--- | :--- | :--- | :--- |
+| <Phase/feature> | <blocks/depends on/enables> | <why it matters> | <status> | <implementation impact> |
 
 ### Required Context
 - Specs:
@@ -90,6 +106,16 @@ Copy this block into the PR, issue, or branch-local planning doc.
 - Packaging/release behavior: yes/no
 - Documentation-only: yes/no
 
+### Current Slice
+- Slice ID:
+- Requirement items covered:
+- In scope:
+- Out of scope:
+- Acceptance checks:
+- Required tests:
+- Required docs:
+- Known risks:
+
 ### Required Validation
 - Unit tests:
 - Integration/parity tests:
@@ -98,26 +124,65 @@ Copy this block into the PR, issue, or branch-local planning doc.
 - Docs or link checks:
 - CI/release gates:
 
+### Validation Log
+
+| Date | Command | Result | Notes |
+| :--- | :--- | :--- | :--- |
+| <YYYY-MM-DD> | `<command>` | <passed/failed/skipped> | <notes> |
+
+### Progress Log
+
+| Date | Slice | Status | Summary | Commit |
+| :--- | :--- | :--- | :--- | :--- |
+| <YYYY-MM-DD> | <slice id> | <status> | <summary> | <commit or pending> |
+
 ### Handoff Requirements
 - Summary:
 - Tests run:
 - Docs updated:
 - Known limitations or residual risks:
 - Follow-up issues:
+
+### Conclusion
+- Completed requirement items:
+- Deferred or blocked items:
+- Final validation:
+- Formal docs updated:
+- Branch-local document disposition:
 ```
 
 ## Standard Development Loop
 
 1. Recover context.
-2. Classify the change surface.
-3. Identify acceptance criteria and non-goals.
-4. Inspect existing implementation and tests before designing new abstractions.
-5. Implement the smallest coherent change.
-6. Add or update tests that prove behavior and prevent regression.
-7. Update docs listed in `docs/status.md` for the touched surface.
-8. Run targeted tests, then broaden based on risk.
-9. Inspect `git diff` for unrelated edits and schema/documentation drift.
-10. Handoff with commands run, results, and remaining risks.
+2. Create or update the Branch Customization Block.
+3. Classify the change surface.
+4. Identify acceptance criteria, non-goals, and cross-phase dependencies.
+5. Ask for the smallest P0 slice. Do not implement until the developer approves the slice.
+6. Inspect existing implementation and tests before designing new abstractions.
+7. Implement the approved slice.
+8. Add or update tests that prove behavior and prevent regression.
+9. Update formal docs listed in `docs/status.md` for the touched surface.
+10. Update the branch-local workflow document with progress and validation results.
+11. Run targeted tests, then broaden based on risk.
+12. Inspect `git diff` for unrelated edits and schema/documentation drift.
+13. Handoff with commands run, results, residual risks, and next-slice recommendation.
+
+## Rolling Development Prompt Pattern
+
+For ongoing feature branches, each new session should ask the agent to read the branch-local workflow document and report current progress before selecting the next task.
+
+Required status report:
+
+- base commit and current working tree status;
+- requirement items by status;
+- completed and verified items;
+- implemented but unverified or undocumented items;
+- blocked/deferred items;
+- suggested next requirement priority;
+- smallest slice for the highest-priority item;
+- acceptance checks, tests, docs, and risks for that slice.
+
+The agent should not edit code during this status report unless explicitly authorized.
 
 ## Code, Docs, Tests, and CI Coupling
 
@@ -191,6 +256,8 @@ At minimum, update docs when:
 - A planned feature becomes implemented or a limitation is removed.
 - A benchmark or public claim is added, modified, or promoted.
 
+Branch-local workflow documents do not replace formal docs. They record progress; formal docs describe the project state after the change.
+
 Do not update README to advertise a capability before tests and docs support it.
 
 ## CI and Release Gate Expectations
@@ -229,6 +296,12 @@ Use this for final AI summaries, PR comments, or branch notes.
 - Command:
 - Result:
 
+## Branch Workflow Update
+- Requirement items updated:
+- Current slice status:
+- Validation log updated:
+- Next recommended slice:
+
 ## Reproducibility Metadata
 - Seeds:
 - Backend:
@@ -246,6 +319,7 @@ Use this for final AI summaries, PR comments, or branch notes.
 Feature and development branches may tailor this template by adding stricter checks. They should not remove these baseline requirements:
 
 - context recovery from `AGENTS.md`, `REQUIREMENTS.md`, and relevant specs;
+- branch baseline and requirement-item status tracking for long-running branches;
 - tests for behavior changes;
 - docs updates for public behavior or schema changes;
 - artifact-backed evidence for performance or release claims;

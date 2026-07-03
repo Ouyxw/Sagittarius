@@ -67,6 +67,7 @@ Status values:
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | - | [`development/README.md`](development/README.md) | Index for reusable contributor and AI-agent development workflow templates. | Cross-phase development workflow | Template | Development workflow templates, agent collaboration process, or branch customization policy changes. |
 | - | [`development/agent-workflow-template.md`](development/agent-workflow-template.md) | Reusable AI-agent workflow template for feature, development, release, benchmark, and documentation branches. | Cross-phase development workflow | Template | Agent collaboration process, branch workflow expectations, test matrix, or handoff requirements change. |
+| - | [`development/prompt-context.md`](development/prompt-context.md) | Bilingual prompt standards for starting, resuming, implementing, reviewing, and closing AI-assisted branch work. | Cross-phase AI-assisted development workflow | Template | Prompt templates, branch context expectations, or AI handoff requirements change. |
 
 ## Reference
 
