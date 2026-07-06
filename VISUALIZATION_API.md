@@ -317,6 +317,15 @@ plt.savefig("observables.png")
 ```python
 from sagittarius.viz import plot_population_heatmap
 
+def plot_population_heatmap(
+    result,  # 必填：SimulationResult，to_pandas输出包含pop0/pop1系列布居列
+    ax: Optional[Axes] = None,  # 可选，默认None：外部子图，不传新建(10,6)画布
+    cmap: str = 'viridis',  # 可选，默认viridis：Matplotlib内置色板名称
+    title: Optional[str] = None,  # 可选，默认None：自定义标题，默认「Rydberg Population Heatmap」
+    show_colorbar: bool = True,  # 可选，默认True：右侧显示颜色刻度图例
+    atom_order: Optional[List[int]] = None,  # 可选，默认None：自定义原子纵向展示顺序列表，如[3,2,1,0]
+) -> Axes:
+
 # 基础用法（自动检测 pop* 列）
 ax = plot_population_heatmap(result)
 
@@ -389,6 +398,17 @@ plot_population_heatmap(result, atom_order=[0, 0, 1])
 ```python
 from sagittarius.viz import plot_bitstring_distribution
 from sagittarius import load_result
+def plot_bitstring_distribution(
+    result,  # 必填：SimulationResult，必须实现final_bitstring_distribution()方法获取概率字典
+    top_k: int = 10,  # 可选，默认10：仅展示概率最高前K个比特态，其余截断舍弃
+    ax: Optional[Axes] = None,  # 可选，默认None：外部自定义子图，不传新建(12,6)画布
+    sort_by: str = 'probability',  # 可选，默认probability：排序规则，probability降序 / bitstring字典升序
+    title: Optional[str] = None,  # 可选，默认None：自定义标题；空则自动拼接基矢、禁态、总概率信息
+    bar_color: str = 'steelblue',  # 可选，默认steelblue：柱状填充色
+    show_values: bool = True,  # 可选，默认True：柱子顶部显示概率小数数值
+    show_basis_info: bool = True,  # 可选，默认True：右上角文本框展示基矢模式、禁比特态数量
+) -> Axes:
+
 
 # 直接绘图
 result = sim.run(...)
@@ -470,6 +490,16 @@ Total probability: 0.9000
 ```python
 from sagittarius.viz import plot_shot_histogram
 from sagittarius import load_result
+
+def plot_shot_histogram(
+    result,  # 必填：SimulationResult，存在samples采样数组属性
+    ax: Optional[Axes] = None,  # 可选，默认None：外部子图，不传新建(12,6)画布
+    top_k: int = 20,  # 可选，默认20：展示采样次数最多前K种比特串
+    normalize: bool = False,  # 可选，默认False：True归一化为频率0~1，False显示原始测量次数
+    title: Optional[str] = None,  # 可选，默认None：自定义标题；空自动填充总shots、随机种子
+    bar_color: str = 'coral',  # 可选，默认coral：柱状填充色
+    show_seed_info: bool = True,  # 可选，默认True：右上角文本框展示随机种子、总采样数、计数模式
+) -> Axes:
 
 # 基础用法
 result = sim.run(...)
