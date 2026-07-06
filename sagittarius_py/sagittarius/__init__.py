@@ -33,7 +33,12 @@ from .runtime import (
     version_info,
 )
 from .events import event_taxonomy, get_event_spec
-from .pulse import CallablePulse, Constant, GlobalPulse, LocalPulseVector, Ramp, Piecewise, Gaussian, Blackman, Sinc, Pulse
+from .pulse import (
+    CallablePulse, Constant, GlobalPulse, LocalPulseVector, Ramp, 
+    Piecewise, Gaussian, Blackman, Sinc, Pulse,
+    dict_to_pulse_node, parse_pulse_config,
+)
+
 from .cluster import ParallelSimulation
 from .benchmarking import (
     BENCHMARK_ARTIFACT_SCHEMA_VERSION,
@@ -76,6 +81,8 @@ __all__ = [
     "Blackman",
     "Sinc",
     "Pulse",
+    "dict_to_pulse_node",
+    "parse_pulse_config",
     "ParallelSimulation",
     "BENCHMARK_ARTIFACT_SCHEMA_VERSION",
     "BENCHMARK_ARTIFACT_TYPE",
