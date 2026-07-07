@@ -40,6 +40,7 @@ def plot_mwis_problem(
     algorithm_name: Optional[str] = None,
     performance_metrics: Optional[Dict[str, float]] = None,
     artifact_id: Optional[str] = None,
+    weight_label_offset: float = 0.1,
 ) -> Axes:
     """
     Plot MWIS problem on a quantum register layout with overlaid metadata.
@@ -72,6 +73,8 @@ def plot_mwis_problem(
         algorithm_name: Name of the algorithm used to find the solution.
         performance_metrics: Dictionary of performance metrics to display.
         artifact_id: Unique identifier for the solution artifact.
+        weight_label_offset: Offset distance for weight labels from atoms (default: 0.1).
+                           Use smaller value (e.g., 0.05-0.08) for compact subplots.
         
     Returns:
         The matplotlib Axes object
@@ -174,7 +177,7 @@ def plot_mwis_problem(
     
     # Plot atom index labels (zorder=10)
     for i in range(n_atoms):
-        offset = 0.15
+        offset = 0.1
         ax.text(x[i] + offset, y[i] + offset, str(i), 
                fontsize=9, ha='left', va='bottom', 
                color='white', weight='bold',
@@ -184,16 +187,16 @@ def plot_mwis_problem(
     # Plot weight labels (zorder=11)
     if show_weights and weights:
         for i in range(n_atoms):
-            # Position weights opposite to index labels
-            offset_x = -0.35
-            offset_y = -0.35
+            # Position weights close to atoms (opposite corner from index labels)
+            offset_x = -weight_label_offset
+            offset_y = -weight_label_offset
             
             weight_text = f"w={weights[i]:.2f}" if isinstance(weights[i], float) else f"w={weights[i]}"
             
             ax.text(x[i] + offset_x, y[i] + offset_y, weight_text, 
                    fontsize=weight_fontsize, ha='right', va='top', 
                    color='darkgreen', weight='bold',
-                   bbox=dict(boxstyle='round,pad=0.25', facecolor='lightyellow', alpha=0.8),
+                   bbox=dict(boxstyle='round,pad=0.2', facecolor='lightyellow', alpha=0.8),
                    zorder=11)
     
     # Calculate solution metrics
@@ -272,6 +275,7 @@ def plot_mwis_comparison(
     algorithm_names: Optional[List[str]] = None,
     performance_metrics_list: Optional[List[Dict[str, float]]] = None,
     artifact_ids: Optional[List[str]] = None,
+    weight_label_offset: float = 0.1,
 ) -> List[Axes]:
     """
     Compare multiple MWIS solutions side-by-side.
@@ -290,36 +294,12 @@ def plot_mwis_comparison(
         algorithm_names: List of algorithm names for each solution (Phase 16 enhancement)
         performance_metrics_list: List of performance metrics dicts for each solution (Phase 16)
         artifact_ids: List of artifact IDs for each solution (Phase 16)
+        weight_label_offset: Offset distance for weight labels from atoms (default: 0.15).
+                           Use smaller value (e.g., 0.1) for very compact subplots, larger (e.g., 0.2) for spacious layouts.
         
     Returns:
         List of matplotlib Axes objects
         
-    Raises:
-        ValueError: If algorithm_names, performance_metrics_list, or artifact_ids 
-                   length doesn't match bitstrings count
-        
-    Example:
-        >>> # Compare greedy vs optimal solutions
-        >>> ax_list = plot_mwis_comparison(
-        ...     reg,
-        ...     bitstrings=["10101", "01010"],
-        ...     titles=["Greedy Solution", "Optimal Solution"],
-        ...     weights=[1.2, 0.8, 1.5, 0.9, 1.1],
-        ...     edges=[(0,1), (1,2), (2,3), (3,4)],
-        ...     blockade_radius=5.0
-        ... )
-        
-        >>> # Phase 16 enhanced usage
-        >>> ax_list = plot_mwis_comparison(
-        ...     reg,
-        ...     bitstrings=[aqc_sol, greedy_sol],
-        ...     algorithm_names=["AQC", "Greedy"],
-        ...     performance_metrics_list=[
-        ...         {"tts": 2.35, "p_success": 0.85},
-        ...         {"ratio": 0.92}
-        ...     ],
-        ...     artifact_ids=["mwis-aqc-n16", "mwis-greedy-n16"]
-        ... )
     """
     n_solutions = len(bitstrings)
     
@@ -367,7 +347,8 @@ def plot_mwis_comparison(
             title=effective_title,
             algorithm_name=None,  # Already used in title
             performance_metrics=perf_metrics,
-            artifact_id=art_id
+            artifact_id=art_id,
+            weight_label_offset=weight_label_offset  # Pass through the offset parameter
         )
     
     plt.tight_layout()
@@ -400,16 +381,6 @@ def annotate_solution_quality(
         include_approximation_ratio: Whether to show approximation ratio (Phase 16)
         optimal_weight: Optimal solution weight for calculating approximation ratio
         
-    Example:
-        >>> ax = plot_mwis_problem(reg, bitstring="10101", weights=w, edges=e)
-        >>> annotate_solution_quality(ax, "10101", weights=w, edges=e)
-        
-        >>> # With approximation ratio
-        >>> annotate_solution_quality(
-        ...     ax, "10101", weights=w, edges=e,
-        ...     include_approximation_ratio=True,
-        ...     optimal_weight=15.5
-        ... )
     """
     n_atoms = len(bitstring)
     selected_count = bitstring.count('1')
@@ -481,19 +452,7 @@ def save_mwis_benchmark_figure(
         dpi: Image resolution for raster formats (default: 150)
         save_metadata_sidecar: Whether to save JSON metadata file (default: True)
         
-    Example:
-        >>> metadata = {
-        ...     "artifact_id": "mwis-bench-n16-d0.5-seed42",
-        ...     "schema_version": "benchmark-artifact/v1",
-        ...     "algorithm": "AQC",
-        ...     "n_atoms": 16,
-        ...     "density": 0.5,
-        ...     "seed": 42,
-        ...     "performance": {"tts": 2.35, "p_success": 0.85},
-        ...     "commit_sha": "abc123..."
-        ... }
-        >>> save_mwis_benchmark_figure(fig, "result.png", metadata)
-        # Generates: result.png + result.json
+    
     """
     # Save the figure
     fig.savefig(output_path, dpi=dpi, bbox_inches='tight')

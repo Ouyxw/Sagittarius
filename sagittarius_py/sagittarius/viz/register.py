@@ -55,7 +55,7 @@ def plot_register(
     atom_size: int = 100,
     title: Optional[str] = None,
     show_blockade_disks: bool = False,
-    disk_alpha: float = 0.1,
+    disk_alpha: float = 0.15,
     bitstring: Optional[str] = None,
     excited_state_color: str = 'orange',
     ground_state_color: str = 'steelblue',
@@ -180,14 +180,13 @@ def plot_register(
     # Plot atomic labels (0-based indices) positioned near atoms without overlap
     if labels:
         for i in range(n_atoms):
-            # Calculate minimal offset to position label just outside atom edge
-            # Use a very small fixed offset in data coordinates
-            offset = 0.1  # Very small offset in μm - label touches atom edge
+            # Fixed offset for label positioning
+            offset = 0.15
             
             ax.text(x[i] + offset, y[i] + offset, str(i), 
                    fontsize=9, ha='left', va='bottom', 
                    color='black', weight='bold',
-                   bbox=dict(boxstyle='round,pad=0.15', facecolor='white', alpha=0.8),
+                   bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.8),
                    zorder=10)
     # Plot Blockade/UDG Edges
     if edges and blockade_radius is not None:
