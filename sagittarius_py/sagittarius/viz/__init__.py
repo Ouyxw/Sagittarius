@@ -29,6 +29,12 @@ from sagittarius.viz.result import (
     plot_shot_histogram,
     plot_population_heatmap,
 )
+from sagittarius.viz.mwis_viz import (
+    plot_mwis_problem,
+    plot_mwis_comparison,
+    annotate_solution_quality,
+    save_mwis_benchmark_figure,
+)
 
 __all__ = [
     "plot_register",
@@ -40,4 +46,8 @@ __all__ = [
     "plot_bitstring_distribution",
     "plot_shot_histogram",
     "plot_population_heatmap",
+    "plot_mwis_problem",
+    "plot_mwis_comparison",
+    "annotate_solution_quality",
+    "save_mwis_benchmark_figure",
 ]

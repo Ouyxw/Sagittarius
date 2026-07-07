@@ -1,0 +1,22 @@
+{
+  "artifact_id": "test-artifact-001",
+  "schema_version": "benchmark-artifact/v1",
+  "algorithm": "AQC",
+  "n_atoms": 4,
+  "density": 0.5,
+  "seed": 42,
+  "weights_mode": "random",
+  "solution_weight": 2.7,
+  "conflicts": 0,
+  "backend": "CPU",
+  "solver_method": "Tsit5",
+  "performance": {
+    "tts": 2.35,
+    "p_success": 0.85,
+    "runtime": 1.2
+  },
+  "commit_sha": "test-commit-abc123",
+  "visualization_saved_at": "2026-07-07T01:31:07.102383Z",
+  "image_path": "/workspaces/Sagittarius/sagittarius_py/tests/test_figs/mwis_benchmark_test.png",
+  "image_dpi": 150
+}

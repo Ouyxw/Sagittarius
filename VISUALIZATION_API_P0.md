@@ -573,6 +573,7 @@ Total shots: 90
 
 ---
 
+
 ## 🧪 测试覆盖
 
 ### 测试文件组织
@@ -590,47 +591,6 @@ tests/
 cd /workspaces/Sagittarius/sagittarius_py
 uv run pytest tests/test_viz_result.py -v
 ```
-
-### 测试统计
-
-| 模块 | 测试数 | 状态 |
-|------|--------|------|
-| `plot_observables` | 4 | ✅ 全部通过 |
-| `plot_bitstring_distribution` | 6 | ✅ 全部通过 |
-| `plot_shot_histogram` | 7 | ✅ 全部通过 |
-| `plot_population_heatmap` | 8 | ✅ 全部通过 |
-| 综合测试 | 1 | ✅ 全部通过 |
-| **总计** | **26** | **✅ 100%** |
-
-### 关键测试场景
-
-#### plot_population_heatmap
-- ✅ 基础热图绘制
-- ✅ 自定义颜色映射
-- ✅ 隐藏颜色条
-- ✅ 缺失列错误处理
-- ✅ **自定义原子排序**
-- ✅ **无效索引检测**
-- ✅ **重复索引检测**
-
-#### plot_bitstring_distribution
-- ✅ 基础分布绘图
-- ✅ 概率排序
-- ✅ 显示概率值
-- ✅ 空分布错误处理
-- ✅ **基模式信息显示**
-- ✅ **隐藏基模式信息**
-
-#### plot_shot_histogram
-- ✅ 基础直方图
-- ✅ 归一化频率
-- ✅ Top-K 筛选
-- ✅ 无样本错误处理
-- ✅ 空样本错误处理
-- ✅ **种子信息显示**
-- ✅ **隐藏种子信息**
-
----
 
 ## 💡 使用最佳实践
 
