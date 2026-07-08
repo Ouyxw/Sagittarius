@@ -844,3 +844,223 @@ uv run pytest tests/test_viz_basis_diagnostics.py -v
    result.plot_observables()
    result.plot_bitstring_distribution()
    ```
+
+---
+
+### 9. 几何参数校验工具 (`geometry_diagnostics.py`) ⭐ 新增
+
+**需求**: 提供无后端依赖的绘图/数据提取工具，输出原子间距、范德华相互作用矩阵、阻塞邻接矩阵、单位圆盘叠加图；用于用户在高开销求解计算前，校验几何参数、单位、阻塞半径配置是否合理。
+
+**实现位置**: [`sagittarius/viz/geometry_diagnostics.py`](sagittarius_py/sagittarius/viz/geometry_diagnostics.py)
+
+#### 设计目标
+
+**前置几何验证**设计的诊断工具集，用于在运行昂贵仿真前捕获配置错误：
+- **快速校验**: 纯Python/NumPy实现，毫秒级响应
+- **分层隔离**: 明确标注为诊断用途，不作为性能佐证
+- **多维分析**: 距离矩阵、VDW强度、阻塞图、可视化叠加
+- **数值标注**: 所有热力图均标注具体数值，便于精确分析
+
+**重要声明**: 
+- ⚠️ **DIAGNOSTIC VIEW ONLY** - 仅用于几何参数合理性检查
+- ⚠️ **NOT FOR CALIBRATION** - 不得作为硬件校准依据
+- ⚠️ **PRE-SIMULATION TOOL** - 应在仿真前使用，避免浪费计算资源
+
+#### 核心 API
+
+##### 9.1 `extract_geometry_diagnostics()` - 综合几何诊断数据提取
+
+```python
+from sagittarius.viz import extract_geometry_diagnostics
+
+def extract_geometry_diagnostics(
+    register,
+    blockade_radius: Optional[float] = None,
+    C6: Optional[float] = None,
+) -> Dict[str, Any]:
+    """
+    从寄存器配置中提取几何诊断信息
+    
+    Args:
+        register: Register对象（必需）
+        blockade_radius: 阻塞半径(μm)，用于构建邻接矩阵
+        C6: 范德华系数，用于计算相互作用矩阵
+    
+    Returns:
+        Dictionary containing:
+        - n_atoms: int - 原子数量
+        - positions: np.ndarray - Nx2坐标数组
+        - distance_matrix: np.ndarray - NxN距离矩阵(μm)
+        - vdw_matrix: np.ndarray | None - VDW相互作用矩阵（如提供C6）
+        - adjacency_matrix: np.ndarray | None - 二值邻接矩阵（如提供R_b）
+        - edges: List[Tuple[int,int]] - 阻塞边列表
+        - graph_density: float - 图密度 = |E| / (N*(N-1)/2)
+        - min_distance: float - 最小原子间距
+        - max_distance: float - 最大原子间距
+        - mean_distance: float - 平均原子间距
+    """
+```
+
+**使用示例**:
+```python
+from sagittarius import Register
+
+reg = Register.chain(4, spacing=0.6)
+diag = extract_geometry_diagnostics(reg, blockade_radius=1.0, C6=80.0)
+
+print(f"原子数量: {diag['n_atoms']}")
+print(f"最小间距: {diag['min_distance']:.3f} μm")
+print(f"最大间距: {diag['max_distance']:.3f} μm")
+print(f"阻塞边数: {len(diag['edges'])}")
+print(f"图密度: {diag['graph_density']:.2%}")
+
+print("\n距离矩阵:")
+print(diag['distance_matrix'].round(2))
+# [[0.   0.6  1.2  1.8 ]
+#  [0.6  0.   0.6  1.2 ]
+#  [1.2  0.6  0.   0.6 ]
+#  [1.8  1.2  0.6  0.  ]]
+
+print("\nVDW相互作用矩阵 (MHz):")
+print(np.round(diag['vdw_matrix'], 2))
+# [[   0.      1714.68    26.79     2.35]
+#  [1714.68     0.      1714.68    26.79]
+#  [  26.79   1714.68     0.      1714.68]
+#  [   2.35     26.79   1714.68     0.  ]]
+```
+
+##### 9.2 `plot_geometry_diagnostics()` - 综合几何诊断可视化
+
+```python
+from sagittarius.viz import plot_geometry_diagnostics
+
+def plot_geometry_diagnostics(
+    register,
+    blockade_radius: Optional[float] = None,
+    C6: Optional[float] = None,
+    show_distances: bool = False,
+    show_vdw_matrix: bool = True,
+    show_adjacency: bool = True,
+    figsize: Tuple[float, float] = (16, 12),
+    ax: Optional[Axes] = None,
+    title: Optional[str] = None,
+    save_path: Optional[str] = None,
+) -> List[Axes]:
+    """
+    创建多面板几何诊断可视化
+    
+    Panels:
+        1. Register布局 + 阻塞圆盘 + 约束边
+        2. 距离矩阵热力图（带数值标注）
+        3. VDW相互作用矩阵热力图（带数值标注，如提供C6）
+        4. 阻塞邻接矩阵热力图（带数值标注，如提供R_b）
+    
+    Visual Elements (zorder):
+        - zorder=0: 阻塞圆盘背景（低透明度）
+        - zorder=1: 阻塞边连线（虚线）
+        - zorder=5: 原子散点
+        - zorder=10: 原子索引标签
+        - zorder=11: 距离标注文本（可选）
+    
+    Returns:
+        List of Axes objects for each panel
+    """
+```
+
+**使用示例**:
+```python
+import matplotlib.pyplot as plt
+from sagittarius import Register
+
+reg = Register.chain(4, spacing=0.6)
+
+axes = plot_geometry_diagnostics(
+    reg,
+    blockade_radius=1.0,
+    C6=80.0,
+    show_distances=True,  # 在布局图上标注距离
+    show_vdw_matrix=True,
+    show_adjacency=True,
+    figsize=(18, 14),
+    title="4-Atom Chain - Geometry Diagnostics",
+    save_path="geometry_diagnostics.png"
+)
+
+print(f"生成了 {len(axes)} 个面板")
+# 输出: ✓ Geometry diagnostics saved to: geometry_diagnostics.png
+#       生成了 4 个面板
+```
+
+**视觉特征**:
+- **Panel 1**: 寄存器布局，钢蓝色原子，红色阻塞圆盘和虚线边
+- **Panel 2**: 距离矩阵热力图（viridis色图），每个单元格标注距离值
+- **Panel 3**: VDW矩阵热力图（hot色图，log尺度），标注科学计数法数值
+- **Panel 4**: 邻接矩阵热力图（Reds色图），标注0/1整数
+- **顶部标题**: "GEOMETRY DIAGNOSTICS — Pre-Simulation Validation"
+- **警告标识**: "⚠️ FOR PARAMETER VALIDATION ONLY — Not for calibration"
+
+**热力图数值标注特性**:
+- ✅ **自动格式化**: 根据数值大小选择合适精度（.2f或.2e）
+- ✅ **智能对比度**: 根据背景亮度自动选择白色或黑色文字
+- ✅ **阈值过滤**: 邻接矩阵仅标注非零值，避免冗余
+- ✅ **字体大小自适应**: 根据矩阵规模调整字号，避免拥挤
+
+##### 9.3 `plot_unit_disk_graph()` - 简化单位圆盘图
+
+```python
+from sagittarius.viz import plot_unit_disk_graph
+
+def plot_unit_disk_graph(
+    register,
+    blockade_radius: float,
+    ax: Optional[Axes] = None,
+    figsize: Tuple[float, float] = (10, 10),
+    show_labels: bool = True,
+    show_distances: bool = False,
+    title: Optional[str] = None,
+    save_path: Optional[str] = None,
+) -> Axes:
+    """
+    简化的单位圆盘图可视化，仅显示阻塞结构
+    
+    Visual Elements (zorder):
+        - zorder=0: 橙色半透明阻塞圆盘
+        - zorder=1: 红色虚线约束边
+        - zorder=5: 钢蓝色原子散点
+        - zorder=10: 黑底白字索引标签
+        - zorder=11: 距离标注（可选）
+    """
+```
+
+**使用示例**:
+```python
+ax = plot_unit_disk_graph(
+    reg,
+    blockade_radius=1.0,
+    show_distances=True,
+    show_labels=True,
+    title=f"Unit Disk Graph (R_b = 1.0 μm)",
+    save_path="unit_disk_graph.png"
+)
+```
+
+**适用场景**:
+- 快速预览阻塞结构
+- 演示文稿中的简洁图示
+- 教学材料中的概念展示
+
+
+#### 测试覆盖
+
+完整测试套件位于 [`tests/test_viz_geometry_diagnostics.py`](sagittarius_py/tests/test_viz_geometry_diagnostics.py)：
+
+- ✅ **数据提取测试** (9个): 距离矩阵、VDW矩阵、邻接矩阵、边列表、统计量、边界情况
+- ✅ **可视化测试** (7个): 基础绘图、VDW面板、完整面板、数值标注验证、自定义标题
+- ✅ **集成测试** (3个): 完整工作流、一致性验证、多配置测试
+- ✅ **总计**: 23个测试全部通过
+
+运行测试:
+```bash
+cd sagittarius_py && uv run pytest tests/test_viz_geometry_diagnostics.py -v
+# ============================== 23 passed in 5.60s ==============================
+```

@@ -42,6 +42,11 @@ from sagittarius.viz.basis_diagnostics import (
     plot_blockade_constraint_graph,
     plot_comprehensive_basis_diagnostics,
 )
+from sagittarius.viz.geometry_diagnostics import (
+    extract_geometry_diagnostics,
+    plot_geometry_diagnostics,
+    plot_unit_disk_graph,
+)
 
 __all__ = [
     "plot_register",
@@ -62,4 +67,7 @@ __all__ = [
     "plot_bitstring_space_grid",
     "plot_blockade_constraint_graph",
     "plot_comprehensive_basis_diagnostics",
+    "extract_geometry_diagnostics",
+    "plot_geometry_diagnostics",
+    "plot_unit_disk_graph",
 ]

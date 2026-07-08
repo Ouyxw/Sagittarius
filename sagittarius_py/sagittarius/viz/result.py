@@ -594,6 +594,49 @@ def plot_population_heatmap(
     ax.set_yticks(np.arange(-0.5, len(pop_cols), 1), minor=True)
     ax.grid(which='minor', axis='y', linestyle='-', linewidth=0.5, color='white', alpha=0.3)
     
+    # Add numerical annotations on heatmap cells
+    n_times, n_atoms_in_data = data_matrix.shape
+    # Only annotate if the matrix is not too large (avoid cluttering)
+    if n_times <= 20 and n_atoms_in_data <= 15:
+        for i in range(n_times):
+            for j in range(n_atoms_in_data):
+                value = data_matrix[i, j]
+                # Format value based on magnitude
+                if value < 0.01:
+                    text = f'{value:.3f}'
+                elif value < 0.1:
+                    text = f'{value:.2f}'
+                else:
+                    text = f'{value:.2f}'
+                
+                # Choose text color based on background brightness
+                # Normalize colormap to determine if background is dark or light
+                norm_value = (value - np.min(data_matrix)) / (np.max(data_matrix) - np.min(data_matrix) + 1e-10)
+                text_color = 'white' if norm_value < 0.5 else 'black'
+                
+                # Calculate center position of the cell
+                # For imshow with extent, we need to compute the actual center coordinates
+                
+                # X-axis: calculate cell boundaries and find center
+                if n_times == 1:
+                    # Single time point: center at the only time value
+                    x_center = time_vals[0]
+                else:
+                    # Multiple time points: divide the extent into equal cells
+                    t_min = time_vals[0]
+                    t_max = time_vals[-1]
+                    # Each cell width
+                    dt = (t_max - t_min) / n_times
+                    # Cell center
+                    x_center = t_min + (i + 0.5) * dt
+                
+                # Y-axis: imshow with extent=[..., -0.5, len-0.5], cell centers are at integer positions
+                y_center = j
+                
+                ax.text(x_center, y_center, text,
+                       ha='center', va='center',
+                       fontsize=7, color=text_color, weight='bold')
+    
     return ax
 
 
