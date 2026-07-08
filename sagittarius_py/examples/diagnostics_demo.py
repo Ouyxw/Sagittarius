@@ -33,13 +33,15 @@ def example_time_grid_diagnostics():
     print("Example 1: Time Grid Diagnostics")
     print("=" * 60)
     
-    # Create simple simulation
-    reg = Register([Atom(0, 0), Atom(1, 0)], C6=1.0)
+    # Create simple simulation (two atoms)
+    reg = Register([Atom(0, 0), Atom(1, 3)], C6=1.0)  # Spacing > blockade radius to avoid interaction
     seq = PulseSequence(omega=2.0, delta=0.0)
     config = SolverConfig(reltol=1e-8, abstol=1e-10)
     
+    # Run Lindblad simulation
     sim = Simulation(reg, seq, config)
-    result = sim.run()
+    psi0 = np.array([1.0, 0.0, 0.0, 0.0], dtype=complex)  # Start in |gg> state (4-dim for 2 atoms)
+    result = sim.run(psi0=psi0, t_start=0.0, t_end=2.0, observables={"pop0": 0})
     
     print(f"Time points: {len(result.t)}")
     print(f"Time range: [{result.t[0]:.3f}, {result.t[-1]:.3f}] μs")
@@ -83,7 +85,7 @@ def example_lindblad_validation():
     
     # Run actual Lindblad simulation for time axis
     sim = Simulation(reg, seq, config)
-    result = sim.run(psi0)
+    result = sim.run(psi0=psi0, t_start=0.0, t_end=2.0, observables={"pop": 0})
     
     # Plot validation results
     ax = plot_lindblad_validation(result, metrics)
@@ -107,14 +109,15 @@ def example_mcwf_vs_lindblad():
     # Lindblad simulation
     config_lind = SolverConfig(gamma=0.05, use_mc=False)
     sim_lind = Simulation(reg, seq, config_lind)
-    result_lind = sim_lind.run(observables={'pop0': 0, 'pop1': 1})
+    psi0 = np.array([1.0, 0.0, 0.0, 0.0], dtype=complex)
+    result_lind = sim_lind.run(psi0=psi0, t_start=0.0, t_end=2.0, observables={'pop0': 0, 'pop1': 1})
     
     print(f"Lindblad time points: {len(result_lind.t)}")
     
     # MCWF simulation
     config_mcwf = SolverConfig(gamma=0.05, use_mc=True, n_trajectories=50)
     sim_mcwf = Simulation(reg, seq, config_mcwf)
-    result_mcwf = sim_mcwf.run(observables={'pop0': 0, 'pop1': 1})
+    result_mcwf = sim_mcwf.run(psi0=psi0, t_start=0.0, t_end=2.0, observables={'pop0': 0, 'pop1': 1})
     
     print(f"MCWF trajectories: {config_mcwf.n_trajectories}")
     
