@@ -184,15 +184,15 @@ def plot_register(
     # Ensure scatter markers are circular by setting aspect ratio after plotting
     ax.set_aspect('equal', adjustable='datalim')
     
-    # Plot atomic labels (0-based indices) positioned near atoms without overlap
+    # Plot atomic labels (0-based indices) offset to upper-right of atoms
     if labels:
         for i in range(n_atoms):
-            # Fixed offset for label positioning (unified requirement: 0.15)
-            offset = 0.1
+            # Offset label to upper-right to avoid covering atoms
+            offset = 0.15  # μm offset
             ax.text(x[i] + offset, y[i] + offset, str(i), 
-                   fontsize=9, ha='left', va='bottom', 
-                   color='black', weight='bold',
-                   bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.8),
+                   fontsize=9, ha='center', va='center', 
+                   color='white', weight='bold',
+                   bbox=dict(boxstyle='round,pad=0.2', facecolor='black', alpha=0.7),
                    zorder=10)
     # Plot Blockade/UDG Edges
     if edges and blockade_radius is not None:
