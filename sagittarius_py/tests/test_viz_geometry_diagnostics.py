@@ -50,6 +50,13 @@ def output_dir():
     return output_path
 
 
+@pytest.fixture(autouse=True)
+def close_plots():
+    """Automatically close all plots after each test to prevent memory warnings."""
+    yield
+    plt.close('all')
+
+
 @pytest.fixture
 def small_register_3atoms():
     """Create a 3-atom register for geometry diagnostics."""

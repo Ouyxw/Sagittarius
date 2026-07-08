@@ -1296,7 +1296,7 @@ plt.savefig("correlation_dashboard.png", dpi=150)
 - ✅ **总计**: 18个测试全部通过
 
 运行测试:
-```bash
+```
 cd sagittarius_py && uv run pytest tests/test_viz_correlation.py -v
 # ============================== 18 passed in 2.10s ==============================
 ```
@@ -1315,5 +1315,333 @@ cd sagittarius_py && uv run pytest tests/test_viz_correlation.py -v
 - `conflict_matrix.png` - 阻塞冲突矩阵
 - `conflict_edges.png` - 阻塞冲突边热图
 - `correlation_dashboard.png` - 综合仪表板
+
+---
+
+### 11. 空间快照与动画帧提取工具 (`spatial_snapshot.py`) ⭐ 新增
+
+**需求**: 生成空间快照、多子图或可直接生成动画的标准化帧数据；按单/多输出时刻为原子着色，映射布居或指定可观测量数值。动画功能为可选扩展，但提取的帧数据格式稳定、兼容本地产物文件。
+
+**实现位置**: [`sagittarius/viz/spatial_snapshot.py`](sagittarius_py/sagittarius/viz/spatial_snapshot.py)
+
+#### 设计目标
+
+提供从仿真结果中提取空间配置数据的工具集，用于：
+- **单时刻快照**: 提取特定时间步的原子位置和可观测量值
+- **动画帧序列**: 批量提取多个时间步的标准化帧数据
+- **本地存储**: 将帧数据保存为JSON格式，兼容外部动画工具
+- **颜色映射**: 根据可观测量值（如布居）为原子着色
+- **分层隔离**: 只读访问result.data，不修改原始数据
+
+**重要声明**: 
+- ⚠️ **DIAGNOSTIC VIEW** - 仅用于数据探索和可视化
+- ⚠️ **NOT FOR CALIBRATION** - 不得作为硬件校准依据
+- ⚠️ **FRAME DATA ONLY** - 本模块仅提取帧数据，不直接生成动画视频
+
+#### 核心 API
+
+##### 11.1 `extract_spatial_snapshot()` - 提取单时刻空间快照
+
+```python
+from sagittarius.viz import extract_spatial_snapshot
+
+def extract_spatial_snapshot(
+    result,  # 【必填】SimulationResult对象
+    register,  # 【必填】Register对象（提供原子位置）
+    time_index: int,  # 【必填】时间步索引（0-based）
+    observable_name: str = 'pop',  # 【可选】可观测量前缀（默认'pop'）
+) -> Dict[str, Any]:
+    """
+    提取单个时间步的完整空间配置快照
+    
+    Returns:
+        Dictionary containing:
+        - n_atoms: int - 原子数量
+        - time_index: int - 时间步索引
+        - time_value: float - 实际时间值
+        - positions: np.ndarray - Nx2坐标数组
+        - observables: Dict[int, float] - 原子索引到可观测量值的映射
+        - metadata: Dict - 元数据（register信息、可观测量类型等）
+    """
+```
+
+**必需数据格式**:
+```python
+result.data = {
+    't': [0.0, 0.1, 0.2, ...],
+    'pop0': [1.0, 0.8, 0.6, ...],
+    'pop1': [1.0, 0.7, 0.5, ...],
+    'pop2': [1.0, 0.9, 0.7, ...],
+}
+```
+
+**使用示例**:
+```python
+snapshot = extract_spatial_snapshot(result, reg, time_index=10)
+print(f"t={snapshot['time_value']:.3f}s")
+for idx, val in snapshot['observables'].items():
+    pos = snapshot['positions'][idx]
+    print(f"  Atom {idx} at ({pos[0]:.2f}, {pos[1]:.2f}): pop={val:.3f}")
+```
+
+**诊断提示**:
+```python
+ValueError: Time index 100 out of range [0, 49]. Result has 50 time steps.
+# 解决方案：检查result.to_pandas()的长度，确保time_index在有效范围内
+
+ValueError: No observable columns with prefix 'pop' found.
+Available columns: ['t', 'energy'].
+# 解决方案：使用正确的observable_name参数，如observable_name='energy'
+```
+
+##### 11.2 `extract_frame_sequence()` - 提取帧序列
+
+```python
+from sagittarius.viz import extract_frame_sequence
+
+def extract_frame_sequence(
+    result,
+    register,
+    time_indices: Optional[List[int]] = None,  # 【可选】自定义时间索引列表
+    observable_name: str = 'pop',
+    stride: int = 1,  # 【可选】自动采样步长（当time_indices=None时）
+) -> List[Dict[str, Any]]:
+    """
+    提取多个时间步的快照序列，用于动画或多面板可视化
+    
+    Returns:
+        List of snapshot dictionaries (see extract_spatial_snapshot)
+    """
+```
+
+**使用示例**:
+```python
+# 方式1：自动采样（每5步提取一帧）
+frames = extract_frame_sequence(result, reg, stride=5)
+print(f"Extracted {len(frames)} frames")
+
+# 方式2：自定义时间点
+frames = extract_frame_sequence(
+    result, reg, 
+    time_indices=[0, 10, 20, 30, 40]
+)
+```
+
+**诊断提示**:
+```python
+ValueError: Invalid time indices: [100]. Valid range: [0, 49]
+# 解决方案：确保所有time_indices在有效范围内
+```
+
+##### 11.3 `save_frame_data()` - 保存帧数据到JSON
+
+```python
+from sagittarius.viz import save_frame_data
+
+def save_frame_data(
+    frames: List[Dict[str, Any]],
+    output_path: str,
+    format: str = 'json',  # 【可选】目前仅支持'json'
+) -> None:
+    """
+    将帧数据保存为标准化的JSON格式
+    
+    JSON Schema:
+    {
+        "schema_version": "spatial-snapshot/v1",
+        "frame_count": int,
+        "frames": [
+            {
+                "n_atoms": int,
+                "time_index": int,
+                "time_value": float,
+                "positions": [[x, y], ...],
+                "observables": {"0": val, "1": val, ...},
+                "metadata": {...}
+            },
+            ...
+        ]
+    }
+    """
+```
+
+**使用示例**:
+```python
+frames = extract_frame_sequence(result, reg, stride=5)
+save_frame_data(frames, "animation_frames.json")
+
+# 验证JSON结构
+import json
+with open("animation_frames.json") as f:
+    data = json.load(f)
+print(f"Schema: {data['schema_version']}")
+print(f"Frames: {data['frame_count']}")
+```
+
+**兼容性**:
+- ✅ 标准JSON格式，可被任何JSON解析器读取
+- ✅ 包含schema_version标识，便于版本管理
+- ✅ numpy数组自动转换为列表，确保跨平台兼容
+- ✅ 适合作为本地artifact存储或传递给外部动画工具
+
+##### 11.4 `plot_spatial_snapshot()` - 绘制单时刻快照
+
+```python
+from sagittarius.viz import plot_spatial_snapshot
+
+def plot_spatial_snapshot(
+    snapshot: Dict[str, Any],
+    ax: Optional[Axes] = None,
+    figsize: Tuple[float, float] = (8, 8),
+    cmap: str = 'viridis',  # 【可选】色图名称
+    vmin: Optional[float] = None,  # 【可选】颜色范围最小值
+    vmax: Optional[float] = None,  # 【可选】颜色范围最大值
+    show_colorbar: bool = True,
+    show_labels: bool = True,
+    atom_size: int = 200,
+    title: Optional[str] = None,
+    save_path: Optional[str] = None,
+) -> Axes:
+    """
+    绘制空间快照，原子颜色映射可观测量值
+    
+    Visual Elements (zorder):
+        - zorder=5: 原子散点（按可观测量着色）
+        - zorder=10: 原子索引标签（白色文字）
+    """
+```
+
+**视觉特性**:
+- 原子位置散点图，颜色表示可观测量值
+- 智能颜色范围（自动或手动设置vmin/vmax）
+- 原子索引标签（白色粗体，居中显示）
+- 可选颜色条图例
+- aspect='equal'确保几何比例正确
+
+**使用示例**:
+```python
+snapshot = extract_spatial_snapshot(result, reg, time_index=10)
+ax = plot_spatial_snapshot(
+    snapshot,
+    cmap='plasma',
+    title=f"Spatial Snapshot at t={snapshot['time_value']:.3f}",
+    save_path="snapshot_t10.png"
+)
+plt.colorbar(ax.collections[0], label='Population')
+```
+
+##### 11.5 `plot_multi_panel_snapshots()` - 多面板快照对比
+
+```python
+from sagittarius.viz import plot_multi_panel_snapshots
+
+def plot_multi_panel_snapshots(
+    frames: List[Dict[str, Any]],
+    panel_indices: Optional[List[int]] = None,  # 【可选】要显示的帧索引
+    figsize_per_panel: Tuple[float, float] = (6, 6),
+    cmap: str = 'viridis',
+    vmin: Optional[float] = None,  # 【可选】全局统一颜色范围
+    vmax: Optional[float] = None,
+    show_colorbar: bool = False,
+    suptitle: Optional[str] = None,
+    save_path: Optional[str] = None,
+) -> List[Axes]:
+    """
+    创建多面板可视化，对比不同时间步的空间状态
+    
+    Returns:
+        List of Axes objects for each panel
+    """
+```
+
+**视觉特性**:
+- 2×2网格布局（最多4个面板）
+- 全局统一颜色范围（便于跨时间对比）
+- 可选共享颜色条
+- 自定义总标题（suptitle）
+
+**使用示例**:
+```python
+frames = extract_frame_sequence(result, reg, stride=10)
+axes = plot_multi_panel_snapshots(
+    frames,
+    panel_indices=[0, 3, 6, 9],  # 显示第0,3,6,9帧
+    cmap='viridis',
+    show_colorbar=True,
+    suptitle="Quantum State Evolution",
+    save_path="evolution_multipanel.png"
+)
+```
+
+**诊断提示**:
+```python
+ValueError: Panel indices [10, 15] exceed available frames (10). Valid range: [0, 9]
+# 解决方案：确保panel_indices在可用帧数范围内
+```
+
+#### 分层隔离原则
+
+1. **只读访问**: 所有函数仅读取`result.to_pandas()`，不修改原始数据
+2. **标准化输出**: 帧数据采用固定JSON schema，便于长期存档和工具互操作
+3. **无性能声明**: 图表标题仅显示时间和可观测量类型，不包含优化结论
+4. **本地产物兼容**: JSON格式可直接作为benchmark artifact的一部分
+
+#### zorder层级
+
+| Z-order | 元素 | 说明 |
+|---------|------|------|
+| 0 | 背景网格 | 辅助线（alpha=0.4） |
+| 5 | 原子散点 | 按可观测量着色，黑色边框 |
+| 10 | 原子索引标签 | 白色粗体文字，居中对齐 |
+
+#### 使用场景
+
+1. **动画制作前置步骤**:
+   ```python
+   # 提取帧数据
+   frames = extract_frame_sequence(result, reg, stride=2)
+   save_frame_data(frames, "frames.json")
+   
+   # 使用外部工具（如ffmpeg、matplotlib.animation）生成视频
+   # ffmpeg -i frames.json -vf "..." output.mp4
+   ```
+
+2. **时间演化对比**:
+   ```python
+   # 展示关键时间点的状态
+   frames = extract_frame_sequence(result, reg, stride=5)
+   plot_multi_panel_snapshots(
+       frames, panel_indices=[0, 5, 10, 15],
+       suptitle="Rabi Oscillation Evolution"
+   )
+   ```
+
+3. **本地artifact归档**:
+   ```python
+   # 保存仿真结果的可视化数据
+   frames = extract_frame_sequence(result, reg)
+   save_frame_data(frames, f"result_{experiment_id}_frames.json")
+   # JSON文件可作为benchmark artifact的一部分提交
+   ```
+
+
+运行测试:
+```bash
+cd sagittarius_py && uv run pytest tests/test_viz_spatial_snapshot.py -v
+# ============================== 23 passed in 1.26s ==============================
+```
+
+#### 示例脚本
+
+参考 [`examples/spatial_snapshot_demo.py`](sagittarius_py/examples/spatial_snapshot_demo.py)，演示：
+- 单时刻快照提取和可视化
+- 帧序列批量提取
+- JSON格式保存和验证
+- 多面板时间演化对比
+
+生成文件:
+- `spatial_snapshot_single.png` - 单时刻快照
+- `spatial_snapshots_multipanel.png` - 多面板演化对比
+- `animation_frames.json` - 标准化帧数据（可用于外部动画工具）
 
 ---

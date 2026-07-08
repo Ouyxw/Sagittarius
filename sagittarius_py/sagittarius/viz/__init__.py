@@ -53,6 +53,13 @@ from sagittarius.viz.correlation_viz import (
     plot_pauli_zz_matrix,
     plot_blockade_conflict_heatmap,
 )
+from sagittarius.viz.spatial_snapshot import (
+    extract_spatial_snapshot,
+    extract_frame_sequence,
+    save_frame_data,
+    plot_spatial_snapshot,
+    plot_multi_panel_snapshots,
+)
 
 __all__ = [
     "plot_register",
@@ -80,4 +87,9 @@ __all__ = [
     "plot_connected_correlation_matrix",
     "plot_pauli_zz_matrix",
     "plot_blockade_conflict_heatmap",
+    "extract_spatial_snapshot",
+    "extract_frame_sequence",
+    "save_frame_data",
+    "plot_spatial_snapshot",
+    "plot_multi_panel_snapshots",
 ]
