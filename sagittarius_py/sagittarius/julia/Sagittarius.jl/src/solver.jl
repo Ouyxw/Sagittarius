@@ -323,7 +323,8 @@ end
 function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
                                n_trajectories=100, observables=nothing,
                                reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0,
-                               seed=nothing, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
+                               seed=nothing, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing,
+                               return_individual_trajectories=false)
     _log_solver_start(; backend=backend, use_gpu=use_gpu, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius, method=method, adaptive=adaptive, dt=dt, use_mc=true)
     if !isnothing(seed)
         Random.seed!(Int(seed))
@@ -382,6 +383,24 @@ function solve_mc_trajectories(ψ0::Vector{ComplexF64}, H_func, J_ops, tspan;
         end
         for t_idx in 1:length(t_vals)
             avg_res[t_idx] ./= n_trajectories
+        end
+        if return_individual_trajectories
+            traj_dict = Dict{String, Any}()
+            traj_dict["averages"] = (t_vals, avg_res)
+            n_time = length(t_vals)
+            individual_trajs = Array{Float64, 3}(undef, n_obs, n_time, n_trajectories)
+            for (traj_idx, traj_res) in enumerate(sim.u)
+                for (t_idx, obs_vals) in enumerate(traj_res)
+                    for (obs_idx, val) in enumerate(obs_vals)
+                        individual_trajs[obs_idx, t_idx, traj_idx] = val
+                    end
+                end
+            end
+            traj_dict["individual_trajectories"] = individual_trajs
+            traj_dict["observable_names"] = collect(keys(observables))
+            traj_dict["time_values"] = t_vals
+            _log_solver_finish("mcwf_observables_with_trajectories", length(ψ0); backend=backend)
+            return traj_dict
         end
         _log_solver_finish("mcwf_observables", length(ψ0); backend=backend)
         return (t_vals, avg_res)
