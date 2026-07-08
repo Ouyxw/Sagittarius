@@ -231,3 +231,68 @@ def test_seed_and_saveat_forwarded_to_mcwf_solver(monkeypatch):
     assert result.manifest["random"] == {"seed": 123, "effective_seed": 123, "n_trajectories": 100}
     assert result.manifest["solver"]["saveat"] == 3
     assert np.allclose(result.manifest["solver"]["effective_saveat"], [0.0, 0.5, 1.0])
+
+
+def test_store_trajectories_populates_result_trajectories(monkeypatch):
+    import sagittarius.api as api
+
+    class FakeAtom:
+        x = 0.0
+        y = 0.0
+        z = 0.0
+
+    class FakeRegister:
+        atoms = [FakeAtom()]
+        C6 = 0.0
+
+        @property
+        def jl_obj(self):
+            return self
+
+        def geometry_summary(self, **kwargs):
+            return {"atom_count": 1}
+
+    class FakePhys:
+        def build_hamiltonian_func(self, reg, omega_func, delta_func, **kwargs):
+            return lambda t: None
+
+        def get_jump_operators(self, n, gamma, gamma_phi):
+            return ["jump"]
+
+    class FakeSolver:
+        def RydbergPopulation(self, atom_idx, n, **kwargs):
+            return lambda state, t, integrator: 0.0
+
+        def solve_mc_trajectories(self, psi0, h_func, j_ops, tspan, **kwargs):
+            return {
+                "averages": ([0.0, 0.5, 1.0], [[0.0], [0.1], [0.2]]),
+                "individual_trajectories": np.array([[[0.0, 0.1, 0.2], [0.2, 0.3, 0.4], [0.4, 0.5, 0.6]]]),
+                "time_values": [0.0, 0.5, 1.0],
+                "observable_names": ["pop"],
+            }
+
+    class FakeVectorFactory:
+        def __getitem__(self, dtype):
+            return lambda values: list(values)
+
+    class FakeJL:
+        Any = object
+        ComplexF64 = complex
+        Float64 = float
+        Vector = FakeVectorFactory()
+
+        def SVector(self, *values):
+            return tuple(values)
+
+    monkeypatch.setattr(api, "doctor", lambda backend: {"requested_backend": backend})
+    monkeypatch.setattr(api, "version_info", lambda: {"schema_version": "version-info/v1"})
+    monkeypatch.setattr(api, "get_modules", lambda: (FakeJL(), None, FakePhys(), FakeSolver()))
+    monkeypatch.setattr(api.Simulation, "_get_compiled_func", lambda self, pulse, n: (lambda t: [0.0] * n))
+
+    cfg = api.SolverConfig(gamma=0.1, use_mc=True, store_trajectories=True)
+    sim = api.Simulation(FakeRegister(), api.PulseSequence(), cfg)
+    result = sim.run(np.array([1.0, 0.0], dtype=complex), 0.0, 1.0, observables={"pop": 0})
+
+    assert result.trajectories is not None
+    assert "pop" in result.trajectories
+    assert result.trajectories["pop"].shape == (3, 3)
