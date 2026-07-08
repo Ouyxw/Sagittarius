@@ -1,20 +1,11 @@
 """
-Sagittarius Visualization Module.
+Visualization module for Sagittarius quantum simulation framework.
 
-Provides backend-free visualization helpers for quantum simulation results,
-register geometries, and pulse sequences.
-
-This module implements Phase 19 P0 (Priority 0) visualization features:
-- Register layout plotting with blockade edges
-- Pulse waveform sampling and plotting
-- Observable trajectory plotting
-- Bitstring distribution histograms
-- Shot count histograms
-- Population heatmaps
-
-All functions are backend-free and do not trigger Julia initialization.
-They operate on pure Python/NumPy data structures extracted from
-SimulationResult, Register, or PulseSequence objects.
+Provides backend-free plotting utilities for:
+- Register geometry and pulse sequences
+- Observable trajectories and expectation values
+- MWIS problem visualization and solution quality
+- Diagnostic views for numerical validation (Phase 14/16)
 """
 
 from sagittarius.viz.register import plot_register, plot_interaction_graph
@@ -60,6 +51,29 @@ from sagittarius.viz.spatial_snapshot import (
     plot_spatial_snapshot,
     plot_multi_panel_snapshots,
 )
+from sagittarius.viz.diagnostics import (
+    plot_time_grid_diagnostics,
+    plot_lindblad_validation,
+    plot_mcwf_vs_lindblad,
+    plot_trajectory_statistics,
+)
+from sagittarius.viz.mwis_diagnostics import (
+    plot_mwis_convergence,
+    plot_mwis_feasibility_diagram,
+)
+from sagittarius.viz.benchmark_perf import (
+    plot_runtime_scaling,
+    plot_memory_scaling,
+    plot_solver_comparison,
+    plot_success_failure_summary,
+    plot_cpu_gpu_error_comparison,
+)
+from sagittarius.viz.small_system_debug import (
+    plot_state_probabilities,
+    plot_density_matrix_diagonal,
+    plot_density_matrix_magnitude,
+    plot_density_matrix_phase,
+)
 
 __all__ = [
     "plot_register",
@@ -92,4 +106,22 @@ __all__ = [
     "save_frame_data",
     "plot_spatial_snapshot",
     "plot_multi_panel_snapshots",
+    "plot_time_grid_diagnostics",
+    "plot_lindblad_validation",
+    "plot_mcwf_vs_lindblad",
+    "plot_trajectory_statistics",
+    # MWIS diagnostic visualization (Phase 16)
+    "plot_mwis_convergence",
+    "plot_mwis_feasibility_diagram",
+    # Benchmark performance analysis
+    "plot_runtime_scaling",
+    "plot_memory_scaling",
+    "plot_solver_comparison",
+    "plot_success_failure_summary",
+    "plot_cpu_gpu_error_comparison",
+    # Small-system debugging views
+    "plot_state_probabilities",
+    "plot_density_matrix_diagonal",
+    "plot_density_matrix_magnitude",
+    "plot_density_matrix_phase",
 ]
