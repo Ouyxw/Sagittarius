@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import numbers
 from datetime import datetime, timezone
-from collections.abc import Sequence as ABCSequence
+from collections.abc import Mapping, Sequence as ABCSequence
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Union, Any, List, Tuple
 
@@ -333,6 +333,7 @@ class SolverConfig:
     saveat: Optional[Union[int, List[float]]] = None  # Explicit output count or output time grid
     use_gpu: bool = False                       # Use GPU acceleration
     gpu_backend: str = "CUDA"                   # GPU backend: "CUDA", "AMDGPU", or "Metal"
+    store_trajectories: bool = False            # Store individual trajectory data (Phase 16 diagnostics)
 
 @dataclass
 class PulseSequence:
@@ -1525,6 +1526,38 @@ def open_system_sanity_checks(
     }
 
 
+def _normalize_mcwf_trajectories(raw_trajectories: Any, observable_names: List[str]) -> Optional[Dict[str, np.ndarray]]:
+    if raw_trajectories is None:
+        return None
+    if isinstance(raw_trajectories, dict):
+        normalized = {}
+        for name, values in raw_trajectories.items():
+            arr = np.asarray(values, dtype=float)
+            if arr.ndim == 1:
+                normalized[str(name)] = arr.reshape(1, -1)
+            elif arr.ndim >= 2:
+                normalized[str(name)] = arr
+            else:
+                normalized[str(name)] = np.array([float(arr)], dtype=float)
+        return normalized
+
+    arr = np.asarray(raw_trajectories, dtype=float)
+    if arr.ndim == 2:
+        if observable_names:
+            return {observable_names[0]: arr}
+        return {"trajectory": arr}
+    if arr.ndim == 3:
+        if observable_names and arr.shape[0] == len(observable_names):
+            return {name: np.asarray(arr[idx]).T for idx, name in enumerate(observable_names)}
+        if observable_names and arr.shape[-1] == len(observable_names):
+            return {name: np.asarray(arr[:, :, idx]) for idx, name in enumerate(observable_names)}
+    if arr.ndim == 1:
+        if observable_names:
+            return {observable_names[0]: arr.reshape(1, -1)}
+        return {"trajectory": arr.reshape(1, -1)}
+    return None
+
+
 def _simulation_result_with_manifest(
     data: Dict[str, List[float]],
     *,
@@ -1543,6 +1576,7 @@ def _simulation_result_with_manifest(
     effective_solver: Optional[Dict[str, Any]] = None,
     final_state: Optional[Any] = None,
     basis: Optional[List[int]] = None,
+    trajectories: Optional[Dict[str, np.ndarray]] = None,
 ) -> "SimulationResult":
     readout_distribution = None
     distribution_key = None
@@ -1585,7 +1619,7 @@ def _simulation_result_with_manifest(
         readout=readout,
     )
     validate_run_manifest(manifest)
-    return SimulationResult(data, metadata=metadata, diagnostics=diagnostics, manifest=manifest)
+    return SimulationResult(data, metadata=metadata, diagnostics=diagnostics, manifest=manifest, trajectories=trajectories)
 
 
 class SimulationResult:
@@ -1595,12 +1629,15 @@ class SimulationResult:
         metadata: Optional[Dict[str, Any]] = None,
         diagnostics: Optional[Dict[str, Any]] = None,
         manifest: Optional[Dict[str, Any]] = None,
+        trajectories: Optional[Dict[str, np.ndarray]] = None,
     ):
         self.data = data
         self.metadata = metadata or {}
         self.diagnostics = diagnostics or {}
         self.manifest = manifest or {}
         self.t = np.array(data.get('t', []))
+        self.trajectories = trajectories  # Shape: {observable_name: (n_traj, n_time)}
+
 
     def final_bitstring_distribution(self) -> Dict[str, float]:
         """Return the final-state bitstring probability distribution when available."""
@@ -1665,6 +1702,15 @@ class SimulationResult:
     def to_envelope(self) -> Dict[str, Any]:
         """Return the stable JSON artifact envelope for this result."""
         shared_result = self.to_shared_result()
+        
+        # Serialize trajectories if present
+        trajectories_serialized = None
+        if self.trajectories is not None:
+            trajectories_serialized = {
+                obs_name: traj.tolist()  # Convert numpy arrays to lists
+                for obs_name, traj in self.trajectories.items()
+            }
+        
         return {
             "schema_version": RESULT_ARTIFACT_SCHEMA_VERSION,
             "artifact_type": RESULT_ARTIFACT_TYPE,
@@ -1673,6 +1719,7 @@ class SimulationResult:
             "metadata": _json_compatible(self.metadata),
             "diagnostics": _json_compatible(self.diagnostics),
             "manifest": _json_compatible(self.manifest),
+            "trajectories": trajectories_serialized,  # Add trajectories to envelope
         }
     
     def to_pandas(self):
@@ -1746,11 +1793,21 @@ class SimulationResult:
             shared_result = data.get("shared_result")
             if shared_result is not None:
                 validate_shared_result(shared_result)
+            
+            # Deserialize trajectories if present
+            trajectories = None
+            if "trajectories" in data and data["trajectories"] is not None:
+                trajectories = {
+                    obs_name: np.array(traj_list)
+                    for obs_name, traj_list in data["trajectories"].items()
+                }
+            
             return cls(
                 data["data"],
                 metadata=data.get("metadata"),
                 diagnostics=data.get("diagnostics"),
                 manifest=data.get("manifest"),
+                trajectories=trajectories,  # Pass deserialized trajectories
             )
 
         if isinstance(data, dict) and "schema_version" in data:
@@ -1771,7 +1828,16 @@ class SimulationResult:
                 )
                 emit_failure_diagnostic(err.issue)
                 raise err
-            return cls(data["data"], metadata=data.get("metadata"), diagnostics=data.get("diagnostics"), manifest=data.get("manifest"))
+            
+            # Handle legacy format without trajectories
+            trajectories = None
+            if "trajectories" in data and data["trajectories"] is not None:
+                trajectories = {
+                    obs_name: np.array(traj_list)
+                    for obs_name, traj_list in data["trajectories"].items()
+                }
+            
+            return cls(data["data"], metadata=data.get("metadata"), diagnostics=data.get("diagnostics"), manifest=data.get("manifest"), trajectories=trajectories)
         if not isinstance(data, dict):
             err = _serialization_error(
                 "SERIALIZATION_SCHEMA_INVALID",
@@ -1999,6 +2065,8 @@ class Simulation:
             solver_extra_kwargs["dt"] = float(effective_solver["effective_dt"])
         if effective_saveat is not None:
             solver_extra_kwargs["saveat"] = jl.Vector[jl.Float64](effective_saveat)
+        if self.config.store_trajectories and self.config.use_mc:
+            solver_extra_kwargs["return_individual_trajectories"] = True
 
         # 4. Determine if we use Lindblad, MC, or Schrodinger
         is_noisy = (np.any(np.array(self.config.gamma) > 0) or 
@@ -2034,7 +2102,29 @@ class Simulation:
                 )
                 
                 if jl_obs:
-                    t_vals, avg_res = result
+                    if isinstance(result, Mapping):
+                        averages = result.get("averages")
+                        if isinstance(averages, tuple) and len(averages) == 2:
+                            t_vals, avg_res = averages
+                        else:
+                            t_vals = result.get("time_values") or []
+                            avg_res = averages or []
+                        trajectories = None
+                        if self.config.store_trajectories:
+                            raw_trajectories = result.get("individual_trajectories")
+                            if raw_trajectories is None:
+                                raw_trajectories = result.get("trajectories")
+                            trajectories = _normalize_mcwf_trajectories(raw_trajectories, observable_names)
+                    else:
+                        if isinstance(result, tuple) and len(result) == 2:
+                            t_vals, avg_res = result
+                        else:
+                            raise SagittariusSolverError(make_issue(
+                                "SOLVER_EXECUTION_FAILED",
+                                "MCWF solver returned an unexpected result payload.",
+                                "Inspect the Julia solver output and confirm it returns either (t_vals, avg_res) or a trajectory dictionary.",
+                            ))
+                        trajectories = None
                     times = list(t_vals)
                     data = {name: [avg_res[t_idx][i] for t_idx in range(len(times))]
                             for i, name in enumerate(observable_names)}
@@ -2057,6 +2147,7 @@ class Simulation:
                         result_type=result_type,
                         effective_saveat=effective_saveat,
                         effective_solver=effective_solver,
+                        trajectories=trajectories,
                     )
                 log_event("solver_finish", result_type="raw_mcwf", basis_size=basis_size)
                 return result
