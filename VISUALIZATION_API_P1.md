@@ -1064,3 +1064,256 @@ ax = plot_unit_disk_graph(
 cd sagittarius_py && uv run pytest tests/test_viz_geometry_diagnostics.py -v
 # ============================== 23 passed in 5.60s ==============================
 ```
+
+---
+
+### 10. 关联分析可视化工具 (`correlation_viz.py`) ⭐ 新增
+
+**需求**: 支持成对关联、连通关联、Pauli-ZZ 关联、阻塞冲突矩阵/边热图绘制；仅当结果包含匹配可观测量序列与元数据时生效，缺失数据输出可定位问题的诊断提示。
+
+**实现位置**: [`sagittarius/viz/correlation_viz.py`](sagittarius_py/sagittarius/viz/correlation_viz.py)
+
+#### 设计目标
+
+提供四种关联分析可视化工具，用于探索量子模拟结果中的空间关联模式：
+- **成对关联**: `<n_i n_j>` 联合激发概率
+- **连通关联**: `C_ij = <n_i n_j> - <n_i><n_j>` 真实关联（去除独立贡献）
+- **Pauli-ZZ关联**: `<ZZ>_ij` 计算基下的自旋-自旋关联
+- **阻塞冲突**: 阻塞违例概率矩阵或边热图
+
+**重要声明**: 本模块仅用于数据探索和诊断，不直接生成性能结论。
+
+#### 核心 API
+
+##### 10.1 `plot_pair_correlation_matrix()` - 成对关联矩阵
+
+```python
+from sagittarius.viz import plot_pair_correlation_matrix
+
+def plot_pair_correlation_matrix(
+    result,  # 【必填】SimulationResult，包含 pair_corr_i_j 列
+    register=None,  # 【可选】Register对象（暂未使用，保留接口）
+    ax: Optional[Axes] = None,  # 【可选】外部子图
+    figsize: Tuple[float, float] = (8, 8),  # 【可选】画布尺寸
+    cmap: str = 'viridis',  # 【可选】色图名称
+    show_values: bool = True,  # 【可选】标注数值
+    title: Optional[str] = None,  # 【可选】自定义标题
+    save_path: Optional[str] = None,  # 【可选】保存路径
+) -> Axes:
+```
+
+**必需数据格式**:
+```python
+result.data = {
+    't': [...],
+    'pair_corr_0_1': [0.0, 0.3, 0.45],  # 原子0和1的成对关联
+    'pair_corr_0_2': [0.0, 0.1, 0.15],
+    'pair_corr_1_2': [0.0, 0.2, 0.25],
+}
+```
+
+**视觉特性**:
+- NxN对称矩阵热图（viridis色图，范围[0, 1]）
+- 对角线填充单原子布居值（如可用）
+- 单元格数值标注（两位小数，智能对比度）
+- 标题显示关联对数量
+
+**诊断提示**:
+```python
+ValueError: No PairCorrelation observables found in result.
+Available columns: ['t', 'pop0', 'pop1'].
+To enable PairCorrelation plots, include PairCorrelation in simulation observables.
+Example:
+    observables = {
+        "pair_corr_0_1": PairCorrelation(atom_i=0, atom_j=1, N_atoms=N),
+        "pair_corr_1_2": PairCorrelation(atom_i=1, atom_j=2, N_atoms=N),
+    }
+```
+
+##### 10.2 `plot_connected_correlation_matrix()` - 连通关联矩阵
+
+```python
+from sagittarius.viz import plot_connected_correlation_matrix
+
+def plot_connected_correlation_matrix(
+    result,  # 【必填】SimulationResult，包含 connected_corr_i_j 列
+    register=None,
+    ax: Optional[Axes] = None,
+    figsize: Tuple[float, float] = (8, 8),
+    cmap: str = 'coolwarm',  # 【可选】发散色图
+    show_values: bool = True,
+    significance_threshold: float = 0.1,  # 【可选】显著性阈值
+    title: Optional[str] = None,
+    save_path: Optional[str] = None,
+) -> Axes:
+```
+
+**必需数据格式**:
+```python
+result.data = {
+    'connected_corr_0_1': [0.0, 0.05, 0.12],  # C_01 = <n0 n1> - <n0><n1>
+    'connected_corr_0_2': [0.0, -0.02, 0.03],
+    'connected_corr_1_2': [0.0, 0.08, 0.15],
+}
+```
+
+**视觉特性**:
+- 发散色图（coolwarm），零值居中
+- 正负对称颜色范围
+- 仅标注显著关联（|C_ij| > threshold）
+- 标题显示显著关联对数量
+
+##### 10.3 `plot_pauli_zz_matrix()` - Pauli-ZZ关联矩阵
+
+```python
+from sagittarius.viz import plot_pauli_zz_matrix
+
+def plot_pauli_zz_matrix(
+    result,  # 【必填】SimulationResult，包含 pauli_zz_i_j 列
+    register=None,
+    ax: Optional[Axes] = None,
+    figsize: Tuple[float, float] = (8, 8),
+    cmap: str = 'RdBu_r',  # 【可选】红蓝发散色图
+    show_values: bool = True,
+    title: Optional[str] = None,
+    save_path: Optional[str] = None,
+) -> Axes:
+```
+
+**必需数据格式**:
+```python
+result.data = {
+    'pauli_zz_0_1': [1.0, 0.6, 0.4],  # <ZZ>_01
+    'pauli_zz_0_2': [1.0, 0.8, 0.7],
+    'pauli_zz_1_2': [1.0, 0.5, 0.3],
+}
+```
+
+**视觉特性**:
+- 红蓝发散色图（RdBu_r），范围[-1, 1]
+- 对角线固定为+1（自关联）
+- 全量数值标注
+
+##### 10.4 `plot_blockade_conflict_heatmap()` - 阻塞冲突热图
+
+```python
+from sagittarius.viz import plot_blockade_conflict_heatmap
+
+def plot_blockade_conflict_heatmap(
+    result,  # 【必填】SimulationResult，包含 blockade_violation_i_j 列
+    register=None,  # 【可选】用于自动推导边
+    edges: Optional[List[Tuple[int, int]]] = None,  # 【可选】显式边列表
+    blockade_radius: Optional[float] = None,  # 【可选】阻塞半径
+    ax: Optional[Axes] = None,
+    figsize: Tuple[float, float] = (8, 8),
+    mode: str = 'matrix',  # 【可选】'matrix' 或 'edges'
+    cmap: str = 'Reds',
+    show_values: bool = True,
+    title: Optional[str] = None,
+    save_path: Optional[str] = None,
+) -> Axes:
+```
+
+**必需数据格式**:
+```python
+result.data = {
+    'blockade_violation_0_1': [0.0, 0.15, 0.25],  # P(both excited)
+    'blockade_violation_0_2': [0.0, 0.05, 0.08],
+    'blockade_violation_1_2': [0.0, 0.12, 0.18],
+}
+```
+
+**两种模式**:
+
+1. **Matrix模式**: NxN冲突概率矩阵
+   - 红色色图，范围[0, 1]
+   - 高亮高频冲突对
+
+2. **Edges模式**: 沿边的冲突频率水平条形图
+   - 按冲突概率降序排列
+   - 适合稀疏图可视化
+   - 需要`edges`参数或`register + blockade_radius`
+
+**视觉特性**:
+- 矩阵模式：对称热力图
+- 边模式：排序条形图，红色渐变
+- 仅标注显著冲突（> 0.01）
+
+#### 分层隔离原则
+
+1. **只读访问**: 所有函数仅读取`result.data`，不修改原始数据
+2. **诊断导向**: 错误消息明确指出缺失的observable类型和修复示例
+3. **无性能声明**: 图表标题仅显示数据统计特征，不包含优化结论
+4. **Artifact链接**: 如`result.manifest`包含`artifact_id`，在副标题中显示
+
+#### zorder层级
+
+| Z-order | 元素 | 说明 |
+|---------|------|------|
+| 0 | 背景网格 | 辅助线 |
+| 1 | 热力图单元格 | imshow图像 |
+| 5 | 数值标注文本 | 白色/黑色智能对比 |
+| 10 | 原子索引标签 | （如有register布局） |
+| 11 | 冲突标记 | X符号（边模式） |
+
+#### 使用示例
+
+```python
+from sagittarius.viz import (
+    plot_pair_correlation_matrix,
+    plot_connected_correlation_matrix,
+    plot_pauli_zz_matrix,
+    plot_blockade_conflict_heatmap,
+)
+
+# 单独绘制
+ax1 = plot_pair_correlation_matrix(result, save_path="pair_corr.png")
+ax2 = plot_connected_correlation_matrix(result, significance_threshold=0.05)
+ax3 = plot_pauli_zz_matrix(result)
+ax4 = plot_blockade_conflict_heatmap(result, mode='matrix')
+ax5 = plot_blockade_conflict_heatmap(result, mode='edges', edges=[(0,1), (1,2)])
+
+# 组合仪表板
+fig, axes = plt.subplots(2, 2, figsize=(16, 16))
+plot_pair_correlation_matrix(result, ax=axes[0, 0])
+plot_connected_correlation_matrix(result, ax=axes[0, 1])
+plot_pauli_zz_matrix(result, ax=axes[1, 0])
+plot_blockade_conflict_heatmap(result, mode='matrix', ax=axes[1, 1])
+plt.suptitle("Correlation Analysis Dashboard")
+plt.tight_layout()
+plt.savefig("correlation_dashboard.png", dpi=150)
+```
+
+#### 测试覆盖
+
+完整测试套件位于 [`tests/test_viz_correlation.py`](sagittarius_py/tests/test_viz_correlation.py)：
+
+- ✅ **成对关联测试** (5个): 基础绘图、自定义标题、隐藏数值、缺失数据诊断、原子计数验证
+- ✅ **连通关联测试** (3个): 基础绘图、显著性阈值过滤、缺失数据诊断
+- ✅ **Pauli-ZZ测试** (3个): 基础绘图、对角线验证、缺失数据诊断
+- ✅ **阻塞冲突测试** (5个): 矩阵模式、边模式、无效模式、无边错误、缺失数据诊断
+- ✅ **集成测试** (2个): 四合一仪表板、错误消息可操作性验证
+- ✅ **总计**: 18个测试全部通过
+
+运行测试:
+```bash
+cd sagittarius_py && uv run pytest tests/test_viz_correlation.py -v
+# ============================== 18 passed in 2.10s ==============================
+```
+
+#### 示例脚本
+
+参考 [`examples/correlation_viz_demo.py`](sagittarius_py/examples/correlation_viz_demo.py)，演示：
+- 4种关联类型的单独可视化
+- 组合仪表板创建
+- 诊断洞察输出
+
+生成文件:
+- `correlation_pair.png` - 成对关联矩阵
+- `correlation_connected.png` - 连通关联矩阵
+- `correlation_pauli_zz.png` - Pauli-ZZ矩阵
+- `conflict_matrix.png` - 阻塞冲突矩阵
+- `conflict_edges.png` - 阻塞冲突边热图
+- `correlation_dashboard.png` - 综合仪表板
+
+---

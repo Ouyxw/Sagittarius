@@ -47,6 +47,12 @@ from sagittarius.viz.geometry_diagnostics import (
     plot_geometry_diagnostics,
     plot_unit_disk_graph,
 )
+from sagittarius.viz.correlation_viz import (
+    plot_pair_correlation_matrix,
+    plot_connected_correlation_matrix,
+    plot_pauli_zz_matrix,
+    plot_blockade_conflict_heatmap,
+)
 
 __all__ = [
     "plot_register",
@@ -70,4 +76,8 @@ __all__ = [
     "extract_geometry_diagnostics",
     "plot_geometry_diagnostics",
     "plot_unit_disk_graph",
+    "plot_pair_correlation_matrix",
+    "plot_connected_correlation_matrix",
+    "plot_pauli_zz_matrix",
+    "plot_blockade_conflict_heatmap",
 ]
