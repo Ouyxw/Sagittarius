@@ -36,7 +36,7 @@
   },
   "timestamp": "2026-07-07T01:00:00Z",
   "commit_sha": "benchmark-test-sha",
-  "visualization_saved_at": "2026-07-08T03:14:46.437811Z",
+  "visualization_saved_at": "2026-07-08T03:39:37.399234Z",
   "image_path": "/workspaces/Sagittarius/sagittarius_py/tests/test_figs/mwis_benchmark_workflow.png",
   "image_dpi": 150
 }
