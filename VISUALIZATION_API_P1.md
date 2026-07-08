@@ -410,7 +410,6 @@ plot_mwis_problem(reg, bitstring="10101", weights=[1.0, 2.0])
 # ValueError: Weights length (2) does not match number of atoms (5)
 ```
 
-
 #### 技术要点
 
 - **Backend-Free**: 纯 NumPy + Matplotlib 实现，不触发 Julia 初始化
@@ -418,6 +417,9 @@ plot_mwis_problem(reg, bitstring="10101", weights=[1.0, 2.0])
 - **优先级处理**: `bitstring` 参数优先于其他高亮方式
 - **一致性**: 遵循项目可视化规范（zorder、aspect ratio、颜色方案）
 - **可扩展性**: 支持任意规模的寄存器和图结构
+- **标签偏移优化**: 原子索引和权重标签使用基于点的偏移量（offset points），确保在不同 DPI 和缩放比例下保持一致的视觉效果
+- **布局管理**: `plot_mwis_comparison()` 内部使用 `subplots_adjust(wspace=0.3)` 而非 `tight_layout()`，避免复杂多子图场景下的布局警告
+
 #### 测试
 
 测试文件: [`tests/test_viz_mwis.py`](sagittarius_py/tests/test_viz_mwis.py)
@@ -429,3 +431,416 @@ uv run pytest tests/test_viz_mwis.py -v
 # ============================== 35 passed in 4.83s ==============================
 ```
 
+---
+
+### 8. 比特串空间诊断工具 (`basis_diagnostics.py`) 
+
+**需求**: 提供小型系统专用的调试工具，可视化有效比特串、禁戒比特串、全基/约化基维度、基截断比例，以及阻塞关联边和约化基有效性的关联关系；视图明确标注为诊断用途，严格遵循 Sagittarius 统一比特串排序规则。
+
+**实现位置**: [`sagittarius/viz/basis_diagnostics.py`](sagittarius_py/sagittarius/viz/basis_diagnostics.py)
+
+#### 设计目标
+
+专为理解 Hilbert 空间结构和 Rydberg blockade 约束而设计的诊断工具集，用于：
+- **小型系统分析**: N ≤ 10 原子的可管理规模（全基维度 ≤ 1024）
+- **基空间可视化**: 直观展示全基 vs 约化基的维度差异
+- **约束影响评估**: 量化 blockade 约束对状态空间的修剪效果
+- **比特串分类**: 清晰区分有效态（valid）和禁戒态（forbidden）
+- **阻塞图分析**: 可视化原子间阻塞约束的拓扑结构
+
+**重要声明**: 
+- ⚠️ **DIAGNOSTIC VIEW** - 仅用于小系统调试和理解基结构
+- ⚠️ **N ≤ 10 限制** - 超过此规模会自动拒绝（全基维度爆炸）
+- ⚠️ **升序整数排序** - 所有比特串严格按 integer value 升序排列（Sagittarius 规范）
+
+#### 核心 API
+
+##### 8.1 `generate_basis_diagnostics()` - 生成诊断数据
+
+```python
+from sagittarius.viz import generate_basis_diagnostics
+
+def generate_basis_diagnostics(
+    register,  # 【必填】量子寄存器实例
+    blockade_radius: float,  # 【必填】阻塞半径(μm)，用于判定约束
+    edges: Optional[List[Tuple[int, int]]] = None,  # 【可选，默认=None】预计算的阻塞边列表；None则自动推导
+) -> Dict[str, Any]:
+    """
+    生成完整的基空间诊断数据
+    
+    Returns:
+        Dictionary containing:
+        - n_atoms: 原子数量
+        - full_dimension: 全基维度 (2^N)
+        - reduced_dimension: 约化基维度（有效态数量）
+        - pruning_ratio: 修剪比例 (0 to 1)，表示被禁戒的状态占比
+        - valid_states: 有效态的整数列表（升序）
+        - forbidden_states: 禁戒态的整数列表（升序）
+        - valid_bitstrings: 有效态的二进制字符串列表
+        - forbidden_bitstrings: 禁戒态的二进制字符串列表
+        - edges: 阻塞边列表 [(i, j), ...]
+        - blockade_graph_density: 阻塞图密度 = |E| / (N*(N-1)/2)
+    """
+```
+
+**功能特性**:
+
+✅ **自动边推导**
+- 基于原子坐标和 blockade_radius 计算距离矩阵
+- 距离 < R_b 的原子对自动添加阻塞边
+
+✅ **状态分类**
+- 遍历所有 2^N 个可能状态
+- 检查每个状态是否违反任何阻塞约束
+- 相邻原子同时为 '1' → 禁戒态
+
+✅ **严格排序**
+- 所有状态按 integer value 升序排列
+- 符合 Sagittarius 统一比特串排序规范
+
+✅ **尺寸保护**
+- N > 10 时抛出 `ValueError`
+- 防止全基维度爆炸（2^11 = 2048 已较大）
+
+**使用示例**:
+
+```python
+from sagittarius import Register
+from sagittarius.viz import generate_basis_diagnostics
+
+# 创建 4-atom chain
+reg = Register.chain(4, spacing=0.6, C6=10.0)
+blockade_radius = 1.0
+
+# 生成诊断数据
+diagnostics = generate_basis_diagnostics(reg, blockade_radius)
+
+print(f"Atoms: {diagnostics['n_atoms']}")
+print(f"Full dimension: {diagnostics['full_dimension']}")  # 16
+print(f"Reduced dimension: {diagnostics['reduced_dimension']}")  # 8
+print(f"Pruning ratio: {diagnostics['pruning_ratio']:.2%}")  # 50.00%
+print(f"Blockade edges: {len(diagnostics['edges'])}")  # 3
+
+# 查看有效态
+print("\nValid bitstrings:")
+for state, bs in zip(diagnostics['valid_states'], diagnostics['valid_bitstrings']):
+    print(f"  State {state:2d}: {bs}")
+
+# 查看禁戒态
+print("\nForbidden bitstrings:")
+for state, bs in zip(diagnostics['forbidden_states'], diagnostics['forbidden_bitstrings']):
+    print(f"  State {state:2d}: {bs}")
+```
+
+输出示例:
+```
+Atoms: 4
+Full dimension: 16
+Reduced dimension: 8
+Pruning ratio: 50.00%
+Blockade edges: 3
+
+Valid bitstrings:
+  State  0: 0000
+  State  1: 0001
+  State  2: 0010
+  State  4: 0100
+  State  5: 0101
+  State  8: 1000
+  State  9: 1001
+  State 10: 1010
+
+Forbidden bitstrings:
+  State  3: 0011  ← atoms 2,3 both excited
+  State  6: 0110  ← atoms 1,2 both excited
+  State  7: 0111  ← multiple violations
+  State 11: 1011  ← atoms 2,3 both excited
+  State 12: 1100  ← atoms 0,1 both excited
+  State 13: 1101  ← atoms 0,1 both excited
+  State 14: 1110  ← multiple violations
+  State 15: 1111  ← all adjacent pairs violated
+```
+
+##### 8.2 `plot_basis_space_diagram()` - 维度分解柱状图
+
+```python
+from sagittarius.viz import plot_basis_space_diagram
+
+def plot_basis_space_diagram(
+    diagnostics: Dict[str, Any],  # 【必填】generate_basis_diagnostics() 的输出
+    ax: Optional[Axes] = None,  # 【可选，默认=None】外部子图，不传新建(14,8)画布
+    title: Optional[str] = None,  # 【可选，默认=None】自定义标题
+    figsize: Tuple[float, float] = (14, 8),  # 【可选，默认=(14,8)】画布尺寸
+) -> Axes:
+```
+
+**功能特性**:
+
+✅ **三栏对比**
+- Full Hilbert Space（钢蓝色）
+- Reduced Basis（森林绿）
+- Forbidden States（深红色）
+
+✅ **对数刻度**
+- y轴使用 log scale 便于观察大尺度差异
+- 适合展示指数级增长的全基维度
+
+✅ **统计信息框**
+- 原子数量 N
+- 修剪比例 pruning_ratio
+- 阻塞边数量
+- 图密度 graph_density
+
+✅ **诊断标识**
+- 底部红色警告文本："⚠️ DIAGNOSTIC VIEW — Small Systems Only (N ≤ 10)"
+
+**使用示例**:
+
+```python
+import matplotlib.pyplot as plt
+from sagittarius.viz import plot_basis_space_diagram
+
+fig, ax = plt.subplots(figsize=(14, 8))
+plot_basis_space_diagram(diagnostics, ax=ax, title="Basis Space Breakdown")
+plt.savefig("basis_dimensions.png", dpi=150, bbox_inches='tight')
+```
+
+##### 8.3 `plot_bitstring_space_grid()` - 比特串空间网格
+
+```python
+from sagittarius.viz import plot_bitstring_space_grid
+
+def plot_bitstring_space_grid(
+    diagnostics: Dict[str, Any],  # 【必填】诊断数据
+    ax: Optional[Axes] = None,  # 【可选，默认=None】外部子图
+    title: Optional[str] = None,  # 【可选，默认=None】自定义标题
+    max_display_states: int = 64,  # 【可选，默认=64】最大显示状态数（避免过度拥挤）
+    figsize: Tuple[float, float] = (12, 10),  # 【可选，默认=(12,10)】画布尺寸
+) -> Axes:
+```
+
+**功能特性**:
+
+✅ **颜色编码**
+- 🟢 绿色：有效态（在约化基中）
+- 🔴 红色：禁戒态（违反阻塞约束）
+
+✅ **升序排列**
+- Y轴从上到下按 integer value 升序
+- 严格遵循 Sagittarius 排序规范
+
+✅ **智能截断**
+- 状态数 > max_display_states 时只显示前 N 个
+- 标题中标注 "(showing first X)"
+
+✅ **图例说明**
+- 右上角显示有效态和禁戒态的数量
+
+**使用示例**:
+
+```python
+fig, ax = plt.subplots(figsize=(12, 10))
+plot_bitstring_space_grid(
+    diagnostics,
+    ax=ax,
+    max_display_states=32  # 只显示前32个状态
+)
+plt.savefig("bitstring_grid.png", dpi=150, bbox_inches='tight')
+```
+
+##### 8.4 `plot_blockade_constraint_graph()` - 阻塞约束图
+
+```python
+from sagittarius.viz import plot_blockade_constraint_graph
+
+def plot_blockade_constraint_graph(
+    diagnostics: Dict[str, Any],  # 【必填】诊断数据
+    register,  # 【必填】寄存器对象（用于原子位置）
+    ax: Optional[Axes] = None,  # 【可选，默认=None】外部子图
+    title: Optional[str] = None,  # 【可选，默认=None】自定义标题
+    figsize: Tuple[float, float] = (10, 10),  # 【可选，默认=(10,10)】画布尺寸
+) -> Axes:
+```
+
+**功能特性**:
+
+✅ **原子布局**
+- 复用 `plot_register()` 的渲染逻辑
+- 显示原子索引标签
+
+✅ **阻塞边可视化**
+- 红色虚线表示阻塞约束
+- zorder=3 确保在原子之上可见
+
+✅ **统计信息**
+- 左上角黄色文本框显示关键指标
+- 包含原子数、边数、图密度、修剪比例
+
+✅ **图例说明**
+- 右下角标注 "Blockade constraint"
+
+**使用示例**:
+
+```python
+fig, ax = plt.subplots(figsize=(10, 10))
+plot_blockade_constraint_graph(diagnostics, reg, ax=ax)
+plt.savefig("constraint_graph.png", dpi=150, bbox_inches='tight')
+```
+
+##### 8.5 `plot_comprehensive_basis_diagnostics()` - 综合诊断面板
+
+```python
+from sagittarius.viz import plot_comprehensive_basis_diagnostics
+
+def plot_comprehensive_basis_diagnostics(
+    diagnostics: Dict[str, Any],  # 【必填】诊断数据
+    register,  # 【必填】寄存器对象
+    figsize: Tuple[float, float] = (18, 14),  # 【可选，默认=(18,14)】整体画布尺寸
+    save_path: Optional[str] = None,  # 【可选，默认=None】保存路径（PNG/PDF/SVG）
+) -> List[Axes]:
+    """
+    创建三合一综合诊断图
+    
+    Returns:
+        List of 3 Axes objects: [dimensions_panel, grid_panel, constraint_panel]
+    """
+```
+
+**功能特性**:
+
+✅ **三面板布局**
+1. **左面板**: 维度分解柱状图
+2. **中面板**: 比特串空间网格
+3. **右面板**: 阻塞约束图
+
+✅ **统一标题**
+- 顶部大标题: "Basis Space Diagnostics — N=X Atoms (DIAGNOSTIC VIEW)"
+
+✅ **一键保存**
+- `save_path` 参数直接保存为图片文件
+- 支持 PNG/PDF/SVG 格式
+
+**使用示例**:
+
+```python
+# 生成并保存综合诊断图
+axes = plot_comprehensive_basis_diagnostics(
+    diagnostics,
+    reg,
+    figsize=(18, 14),
+    save_path="/tmp/basis_diagnostics.png"
+)
+
+# axes[0]: 维度分解
+# axes[1]: 比特串网格
+# axes[2]: 约束图
+```
+
+#### 视觉元素层级 (Z-order)
+
+| Z-order | 元素 | 说明 |
+|---------|------|------|
+| 0 | 阻塞圆盘背景 | 如果启用（低透明度） |
+| 1 | 阻塞边（红色虚线） | 约束关系 |
+| 2 | 冲突标记 | （本模块暂不使用） |
+| 5 | 原子散点 | 主要数据点 |
+| 10 | 原子索引标签 | 黑色背景白色文字 |
+| 11 | 权重标签 | （本模块暂不使用） |
+
+#### 阻塞约束检测逻辑
+
+```python
+def _check_blockade_violation(state: int, edges: List[Tuple[int, int]]) -> bool:
+    """检查状态是否违反阻塞约束"""
+    for i, j in edges:
+        # 检查两个原子是否同时处于激发态 (bit=1)
+        if (state & (1 << i)) and (state & (1 << j)):
+            return True  # 违反约束
+    return False  # 有效状态
+```
+
+**示例**: 对于边 (1, 2) 和状态 `0110` (binary):
+- Atom 1: bit=1 (excited) ✓
+- Atom 2: bit=1 (excited) ✓
+- → **Violation!** 状态 `0110` 被禁戒
+
+#### 错误处理
+
+```python
+# 系统过大
+reg_large = Register.chain(11, spacing=0.5)
+generate_basis_diagnostics(reg_large, blockade_radius=1.0)
+# ValueError: Basis diagnostics limited to N ≤ 10 atoms for tractability. Got 11 atoms (full dimension would be 2048).
+
+# 数据不一致
+bad_diagnostics = {
+    'n_atoms': 3,
+    'full_dimension': 8,
+    'valid_bitstrings': ['000', '001'],  # 只有2个
+    'forbidden_bitstrings': ['010'],  # 只有1个
+    # ... 其他字段
+}
+plot_basis_space_diagram(bad_diagnostics)
+# ValueError: Inconsistent state counts: 2 valid + 1 forbidden ≠ 8 total
+```
+
+
+#### 技术要点
+
+- **Backend-Free**: 纯 NumPy + Matplotlib 实现，不触发 Julia 初始化
+- **输入验证**: 全面的尺寸、一致性、字符合法性检查
+- **严格排序**: 所有比特串按 integer value 升序（Sagittarius 规范）
+- **诊断标识**: 所有图表包含醒目的 ⚠️ 警告标记
+- **资源管理**: 正确关闭 figure 避免内存泄漏
+- **可扩展性**: 支持任意小规模寄存器（N ≤ 10）
+
+#### 测试覆盖
+
+测试文件: [`tests/test_viz_basis_diagnostics.py`](sagittarius_py/tests/test_viz_basis_diagnostics.py)
+
+| 测试类别 | 测试数 | 覆盖内容 |
+|---------|--------|---------|
+| 数据生成 | 7 | 基础功能、自动边推导、无约束、全禁戒、尺寸保护、比特串格式、排序验证 |
+| 维度图 | 4 | 基础绘图、对数刻度、自定义标题、警告文本 |
+| 比特串网格 | 4 | 基础绘图、颜色编码、截断显示、排序验证 |
+| 约束图 | 3 | 基础绘图、边可见性、统计框 |
+| 综合面板 | 3 | 基础绘图、保存功能、总标题 |
+| 集成测试 | 3 | 完整工作流、函数一致性、单原子边界 |
+| 错误处理 | 1 | 不一致数据验证 |
+| **总计** | **25** | **✅ 100% 通过 (3.56s)** |
+
+运行测试:
+```bash
+cd sagittarius_py
+uv run pytest tests/test_viz_basis_diagnostics.py -v
+# ============================== 25 passed in 3.56s ==============================
+```
+
+
+
+#### 最佳实践
+
+1. **何时使用**: 
+   - 调试约化基仿真时
+   - 理解 blockade 约束的影响
+   - 教学演示 Hilbert 空间结构
+   - 验证基生成的正确性
+
+2. **何时不使用**:
+   - N > 10 的大系统（会自动拒绝）
+   - 生产环境的结果展示（应使用 `result.py`）
+   - 性能基准测试（应使用 `mwis_viz.py`）
+
+3. **组合使用**:
+   ```python
+   # 先用诊断工具理解基结构
+   diag = generate_basis_diagnostics(reg, R_b)
+   plot_comprehensive_basis_diagnostics(diag, reg)
+   
+   # 再运行仿真
+   result = sim.run(...)
+   
+   # 最后用结果可视化工具展示
+   result.plot_observables()
+   result.plot_bitstring_distribution()
+   ```

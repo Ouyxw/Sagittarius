@@ -35,6 +35,13 @@ from sagittarius.viz.mwis_viz import (
     annotate_solution_quality,
     save_mwis_benchmark_figure,
 )
+from sagittarius.viz.basis_diagnostics import (
+    generate_basis_diagnostics,
+    plot_basis_space_diagram,
+    plot_bitstring_space_grid,
+    plot_blockade_constraint_graph,
+    plot_comprehensive_basis_diagnostics,
+)
 
 __all__ = [
     "plot_register",
@@ -50,4 +57,9 @@ __all__ = [
     "plot_mwis_comparison",
     "annotate_solution_quality",
     "save_mwis_benchmark_figure",
+    "generate_basis_diagnostics",
+    "plot_basis_space_diagram",
+    "plot_bitstring_space_grid",
+    "plot_blockade_constraint_graph",
+    "plot_comprehensive_basis_diagnostics",
 ]

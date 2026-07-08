@@ -498,9 +498,6 @@ def plot_population_heatmap(
         >>> ax = plot_population_heatmap(result, atom_order=[2, 0, 1])
         >>> plt.colorbar(ax.collections[0], label='Population')
     """
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(10, 6))
-    
     # Convert to DataFrame
     try:
         df = result.to_pandas()
@@ -524,7 +521,7 @@ def plot_population_heatmap(
         # If column names don't follow 'popN' pattern, use sequential indices
         available_atom_indices = list(range(len(pop_cols)))
     
-    # Apply custom atom ordering if specified
+    # Apply custom atom ordering if specified - VALIDATE BEFORE CREATING FIGURE
     if atom_order is not None:
         # Validate atom_order
         invalid_atoms = [idx for idx in atom_order if idx not in available_atom_indices]
@@ -554,6 +551,10 @@ def plot_population_heatmap(
     else:
         # Use default sorted order
         atom_indices = available_atom_indices
+    
+    # Create figure if needed (after all validation)
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(10, 6))
     
     # Extract data matrix: Time x Atoms
     data_matrix = df[pop_cols].values  # Shape: (n_times, n_atoms)

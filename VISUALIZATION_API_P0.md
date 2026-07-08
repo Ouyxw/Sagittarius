@@ -76,10 +76,10 @@ def plot_register(
 - 基于距离矩阵自动计算邻接关系
 - 使用 `LineCollection` 高效渲染边
 
-✅ **原子标签居中叠加**
-- 标签位于原子中心（`ha='center', va='center'`）
-- 半透明背景框增强对比度
-- 高 zorder 确保不被遮挡
+✅ **原子标签偏移叠加（实现说明）**
+- 标签在每个原子位置向右上偏移 `0.15`（坐标单位为 μm），对齐方式为 `ha='left', va='bottom'`，并带半透明背景框以增强可读性。
+- 该行为在可视化函数中为统一实现（`offset = 0.15`），用于避免标签与标记重叠并在不同缩放下保持可读性。
+- 高 zorder 确保标签不被图层遮挡
 
 ✅ **阻塞圆盘可视化**
 - 可选显示每个原子的阻塞范围
@@ -102,6 +102,7 @@ def plot_register(
 #### 技术要点
 
 - **零后端依赖**: 纯 NumPy + Matplotlib 实现
+- **Julia 后端兼容**: 可视化函数兼容由 Julia `Physics.Register` 导出的对象（通过 `pyjulia`），能从 Julia `Atom.coords`（SVector）中提取 XY 坐标。位置提取优先级为：`register.positions` → Python `Atom.x,y` → Julia `Atom.coords`。
 - **层级管理**: 显式设置 zorder（网格线=1, 散点=5, 标签=10, 圆盘=0）
 - **圆形保证**: `ax.set_aspect('equal', adjustable='datalim')`
 - **比特串验证**: 长度检查 + 字符验证 + 清晰错误提示

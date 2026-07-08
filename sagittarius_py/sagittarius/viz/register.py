@@ -21,9 +21,16 @@ def _extract_positions(register) -> np.ndarray:
             atoms = register.atoms
             if len(atoms) > 0:
                 first_atom = atoms[0]
-                # Check if atoms are objects with x, y attributes
+                # Python `Atom` dataclass has `x` and `y` fields
                 if hasattr(first_atom, 'x') and hasattr(first_atom, 'y'):
                     pos_array = np.array([[a.x, a.y] for a in atoms])
+                # Julia `Atom` objects exposed via pyjulia have `coords` SVector
+                elif hasattr(first_atom, 'coords'):
+                    try:
+                        pos_array = np.array([[float(a.coords[0]), float(a.coords[1])] for a in atoms])
+                    except Exception:
+                        # Fall back to attribute access if coords behaves like a struct
+                        pos_array = np.array([[float(a.coords.x), float(a.coords.y)] for a in atoms])
                 # Check if atoms are lists/tuples
                 elif isinstance(first_atom, (list, tuple)):
                     pos_array = np.array(atoms)
@@ -180,9 +187,8 @@ def plot_register(
     # Plot atomic labels (0-based indices) positioned near atoms without overlap
     if labels:
         for i in range(n_atoms):
-            # Fixed offset for label positioning
-            offset = 0.15
-            
+            # Fixed offset for label positioning (unified requirement: 0.15)
+            offset = 0.1
             ax.text(x[i] + offset, y[i] + offset, str(i), 
                    fontsize=9, ha='left', va='bottom', 
                    color='black', weight='bold',

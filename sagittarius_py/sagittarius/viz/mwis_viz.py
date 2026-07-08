@@ -175,9 +175,9 @@ def plot_mwis_problem(
     # Ensure circular markers
     ax.set_aspect('equal', adjustable='datalim')
     
-    # Plot atom index labels (zorder=10)
+    # Plot atom index labels (zorder=10) with unified offset 0.15
     for i in range(n_atoms):
-        offset = 0.1
+        offset = 0.15
         ax.text(x[i] + offset, y[i] + offset, str(i), 
                fontsize=9, ha='left', va='bottom', 
                color='white', weight='bold',
@@ -351,7 +351,9 @@ def plot_mwis_comparison(
             weight_label_offset=weight_label_offset  # Pass through the offset parameter
         )
     
-    plt.tight_layout()
+    # Adjust spacing between subplots manually to avoid tight_layout warnings
+    fig.subplots_adjust(wspace=0.3)
+    
     return list(axes)
 
 
