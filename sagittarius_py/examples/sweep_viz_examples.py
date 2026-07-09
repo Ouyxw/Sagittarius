@@ -17,6 +17,7 @@ from sagittarius.viz import (
     plot_sweep_heatmap,
     plot_sweep_line_slice,
     plot_final_observable_map,
+    plot_observables_comparison,
     plot_failed_run_mask,
     extract_sweep_summary,
     generate_synthetic_sweep_data,
@@ -333,6 +334,79 @@ def example_6_complete_workflow():
     plt.close()
 
 
+def example_7_observables_comparison():
+    """Example 7: Multiple observables comparison on single plot."""
+    print("\n" + "="*80)
+    print("EXAMPLE 7: Observables Comparison")
+    print("="*80)
+    
+    # Generate sweep data with multiple observables
+    omega_vals = np.linspace(0.5, 5.0, 30)
+    
+    # Create multiple observables with different behaviors
+    pop0 = np.sin(omega_vals)**2 * np.exp(-0.1 * omega_vals)
+    pop1 = np.cos(omega_vals)**2 * np.exp(-0.1 * omega_vals)
+    energy = omega_vals**2 / (1 + omega_vals)
+    coherence = np.sin(2 * omega_vals) * np.exp(-0.05 * omega_vals)
+    
+    sweep_data = {
+        'parameters': {
+            'omega': omega_vals,
+        },
+        'results': {
+            'pop0': pop0,
+            'pop1': pop1,
+            'energy': energy,
+            'coherence': coherence,
+        },
+    }
+    
+    print(f"Generated sweep data with {len(omega_vals)} omega values")
+    print(f"Observables: pop0, pop1, energy, coherence")
+    
+    # Create comparison plot
+    fig, ax = plt.subplots(figsize=(12, 7))
+    plot_observables_comparison(
+        sweep_data,
+        observables=['pop0', 'pop1', 'energy', 'coherence'],
+        param_name='omega',
+        ax=ax,
+        show_markers=True,
+        title="Multiple Observables vs Rabi Frequency",
+    )
+    
+    plt.savefig('example_observables_comparison.png', dpi=150, bbox_inches='tight')
+    print(f"\n✓ Saved: example_observables_comparison.png")
+    print("  • Features:")
+    print("    - Multiple observables on same axes")
+    print("    - Auto-assigned colors from tab10 colormap")
+    print("    - Markers at each data point")
+    print("    - Legend with all observable names")
+    print("    - Disclaimer: EXPLORATORY VISUALIZATION")
+    print("  • Backend: NONE (synthetic data)")
+    print("  • Classification: EXPLORATORY")
+    
+    plt.close()
+    
+    # Example with normalization
+    print("\n--- Normalized Comparison ---")
+    fig, ax = plt.subplots(figsize=(12, 7))
+    plot_observables_comparison(
+        sweep_data,
+        observables=['pop0', 'pop1', 'energy'],
+        normalize=True,
+        ax=ax,
+        title="Normalized Observables Comparison",
+    )
+    
+    plt.savefig('example_observables_normalized.png', dpi=150, bbox_inches='tight')
+    print(f"✓ Saved: example_observables_normalized.png")
+    print("  • All values normalized to [0, 1] range")
+    print("  • Easier visual comparison of trends")
+    
+    plt.close()
+
+
 # ============================================================================
 # Main execution
 # ============================================================================
@@ -357,6 +431,7 @@ if __name__ == "__main__":
     example_4_failed_run_mask()
     example_5_sweep_summary()
     example_6_complete_workflow()
+    example_7_observables_comparison()
     
     print("\n" + "="*80)
     print("ALL EXAMPLES COMPLETED SUCCESSFULLY")
@@ -367,6 +442,7 @@ if __name__ == "__main__":
     print("  ✓ Final observable extraction from time series")
     print("  ✓ Binary success/failure masks")
     print("  ✓ Statistical summary extraction")
+    print("  ✓ Multiple observables comparison (NEW)")
     print("  ✓ Artifact link preservation")
     print("  ✓ Mandatory disclaimers on all plots")
     print("  ✓ No backend dependency (pure Python/NumPy/Matplotlib)")
