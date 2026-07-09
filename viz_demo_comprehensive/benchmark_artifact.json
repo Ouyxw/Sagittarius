@@ -1,0 +1,25 @@
+{
+  "schema_version": "benchmark-result/v1",
+  "artifact_type": "controlled-benchmark",
+  "test_name": "small-system-evolution",
+  "performance_metrics": {
+    "execution_time_ms": [
+      120,
+      115,
+      118,
+      122,
+      119
+    ],
+    "memory_mb": [
+      256,
+      258,
+      255,
+      260,
+      257
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-07-09T05:00:00Z",
+    "controlled": true
+  }
+}

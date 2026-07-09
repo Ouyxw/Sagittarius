@@ -1,0 +1,22 @@
+{
+  "schema_version": "chart-export/v1",
+  "export_timestamp": "2026-07-09T06:25:14.538065Z",
+  "provenance": {
+    "artifact_id": "mis-graph-demo",
+    "mode_version": null,
+    "schema_version_result": null,
+    "backend_type": null,
+    "random_seed": null,
+    "basis_mode": null
+  },
+  "plotting": {
+    "function": "custom_mis_plot",
+    "parameters": {}
+  },
+  "environment": {
+    "python_version": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
+    "matplotlib_version": "3.10.9",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35"
+  },
+  "disclaimer": "EXPLORATORY VISUALIZATION - Not for hardware calibration or performance evidence unless bound to controlled standard artifacts per SPEC-GOV-001"
+}
