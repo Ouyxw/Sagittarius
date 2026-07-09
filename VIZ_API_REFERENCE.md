@@ -71,6 +71,7 @@
 | [`plot_sweep_heatmap()`](#plot_sweep_heatmap) | `viz.sweep` | 2D parameter sweep heatmap with failed run overlay | `Axes` |
 | [`plot_sweep_line_slice()`](#plot_sweep_line_slice) | `viz.sweep` | 1D slice through multi-dimensional sweep data | `Axes` |
 | [`plot_final_observable_map()`](#plot_final_observable_map) | `viz.sweep` | Final observable values vs parameter | `Axes` |
+| [`plot_observables_comparison()`](#plot_observables_comparison) | `viz.sweep` | Multiple observables comparison on single plot | `Axes` |
 | [`plot_failed_run_mask()`](#plot_failed_run_mask) | `viz.sweep` | Binary success/failure mask visualization | `Axes` |
 | [`extract_sweep_summary()`](#extract_sweep_summary) | `viz.sweep` | Statistical summary extraction | `Dict` |
 | [`generate_synthetic_sweep_data()`](#generate_synthetic_sweep_data) | `viz.sweep` | Demo data generator for testing | `Dict` |
@@ -469,6 +470,53 @@ ax = plot_final_observable_map(
 
 ---
 
+### `plot_observables_comparison()`
+
+**Module**: `sagittarius.viz.sweep`
+
+**Purpose**: Plot multiple observables on the same axes for comparison.
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `sweep_data` | `Dict[str, Any]` | ✅ Yes | - | Dictionary containing sweep results |
+| `observables` | `List[str]` | ❌ Optional | `None` | List of observable names to plot (auto-detect if None) |
+| `param_name` | `str` | ❌ Optional | `'omega'` | Name of x-axis parameter |
+| `ax` | `matplotlib.axes.Axes` | ❌ Optional | `None` | Existing axes to plot on |
+| `show_markers` | `bool` | ❌ Optional | `True` | Whether to show data point markers |
+| `title` | `str` | ❌ Optional | `None` | Custom title |
+| `figsize` | `Tuple[float, float]` | ❌ Optional | `(12, 7)` | Figure size in inches |
+| `colors` | `List[str]` | ❌ Optional | `None` | Colors for each observable line (auto-assigned if None) |
+| `normalize` | `bool` | ❌ Optional | `False` | Whether to normalize all observables to [0, 1] range |
+
+#### Returns
+
+- **Type**: `matplotlib.axes.Axes`
+
+#### Example
+
+```python
+from sagittarius.viz import plot_observables_comparison
+
+# Plot multiple observables with auto-assigned colors
+ax = plot_observables_comparison(
+    sweep_data,
+    observables=['pop0', 'pop1', 'energy'],
+    param_name='omega'
+)
+
+# Plot with normalization for easier comparison
+ax = plot_observables_comparison(
+    sweep_data,
+    observables=['pop0', 'energy'],
+    normalize=True,
+    title="Normalized Comparison"
+)
+```
+
+---
+
 ### `plot_failed_run_mask()`
 
 **Module**: `sagittarius.viz.sweep`
@@ -600,45 +648,6 @@ The `sweep_data` dictionary must contain:
 
 ---
 
-## ✅ Compliance Checklist
-
-All sweep visualizations comply with project specifications:
-
-- ✅ **Exploratory Disclaimer**: All plots include "⚠️ EXPLORATORY VISUALIZATION - Not for hardware calibration"
-- ✅ **Artifact Links**: Display sample artifact ID when manifest_links provided
-- ✅ **Parameter Preservation**: All plots maintain original parameter coordinates
-- ✅ **Failure Marking**: Failed runs clearly marked (red X or red cells)
-- ✅ **No Backend Dependency**: Pure Python/NumPy/Matplotlib implementation
-- ✅ **Layered Isolation**: Clearly marked as EXPLORATORY, not for calibration
-
----
-
-## 🧪 Testing
-
-Run the test suite:
-
-```bash
-cd sagittarius_py
-python -m pytest tests/test_viz_sweep.py -v
-```
-
-**34 tests covering**:
-- Heatmap creation and customization
-- Line slice extraction
-- Final observable mapping
-- Failed run masking
-- Summary statistics
-- Synthetic data generation
-- Integration workflows
-- Error handling
-
----
-
-## 📖 Additional Resources
-
-- **Examples**: See [`examples/sweep_viz_examples.py`](file:///workspaces/Sagittarius/sagittarius_py/examples/sweep_viz_examples.py) for complete usage examples
-- **README**: See [`sagittarius/viz/README_sweep.md`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/README_sweep.md) for module documentation
-- **Chinese API Reference**: See [`VIZ_API_REFERENCE_CN.md`](file:///workspaces/Sagittarius/VIZ_API_REFERENCE_CN.md) for Chinese version
 
 ## 📚 Appendix
 

@@ -163,7 +163,7 @@ def export_from_result(
 - 保留绘图函数的所有参数
 
 **使用示例**:
-```python
+```
 from sagittarius.viz import export_from_result
 from sagittarius.viz.result import plot_observables
 
@@ -215,7 +215,7 @@ paths = export_from_result(
 
 #### 测试覆盖
 
-```bash
+```
 cd sagittarius_py && uv run pytest tests/test_viz_export.py -v
 # ============================== 10 passed in 0.85s ==============================
 ```
@@ -345,7 +345,7 @@ reporter.add_result_summary(result1, 'exploratory') \
 ```
 
 **HTML报表结构示例**:
-```html
+```
 <!DOCTYPE html>
 <html>
 <head>
@@ -397,7 +397,7 @@ reporter.add_result_summary(result1, 'exploratory') \
 ```
 
 **使用示例**:
-```python
+```
 from sagittarius.viz.report import ReportGenerator
 import matplotlib.pyplot as plt
 
@@ -479,7 +479,7 @@ def generate_quick_report(
 - 统一格式和样式
 
 **使用示例**:
-```python
+```
 from sagittarius.viz.report import generate_quick_report
 
 results = [result1, result2, result3]
@@ -526,7 +526,7 @@ print(f"Generated: {report_path}")
 
 #### 测试覆盖
 
-```bash
+```
 cd sagittarius_py && uv run pytest tests/test_viz_report.py -v
 # ============================== 14 passed in 0.65s ==============================
 ```
@@ -581,7 +581,7 @@ cd sagittarius_py && uv run pytest tests/test_viz_report.py -v
 
 #### 运行示例
 
-```bash
+```
 cd /workspaces/Sagittarius/sagittarius_py
 uv run python examples/minimal_viz_examples.py
 ```
@@ -899,7 +899,7 @@ def plot_sweep_heatmap(
 ```
 
 **使用示例**:
-```python
+```
 from sagittarius.viz import plot_sweep_heatmap, generate_synthetic_sweep_data
 
 # 生成合成数据（演示用）
@@ -1007,9 +1007,62 @@ ax = plot_final_observable_map(
 
 ---
 
-##### 18.4 `plot_failed_run_mask()` - 失败运行掩码
+##### 18.4 `plot_observables_comparison()` - 多可观测量对比
 
 ```python
+from sagittarius.viz import plot_observables_comparison
+
+def plot_observables_comparison(
+    sweep_data: Dict[str, Any],  # 【必填】包含扫描结果的字典
+    observables: Optional[List[str]] = None,  # 【可选,默认=None】要绘制的可观测量列表
+    param_name: str = 'omega',  # 【可选,默认='omega'】x轴参数名
+    ax: Optional[Axes] = None,  # 【可选,默认=None】现有坐标轴
+    show_markers: bool = True,  # 【可选,默认=True】是否显示标记
+    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
+    figsize: Tuple[float, float] = (12, 7),  # 【可选,默认=(12,7)】图形尺寸
+    colors: Optional[List[str]] = None,  # 【可选,默认=None】每条线的颜色
+    normalize: bool = False,  # 【可选,默认=False】是否归一化到[0,1]
+) -> Axes:
+```
+
+**功能特性**:
+
+- **多曲线对比**: 在单个坐标轴上绘制多个可观测量
+- **自动颜色分配**: 使用tab10 colormap自动分配颜色
+- **归一化支持**: 可选将所有值归一化到[0, 1]范围便于对比
+- **灵活选择**: 可指定特定可观测量或自动检测所有数值型数据
+- **清晰图例**: 每个可观测量都有标签和颜色标识
+
+**使用示例**:
+```
+from sagittarius.viz import plot_observables_comparison
+
+# 绘制多个可观测量，自动分配颜色
+ax = plot_observables_comparison(
+    sweep_data,
+    observables=['pop0', 'pop1', 'energy'],
+    param_name='omega',
+    title="Multiple Observables vs Rabi Frequency"
+)
+
+# 使用归一化便于趋势对比
+ax = plot_observables_comparison(
+    sweep_data,
+    observables=['pop0', 'energy'],
+    normalize=True,
+    title="Normalized Comparison"
+)
+```
+
+**输出示例**: 
+- [example_observables_comparison.png](file:///workspaces/Sagittarius/sagittarius_py/example_observables_comparison.png) (156KB)
+- [example_observables_normalized.png](file:///workspaces/Sagittarius/sagittarius_py/example_observables_normalized.png) (198KB)
+
+---
+
+##### 18.5 `plot_failed_run_mask()` - 失败运行掩码
+
+```
 from sagittarius.viz import plot_failed_run_mask
 
 def plot_failed_run_mask(
@@ -1043,7 +1096,43 @@ ax = plot_failed_run_mask(sweep_data, title="Run Success/Failure Map")
 
 ---
 
-##### 18.5 `extract_sweep_summary()` - 统计摘要提取
+##### 18.6 `plot_failed_run_mask()` - 失败运行掩码
+
+```
+from sagittarius.viz import plot_failed_run_mask
+
+def plot_failed_run_mask(
+    sweep_data: Dict[str, Any],  # 【必填】包含'failed_runs'键的字典
+    x_param: str = 'omega',  # 【可选,默认='omega'】x轴参数名
+    y_param: str = 'delta',  # 【可选,默认='delta'】y轴参数名
+    ax: Optional[Axes] = None,  # 【可选,默认=None】现有坐标轴
+    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
+    figsize: Tuple[float, float] = (10, 8),  # 【可选,默认=(10,8)】图形尺寸
+) -> Axes:
+```
+
+**功能特性**:
+
+- **二元可视化**: 绿色单元格=成功，红色单元格=失败
+- **成功率计算**: 标题中显示成功率和总运行数
+- **Manifest链接计数**: 如果提供manifest_links，显示链接数量
+- **灵活输入**: 支持集合{(x_idx, y_idx)}或布尔掩码数组
+
+**使用示例**:
+```
+from sagittarius.viz import plot_failed_run_mask
+
+# 绘制成功/失败掩码
+ax = plot_failed_run_mask(sweep_data, title="Run Success/Failure Map")
+# 绿色单元格: 成功运行
+# 红色单元格: 失败运行
+```
+
+**输出示例**: [example_failed_mask.png](file:///workspaces/Sagittarius/sagittarius_py/example_failed_mask.png) (48KB)
+
+---
+
+##### 18.7 `extract_sweep_summary()` - 统计摘要提取
 
 ```python
 from sagittarius.viz import extract_sweep_summary
@@ -1077,7 +1166,7 @@ def extract_sweep_summary(
 ```
 
 **使用示例**:
-```python
+```
 from sagittarius.viz import extract_sweep_summary
 
 summary = extract_sweep_summary(sweep_data, metrics=['pop0', 'energy'])
@@ -1088,7 +1177,7 @@ print(f"成功率: {summary['run_statistics']['success_rate']:.1f}%")
 
 ---
 
-##### 18.6 `generate_synthetic_sweep_data()` - 合成数据生成器
+##### 18.8 `generate_synthetic_sweep_data()` - 合成数据生成器
 
 ```python
 from sagittarius.viz import generate_synthetic_sweep_data
@@ -1106,7 +1195,7 @@ def generate_synthetic_sweep_data(
 **⚠️ 注意**: 此函数仅用于演示目的，因为用户-facing sweep artifacts尚未实现。
 
 **使用示例**:
-```python
+```
 from sagittarius.viz import generate_synthetic_sweep_data
 
 sweep_data = generate_synthetic_sweep_data(
@@ -1125,12 +1214,12 @@ sweep_data = generate_synthetic_sweep_data(
 
 ```
 from sagittarius.viz import (
-    generate_synthetic_sweep_data,
     plot_sweep_heatmap,
     plot_sweep_line_slice,
     plot_final_observable_map,
     plot_failed_run_mask,
     extract_sweep_summary,
+    generate_synthetic_sweep_data,
 )
 import matplotlib.pyplot as plt
 
@@ -1201,7 +1290,7 @@ plt.savefig('complete_workflow.png', dpi=150, bbox_inches='tight')
 
 ```
 cd sagittarius_py && uv run pytest tests/test_viz_sweep.py -v
-# ============================== 34 passed in 1.22s ==============================
+# ============================== 40 passed in ~1.4s ==============================
 ```
 
 | 测试类别 | 用例数 | 通过数 | 失败数 | 覆盖率 |
@@ -1213,7 +1302,8 @@ cd sagittarius_py && uv run pytest tests/test_viz_sweep.py -v
 | TestSweepSummary | 3 | 3 | 0 | 100% |
 | TestSyntheticDataGeneration | 6 | 6 | 0 | 100% |
 | TestSweepIntegration | 1 | 1 | 0 | 100% |
-| **总计** | **34** | **34** | **0** | **100%** |
+| **TestObservablesComparison** | **6** | **6** | **0** | **100%** |
+| **总计** | **40** | **40** | **0** | **100%** |
 
 **测试覆盖内容**:
 - 基础功能测试（热力图、线切片、最终值图、失败掩码）
@@ -1221,8 +1311,10 @@ cd sagittarius_py && uv run pytest tests/test_viz_sweep.py -v
 - 错误处理测试（缺失参数、形状不匹配、类型错误）
 - 免责声明验证（所有图表包含警告文本）
 - Artifact链接测试（manifest_links显示）
+- 统计摘要提取测试（extract_sweep_summary）
 - 合成数据生成测试（可复现性、参数范围、失败率）
 - 集成工作流测试（完整分析流程）
+- **多可观测量对比测试**（自动颜色分配、归一化、特定选择、缺失警告）
 
 ---
 
@@ -1232,8 +1324,8 @@ cd sagittarius_py && uv run pytest tests/test_viz_sweep.py -v
 - **模块README**: [sagittarius/viz/README_sweep.md](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/README_sweep.md)
 - **中文API参考**: [VIZ_API_REFERENCE_CN.md](file:///workspaces/Sagittarius/VIZ_API_REFERENCE_CN.md) - Sweep Visualization部分
 - **英文API参考**: [VIZ_API_REFERENCE.md](file:///workspaces/Sagittarius/VIZ_API_REFERENCE.md) - Sweep Visualization部分
-- **测试文件**: `tests/test_viz_sweep.py` (34用例)
-- **示例脚本**: `examples/sweep_viz_examples.py` (6个完整示例)
+- **测试文件**: `tests/test_viz_sweep.py` (40用例)
+- **示例脚本**: `examples/sweep_viz_examples.py` (7个完整示例)
 
 ---
 
@@ -1242,9 +1334,9 @@ cd sagittarius_py && uv run pytest tests/test_viz_sweep.py -v
 
 ### 测试覆盖汇总
 
-```bash
+```
 cd sagittarius_py && uv run pytest tests/test_viz_benchmark_perf.py tests/test_viz_small_system_debug.py tests/test_viz_export.py tests/test_viz_report.py tests/test_viz_sweep.py -v
-# ============================== 96 passed in ~30s ==============================
+# ============================== 102 passed in ~30s ==============================
 ```
 
 | 测试套件 | 用例数 | 通过数 | 失败数 | 覆盖率 |
@@ -1253,6 +1345,6 @@ cd sagittarius_py && uv run pytest tests/test_viz_benchmark_perf.py tests/test_v
 | test_viz_small_system_debug.py | 19 | 19 | 0 | 100% |
 | test_viz_export.py | 10 | 10 | 0 | 100% |
 | test_viz_report.py | 14 | 14 | 0 | 100% |
-| **test_viz_sweep.py** | **34** | **34** | **0** | **100%** |
-| **总计** | **96** | **96** | **0** | **100%** |
+| **test_viz_sweep.py** | **40** | **40** | **0** | **100%** |
+| **总计** | **102** | **102** | **0** | **100%** |
 
