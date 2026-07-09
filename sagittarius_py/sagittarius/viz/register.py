@@ -187,13 +187,17 @@ def plot_register(
     # Plot atomic labels (0-based indices) offset to upper-right of atoms
     if labels:
         for i in range(n_atoms):
-            # Offset label to upper-right to avoid covering atoms
-            offset = 0.15  # μm offset
-            ax.text(x[i] + offset, y[i] + offset, str(i), 
-                   fontsize=9, ha='center', va='center', 
-                   color='white', weight='bold',
-                   bbox=dict(boxstyle='round,pad=0.2', facecolor='black', alpha=0.7),
-                   zorder=10)
+            # Use annotate with screen-coordinate offsets instead of data coordinates
+            # This ensures consistent visual spacing regardless of axis scaling
+            ax.annotate(str(i), 
+                       xy=(x[i], y[i]),  # Position at atom center
+                       xytext=(8, 8),     # Offset in screen points (upper-right)
+                       textcoords='offset points',
+                       fontsize=9, 
+                       ha='left', va='bottom', 
+                       color='white', weight='bold',
+                       bbox=dict(boxstyle='round,pad=0.2', facecolor='black', alpha=0.85),
+                       zorder=100)
     # Plot Blockade/UDG Edges
     if edges and blockade_radius is not None:
         edge_count = 0

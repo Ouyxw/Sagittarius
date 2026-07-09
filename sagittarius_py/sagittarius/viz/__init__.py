@@ -74,6 +74,14 @@ from sagittarius.viz.small_system_debug import (
     plot_density_matrix_magnitude,
     plot_density_matrix_phase,
 )
+from sagittarius.viz.export import (
+    export_figure,
+    export_from_result,
+)
+from sagittarius.viz.report import (
+    ReportGenerator,
+    generate_quick_report,
+)
 
 __all__ = [
     "plot_register",
@@ -124,4 +132,10 @@ __all__ = [
     "plot_density_matrix_diagonal",
     "plot_density_matrix_magnitude",
     "plot_density_matrix_phase",
+    # Chart export with metadata provenance
+    "export_figure",
+    "export_from_result",
+    # Lightweight report generation
+    "ReportGenerator",
+    "generate_quick_report",
 ]
