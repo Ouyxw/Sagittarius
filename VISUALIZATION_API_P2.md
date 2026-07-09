@@ -1,488 +1,851 @@
-### 13. 基准性能分析可视化工具 (`benchmark_perf.py`) 
-
-**需求**: 基于受管控基准产物生成标准化图表,包含运行耗时-原子数曲线、内存占用-基维度曲线、CPU/GPU计算误差对比、求解器性能横向对比、运行成功/失败汇总。仅读取官方基准产物或留存实验数据,性能结论需遵循管控规范(SPEC-GOV-001),不可直接将本地临时计时作为官方性能依据。
-
-**实现位置**: [`sagittarius/viz/benchmark_perf.py`](sagittarius_py/sagittarius/viz/benchmark_perf.py)
-
-#### 设计目标
-
-- **性能趋势分析**: 运行时和内存随问题规模的缩放规律
-- **求解器对比**: 不同数值方法的性能横向比较
-- **成功率统计**: 基准测试成功/失败分布可视化
-- **硬件对比**: CPU vs GPU数值精度差异分析
-- **合规性保证**: 所有图表包含免责声明,不直接作为硬件校准依据
-
-**重要声明**: 
-- ⚠️ **DIAGNOSTIC VIEW - Not for hardware calibration**
-- 性能结论必须遵循SPEC-GOV-001管控规范
-- 本地临时计时不得作为官方性能证据
-- 仅读取受管控的基准产物或已验证的实验数据
-
-#### 核心 API
-
-##### 13.1 `plot_runtime_scaling()` - 运行耗时缩放分析
-
-```python
-from sagittarius.viz import plot_runtime_scaling
-
-def plot_runtime_scaling(
-    artifacts: List[Dict[str, Any]],  # 【必填】基准产物列表
-    ax: Optional[Axes] = None,  # 【可选,默认=None】外部子图
-    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
-    figsize: Tuple[float, float] = (10, 6),  # 【可选,默认=(10,6)】画布尺寸
-    show_fit: bool = True,  # 【可选,默认=True】显示幂律拟合曲线
-) -> Axes:
-```
-
-**功能特性**:
-
- **幂律缩放拟合**
-- 主图: 散点图展示runtime vs n_atoms
-- 拟合曲线: T ∝ N^b (对数空间线性拟合)
-- 统计摘要: 缩放指数b、前置因子a
-
-**数据结构要求**:
-```python
-artifacts = [
-    {
-        'n_atoms': int,           # 原子数量
-        'runtime_seconds': float, # 墙钟时间(秒)
-        'artifact_id': str        # 唯一标识符
-    },
-    ...
-]
-```
-
-**使用示例**:
-```python
-artifacts = [load_artifact(f"bench_{n}.json") for n in [5, 10, 15, 20]]
-ax = plot_runtime_scaling(artifacts, show_fit=True)
-plt.savefig("runtime_scaling.png", dpi=150)
-```
-
-##### 13.2 `plot_memory_scaling()` - 内存占用缩放分析
-
-```python
-from sagittarius.viz import plot_memory_scaling
-
-def plot_memory_scaling(
-    artifacts: List[Dict[str, Any]],  # 【必填】基准产物列表
-    ax: Optional[Axes] = None,  # 【可选,默认=None】外部子图
-    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
-    figsize: Tuple[float, float] = (10, 6),  # 【可选,默认=(10,6)】画布尺寸
-    y_unit: str = 'MB',  # 【可选,默认='MB']内存单位('B','KB','MB','GB')
-) -> Axes:
-```
-
-**功能特性**:
-
- **指数增长可视化**
-- X轴: Hilbert空间维度(对数刻度)
-- Y轴: 内存占用(可配置单位)
-- 半对数坐标展示指数增长趋势
-
-**数据结构要求**:
-```python
-artifacts = [
-    {
-        'hilbert_dim': int,      # Hilbert空间维度(2^n)
-        'memory_bytes': int,     # 峰值内存(字节)
-        'artifact_id': str       # 唯一标识符
-    },
-    ...
-]
-```
-
-##### 13.3 `plot_solver_comparison()` - 求解器性能对比
-
-```python
-from sagittarius.viz import plot_solver_comparison
-
-def plot_solver_comparison(
-    results: List[Dict[str, Any]],  # 【必填】求解器结果列表
-    metric: str = 'runtime',  # 【可选,默认='runtime'】对比指标
-    ax: Optional[Axes] = None,  # 【可选,默认=None】外部子图
-    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
-    figsize: Tuple[float, float] = (12, 6),  # 【可选,默认=(12,6)】画布尺寸
-    show_error_bars: bool = True,  # 【可选,默认=True】显示误差棒
-) -> Axes:
-```
-
-**功能特性**:
-
- **横向条形图对比**
-- 水平条形图展示各求解器性能
-- 自动排序(最优者置顶)
-- 误差棒显示标准差(如提供)
-- ★标记最佳性能者
-
-**支持指标**: `'runtime'`, `'accuracy'`, `'memory'`, `'error'`
-
-**数据结构要求**:
-```python
-results = [
-    {
-        'solver_name': str,      # 求解器名称
-        'metric_value': float,   # 指标值
-        'metric_std': float,     # 标准差(可选)
-        'artifact_id': str       # 唯一标识符
-    },
-    ...
-]
-```
-
-##### 13.4 `plot_success_failure_summary()` - 成功/失败汇总
-
-```python
-from sagittarius.viz import plot_success_failure_summary
-
-def plot_success_failure_summary(
-    benchmark_runs: List[Dict[str, Any]],  # 【必填】基准运行记录
-    ax: Optional[Axes] = None,  # 【可选,默认=None】外部子图
-    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
-    figsize: Tuple[float, float] = (10, 8),  # 【可选,默认=(10,8)】画布尺寸
-    group_by: str = 'solver',  # 【可选,默认='solver'】分组维度
-) -> Axes:
-```
-
-**功能特性**:
-
- **堆叠条形图统计**
-- 成功(绿色) + 失败(红色)堆叠
-- 百分比标注在条形中央
-- 总体成功率文本框
-- 支持按solver/n_atoms/problem_type分组
-
-**数据结构要求**:
-```python
-benchmark_runs = [
-    {
-        'status': str,           # 'success' 或 'failure'
-        'solver': str,           # 求解器名称
-        'n_atoms': int,          # 问题规模
-        'error_message': str,    # 失败原因(可选)
-        'artifact_id': str       # 唯一标识符
-    },
-    ...
-]
-```
-
-##### 13.5 `plot_cpu_gpu_error_comparison()` - CPU/GPU误差对比
-
-```python
-from sagittarius.viz import plot_cpu_gpu_error_comparison
-
-def plot_cpu_gpu_error_comparison(
-    cpu_results: List[Dict[str, Any]],  # 【必填】CPU结果
-    gpu_results: List[Dict[str, Any]],  # 【必填】GPU结果
-    ax: Optional[Axes] = None,  # 【可选,默认=None】外部子图
-    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
-    figsize: Tuple[float, float] = (12, 6),  # 【可选,默认=(12,6)】画布尺寸
-    error_metric: str = 'relative_error',  # 【可选,默认='relative_error'】误差类型
-) -> Axes:
-```
-
-**功能特性**:
-
- **分组条形图对比**
-- CPU(蓝色) vs GPU(紫色)并排对比
-- Y轴对数刻度展示误差量级
-- 平均GPU/CPU比率标注
-- 支持相对误差/绝对误差
-
-**支持误差类型**: `'relative_error'`, `'absolute_error'`
-
-**数据结构要求**:
-```python
-cpu_results = [
-    {
-        'observable': str,        # 可观测量名称
-        'value': float,           # 计算值
-        'reference_value': float  # 参考值(高精度或解析解)
-    },
-    ...
-]
-# gpu_results结构相同
-```
-
-#### 测试覆盖
-
-:
-```bash
-cd sagittarius_py && uv run pytest tests/test_viz_benchmark_perf.py -v
-# ============================== 18 passed in 0.69s ==============================
-```
-
-**测试用例**:
-- ✅ 正常数据: 完整基准产物、有效指标值
-- ✅ 缺失字段: n_atoms/runtime_seconds/hilbert_dim等必需字段
-- ✅ 无效参数: 不支持的内存单位、无共同可观测量
-- ✅ 边界情况: <3个数据点跳过拟合、零参考值处理
-- ✅ Artifact链接: artifact_id字段存在性检查
-
-#### 示例脚本
-
- [`examples/benchmark_perf_demo.py`](sagittarius_py/examples/benchmark_perf_demo.py),演示:
-- 运行耗时缩放分析(6个基准点,幂律拟合)
-- 内存占用缩放分析(5个维度,KB单位)
-- 求解器性能对比(4种方法,带误差棒)
-- 成功/失败汇总(按solver和n_atoms分组)
-- CPU/GPU误差对比(4个可观测量)
-
-::::::
-- `benchmark_runtime_scaling.png` - 运行耗时缩放曲线
-- `benchmark_memory_scaling.png` - 内存占用缩放曲线
-- `benchmark_solver_comparison.png` - 求解器横向对比
-- `benchmark_success_failure_solver.png` - 按求解器分组的成功率
-- `benchmark_success_failure_size.png` - 按问题规模分组的成功率
-- `benchmark_cpu_gpu_comparison.png` - CPU/GPU数值精度对比
-
----
-
-### 14. 小型系统调试视图 (`small_system_debug.py`) 
-
-**需求**: 提供低维希尔伯特空间的量子态诊断视图,包括态概率矢量、密度矩阵对角元、密度矩阵幅值热图、相位热图。明确限定仅适用于≤10量子比特系统,数据缺失或维度过大时抛出清晰报错。
-
-**实现位置**: [`sagittarius/viz/small_system_debug.py`](sagittarius_py/sagittarius/viz/small_system_debug.py)
-
-#### 设计目标
-
-EOFEOF,用于:
-- **态矢量分析**: 计算基态概率分布可视化
-- **密度矩阵诊断**: 占据数(diagonal)和相干性(off-diagonal)分析
-- **相位结构**: 复数相干性的相位模式识别
-- **非物理态检测**: 负占据数、迹≠1等异常自动警告
-- **维度安全限制**: >1024维(>10 qubits)时拒绝可视化
-
-**重要声明**: 
-- ⚠️ **仅限小系统**: MAX_SAFE_DIM = 1024 (2^10 qubits)
-- ⚠️ **DIAGNOSTIC VIEW - Not for hardware calibration**
-- 超维系统将抛出ValueError并提示替代方案
-- 非物理态会触发UserWarning但不阻止绘图
-
-#### 核心 API
-
-##### 14.1 `plot_state_probabilities()` - 态概率矢量
-
-```python
-from sagittarius.viz import plot_state_probabilities
-
-def plot_state_probabilities(
-    state_vector: Union[List[complex], np.ndarray],  # 【必填】态矢量|ψ⟩
-    ax: Optional[Axes] = None,  # 【可选,默认=None】外部子图
-    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
-    figsize: Tuple[float, float] = (12, 6),  # 【可选,默认=(12,6)】画布尺寸
-    show_labels: bool = True,  # 【可选,默认=True】显示二进制标签
-    basis: str = 'computational',  # 【可选,默认='computational'】基底类型
-) -> Axes:
-```
-
-**功能特性**:
-
- **概率分布柱状图**
-- 高概率态(>0.01)用深色,低概率态用浅色
-- X轴二进制标签(|00⟩, |01⟩, ..., |11⟩)
-- 统计摘要: 非零态数、最大概率态
-- 自动归一化警告(如Σ|ψ_i|² ≠ 1)
-
-**输入验证**:
-- 必须为1D数组
-- 维度必须为2的幂(2^n)
-- 维度 ≤ 1024 (10 qubits)
-
-**使用示例**:
-```python
-# Bell state: (|00⟩ + |11⟩) / √2
-psi = np.array([1/np.sqrt(2), 0, 0, 1/np.sqrt(2)])
-ax = plot_state_probabilities(psi, show_labels=True)
-plt.savefig("bell_state_probs.png", dpi=150)
-```
-
-**错误处理**:
-```python
-ValueError: State vector dimension 3 is not a power of 2. Expected dimension 2^n for n qubits.
-# 解决方案: 确保态矢量维度为2的幂
-
-ValueError: Hilbert space dimension 2048 exceeds safe limit (1024). This corresponds to more than 11 qubits.
-# 解决方案: 仅支持≤10 qubits系统,考虑使用稀疏表示或降维可观测量
-
-UserWarning: State vector not normalized: Σ|ψ_i|^2 = 0.500000. Probabilities will be normalized for visualization.
-# 说明: 态矢量未归一化,将自动归一化后绘图
-```
-
-##### 14.2 `plot_density_matrix_diagonal()` - 密度矩阵对角元
-
-```python
-from sagittarius.viz import plot_density_matrix_diagonal
-
-def plot_density_matrix_diagonal(
-    density_matrix: Union[List[List[complex]], np.ndarray],  # 【必填】密度矩阵ρ
-    ax: Optional[Axes] = None,  # 【可选,默认=None】外部子图
-    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
-    figsize: Tuple[float, float] = (12, 6),  # 【可选,默认=(12,6)】画布尺寸
-    normalize: bool = True,  # 【可选,默认=True】归一化对角元
-) -> Axes:
-```
-
-**功能特性**:
-
- **占据数(Population)可视化**
-- 柱状图展示ρ_ii (i=0,...,dim-1)
-- 高占据态用深色标记
-- 统计摘要: 非零占据数、最大占据态、对角纯度
-- 负占据数警告(非物理态)
-
-**输入验证**:
-- 必须为2D方阵
-- 维度必须为2的幂
-- 维度 ≤ 1024
-
-**使用示例**:
-```python
-# Maximally mixed state: ρ = I/2
-rho = np.array([[0.5, 0], [0, 0.5]])
-ax = plot_density_matrix_diagonal(rho, normalize=True)
-plt.savefig("mixed_state_diagonal.png", dpi=150)
-```
-
-##### 14.3 `plot_density_matrix_magnitude()` - 密度矩阵幅值热图
-
-```python
-from sagittarius.viz import plot_density_matrix_magnitude
-
-def plot_density_matrix_magnitude(
-    density_matrix: Union[List[List[complex]], np.ndarray],  # 【必填】密度矩阵ρ
-    ax: Optional[Axes] = None,  # 【可选,默认=None】外部子图
-    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
-    figsize: Tuple[float, float] = (10, 8),  # 【可选,默认=(10,8)】画布尺寸
-    cmap: str = 'viridis',  # 【可选,默认='viridis'】色图
-    show_values: bool = False,  # 【可选,默认=False】标注数值(仅dim≤16)
-) -> Axes:
-```
-
-**功能特性**:
-
- **热力图**
-- 完整密度矩阵幅值可视化
-- 对角线红色虚线标记(populations)
-- 可选数值标注(仅小系统dim≤16)
-- Colorbar显示幅值范围
-
-**视觉特性**:
-- viridis色图(从紫到黄)
-- 对角线zorder=10红色虚线
-- 小系统(dim≤32)显示二进制标签
-
-**使用示例**:
-```python
-# Pure state |+⟩⟨+| with coherences
-psi = np.array([1/np.sqrt(2), 1/np.sqrt(2)])
-rho = np.outer(psi, psi.conj())
-ax = plot_density_matrix_magnitude(rho, show_values=True)
-plt.savefig("pure_state_magnitude.png", dpi=150)
-```
-
-##### 14.4 `plot_density_matrix_phase()` - 密度矩阵相位热图
-
-```python
-from sagittarius.viz import plot_density_matrix_phase
-
-def plot_density_matrix_phase(
-    density_matrix: Union[List[List[complex]], np.ndarray],  # 【必填】密度矩阵ρ
-    ax: Optional[Axes] = None,  # 【可选,默认=None】外部子图
-    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
-    figsize: Tuple[float, float] = (10, 8),  # 【可选,默认=(10,8)】画布尺寸
-    cmap: str = 'twilight',  # 【可选,默认='twilight'】循环色图
-    threshold: float = 1e-3,  # 【可选,默认=1e-3】掩蔽阈值
-) -> Axes:
-```
-
-**功能特性**:
-
- **arg(ρ_ij)相位热力图**
-- 相位范围[-π, π]用twilight循环色图
-- 小幅值元素(|ρ_ij| < threshold)被掩蔽
-- 白色对角线标记
-- 掩蔽元素数量统计
-
-**视觉特性**:
-- twilight色图(适合循环相位数据)
-- Colorbar标注-π到π刻度
-- 灰色文本框显示掩蔽元素数
-
-**使用示例**:
-```python
-# Density matrix with complex coherences
-rho = np.array([
-    [0.5, 0.1*np.exp(1j*np.pi/4)],
-    [0.1*np.exp(-1j*np.pi/4), 0.5]
-])
-ax = plot_density_matrix_phase(rho, threshold=1e-3)
-plt.savefig("density_matrix_phase.png", dpi=150)
-```
-
-#### 维度安全限制
-
-**MAX_SAFE_DIM = 1024** (对应10 qubits)
-
-```python
-_validate_hilbert_dimension(dim, context="visualization")
-# 如果 dim > 1024, 抛出:
-# ValueError: Hilbert space dimension {dim} exceeds safe limit (1024).
-#             This corresponds to more than {n_qubits} qubits.
-#             Visualization is only supported for small systems (≤ 10 qubits).
-#             Consider using sparse representations or reduced observable sets for larger systems.
-```
-
-#### 分层隔离原则
-
-1. **只读访问**: 所有函数仅读取态矢量/密度矩阵数据,不修改原始对象
-2. **非校准声明**: 所有图表标题/角落包含"DIAGNOSTIC VIEW - Not for hardware calibration"
-3. **元数据分离**: 可视化不修改原始量子态数据,仅展示特征
-4. **小系统限定**: 明确标注适用系统规模,避免误用于大规模系统
-
-#### zorder 层级
-
-| Z-order | 元素 | 说明 |
-|---------|------|------|
-| 0 | 背景网格 | 辅助线(alpha=0.3) |
-| 5 | 柱状图/热力图 | 主要数据可视化 |
-| 10 | 对角线/统计文本 | 参考线和标注 |
-| 11 | 免责声明 | 黄色背景红色文字 |
-
-#### 测试覆盖
-
-:
-```bash
-cd sagittarius_py && uv run pytest tests/test_viz_small_system_debug.py -v
-# ============================== 19 passed in 0.52s ==============================
-```
-
-**测试用例**:
-- ✅ 正常数据: Bell态、GHZ态、混合态、纯态
-- ✅ 维度验证: 非2的幂、超大维度(2048)、多维数组
-- ✅ 非物理态: 负占据数、迹≠1、未归一化态矢量
-- ✅ 边界情况: dim=1024(边界)、dim=1025(超限)
-- ✅ 可选参数: show_labels、normalize、show_values、threshold
-
-#### 示例脚本
-
- [`examples/small_system_debug_demo.py`](sagittarius_py/examples/small_system_debug_demo.py),演示:
-- Bell态概率分布(2 qubits)
-- GHZ态概率分布(3 qubits)
-- 最大混合态对角元(1 qubit)
-- 纯态|+⟩幅值和相位热图
-- 复杂相干性相位结构(2 qubits)
-- 维度限制错误处理(11 qubits → 2048维)
-- 非物理态警告检测(负占据数)
-
-::::::
-- `debug_bell_state_probabilities.png` - Bell态势概率
-- `debug_ghz_state_probabilities.png` - GHZ态势概率
-- `debug_mixed_state_diagonal.png` - 混合态对角元
-- `debug_pure_state_magnitude.png` - 纯态幅值热图
-- `debug_pure_state_phase.png` - 纯态相位热图
-- `debug_complex_coherences_magnitude.png` - 复杂相干性幅值
 - `debug_complex_coherences_phase.png` - 复杂相干性相位
 
 ---
+
+### 15. 图表导出与元数据溯源 (`export.py`)
+
+**需求**: 提供便捷的图表导出工具,支持PNG/SVG/PDF多格式输出,并自动生成配套JSON元数据文件。导出的图表必须携带完整溯源信息,包括原始产物标识、模式版本、随机种子、后端类型、基模式、绘图参数等,确保可复现性和可追溯性。
+
+**实现位置**: [`sagittarius/viz/export.py`](sagittarius_py/sagittarius/viz/export.py)
+
+#### 设计目标
+
+- **多格式支持**: PNG(光栅)、SVG/PDF(矢量)按需导出
+- **完整溯源**: 自动提取并记录所有关键元数据
+- **分层隔离**: 明确区分探索性可视化和基准证据
+- **无后端依赖**: 纯Python实现,不依赖Julia后端
+- **合规性保证**: 所有导出包含免责声明和环境信息
+
+**重要声明**: 
+- ⚠️ **EXPLORATORY VISUALIZATION - Not for hardware calibration or performance evidence unless bound to controlled standard artifacts per SPEC-GOV-001**
+- 元数据完整性是结果可复现的关键保障
+- 分类责任由用户承担,需正确设置classification参数
+
+#### 核心 API
+
+##### 15.1 `export_figure()` - 图表导出与元数据生成
+
+```python
+from sagittarius.viz import export_figure
+
+def export_figure(
+    fig: Optional[Figure] = None,  # 【可选,默认=None】matplotlib图形对象
+    output_path: str = "chart",  # 【必填】输出路径(不含扩展名)
+    formats: List[str] = None,  # 【可选,默认=['png']】格式列表: png/svg/pdf
+    dpi: int = 300,  # 【可选,默认=300】PNG分辨率
+    metadata: Optional[Dict[str, Any]] = None,  # 【可选,默认=None】预构建元数据
+    save_metadata: bool = True,  # 【可选,默认=True】是否保存JSON元数据
+    **metadata_kwargs,  # 【可选】传递给_build_provenance_metadata的参数
+) -> Dict[str, str]:
+```
+
+**功能特性**:
+
+ **多格式并行导出**
+- PNG: 高分辨率光栅图,适合网页展示
+- SVG: 矢量图,无限缩放不失真
+- PDF: 矢量图,适合学术出版
+
+ **自动元数据生成**
+- artifact_id: 产物唯一标识符
+- mode_version: 模式版本号
+- backend_type: 后端类型(CPU/GPU/NONE)
+- random_seed: 随机种子
+- basis_mode: 基模式(computational/其他)
+- plotting_parameters: 绘图参数字典
+- environment: Python/matplotlib版本、平台信息
+- export_timestamp: ISO 8601时间戳
+- disclaimer: 免责声明文本
+
+**返回结构**:
+```python
+{
+    'png': 'my_chart.png',              # PNG文件路径
+    'svg': 'my_chart.svg',              # SVG文件路径
+    'pdf': 'my_chart.pdf',              # PDF文件路径
+    'json': 'my_chart.metadata.json'    # 元数据文件路径
+}
+```
+
+**使用示例**:
+```python
+import matplotlib.pyplot as plt
+from sagittarius.viz import export_figure
+
+# 创建图表
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot([1, 2, 3], [1, 4, 9], label='y=x²')
+ax.set_title('Sample Plot')
+ax.legend()
+
+# 导出多格式+元数据
+paths = export_figure(
+    fig=fig,
+    output_path='sample_chart',
+    formats=['png', 'svg', 'pdf'],
+    dpi=300,
+    artifact_id='demo_001',
+    plot_function='plot_sample',
+    plot_params={'x': [1, 2, 3], 'y': [1, 4, 9]},
+    extra_metadata={
+        'description': 'Demonstration chart',
+        'category': 'testing',
+    }
+)
+
+print(paths)
+# {
+#     'png': 'sample_chart.png',
+#     'svg': 'sample_chart.svg',
+#     'pdf': 'sample_chart.pdf',
+#     'json': 'sample_chart.metadata.json'
+# }
+```
+
+**元数据结构示例**:
+```json
+{
+  "schema_version": "chart-export/v1",
+  "export_timestamp": "2026-07-08T09:46:34.517648Z",
+  "provenance": {
+    "artifact_id": "demo_001",
+    "mode_version": "v1.0",
+    "schema_version_result": "result/v1",
+    "backend_type": "julia",
+    "random_seed": 42,
+    "basis_mode": "computational"
+  },
+  "plotting": {
+    "function": "plot_sample",
+    "parameters": {
+      "x": [1, 2, 3],
+      "y": [1, 4, 9]
+    }
+  },
+  "environment": {
+    "python_version": "3.10.12",
+    "matplotlib_version": "3.7.2",
+    "platform": "Linux-5.15.0-x86_64"
+  },
+  "disclaimer": "EXPLORATORY VISUALIZATION - Not for hardware calibration or performance evidence unless bound to controlled standard artifacts per SPEC-GOV-001"
+}
+```
+
+##### 15.2 `export_from_result()` - 从SimulationResult一键导出
+
+```python
+from sagittarius.viz import export_from_result
+
+def export_from_result(
+    result: Any,  # 【必填】SimulationResult或类似对象
+    plot_func,  # 【必填】绘图函数(接受result和ax参数)
+    output_path: str,  # 【必填】输出路径(不含扩展名)
+    formats: List[str] = None,  # 【可选,默认=['png']】格式列表
+    dpi: int = 300,  # 【可选,默认=300】PNG分辨率
+    plot_args: Optional[Dict[str, Any]] = None,  # 【可选,默认=None】传递给plot_func的参数
+    extra_metadata: Optional[Dict[str, Any]] = None,  # 【可选,默认=None】额外元数据
+    **kwargs,  # 【可选】传递给export_figure的参数
+) -> Dict[str, str]:
+```
+
+**功能特性**:
+
+ **自动元数据提取**
+- 从result.manifest读取artifact_id
+- 从result.mode_version读取模式版本
+- 从result.backend读取后端类型
+- 从result.seed读取随机种子
+- 自动推断基模式(如果可用)
+
+ **无缝集成现有可视化**
+- 兼容所有遵循sagittarius规范的绘图函数
+- 自动创建figure和axes
+- 保留绘图函数的所有参数
+
+**使用示例**:
+```python
+from sagittarius.viz import export_from_result
+from sagittarius.viz.result import plot_observables
+
+# 假设已有simulation_result
+paths = export_from_result(
+    result=simulation_result,
+    plot_func=plot_observables,
+    output_path='observable_export',
+    formats=['png', 'pdf'],
+    plot_args={'names': ['energy', 'population']},
+    extra_metadata={
+        'analysis_type': 'time_evolution',
+        'validated': True,
+    }
+)
+
+# 自动提取的元数据包含:
+# - simulation_result.manifest['artifact_id']
+# - simulation_result.mode_version
+# - simulation_result.backend
+# - simulation_result.seed
+```
+
+#### 技术规范
+
+**支持的格式**:
+| 格式 | 类型 | 用途 | DPI适用 |
+|------|------|------|---------|
+| PNG | 光栅 | 网页展示、快速预览 | ✅ 是 |
+| SVG | 矢量 | 无限缩放、编辑 | ❌ 否 |
+| PDF | 矢量 | 学术出版、打印 | ❌ 否 |
+
+**元数据Schema版本**: `chart-export/v1`
+
+**强制字段**:
+- `schema_version`: 元数据格式版本
+- `export_timestamp`: ISO 8601时间戳
+- `provenance.artifact_id`: 产物标识符(可为null)
+- `disclaimer`: 免责声明文本
+
+**可选字段**:
+- `provenance.mode_version`: 模式版本
+- `provenance.backend_type`: 后端类型
+- `provenance.random_seed`: 随机种子
+- `provenance.basis_mode`: 基模式
+- `plotting.function`: 绘图函数名
+- `plotting.parameters`: 绘图参数
+- `environment.*`: 环境信息
+
+#### 测试覆盖
+
+```bash
+cd sagittarius_py && uv run pytest tests/test_viz_export.py -v
+# ============================== 10 passed in 0.85s ==============================
+```
+
+**测试用例**:
+- ✅ 基本PNG导出
+- ✅ 多格式并行导出(PNG+SVG+PDF)
+- ✅ 元数据JSON生成与验证
+- ✅ 无效格式错误处理
+- ✅ 自定义DPI设置
+- ✅ 禁用元数据选项
+- ✅ 基础元数据结构验证
+- ✅ Result对象元数据提取
+- ✅ 额外元数据合并
+- ✅ export_from_result集成测试
+
+#### 示例脚本
+
+参见 [`examples/minimal_viz_examples.py`](sagittarius_py/examples/minimal_viz_examples.py) 中的Example 1和Example 4,演示:
+- 基本图表导出与元数据溯源
+- 多格式并行导出
+- 从SimulationResult一键导出
+- 元数据结构验证
+- 环境信息自动记录
+
+**生成文件示例**:
+- `trig_functions.png` (213 KB) - 高分辨率PNG
+- `trig_functions.svg` (36 KB) - 矢量SVG
+- `trig_functions.pdf` (15 KB) - 矢量PDF
+- `trig_functions.metadata.json` (964 B) - 完整元数据
+
+---
+
+### 16. 轻量化报表工具 (`report.py`)
+
+**需求**: 提供轻量级报表生成工具,自动汇总多个仿真结果产物,嵌入配套图表、模式版本、后端/运行元数据、基模式、随机种子/输出网格信息、关联清单文件。报表必须严格区分探索性可视化图表和基准/公开结论佐证材料,采用视觉编码(颜色、标签)清晰标识。
+
+**实现位置**: [`sagittarius/viz/report.py`](sagittarius_py/sagittarius/viz/report.py)
+
+#### 设计目标
+
+- **自动汇总**: 批量处理多个结果,生成统一报表
+- **严格分类**: EXPLORATORY(红色) vs BENCHMARK EVIDENCE(绿色)
+- **多格式支持**: HTML(交互式)和Markdown(轻量级)
+- **嵌入图表**: 自动保存并引用PNG图表
+- **元数据聚合**: 集中展示所有关键元数据
+- **清单链接**: 关联manifest文件确保可追溯性
+- **无后端依赖**: 纯Python实现,不依赖Julia
+
+**重要声明**: 
+- ⚠️ **分类责任由用户承担**: 必须根据数据来源和用途正确设置classification
+- 🔴 **EXPLORATORY**: 不得作为硬件校准依据或性能佐证材料
+- 🟢 **BENCHMARK EVIDENCE**: 必须绑定SPEC-GOV-001管控标准产物
+
+#### 核心 API
+
+##### 16.1 `ReportGenerator` - 报表生成器类
+
+```python
+from sagittarius.viz.report import ReportGenerator
+
+class ReportGenerator:
+    def __init__(
+        self,
+        output_dir: str = "reports",  # 【可选,默认='reports'】输出目录
+        report_type: str = "html",  # 【可选,默认='html'】报表类型: html/markdown
+        title: str = "Simulation Results Report",  # 【可选】报表标题
+    ):
+    
+    def add_result_summary(
+        self,
+        result: Any,  # 【必填】SimulationResult或类似对象
+        classification: str = "exploratory",  # 【可选,默认='exploratory']分类: exploratory/benchmark_evidence
+        custom_metrics: Optional[Dict[str, Any]] = None,  # 【可选,默认=None】自定义指标
+    ) -> 'ReportGenerator':  # 返回self支持链式调用
+    
+    def add_chart(
+        self,
+        fig: Figure,  # 【必填】matplotlib图形对象
+        title: str,  # 【必填】图表标题
+        description: str = "",  # 【可选,默认=''】图表描述
+        classification: str = "exploratory",  # 【可选,默认='exploratory']分类
+        chart_metadata: Optional[Dict[str, Any]] = None,  # 【可选,默认=None】图表元数据
+    ) -> 'ReportGenerator':
+    
+    def add_manifest_link(
+        self,
+        manifest_path: str,  # 【必填】manifest文件路径
+        description: str = "",  # 【可选,默认=''】描述
+    ) -> 'ReportGenerator':
+    
+    def generate(
+        self,
+        output_filename: Optional[str] = None,  # 【可选,默认=自动生成】输出文件名
+    ) -> str:  # 返回生成的报表文件路径
+```
+
+**功能特性**:
+
+ **结果摘要提取**
+- artifact_id: 从result.manifest读取
+- mode_version: 模式版本
+- schema_version: Schema版本
+- backend: 后端类型
+- seed: 随机种子
+- register信息: 原子数、基模式
+- solver_config: 求解器配置(method、dt、t_final)
+- custom_metrics: 用户自定义指标
+
+ **分类视觉编码**
+- 🔴 EXPLORATORY: 红色边框(#e74c3c) + 浅红背景(#fdf2f2)
+- 🟢 BENCHMARK EVIDENCE: 绿色边框(#27ae60) + 浅绿背景(#f2fdf5)
+- 免责声明自动添加对应颜色和图标(⚠️/✅)
+
+ **图表嵌入**
+- 自动保存为PNG(dpi=300)
+- 文件名自动生成(chart_0.png, chart_1.png...)
+- HTML中直接引用<img>标签
+- Markdown中使用![alt](path)语法
+
+ **方法链式调用**
+```python
+reporter.add_result_summary(result1, 'exploratory') \
+        .add_result_summary(result2, 'benchmark_evidence') \
+        .add_chart(fig, 'Chart Title', classification='exploratory') \
+        .generate('report.html')
+```
+
+**HTML报表结构示例**:
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .section.exploratory { 
+            border-left: 4px solid #e74c3c; 
+            background: #fdf2f2; 
+        }
+        .section.benchmark { 
+            border-left: 4px solid #27ae60; 
+            background: #f2fdf5; 
+        }
+        .disclaimer.exploratory { 
+            background: #ffebee; 
+            color: #c62828; 
+        }
+        .disclaimer.benchmark { 
+            background: #e8f5e9; 
+            color: #2e7d32; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulation Results Report</h1>
+    
+    <!-- Result Summary Section -->
+    <div class="section benchmark">
+        <h2>Result Summary #1</h2>
+        <div class="disclaimer benchmark">
+            ✅ BENCHMARK EVIDENCE - Bound to controlled standard artifacts per SPEC-GOV-001
+        </div>
+        <table>
+            <tr><th>artifact_id</th><td>controlled_001</td></tr>
+            <tr><th>backend</th><td>julia</td></tr>
+            <tr><th>seed</th><td>42</td></tr>
+        </table>
+    </div>
+    
+    <!-- Chart Section -->
+    <div class="section exploratory">
+        <h2>Performance Trend</h2>
+        <div class="disclaimer exploratory">
+            ⚠️ EXPLORATORY - Not for calibration
+        </div>
+        <img src="chart_0.png" alt="Performance Trend">
+    </div>
+</body>
+</html>
+```
+
+**使用示例**:
+```python
+from sagittarius.viz.report import ReportGenerator
+import matplotlib.pyplot as plt
+
+# 初始化报表生成器
+reporter = ReportGenerator(
+    output_dir='reports',
+    report_type='html',
+    title='Quantum Simulation Analysis Report'
+)
+
+# 添加探索性结果
+reporter.add_result_summary(
+    result=result_exploratory,
+    classification='exploratory',
+    custom_metrics={
+        'note': 'Preliminary analysis',
+        'purpose': 'Feature testing',
+    }
+)
+
+# 添加基准证据结果
+reporter.add_result_summary(
+    result=result_benchmark,
+    classification='benchmark_evidence',
+    custom_metrics={
+        'standard': 'SPEC-GOV-001',
+        'validated': True,
+    }
+)
+
+# 添加图表
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot([1, 2, 3, 4], [1, 4, 9, 16])
+ax.set_title('Runtime Scaling')
+
+reporter.add_chart(
+    fig=fig,
+    title='Performance Scaling',
+    description='Runtime vs problem size',
+    classification='exploratory',
+    chart_metadata={'metric': 'runtime', 'unit': 'seconds'}
+)
+plt.close()
+
+# 添加manifest链接
+reporter.add_manifest_link(
+    'path/to/manifest.json',
+    'Associated benchmark manifest'
+)
+
+# 生成报表
+report_path = reporter.generate('final_report.html')
+print(f"Report generated: {report_path}")
+```
+
+##### 16.2 `generate_quick_report()` - 一键生成报表
+
+```python
+from sagittarius.viz.report import generate_quick_report
+
+def generate_quick_report(
+    results: List[Any],  # 【必填】结果对象列表
+    output_dir: str = "reports",  # 【可选,默认='reports'】输出目录
+    title: str = "Quick Simulation Report",  # 【可选】报表标题
+    classifications: Optional[List[str]] = None,  # 【可选,默认=全exploratory】分类列表
+) -> str:  # 返回生成的报表文件路径
+```
+
+**功能特性**:
+
+ **极简API**
+- 一行代码生成完整报表
+- 自动处理所有结果摘要
+- 自动分配分类(如未指定则默认为exploratory)
+
+ **批量处理**
+- 支持任意数量的结果对象
+- 自动按顺序编号
+- 统一格式和样式
+
+**使用示例**:
+```python
+from sagittarius.viz.report import generate_quick_report
+
+results = [result1, result2, result3]
+classifications = ['exploratory', 'exploratory', 'benchmark_evidence']
+
+report_path = generate_quick_report(
+    results=results,
+    output_dir='reports',
+    title='Quick Summary',
+    classifications=classifications,
+)
+
+print(f"Generated: {report_path}")
+# Output: reports/report_20260708_094634.html
+```
+
+#### 技术规范
+
+**支持的报表类型**:
+| 类型 | 格式 | 特点 | 适用场景 |
+|------|------|------|----------|
+| HTML | .html | 交互式、颜色编码、表格 | 内部审查、在线分享 |
+| Markdown | .md | 轻量级、纯文本、Git友好 | 版本控制、文档归档 |
+
+**分类规范**:
+| 分类 | 颜色 | 图标 | 用途 | 限制 |
+|------|------|------|------|------|
+| exploratory | 🔴 红色 | ⚠️ | 数据分析、调试、初步探索 | **不得**作为校准依据 |
+| benchmark_evidence | 🟢 绿色 | ✅ | 官方基准结论、性能报告 | 必须绑定受控产物 |
+
+**自动生成的文件名**:
+- HTML: `report_YYYYMMDD_HHMMSS.html`
+- Markdown: `report_YYYYMMDD_HHMMSS.md`
+- 图表: `chart_0.png`, `chart_1.png`, ...
+
+**元数据提取优先级**:
+1. result.manifest['artifact_id'] (最高优先级)
+2. result.mode_version
+3. result.schema_version
+4. result.backend
+5. result.seed
+6. result.register (如果存在)
+7. result.config (如果存在)
+
+#### 测试覆盖
+
+```bash
+cd sagittarius_py && uv run pytest tests/test_viz_report.py -v
+# ============================== 14 passed in 0.65s ==============================
+```
+
+**测试用例**:
+- ✅ 基本HTML报表生成
+- ✅ 基本Markdown报表生成
+- ✅ 添加探索性结果摘要
+- ✅ 添加基准证据结果摘要
+- ✅ 无效分类错误处理
+- ✅ 添加图表与分类
+- ✅ 添加manifest链接
+- ✅ 方法链式调用
+- ✅ 自定义指标在摘要中
+- ✅ 自动生成文件名
+- ✅ 多结果混合分类
+- ✅ 快速报表基本功能
+- ✅ 快速报表自定义分类
+- ✅ 长度不匹配错误处理
+
+#### 示例脚本
+
+参见 [`examples/minimal_viz_examples.py`](sagittarius_py/examples/minimal_viz_examples.py) 中的Example 2和Example 3,演示:
+- ReportGenerator类完整工作流
+- 探索性与基准证据混合报表
+- 颜色编码视觉区分
+- generate_quick_report()一行代码生成
+- 批量结果处理
+- 自定义分类分配
+
+**生成文件示例**:
+- `demo_report.html` (3.8 KB) - 包含2个结果+2个图表的HTML报表
+- `report_20260708_094634.html` (3.2 KB) - 快速生成的3结果报表
+- `chart_0.png`, `chart_1.png` - 嵌入的图表文件
+
+---
+
+### 17. 最小可运行示例与最佳实践
+
+**需求**: 提供完整的最小可运行示例,展示新增的导出和报表功能。每个示例必须清晰标注输出数据结构、后端依赖状态(无后端依赖/依赖Julia)、分类标签(探索性/基准证据),便于用户快速上手和正确分类。
+
+**实现位置**: [`examples/minimal_viz_examples.py`](sagittarius_py/examples/minimal_viz_examples.py)
+
+#### 示例列表
+
+| 示例 | 功能 | 后端依赖 | 分类 | 输出 |
+|------|------|----------|------|------|
+| Example 1 | 图表导出与元数据溯源 | NONE | EXPLORATORY | PNG/SVG/PDF + JSON |
+| Example 2 | 报表生成与分类区分 | NONE | MIXED | HTML报告 |
+| Example 3 | 快速报表一行代码 | NONE | MIXED | HTML报告 |
+| Example 4 | 与现有可视化集成 | VARIES | INHERITED | PNG/SVG + JSON |
+
+#### 运行示例
+
+```bash
+cd /workspaces/Sagittarius/sagittarius_py
+uv run python examples/minimal_viz_examples.py
+```
+
+**输出示例**:
+```
+================================================================================
+NEW VISUALIZATION EXPORT & REPORT FEATURES
+================================================================================
+
+Example 1: Chart Export with Metadata Provenance
+✓ Exported files:
+  • PNG: trig_functions.png (213,839 bytes)
+  • SVG: trig_functions.svg (36,396 bytes)
+  • PDF: trig_functions.pdf (15,575 bytes)
+  • JSON: trig_functions.metadata.json (964 bytes)
+
+✓ Metadata provenance:
+  • Schema: chart-export/v1
+  • Artifact ID: demo_trig_001
+  • Plot function: plot_trigonometric
+  • Timestamp: 2026-07-08T09:46:34.517648Z
+  • Disclaimer: EXPLORATORY VISUALIZATION - Not for hardware calibration...
+
+Example 2: Report Generation with Classification
+✓ Generated report:
+  • Path: demo_report.html
+  • Format: HTML
+  • Sections: 4 (2 results + 2 charts)
+  • Size: 3,798 bytes
+
+✓ Classification distribution:
+  • Exploratory mentions: 8
+  • Benchmark mentions: 7
+  • Visual distinction: Color-coded sections (red/green)
+
+Example 3: Quick Report One-Liner
+✓ Generated quick report:
+  • Path: report_20260708_094634.html
+  • Results: 3 (2 exploratory, 1 benchmark)
+  • Time: Single function call
+  • Size: 3,191 bytes
+
+Example 4: Export Integration with Visualization Functions
+✓ Exported integrated chart:
+  • PNG: integrated_export.png
+  • SVG: integrated_export.svg
+  • JSON: integrated_export.metadata.json
+
+✓ Extracted provenance from result:
+  • Artifact ID: integration_demo_001
+  • Backend: julia_synthetic
+  • Seed: 12345
+  • Mode version: v1.0
+
+✅ All examples completed!
+```
+
+#### 后端依赖分类说明
+
+**NONE (无后端依赖)**:
+- 纯Python实现
+- 不依赖Julia后端
+- 可直接运行,无需仿真结果
+- 适用于: 导出基础设施、报表生成器
+
+**JULIA_REQUIRED (需要Julia后端)**:
+- 需要真实的SimulationResult
+- 依赖Julia求解器输出
+- 必须先运行仿真
+- 适用于: 实际观测值轨迹、布居热图等
+
+**VARIES (依赖可变)**:
+- 取决于传入的plot_func
+- 如果使用合成数据则NONE
+- 如果使用真实结果则JULIA_REQUIRED
+- 适用于: export_from_result()集成
+
+**INHERITED (继承自数据源)**:
+- 分类继承自result对象
+- 如果result来自Julia则为JULIA_REQUIRED
+- 如果result为合成数据则为NONE
+- 适用于: 集成现有可视化函数
+
+#### 分类标签规范
+
+**EXPLORATORY (探索性)**:
+- 🔴 红色视觉编码
+- ⚠️ 警告图标
+- "Not for hardware calibration"声明
+- 用途: 数据分析、调试、初步探索
+- **限制**: 不得作为硬件校准依据或性能佐证材料
+
+**BENCHMARK EVIDENCE (基准证据)**:
+- 🟢 绿色视觉编码
+- ✅ 确认图标
+- "Bound to controlled standard artifacts per SPEC-GOV-001"声明
+- 用途: 官方基准结论、性能报告
+- **要求**: 必须绑定SPEC-GOV-001管控标准产物
+
+**MIXED (混合)**:
+- 同时包含EXPLORATORY和BENCHMARK EVIDENCE
+- 每部分独立标注分类
+- 颜色编码清晰区分
+- 用途: 综合分析报告
+
+#### 输出数据结构标注
+
+**图表导出输出**:
+```
+my_chart/
+├── my_chart.png          # PNG格式(光栅,213 KB @ 300 DPI)
+├── my_chart.svg          # SVG格式(矢量,36 KB)
+├── my_chart.pdf          # PDF格式(矢量,15 KB)
+└── my_chart.metadata.json # 元数据(964 B, JSON格式)
+```
+
+**元数据结构** (见第15章详细规范):
+```json
+{
+  "schema_version": "chart-export/v1",
+  "export_timestamp": "ISO 8601 timestamp",
+  "provenance": {...},
+  "plotting": {...},
+  "environment": {...},
+  "disclaimer": "..."
+}
+```
+
+**报表输出**:
+```
+reports/
+├── report_YYYYMMDD_HHMMSS.html  # HTML报表(3-5 KB)
+├── chart_0.png                  # 嵌入图表1
+├── chart_1.png                  # 嵌入图表2
+└── ...
+```
+
+**HTML报表结构** (见第16章详细规范):
+- 头部: 标题、生成时间、CSS样式
+- 主体: 分节展示(result summary、chart、manifest link)
+- 每节: 分类标签、免责声明、内容(表格/图片/链接)
+- 视觉编码: 红色(探索性) / 绿色(基准证据)
+
+#### 最佳实践
+
+**1. 始终导出元数据**:
+```python
+# ✅ 推荐: 保留完整溯源信息
+paths = export_figure(fig, 'chart', save_metadata=True)
+
+# ❌ 避免: 丢失可复现性关键信息
+paths = export_figure(fig, 'chart', save_metadata=False)
+```
+
+**2. 明确分类责任**:
+```python
+# ✅ 推荐: 根据数据来源正确分类
+if result.manifest.get('controlled'):
+    classification = 'benchmark_evidence'
+else:
+    classification = 'exploratory'
+
+reporter.add_result_summary(result, classification=classification)
+```
+
+**3. 使用高DPI用于出版**:
+```python
+# ✅ 出版物质量
+paths = export_figure(fig, 'chart', dpi=300, formats=['png', 'pdf'])
+
+# ⚠️ 网页展示可降低DPI
+paths = export_figure(fig, 'chart', dpi=150, formats=['png'])
+```
+
+**4. 矢量格式优先用于缩放**:
+```python
+# ✅ 需要缩放时用矢量格式
+paths = export_figure(fig, 'chart', formats=['svg', 'pdf'])
+
+# ❌ PNG放大后会失真
+paths = export_figure(fig, 'chart', formats=['png'])
+```
+
+**5. 批量处理用快速报表**:
+```python
+# ✅ 多个结果一键生成
+report_path = generate_quick_report(results, 'reports', classifications=classifications)
+
+# ❌ 逐个添加繁琐
+reporter = ReportGenerator()
+for r in results:
+    reporter.add_result_summary(r)
+reporter.generate()
+```
+
+**6. 保留原始数据**:
+```python
+# ✅ 导出图表同时保存原始result
+paths = export_from_result(result, plot_func, 'chart')
+result.save('result.json')  # 保留完整数据
+
+# ❌ 仅导出图表,丢失原始数据
+paths = export_from_result(result, plot_func, 'chart')
+# result未保存
+```
+
+#### 注意事项
+
+**⚠️ JSON不是图表格式**:
+```python
+# ❌ 错误: JSON不在formats参数中
+paths = export_figure(fig, 'chart', formats=['png', 'json'])
+# ValueError: Invalid formats: {'json'}
+
+# ✅ 正确: JSON自动生成
+paths = export_figure(fig, 'chart', formats=['png', 'svg'])
+# 自动生成: chart.png, chart.svg, chart.metadata.json
+```
+
+**⚠️ 分类一致性检查**:
+```python
+# ✅ 推荐: 验证分类与数据来源一致
+assert len(results) == len(classifications), "长度必须匹配"
+for result, classification in zip(results, classifications):
+    if classification == 'benchmark_evidence':
+        assert result.manifest.get('controlled'), "基准证据必须绑定受控产物"
+```
+
+**⚠️ 文件大小管理**:
+```python
+# ✅ 根据用途选择合适DPI
+if for_publication:
+    dpi = 300  # ~200-300 KB PNG
+elif for_web:
+    dpi = 150  # ~50-100 KB PNG
+elif for_preview:
+    dpi = 72   # ~20-50 KB PNG
+```
+
+#### 相关文档
+
+- **详细实现**: [EXPORT_REPORT_FEATURES_SUMMARY.md](file:///workspaces/Sagittarius/EXPORT_REPORT_FEATURES_SUMMARY.md)
+- **快速参考**: [EXPORT_REPORT_QUICK_REFERENCE.md](file:///workspaces/Sagittarius/EXPORT_REPORT_QUICK_REFERENCE.md)
+- **测试文件**: `tests/test_viz_export.py` (10用例), `tests/test_viz_report.py` (14用例)
+- **示例脚本**: `examples/minimal_viz_examples.py` (4个示例)
+
+---
+
+## P2阶段总结
+
+
+### 测试覆盖汇总
+
+```bash
+cd sagittarius_py && uv run pytest tests/test_viz_benchmark_perf.py tests/test_viz_small_system_debug.py tests/test_viz_export.py tests/test_viz_report.py -v
+# ============================== 61 passed in 2.50s ==============================
+```
+
+| 测试套件 | 用例数 | 通过数 | 失败数 | 覆盖率 |
+|---------|--------|--------|--------|--------|
+| test_viz_benchmark_perf.py | 19 | 19 | 0 | 100% |
+| test_viz_small_system_debug.py | 19 | 19 | 0 | 100% |
+| test_viz_export.py | 10 | 10 | 0 | 100% |
+| test_viz_report.py | 14 | 14 | 0 | 100% |
+| **总计** | **62** | **62** | **0** | **100%** |
+
