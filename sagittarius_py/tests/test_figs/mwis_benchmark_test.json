@@ -16,7 +16,7 @@
     "runtime": 1.2
   },
   "commit_sha": "test-commit-abc123",
-  "visualization_saved_at": "2026-07-09T01:55:23.301919Z",
+  "visualization_saved_at": "2026-07-09T03:43:45.402532Z",
   "image_path": "/workspaces/Sagittarius/sagittarius_py/tests/test_figs/mwis_benchmark_test.png",
   "image_dpi": 150
 }

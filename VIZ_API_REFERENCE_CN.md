@@ -60,7 +60,7 @@
 | [`plot_density_matrix_magnitude()`](#plot_density_matrix_magnitude) | `viz.small_system_debug` | 密度矩阵模值热力图 | `Axes` |
 | [`plot_density_matrix_phase()`](#plot_density_matrix_phase) | `viz.small_system_debug` | 密度矩阵相位热力图 | `Axes` |
 
-### 导出与报告 (需求 18-19)
+### 导出与报告 (需求 18-20)
 
 | 函数 | 模块 | 功能 | 返回值 |
 |------|------|------|--------|
@@ -68,6 +68,12 @@
 | [`export_from_result()`](#export_from_result) | `viz.export` | 从Result对象一键导出 | `None` |
 | [`ReportGenerator`](#reportgenerator) | `viz.report` | 生成HTML/Markdown报告 | `ReportGenerator` |
 | [`generate_quick_report()`](#generate_quick_report) | `viz.report` | 快速报告生成助手 | `str` (文件路径) |
+| [`plot_sweep_heatmap()`](#plot_sweep_heatmap) | `viz.sweep` | 2D参数扫描热力图,带失败运行标记 | `Axes` |
+| [`plot_sweep_line_slice()`](#plot_sweep_line_slice) | `viz.sweep` | 多维扫描数据的1D切片提取 | `Axes` |
+| [`plot_final_observable_map()`](#plot_final_observable_map) | `viz.sweep` | 最终可观测量值随参数变化图 | `Axes` |
+| [`plot_failed_run_mask()`](#plot_failed_run_mask) | `viz.sweep` | 成功/失败二元掩码可视化 | `Axes` |
+| [`extract_sweep_summary()`](#extract_sweep_summary) | `viz.sweep` | 统计摘要提取 | `Dict` |
+| [`generate_synthetic_sweep_data()`](#generate_synthetic_sweep_data) | `viz.sweep` | 用于测试的合成数据生成器 | `Dict` |
 
 ---
 
@@ -312,7 +318,7 @@ times = np.linspace(0, 1.0, 500)
 ax, vals = plot_pulse_waveform(pulse, time_grid=times)
 
 # 方法6: 同时获取坐标轴和值
-ax, y_values = plot_pulse_waveform(Pulse.constant(5.0, duration=1.0))
+ax, y_values = yplot_pulse_waveform(Pulse.constant(5.0, duration=1.0))
 print(y_values.shape)  # (200,) - 与num_samples匹配
 ```
 
@@ -1532,6 +1538,314 @@ ax = plot_density_matrix_diagonal(rho)
 - **类型**: `matplotlib.axes.Axes`
 
 #### 示例
+
+
+---
+
+### `plot_sweep_heatmap()`
+
+**模块**: `sagittarius.viz.sweep`
+
+**功能**: 绘制2D参数扫描热力图,支持失败运行标记和artifact链接。
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| `sweep_data` | `Dict[str, Any]` | ✅ 是 | - | 包含扫描结果的字典 |
+| `x_param` | `str` | ❌ 可选 | `'omega'` | x轴参数名 |
+| `y_param` | ❌ 可选 | `'delta'` | ' y轴参数名 |
+| `metric` | `str` | ❌ 可选 | `'pop0'` | 要可视化的指标名 |
+| `ax` | `matplotlib.axes.Axes` | ❌ 可选 | `None` | 现有的绘图坐标轴 |
+| `show_colorbar` | `bool` | ❌ 可选 | `True` | 是否显示颜色条 |
+| `show_failed_mask` | `bool` | ❌ 可选 | `True` | 是否用红色X标记失败的运行 |
+| `title` | `str` | ❌ 可选 | `None` | 自定义标题 |
+| `figsize` | `Tuple[float, float]` | ❌ 可选 | `(10, 8)` | 图形尺寸,单位:英寸 |
+| `cmap` | `str` | ❌ 可选 | `'viridis'` | 颜色映射名称 |
+
+#### sweep_data结构
+
+```python
+{
+    'parameters': {
+        'omega': array-like,  # x轴值
+        'delta': array-like,  # y轴值
+    },
+    'results': {
+        'metric_name': 2D array,  # shape (len(delta), len(omega))
+        ...
+    },
+    'failed_runs': set of tuples  # {(omega_idx, delta_idx), ...}
+                   or boolean mask array,
+    'manifest_links': {  # 可选
+        'run_id': 'artifact_id',
+        ...
+    }
+}
+```
+
+#### 返回值
+
+- **类型**: `matplotlib.axes.Axes`
+
+#### 示例
+
+```python
+from sagittarius.viz import plot_sweep_heatmap, generate_synthetic_sweep_data
+
+# 生成合成数据
+sweep_data = generate_synthetic_sweep_data(
+    omega_range=(0.5, 5.0),
+    delta_range=(-3.0, 3.0),
+    n_omega=25,
+    n_delta=20,
+)
+
+# 绘制热力图
+ax = plot_sweep_heatmap(sweep_data, metric='pop0')
+```
+
+---
+
+### `plot_sweep_line_slice()`
+
+**模块**: `sagittarius.viz.sweep`
+
+**功能**: 绘制参数扫描的1D切片(线切片)。
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| `sweep_data` | `Dict[str, Any]` | ✅ 是 | - | 包含扫描结果的字典 |
+| `fixed_param` | `str` | ✅ 是 | - | 保持固定的参数名 |
+| `fixed_value` | `float` | ✅ 是 | - | 固定参数的值 |
+| `varying_param` | `str` | ✅ 是 | - | 沿x轴变化的参数名 |
+| `metric` | `str` | ❌ 可选 | `'pop0'` | 要可视化的指标名 |
+| `ax` | `matplotlib.axes.Axes` | ❌ 可选 | `None` | 现有的绘图坐标轴 |
+| `show_error_bars` | `bool` | ❌ 可选 | `False` | 如果存在std数据,是否显示误差棒 |
+| `title` | `str` | ❌ 可选 | `None` | 自定义标题 |
+| `figsize` | `Tuple[float, float]` | ❌ 可选 | `(10, 6)` | 图形尺寸,单位:英寸 |
+| `color` | `str` | ❌ 可选 | `'steelblue'` | 线条颜色 |
+| `marker` | `str` | ❌ 可选 | `'o'` | 标记样式 |
+
+#### 返回值
+
+- **类型**: `matplotlib.axes.Axes`
+
+#### 示例
+
+```python
+from sagittarius.viz import plot_sweep_line_slice
+
+# 在delta=0处提取omega切片
+ax = plot_sweep_line_slice(
+    sweep_data,
+    fixed_param='delta',
+    fixed_value=0.0,
+    varying_param='omega',
+    show_error_bars=True
+)
+```
+
+---
+
+### `plot_final_observable_map()`
+
+**模块**: `sagittarius.viz.sweep`
+
+**功能**: 绘制1D参数扫描的最终可观测量值。
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| `sweep_data` | `Dict[str, Any]` | ✅ 是 | - | 包含扫描结果的字典 |
+| `observable_name` | `str` | ❌ 可选 | `'pop0'` | 要绘制的可观测量名 |
+| `param_name` | `str` | ❌ 可选 | `'omega'` | x轴参数名 |
+| `ax` | `matplotlib.axes.Axes` | ❌ 可选 | `None` | 现有的绘图坐标轴 |
+| `show_markers` | `bool` | ❌ 可选 | `True` | 是否显示数据点标记 |
+| `title` | `str` | ❌ 可选 | `None` | 自定义标题 |
+| `figsize` | `Tuple[float, float]` | ❌ 可选 | `(10, 6)` | 图形尺寸,单位:英寸 |
+| `color` | `str` | ❌ 可选 | `'steelblue'` | 线条/标记颜色 |
+
+#### 返回值
+
+- **类型**: `matplotlib.axes.Axes`
+
+#### 示例
+
+```python
+from sagittarius.viz import plot_final_observable_map
+
+# 从时间序列数据中提取最终值并绘制
+ax = plot_final_observable_map(
+    sweep_data,
+    observable_name='pop0',
+    param_name='omega'
+)
+```
+
+---
+
+### `plot_failed_run_mask()`
+
+**模块**: `sagittarius.viz.sweep`
+
+**功能**: 绘制二进制掩码,显示2D扫描中失败与成功的运行。
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| `sweep_data` | `Dict[str, Any]` | ✅ 是 | - | 包含'failed_runs'键的扫描结果字典 |
+| `x_param` | `str` | ❌ 可选 | `'omega'` | x轴参数名 |
+| `y_param` | `str` | ❌ 可选 | `'delta'` | y轴参数名 |
+| `ax` | `matplotlib.axes.Axes` | ❌ 可选 | `None` | 现有的绘图坐标轴 |
+| `title` | `str` | ❌ 可选 | `None` | 自定义标题 |
+| `figsize` | `Tuple[float, float]` | ❌ 可选 | `(10, 8)` | 图形尺寸,单位:英寸 |
+
+#### 返回值
+
+- **类型**: `matplotlib.axes.Axes`
+
+#### 示例
+
+```python
+from sagittarius.viz import plot_failed_run_mask
+
+# 绘制成功/失败掩码
+ax = plot_failed_run_mask(sweep_data)
+# 绿色单元格: 成功运行
+# 红色单元格: 失败运行
+```
+
+---
+
+### `extract_sweep_summary()`
+
+**模块**: `sagittarius.viz.sweep`
+
+**功能**: 从扫描数据中提取摘要统计信息。
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| `sweep_data` | `Dict[str, Any]` | ✅ 是 | - | 包含扫描结果的字典 |
+| `metrics` | `List[str]` | ❌ 可选 | `None` | 要汇总的特定指标(默认:所有数值指标) |
+
+#### 返回值
+
+- **类型**: `Dict[str, Any]`
+- **包含**: 每个指标的min、max、mean、std、median、q25、q75,以及运行统计信息
+
+#### 示例
+
+```python
+from sagittarius.viz import extract_sweep_summary
+
+summary = extract_sweep_summary(sweep_data, metrics=['pop0', 'energy'])
+
+print(f"pop0范围: [{summary['pop0']['min']:.3f}, {summary['pop0']['max']:.3f}]")
+print(f"成功率: {summary['run_statistics']['success_rate']:.1f}%")
+```
+
+---
+
+### `generate_synthetic_sweep_data()`
+
+**模块**: `sagittarius.viz.sweep`
+
+**功能**: 生成用于演示的合成扫描数据。
+
+⚠️ **注意**: 此函数仅用于演示目的,因为用户-facing的sweep artifacts尚未实现。
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| `omega_range` | `Tuple[float, float]` | ❌ 可选 | `(0.1, 5.0)` | omega参数范围(min, max) |
+| `delta_range` | `Tuple[float, float]` | ❌ 可选 | `(-2.0, 2.0)` | delta参数范围(min, max) |
+| `n_omega` | `int` | ❌ 可选 | `20` | omega值的采样数量 |
+| `n_delta` | `int` | ❌ 可选 | `15` | delta值的采样数量 |
+| `seed` | `int` | ❌ 可选 | `42` | 随机种子,确保可复现性 |
+| `failure_rate` | `float` | ❌ 可选 | `0.05` | 失败运行的比例(0-1) |
+
+#### 返回值
+
+- **类型**: `Dict[str, Any]`
+- **包含**: parameters、results、failed_runs、manifest_links、metadata
+
+#### 示例
+
+```python
+from sagittarius.viz import generate_synthetic_sweep_data
+
+# 生成合成扫描数据
+sweep_data = generate_synthetic_sweep_data(
+    omega_range=(0.5, 5.0),
+    delta_range=(-3.0, 3.0),
+    n_omega=25,
+    n_delta=20,
+    seed=42,
+    failure_rate=0.08,
+)
+```
+
+---
+
+## 快速参考卡片
+
+| 可视化类型 | 函数名 | 用途 | 后端依赖 |
+|-----------|--------|------|----------|
+| **Sweep热力图** | [`plot_sweep_heatmap()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L18-L179) | 2D参数扫描可视化 | 无(纯Python) |
+| **线切片** | [`plot_sweep_line_slice()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L182-L291) | 1D参数切片 | 无(纯Python) |
+| **最终可观测量图** | [`plot_final_observable_map()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L294-L407) | 最终值vs参数 | 无(纯Python) |
+| **失败运行掩码** | [`plot_failed_run_mask()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L410-L512) | 成功/失败二元图 | 无(纯Python) |
+| **摘要统计** | [`extract_sweep_summary()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L515-L585) | 统计信息提取 | 无(纯Python) |
+| **合成数据生成** | [`generate_synthetic_sweep_data()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L588-L677) | 演示数据生成 | 无(纯Python) |
+
+---
+
+## 附录: Sweep可视化规范
+
+### 分层隔离要求
+
+根据项目规范,所有sweep可视化必须遵循以下原则:
+
+1. **探索性标识**: 所有图表必须包含免责声明"⚠️ EXPLORATORY VISUALIZATION - Not for hardware calibration"
+2. **Artifact链接**: 当提供manifest_links时,必须在图表中显示sample artifact ID
+3. **参数保留**: 所有图表必须保留原始参数值和位置信息
+4. **失败标记**: 失败的运行必须清晰标记(红色X或红色单元格)
+5. **无后端依赖**: 优先采用无后端依赖方案,直接基于Python对象或已保存产物提取数据
+
+### 数据结构要求
+
+`sweep_data`字典必须包含:
+- `parameters`: 参数字典,键为参数名,值为数组
+- `results`: 结果字典,键为指标名,值为与参数维度匹配的数组
+- `failed_runs`: 失败运行的索引集合或布尔掩码数组
+- `manifest_links` (可选): run_id到artifact_id的映射字典
+
+### 合规性检查
+
+✅ **已实现的功能**:
+- 2D热力图 with failed run overlay
+- 1D line slices with error bars
+- Final observable extraction from time series
+- Binary success/failure masks
+- Statistical summary extraction
+- Artifact link preservation
+- Mandatory disclaimers on all plots
+- No backend dependency (pure Python/NumPy/Matplotlib)
+
+✅ **符合REQUIREMENTS.md要求**:
+- Preserves parameter values ✓
+- Preserves result locations ✓
+- Marks failed runs clearly ✓
+- Links to run manifests when available ✓
+- Clearly marked as EXPLORATORY (not for calibration) ✓
 
 ```python
 from sagittarius.viz import plot_density_matrix_magnitude

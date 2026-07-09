@@ -60,7 +60,7 @@
 | [`plot_density_matrix_magnitude()`](#plot_density_matrix_magnitude) | `viz.small_system_debug` | Density matrix magnitude heatmap | `Axes` |
 | [`plot_density_matrix_phase()`](#plot_density_matrix_phase) | `viz.small_system_debug` | Density matrix phase heatmap | `Axes` |
 
-### Export & Reporting (需求 18-19)
+### Export & Reporting (需求 18-20)
 
 | Function | Module | Purpose | Returns |
 |----------|--------|---------|---------|
@@ -68,6 +68,12 @@
 | [`export_from_result()`](#export_from_result) | `viz.export` | One-click export from Result object | `None` |
 | [`ReportGenerator`](#reportgenerator) | `viz.report` | Generate HTML/Markdown reports | `ReportGenerator` |
 | [`generate_quick_report()`](#generate_quick_report) | `viz.report` | Quick report generation helper | `str` (file path) |
+| [`plot_sweep_heatmap()`](#plot_sweep_heatmap) | `viz.sweep` | 2D parameter sweep heatmap with failed run overlay | `Axes` |
+| [`plot_sweep_line_slice()`](#plot_sweep_line_slice) | `viz.sweep` | 1D slice through multi-dimensional sweep data | `Axes` |
+| [`plot_final_observable_map()`](#plot_final_observable_map) | `viz.sweep` | Final observable values vs parameter | `Axes` |
+| [`plot_failed_run_mask()`](#plot_failed_run_mask) | `viz.sweep` | Binary success/failure mask visualization | `Axes` |
+| [`extract_sweep_summary()`](#extract_sweep_summary) | `viz.sweep` | Statistical summary extraction | `Dict` |
+| [`generate_synthetic_sweep_data()`](#generate_synthetic_sweep_data) | `viz.sweep` | Demo data generator for testing | `Dict` |
 
 ---
 
@@ -334,9 +340,305 @@ plot_observables(result, ax=ax, linewidth=3.0, title="Custom Title")
 
 ---
 
-*(Document continues with all remaining APIs...)*
+## 🔍 Sweep Visualization APIs
+
+### `plot_sweep_heatmap()`
+
+**Module**: `sagittarius.viz.sweep`
+
+**Purpose**: Plot 2D parameter sweep heatmap with failed run overlay and artifact links.
+
+⚠️ **NOTE**: Currently uses synthetic data as user-facing sweep artifacts are not yet implemented (Phase 19).
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `sweep_data` | `Dict[str, Any]` | ✅ Yes | - | Dictionary containing sweep results |
+| `x_param` | `str` | ❌ Optional | `'omega'` | Name of x-axis parameter |
+| `y_param` | `str` | ❌ Optional | `'delta'` | Name of y-axis parameter |
+| `metric` | `str` | ❌ Optional | `'pop0'` | Metric name to visualize |
+| `ax` | `matplotlib.axes.Axes` | ❌ Optional | `None` | Existing axes to plot on |
+| `show_colorbar` | `bool` | ❌ Optional | `True` | Whether to display colorbar |
+| `show_failed_mask` | `bool` | ❌ Optional | `True` | Whether to mark failed runs with red X |
+| `title` | `str` | ❌ Optional | `None` | Custom title |
+| `figsize` | `Tuple[float, float]` | ❌ Optional | `(10, 8)` | Figure size in inches |
+| `cmap` | `str` | ❌ Optional | `'viridis'` | Colormap name |
+
+#### Returns
+
+- **Type**: `matplotlib.axes.Axes`
+
+#### Example
+
+```python
+from sagittarius.viz import plot_sweep_heatmap, generate_synthetic_sweep_data
+
+# Generate synthetic sweep data
+sweep_data = generate_synthetic_sweep_data(
+    omega_range=(0.5, 5.0),
+    delta_range=(-3.0, 3.0),
+    n_omega=25,
+    n_delta=20,
+)
+
+# Create heatmap
+ax = plot_sweep_heatmap(sweep_data, metric='pop0')
+```
 
 ---
+
+### `plot_sweep_line_slice()`
+
+**Module**: `sagittarius.viz.sweep`
+
+**Purpose**: Plot 1D slice through multi-dimensional parameter sweep.
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `sweep_data` | `Dict[str, Any]` | ✅ Yes | - | Dictionary containing sweep results |
+| `fixed_param` | `str` | ✅ Yes | - | Name of parameter to keep fixed |
+| `fixed_value` | `float` | ✅ Yes | - | Value of the fixed parameter |
+| `varying_param` | `str` | ✅ Yes | - | Name of parameter varying along x-axis |
+| `metric` | `str` | ❌ Optional | `'pop0'` | Metric name to visualize |
+| `ax` | `matplotlib.axes.Axes` | ❌ Optional | `None` | Existing axes to plot on |
+| `show_error_bars` | `bool` | ❌ Optional | `False` | Whether to show error bars if std data exists |
+| `title` | `str` | ❌ Optional | `None` | Custom title |
+| `figsize` | `Tuple[float, float]` | ❌ Optional | `(10, 6)` | Figure size in inches |
+| `color` | `str` | ❌ Optional | `'steelblue'` | Line color |
+| `marker` | `str` | ❌ Optional | `'o'` | Marker style |
+
+#### Returns
+
+- **Type**: `matplotlib.axes.Axes`
+
+#### Example
+
+```python
+from sagittarius.viz import plot_sweep_line_slice
+
+# Extract line slice at delta=0
+ax = plot_sweep_line_slice(
+    sweep_data,
+    fixed_param='delta',
+    fixed_value=0.0,
+    varying_param='omega',
+    show_error_bars=True
+)
+```
+
+---
+
+### `plot_final_observable_map()`
+
+**Module**: `sagittarius.viz.sweep`
+
+**Purpose**: Plot final observable values across 1D parameter sweep.
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `sweep_data` | `Dict[str, Any]` | ✅ Yes | - | Dictionary containing sweep results |
+| `observable_name` | `str` | ❌ Optional | `'pop0'` | Observable name to plot |
+| `param_name` | `str` | ❌ Optional | `'omega'` | Name of x-axis parameter |
+| `ax` | `matplotlib.axes.Axes` | ❌ Optional | `None` | Existing axes to plot on |
+| `show_markers` | `bool` | ❌ Optional | `True` | Whether to show data point markers |
+| `title` | `str` | ❌ Optional | `None` | Custom title |
+| `figsize` | `Tuple[float, float]` | ❌ Optional | `(10, 6)` | Figure size in inches |
+| `color` | `str` | ❌ Optional | `'steelblue'` | Line/marker color |
+
+#### Returns
+
+- **Type**: `matplotlib.axes.Axes`
+
+#### Example
+
+```python
+from sagittarius.viz import plot_final_observable_map
+
+# Extract final values from time series and plot
+ax = plot_final_observable_map(
+    sweep_data,
+    observable_name='pop0',
+    param_name='omega'
+)
+```
+
+---
+
+### `plot_failed_run_mask()`
+
+**Module**: `sagittarius.viz.sweep`
+
+**Purpose**: Plot binary mask showing failed vs successful runs in 2D sweep.
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `sweep_data` | `Dict[str, Any]` | ✅ Yes | - | Dictionary containing 'failed_runs' key |
+| `x_param` | `str` | ❌ Optional | `'omega'` | Name of x-axis parameter |
+| `y_param` | `str` | ❌ Optional | `'delta'` | Name of y-axis parameter |
+| `ax` | `matplotlib.axes.Axes` | ❌ Optional | `None` | Existing axes to plot on |
+| `title` | `str` | ❌ Optional | `None` | Custom title |
+| `figsize` | `Tuple[float, float]` | ❌ Optional | `(10, 8)` | Figure size in inches |
+
+#### Returns
+
+- **Type**: `matplotlib.axes.Axes`
+
+#### Example
+
+```python
+from sagittarius.viz import plot_failed_run_mask
+
+# Plot success/failure mask
+ax = plot_failed_run_mask(sweep_data)
+# Green cells: successful runs
+# Red cells: failed runs
+```
+
+---
+
+### `extract_sweep_summary()`
+
+**Module**: `sagittarius.viz.sweep`
+
+**Purpose**: Extract summary statistics from sweep data.
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `sweep_data` | `Dict[str, Any]` | ✅ Yes | - | Dictionary containing sweep results |
+| `metrics` | `List[str]` | ❌ Optional | `None` | Specific metrics to summarize (default: all numeric metrics) |
+
+#### Returns
+
+- **Type**: `Dict[str, Any]`
+- **Contains**: min, max, mean, std, median, q25, q75 for each metric, plus run statistics
+
+#### Example
+
+```python
+from sagittarius.viz import extract_sweep_summary
+
+summary = extract_sweep_summary(sweep_data, metrics=['pop0', 'energy'])
+
+print(f"pop0 range: [{summary['pop0']['min']:.3f}, {summary['pop0']['max']:.3f}]")
+print(f"Success rate: {summary['run_statistics']['success_rate']:.1f}%")
+```
+
+---
+
+### `generate_synthetic_sweep_data()`
+
+**Module**: `sagittarius.viz.sweep`
+
+**Purpose**: Generate synthetic sweep data for demonstration purposes.
+
+⚠️ **NOTE**: This function is for demonstration only as user-facing sweep artifacts are not yet implemented.
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `omega_range` | `Tuple[float, float]` | ❌ Optional | `(0.1, 5.0)` | Omega parameter range (min, max) |
+| `delta_range` | `Tuple[float, float]` | ❌ Optional | `(-2.0, 2.0)` | Delta parameter range (min, max) |
+| `n_omega` | `int` | ❌ Optional | `20` | Number of omega samples |
+| `n_delta` | `int` | ❌ Optional | `15` | Number of delta samples |
+| `seed` | `int` | ❌ Optional | `42` | Random seed for reproducibility |
+| `failure_rate` | `float` | ❌ Optional | `0.05` | Fraction of failed runs (0-1) |
+
+#### Returns
+
+- **Type**: `Dict[str, Any]`
+- **Contains**: parameters, results, failed_runs, manifest_links, metadata
+
+#### Example
+
+```python
+from sagittarius.viz import generate_synthetic_sweep_data
+
+# Generate synthetic sweep data
+sweep_data = generate_synthetic_sweep_data(
+    omega_range=(0.5, 5.0),
+    delta_range=(-3.0, 3.0),
+    n_omega=25,
+    n_delta=20,
+    seed=42,
+    failure_rate=0.08,
+)
+```
+
+---
+
+## 📊 Sweep Data Structure
+
+The `sweep_data` dictionary must contain:
+
+```python
+{
+    'parameters': {
+        'omega': array-like,  # x-axis values
+        'delta': array-like,  # y-axis values
+    },
+    'results': {
+        'pop0': 2D array,     # shape (len(delta), len(omega))
+        'energy': 2D array,   # additional metrics
+    },
+    'failed_runs': set or array,  # {(x_idx, y_idx), ...} or boolean mask
+    'manifest_links': {       # optional
+        'run_id': 'artifact_id',
+        ...
+    }
+}
+```
+
+---
+
+## ✅ Compliance Checklist
+
+All sweep visualizations comply with project specifications:
+
+- ✅ **Exploratory Disclaimer**: All plots include "⚠️ EXPLORATORY VISUALIZATION - Not for hardware calibration"
+- ✅ **Artifact Links**: Display sample artifact ID when manifest_links provided
+- ✅ **Parameter Preservation**: All plots maintain original parameter coordinates
+- ✅ **Failure Marking**: Failed runs clearly marked (red X or red cells)
+- ✅ **No Backend Dependency**: Pure Python/NumPy/Matplotlib implementation
+- ✅ **Layered Isolation**: Clearly marked as EXPLORATORY, not for calibration
+
+---
+
+## 🧪 Testing
+
+Run the test suite:
+
+```bash
+cd sagittarius_py
+python -m pytest tests/test_viz_sweep.py -v
+```
+
+**34 tests covering**:
+- Heatmap creation and customization
+- Line slice extraction
+- Final observable mapping
+- Failed run masking
+- Summary statistics
+- Synthetic data generation
+- Integration workflows
+- Error handling
+
+---
+
+## 📖 Additional Resources
+
+- **Examples**: See [`examples/sweep_viz_examples.py`](file:///workspaces/Sagittarius/sagittarius_py/examples/sweep_viz_examples.py) for complete usage examples
+- **README**: See [`sagittarius/viz/README_sweep.md`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/README_sweep.md) for module documentation
+- **Chinese API Reference**: See [`VIZ_API_REFERENCE_CN.md`](file:///workspaces/Sagittarius/VIZ_API_REFERENCE_CN.md) for Chinese version
 
 ## 📚 Appendix
 

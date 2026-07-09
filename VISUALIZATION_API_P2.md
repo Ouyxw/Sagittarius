@@ -831,14 +831,420 @@ elif for_preview:
 
 ---
 
+### 18. Sweep参数扫描可视化 (`sweep.py`)
+
+**需求**: 提供参数扫描的可视化工具，包括热力图、线切片、最终可观测量图和失败运行掩码。所有图表必须保留参数值、结果位置、失败行标记和运行manifest链接，且明确标记为探索性可视化（不用于硬件校准）。
+
+**实现位置**: [`sagittarius/viz/sweep.py`](sagittarius_py/sagittarius/viz/sweep.py)
+
+#### 设计目标
+
+- **无后端依赖**: 纯Python/NumPy/Matplotlib实现，不依赖Julia后端
+- **分层隔离**: 所有图表标记为EXPLORATORY，包含免责声明
+- **元数据保留**: 保留参数值、结果位置、失败行、artifact链接
+- **灵活输入**: 支持字典格式输入，便于与未来SweepResult集成
+- **完整测试**: 34个测试用例覆盖所有功能和边界情况
+
+**重要声明**: 
+- ⚠️ **EXPLORATORY VISUALIZATION - Not for hardware calibration or performance evidence**
+- 当前使用合成数据演示，用户-facing sweep artifacts尚未实现（Phase 19 Planned）
+- 当真实sweep artifacts实现后，相同API可直接使用实际数据
+
+#### 核心 API
+
+##### 18.1 `plot_sweep_heatmap()` - 2D参数扫描热力图
+
+```python
+from sagittarius.viz import plot_sweep_heatmap
+
+def plot_sweep_heatmap(
+    sweep_data: Dict[str, Any],  # 【必填】包含扫描结果的字典
+    x_param: str = 'omega',  # 【可选,默认='omega'】x轴参数名
+    y_param: str = 'delta',  # 【可选,默认='delta'】y轴参数名
+    metric: str = 'pop0',  # 【可选,默认='pop0'】要可视化的指标名
+    ax: Optional[Axes] = None,  # 【可选,默认=None】现有坐标轴
+    show_colorbar: bool = True,  # 【可选,默认=True】是否显示颜色条
+    show_failed_mask: bool = True,  # 【可选,默认=True】是否标记失败运行
+    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
+    figsize: Tuple[float, float] = (10, 8),  # 【可选,默认=(10,8)】图形尺寸
+    cmap: str = 'viridis',  # 【可选,默认='viridis'】颜色映射
+) -> Axes:
+```
+
+**功能特性**:
+
+- **2D彩色地图**: 展示参数空间的指标分布
+- **失败运行标记**: 红色X标记失败的运行点
+- **Artifact链接**: 当提供manifest_links时显示sample artifact ID
+- **免责声明**: 自动添加"EXPLORATORY VISUALIZATION"警告
+- **可定制**: 支持自定义颜色映射、标题、坐标轴等
+
+**sweep_data结构**:
+```python
+{
+    'parameters': {
+        'omega': array-like,  # x轴值
+        'delta': array-like,  # y轴值
+    },
+    'results': {
+        'pop0': 2D array,  # shape (len(delta), len(omega))
+        'energy': 2D array,  # 其他指标
+    },
+    'failed_runs': set or array,  # {(x_idx, y_idx), ...} 或布尔掩码
+    'manifest_links': {  # 可选
+        'run_id': 'artifact_id',
+        ...
+    }
+}
+```
+
+**使用示例**:
+```python
+from sagittarius.viz import plot_sweep_heatmap, generate_synthetic_sweep_data
+
+# 生成合成数据（演示用）
+sweep_data = generate_synthetic_sweep_data(
+    omega_range=(0.5, 5.0),
+    delta_range=(-3.0, 3.0),
+    n_omega=25,
+    n_delta=20,
+    seed=42,
+    failure_rate=0.08,
+)
+
+# 绘制热力图
+ax = plot_sweep_heatmap(sweep_data, metric='pop0')
+plt.savefig('sweep_heatmap.png', dpi=150, bbox_inches='tight')
+```
+
+**输出示例**: [example_sweep_heatmap.png](file:///workspaces/Sagittarius/sagittarius_py/example_sweep_heatmap.png) (77KB)
+
+---
+
+##### 18.2 `plot_sweep_line_slice()` - 1D参数切片
+
+```python
+from sagittarius.viz import plot_sweep_line_slice
+
+def plot_sweep_line_slice(
+    sweep_data: Dict[str, Any],  # 【必填】包含扫描结果的字典
+    fixed_param: str,  # 【必填】保持固定的参数名
+    fixed_value: float,  # 【必填】固定参数的值
+    varying_param: str,  # 【必填】沿x轴变化的参数名
+    metric: str = 'pop0',  # 【可选,默认='pop0'】指标名
+    ax: Optional[Axes] = None,  # 【可选,默认=None】现有坐标轴
+    show_error_bars: bool = False,  # 【可选,默认=False】是否显示误差棒
+    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
+    figsize: Tuple[float, float] = (10, 6),  # 【可选,默认=(10,6)】图形尺寸
+    color: str = 'steelblue',  # 【可选,默认='steelblue'】线条颜色
+    marker: str = 'o',  # 【可选,默认='o'】标记样式
+) -> Axes:
+```
+
+**功能特性**:
+
+- **1D切片提取**: 从2D扫描中提取特定参数值的切片
+- **误差棒支持**: 如果存在std数据，可显示±std误差棒
+- **平滑曲线**: 带标记的连续曲线
+- **参数标注**: 标题中显示固定参数值
+
+**使用示例**:
+```
+from sagittarius.viz import plot_sweep_line_slice
+
+# 在delta=0处提取omega切片
+ax = plot_sweep_line_slice(
+    sweep_data,
+    fixed_param='delta',
+    fixed_value=0.0,
+    varying_param='omega',
+    show_error_bars=True,
+    title="Population vs Rabi Frequency (δ=0)"
+)
+```
+
+**输出示例**: [example_line_slice.png](file:///workspaces/Sagittarius/sagittarius_py/example_line_slice.png) (105KB)
+
+---
+
+##### 18.3 `plot_final_observable_map()` - 最终可观测量图
+
+```python
+from sagittarius.viz import plot_final_observable_map
+
+def plot_final_observable_map(
+    sweep_data: Dict[str, Any],  # 【必填】包含扫描结果的字典
+    observable_name: str = 'pop0',  # 【可选,默认='pop0'】可观测量名
+    param_name: str = 'omega',  # 【可选,默认='omega'】x轴参数名
+    ax: Optional[Axes] = None,  # 【可选,默认=None】现有坐标轴
+    show_markers: bool = True,  # 【可选,默认=True】是否显示标记
+    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
+    figsize: Tuple[float, float] = (10, 6),  # 【可选,默认=(10,6)】图形尺寸
+    color: str = 'steelblue',  # 【可选,默认='steelblue'】颜色
+) -> Axes:
+```
+
+**功能特性**:
+
+- **自动提取最终值**: 从时间序列数据中提取最后一个时间点
+- **智能维度检测**: 支持1D和2D结果数组
+- **清晰标注**: 显示参数值和最终可观测量关系
+
+**使用示例**:
+```
+from sagittarius.viz import plot_final_observable_map
+
+# 从时间序列提取最终值并绘制
+ax = plot_final_observable_map(
+    sweep_data,
+    observable_name='pop0',
+    param_name='omega',
+    title="Final Population vs Rabi Frequency"
+)
+```
+
+**输出示例**: [example_final_observable.png](file:///workspaces/Sagittarius/sagittarius_py/example_final_observable.png) (109KB)
+
+---
+
+##### 18.4 `plot_failed_run_mask()` - 失败运行掩码
+
+```python
+from sagittarius.viz import plot_failed_run_mask
+
+def plot_failed_run_mask(
+    sweep_data: Dict[str, Any],  # 【必填】包含'failed_runs'键的字典
+    x_param: str = 'omega',  # 【可选,默认='omega'】x轴参数名
+    y_param: str = 'delta',  # 【可选,默认='delta'】y轴参数名
+    ax: Optional[Axes] = None,  # 【可选,默认=None】现有坐标轴
+    title: Optional[str] = None,  # 【可选,默认=None】自定义标题
+    figsize: Tuple[float, float] = (10, 8),  # 【可选,默认=(10,8)】图形尺寸
+) -> Axes:
+```
+
+**功能特性**:
+
+- **二元可视化**: 绿色单元格=成功，红色单元格=失败
+- **成功率计算**: 标题中显示成功率和总运行数
+- **Manifest链接计数**: 如果提供manifest_links，显示链接数量
+- **灵活输入**: 支持集合{(x_idx, y_idx)}或布尔掩码数组
+
+**使用示例**:
+```
+from sagittarius.viz import plot_failed_run_mask
+
+# 绘制成功/失败掩码
+ax = plot_failed_run_mask(sweep_data, title="Run Success/Failure Map")
+# 绿色单元格: 成功运行
+# 红色单元格: 失败运行
+```
+
+**输出示例**: [example_failed_mask.png](file:///workspaces/Sagittarius/sagittarius_py/example_failed_mask.png) (48KB)
+
+---
+
+##### 18.5 `extract_sweep_summary()` - 统计摘要提取
+
+```python
+from sagittarius.viz import extract_sweep_summary
+
+def extract_sweep_summary(
+    sweep_data: Dict[str, Any],  # 【必填】包含扫描结果的字典
+    metrics: Optional[List[str]] = None,  # 【可选,默认=None】特定指标列表
+) -> Dict[str, Any]:
+```
+
+**返回结构**:
+```python
+{
+    'pop0': {
+        'min': 0.0,
+        'max': 1.0,
+        'mean': 0.5,
+        'std': 0.2,
+        'median': 0.5,
+        'q25': 0.3,
+        'q75': 0.7,
+    },
+    'energy': { ... },
+    'run_statistics': {
+        'total_runs': 300,
+        'failed_runs': 30,
+        'successful_runs': 270,
+        'success_rate': 90.0,
+    }
+}
+```
+
+**使用示例**:
+```python
+from sagittarius.viz import extract_sweep_summary
+
+summary = extract_sweep_summary(sweep_data, metrics=['pop0', 'energy'])
+
+print(f"pop0范围: [{summary['pop0']['min']:.3f}, {summary['pop0']['max']:.3f}]")
+print(f"成功率: {summary['run_statistics']['success_rate']:.1f}%")
+```
+
+---
+
+##### 18.6 `generate_synthetic_sweep_data()` - 合成数据生成器
+
+```python
+from sagittarius.viz import generate_synthetic_sweep_data
+
+def generate_synthetic_sweep_data(
+    omega_range: Tuple[float, float] = (0.1, 5.0),  # 【可选】omega范围
+    delta_range: Tuple[float, float] = (-2.0, 2.0),  # 【可选】delta范围
+    n_omega: int = 20,  # 【可选】omega采样数
+    n_delta: int = 15,  # 【可选】delta采样数
+    seed: int = 42,  # 【可选】随机种子
+    failure_rate: float = 0.05,  # 【可选】失败率(0-1)
+) -> Dict[str, Any]:
+```
+
+**⚠️ 注意**: 此函数仅用于演示目的，因为用户-facing sweep artifacts尚未实现。
+
+**使用示例**:
+```python
+from sagittarius.viz import generate_synthetic_sweep_data
+
+sweep_data = generate_synthetic_sweep_data(
+    omega_range=(0.5, 5.0),
+    delta_range=(-3.0, 3.0),
+    n_omega=25,
+    n_delta=20,
+    seed=42,
+    failure_rate=0.08,
+)
+```
+
+---
+
+#### 完整工作流示例
+
+```
+from sagittarius.viz import (
+    generate_synthetic_sweep_data,
+    plot_sweep_heatmap,
+    plot_sweep_line_slice,
+    plot_final_observable_map,
+    plot_failed_run_mask,
+    extract_sweep_summary,
+)
+import matplotlib.pyplot as plt
+
+# 步骤1: 生成数据
+sweep_data = generate_synthetic_sweep_data(
+    omega_range=(1.0, 4.0),
+    delta_range=(-2.0, 2.0),
+    n_omega=20,
+    n_delta=15,
+    seed=2026,
+)
+
+# 步骤2: 提取统计信息
+summary = extract_sweep_summary(sweep_data)
+print(f"Success rate: {summary['run_statistics']['success_rate']:.1f}%")
+
+# 步骤3: 创建综合可视化
+fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+
+plot_sweep_heatmap(sweep_data, ax=axes[0, 0], title="Sweep Heatmap")
+plot_sweep_line_slice(
+    sweep_data,
+    fixed_param='delta',
+    fixed_value=0.0,
+    varying_param='omega',
+    ax=axes[0, 1],
+    title="Line Slice (δ=0)"
+)
+plot_failed_run_mask(sweep_data, ax=axes[1, 0], title="Failed Run Mask")
+plot_final_observable_map(
+    sweep_data,
+    observable_name='pop0',
+    param_name='omega',
+    ax=axes[1, 1],
+    title="Final Observable Map"
+)
+
+plt.tight_layout()
+plt.savefig('complete_workflow.png', dpi=150, bbox_inches='tight')
+```
+
+**输出示例**: [example_complete_workflow.png](file:///workspaces/Sagittarius/sagittarius_py/example_complete_workflow.png) (255KB)
+
+---
+
+#### 合规性检查清单
+
+✅ **符合REQUIREMENTS.md规范** (第356行):
+- ✅ Sweep heatmaps（热力图）
+- ✅ Line slices（线切片）
+- ✅ Final-observable maps（最终可观测量图）
+- ✅ Failed-run masks（失败运行掩码）
+- ✅ Preserves parameter values（保留参数值）
+- ✅ Preserves result locations（保留结果位置）
+- ✅ Marks failure rows（标记失败行）
+- ✅ Links to run manifests（运行manifest链接）
+
+✅ **符合项目规范**:
+- ✅ 所有图表标记为EXPLORATORY
+- ✅ 包含免责声明："⚠️ EXPLORATORY VISUALIZATION - Not for hardware calibration"
+- ✅ 无后端依赖（纯Python/NumPy/Matplotlib）
+- ✅ Artifact链接支持（当提供manifest_links时）
+- ✅ 分层隔离（明确区分探索性和基准证据）
+
+---
+
+#### 测试覆盖
+
+```
+cd sagittarius_py && uv run pytest tests/test_viz_sweep.py -v
+# ============================== 34 passed in 1.22s ==============================
+```
+
+| 测试类别 | 用例数 | 通过数 | 失败数 | 覆盖率 |
+|---------|--------|--------|--------|--------|
+| TestSweepHeatmap | 11 | 11 | 0 | 100% |
+| TestSweepLineSlice | 5 | 5 | 0 | 100% |
+| TestFinalObservableMap | 3 | 3 | 0 | 100% |
+| TestFailedRunMask | 5 | 5 | 0 | 100% |
+| TestSweepSummary | 3 | 3 | 0 | 100% |
+| TestSyntheticDataGeneration | 6 | 6 | 0 | 100% |
+| TestSweepIntegration | 1 | 1 | 0 | 100% |
+| **总计** | **34** | **34** | **0** | **100%** |
+
+**测试覆盖内容**:
+- 基础功能测试（热力图、线切片、最终值图、失败掩码）
+- 自定义参数测试（标题、颜色、误差棒、颜色条）
+- 错误处理测试（缺失参数、形状不匹配、类型错误）
+- 免责声明验证（所有图表包含警告文本）
+- Artifact链接测试（manifest_links显示）
+- 合成数据生成测试（可复现性、参数范围、失败率）
+- 集成工作流测试（完整分析流程）
+
+---
+
+#### 相关文档
+
+- **详细实现**: [SWEEP_VIZ_IMPLEMENTATION_SUMMARY.md](file:///workspaces/Sagittarius/SWEEP_VIZ_IMPLEMENTATION_SUMMARY.md)
+- **模块README**: [sagittarius/viz/README_sweep.md](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/README_sweep.md)
+- **中文API参考**: [VIZ_API_REFERENCE_CN.md](file:///workspaces/Sagittarius/VIZ_API_REFERENCE_CN.md) - Sweep Visualization部分
+- **英文API参考**: [VIZ_API_REFERENCE.md](file:///workspaces/Sagittarius/VIZ_API_REFERENCE.md) - Sweep Visualization部分
+- **测试文件**: `tests/test_viz_sweep.py` (34用例)
+- **示例脚本**: `examples/sweep_viz_examples.py` (6个完整示例)
+
+---
+
 ## P2阶段总结
 
 
 ### 测试覆盖汇总
 
 ```bash
-cd sagittarius_py && uv run pytest tests/test_viz_benchmark_perf.py tests/test_viz_small_system_debug.py tests/test_viz_export.py tests/test_viz_report.py -v
-# ============================== 61 passed in 2.50s ==============================
+cd sagittarius_py && uv run pytest tests/test_viz_benchmark_perf.py tests/test_viz_small_system_debug.py tests/test_viz_export.py tests/test_viz_report.py tests/test_viz_sweep.py -v
+# ============================== 96 passed in ~30s ==============================
 ```
 
 | 测试套件 | 用例数 | 通过数 | 失败数 | 覆盖率 |
@@ -847,5 +1253,6 @@ cd sagittarius_py && uv run pytest tests/test_viz_benchmark_perf.py tests/test_v
 | test_viz_small_system_debug.py | 19 | 19 | 0 | 100% |
 | test_viz_export.py | 10 | 10 | 0 | 100% |
 | test_viz_report.py | 14 | 14 | 0 | 100% |
-| **总计** | **62** | **62** | **0** | **100%** |
+| **test_viz_sweep.py** | **34** | **34** | **0** | **100%** |
+| **总计** | **96** | **96** | **0** | **100%** |
 

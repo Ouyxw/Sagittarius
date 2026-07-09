@@ -82,6 +82,14 @@ from sagittarius.viz.report import (
     ReportGenerator,
     generate_quick_report,
 )
+from sagittarius.viz.sweep import (
+    plot_sweep_heatmap,
+    plot_sweep_line_slice,
+    plot_final_observable_map,
+    plot_failed_run_mask,
+    extract_sweep_summary,
+    generate_synthetic_sweep_data,
+)
 
 __all__ = [
     "plot_register",
@@ -138,4 +146,11 @@ __all__ = [
     # Lightweight report generation
     "ReportGenerator",
     "generate_quick_report",
+    # Parameter sweep visualization (Phase 19)
+    "plot_sweep_heatmap",
+    "plot_sweep_line_slice",
+    "plot_final_observable_map",
+    "plot_failed_run_mask",
+    "extract_sweep_summary",
+    "generate_synthetic_sweep_data",
 ]
