@@ -71,6 +71,7 @@
 | [`plot_sweep_heatmap()`](#plot_sweep_heatmap) | `viz.sweep` | 2D参数扫描热力图,带失败运行标记 | `Axes` |
 | [`plot_sweep_line_slice()`](#plot_sweep_line_slice) | `viz.sweep` | 多维扫描数据的1D切片提取 | `Axes` |
 | [`plot_final_observable_map()`](#plot_final_observable_map) | `viz.sweep` | 最终可观测量值随参数变化图 | `Axes` |
+| [`plot_observables_comparison()`](#plot_observables_comparison) | `viz.sweep` | 单图上多个可观测量的对比可视化 | `Axes` |
 | [`plot_failed_run_mask()`](#plot_failed_run_mask) | `viz.sweep` | 成功/失败二元掩码可视化 | `Axes` |
 | [`extract_sweep_summary()`](#extract_sweep_summary) | `viz.sweep` | 统计摘要提取 | `Dict` |
 | [`generate_synthetic_sweep_data()`](#generate_synthetic_sweep_data) | `viz.sweep` | 用于测试的合成数据生成器 | `Dict` |
@@ -1650,6 +1651,53 @@ ax = plot_sweep_line_slice(
 
 ---
 
+### `plot_observables_comparison()`
+
+**模块**: `sagittarius.viz.sweep`
+
+**功能**: 在单个坐标轴上绘制多个可观测量进行对比。
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| `sweep_data` | `Dict[str, Any]` | ✅ 是 | - | 包含扫描结果的字典 |
+| `observables` | `List[str]` | ❌ 可选 | `None` | 要绘制的可观测量列表(为None时自动检测) |
+| `param_name` | `str` | ❌ 可选 | `'omega'` | x轴参数名 |
+| `ax` | `matplotlib.axes.Axes` | ❌ 可选 | `None` | 现有的绘图坐标轴 |
+| `show_markers` | `bool` | ❌ 可选 | `True` | 是否显示数据点标记 |
+| `title` | `str` | ❌ 可选 | `None` | 自定义标题 |
+| `figsize` | `Tuple[float, float]` | ❌ 可选 | `(12, 7)` | 图形尺寸,单位:英寸 |
+| `colors` | `List[str]` | ❌ 可选 | `None` | 每条线的颜色(为None时自动分配) |
+| `normalize` | `bool` | ❌ 可选 | `False` | 是否将所有可观测量归一化到[0, 1]范围 |
+
+#### 返回值
+
+- **类型**: `matplotlib.axes.Axes`
+
+#### 示例
+
+```python
+from sagittarius.viz import plot_observables_comparison
+
+# 使用自动分配的颜色绘制多个可观测量
+ax = plot_observables_comparison(
+    sweep_data,
+    observables=['pop0', 'pop1', 'energy'],
+    param_name='omega'
+)
+
+# 使用归一化便于对比
+ax = plot_observables_comparison(
+    sweep_data,
+    observables=['pop0', 'energy'],
+    normalize=True,
+    title="归一化对比"
+)
+```
+
+---
+
 ### `plot_final_observable_map()`
 
 **模块**: `sagittarius.viz.sweep`
@@ -1795,293 +1843,6 @@ sweep_data = generate_synthetic_sweep_data(
 
 ---
 
-## 快速参考卡片
-
-| 可视化类型 | 函数名 | 用途 | 后端依赖 |
-|-----------|--------|------|----------|
-| **Sweep热力图** | [`plot_sweep_heatmap()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L18-L179) | 2D参数扫描可视化 | 无(纯Python) |
-| **线切片** | [`plot_sweep_line_slice()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L182-L291) | 1D参数切片 | 无(纯Python) |
-| **最终可观测量图** | [`plot_final_observable_map()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L294-L407) | 最终值vs参数 | 无(纯Python) |
-| **失败运行掩码** | [`plot_failed_run_mask()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L410-L512) | 成功/失败二元图 | 无(纯Python) |
-| **摘要统计** | [`extract_sweep_summary()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L515-L585) | 统计信息提取 | 无(纯Python) |
-| **合成数据生成** | [`generate_synthetic_sweep_data()`](file:///workspaces/Sagittarius/sagittarius_py/sagittarius/viz/sweep.py#L588-L677) | 演示数据生成 | 无(纯Python) |
-
----
-
-## 附录: Sweep可视化规范
-
-### 分层隔离要求
-
-根据项目规范,所有sweep可视化必须遵循以下原则:
-
-1. **探索性标识**: 所有图表必须包含免责声明"⚠️ EXPLORATORY VISUALIZATION - Not for hardware calibration"
-2. **Artifact链接**: 当提供manifest_links时,必须在图表中显示sample artifact ID
-3. **参数保留**: 所有图表必须保留原始参数值和位置信息
-4. **失败标记**: 失败的运行必须清晰标记(红色X或红色单元格)
-5. **无后端依赖**: 优先采用无后端依赖方案,直接基于Python对象或已保存产物提取数据
-
-### 数据结构要求
-
-`sweep_data`字典必须包含:
-- `parameters`: 参数字典,键为参数名,值为数组
-- `results`: 结果字典,键为指标名,值为与参数维度匹配的数组
-- `failed_runs`: 失败运行的索引集合或布尔掩码数组
-- `manifest_links` (可选): run_id到artifact_id的映射字典
-
-### 合规性检查
-
-✅ **已实现的功能**:
-- 2D热力图 with failed run overlay
-- 1D line slices with error bars
-- Final observable extraction from time series
-- Binary success/failure masks
-- Statistical summary extraction
-- Artifact link preservation
-- Mandatory disclaimers on all plots
-- No backend dependency (pure Python/NumPy/Matplotlib)
-
-✅ **符合REQUIREMENTS.md要求**:
-- Preserves parameter values ✓
-- Preserves result locations ✓
-- Marks failed runs clearly ✓
-- Links to run manifests when available ✓
-- Clearly marked as EXPLORATORY (not for calibration) ✓
-
-```python
-from sagittarius.viz import plot_density_matrix_magnitude
-
-ax = plot_density_matrix_magnitude(rho, cmap='plasma')
-```
-
----
-
-### `plot_density_matrix_phase()`
-
-**模块**: `sagittarius.viz.small_system_debug`
-
-**功能**: 绘制密度矩阵相位热力图。
-
-#### 参数
-
-| 参数名 | 类型 | 必填 | 默认值 | 描述 |
-|--------|------|------|--------|------|
-| `rho` | `np.ndarray` | ✅ 是 | - | 密度矩阵 |
-| `ax` | `matplotlib.axes.Axes` | ❌ 可选 | `None` | 现有的绘图坐标轴 |
-| `cmap` | `str` | ❌ 可选 | `'twilight'` | 颜色映射 |
-| `figsize` | `Tuple[float, float]` | ❌ 可选 | `(10, 8)` | 图形尺寸,单位:英寸 |
-
-#### 返回值
-
-- **类型**: `matplotlib.axes.Axes`
-
-#### 示例
-
-```python
-from sagittarius.viz import plot_density_matrix_phase
-
-ax = plot_density_matrix_phase(rho)
-```
-
----
-
-### `export_figure()`
-
-**模块**: `sagittarius.viz.export`
-
-**功能**: 将图形导出为文件并附带元数据JSON。
-
-#### 参数
-
-| 参数名 | 类型 | 必填 | 默认值 | 描述 |
-|--------|------|------|--------|------|
-| `fig` | `matplotlib.figure.Figure` | ✅ 是 | - | 要导出的Figure对象 |
-| `output_path` | `str` | ✅ 是 | - | 输出文件路径(不含扩展名) |
-| `formats` | `List[str]` | ❌ 可选 | `['png']` | 输出格式:'png'、'svg'、'pdf' |
-| `metadata` | `Dict` | ❌ 可选 | `None` | 自定义元数据字典 |
-| `save_metadata` | `bool` | ❌ 可选 | `True` | 是否保存.metadata.json文件 |
-| `dpi` | `int` | ❌ 可选 | `300` | PNG输出的DPI |
-
-#### 返回值
-
-- **类型**: `None`
-- **副作用**: 保存图片文件和可选的元数据JSON
-
-#### 示例
-
-```python
-from sagittarius.viz import export_figure
-import matplotlib.pyplot as plt
-
-fig, ax = plt.subplots()
-ax.plot([1, 2, 3], [1, 4, 9])
-
-export_figure(fig, 'my_plot', formats=['png', 'svg'], dpi=300)
-# 创建: my_plot.png, my_plot.svg, my_plot.metadata.json
-```
-
----
-
-### `export_from_result()`
-
-**模块**: `sagittarius.viz.export`
-
-**功能**: 从Result对象一键导出并自动绘图。
-
-#### 参数
-
-| 参数名 | 类型 | 必填 | 默认值 | 描述 |
-|--------|------|------|--------|------|
-| `result` | `SimulationResult` | ✅ 是 | - | Result对象 |
-| `plot_function` | `callable` | ✅ 是 | - | 绘图函数(如`plot_observables`) |
-| `output_path` | `str` | ✅ 是 | - | 输出路径(不含扩展名) |
-| `plot_kwargs` | `Dict` | ❌ 可选 | `{}` | 绘图函数的关键字参数 |
-| `formats` | `List[str]` | ❌ 可选 | `['png']` | 输出格式 |
-| `metadata` | `Dict` | ❌ 可选 | `None` | 附加元数据 |
-
-#### 返回值
-
-- **类型**: `None`
-
-#### 示例
-
-```python
-from sagittarius.viz import export_from_result, plot_observables
-
-export_from_result(
-    result, 
-    plot_observables, 
-    'observable_plot',
-    plot_kwargs={'names': ['pop0', 'pop1']},
-    formats=['png', 'pdf']
-)
-```
-
----
-
-### `ReportGenerator`
-
-**模块**: `sagittarius.viz.report`
-
-**功能**: 生成含嵌入图形的HTML或Markdown报告。
-
-#### 构造函数参数
-
-| 参数名 | 类型 | 必填 | 默认值 | 描述 |
-|--------|------|------|--------|------|
-| `title` | `str` | ✅ 是 | - | 报告标题 |
-| `classification` | `str` | ❌ 可选 | `'EXPLORATORY'` | 分类:'EXPLORATORY'或'BENCHMARK_EVIDENCE' |
-| `author` | `str` | ❌ 可选 | `None` | 作者姓名 |
-| `description` | `str` | ❌ 可选 | `''` | 报告描述 |
-
-#### 方法
-
-##### `add_section(title, content, figures=None)`
-
-向报告添加章节。
-
-| 参数名 | 类型 | 必填 | 默认值 | 描述 |
-|--------|------|------|--------|------|
-| `title` | `str` | ✅ 是 | - | 章节标题 |
-| `content` | `str` | ✅ 是 | - | 章节内容(Markdown格式) |
-| `figures` | `List[str]` | ❌ 可选 | `None` | 图形文件路径列表 |
-
-##### `generate(output_path, format='html')`
-
-生成报告文件。
-
-| 参数名 | 类型 | 必填 | 默认值 | 描述 |
-|--------|------|------|--------|------|
-| `output_path` | `str` | ✅ 是 | - | 输出文件路径 |
-| `format` | `str` | ❌ 可选 | `'html'` | 格式:'html'或'markdown' |
-
-**返回值**: `str` - 输出文件路径
-
-#### 示例
-
-```python
-from sagittarius.viz import ReportGenerator, plot_observables
-import matplotlib.pyplot as plt
-
-# 创建报告
-report = ReportGenerator(
-    title="模拟结果",
-    classification="EXPLORATORY",
-    author="张三"
-)
-
-# 添加含图形的章节
-fig, ax = plt.subplots()
-plot_observables(result, ax=ax)
-fig.savefig('obs_plot.png')
-
-report.add_section(
-    title="可观测量轨迹",
-    content="关键可观测量随时间的演化。",
-    figures=['obs_plot.png']
-)
-
-# 生成报告
-output_path = report.generate('report.html', format='html')
-print(f"报告已保存到: {output_path}")
-```
-
----
-
-### `generate_quick_report()`
-
-**模块**: `sagittarius.viz.report`
-
-**功能**: 快速一行式报告生成助手。
-
-#### 参数
-
-| 参数名 | 类型 | 必填 | 默认值 | 描述 |
-|--------|------|------|--------|------|
-| `title` | `str` | ✅ 是 | - | 报告标题 |
-| `sections` | `List[Dict]` | ✅ 是 | - | 章节字典列表 |
-| `output_path` | `str` | ✅ 是 | - | 输出文件路径 |
-| `classification` | `str` | ❌ 可选 | `'EXPLORATORY'` | 分类 |
-| `format` | `str` | ❌ 可选 | `'html'` | 输出格式 |
-
-#### 章节字典格式
-
-```python
-{
-    'title': str,
-    'content': str,
-    'figures': List[str]  # 可选
-}
-```
-
-#### 返回值
-
-- **类型**: `str` - 输出文件路径
-
-#### 示例
-
-```python
-from sagittarius.viz import generate_quick_report
-
-sections = [
-    {
-        'title': '结果',
-        'content': '模拟成功完成。',
-        'figures': ['plot1.png', 'plot2.png']
-    },
-    {
-        'title': '分析',
-        'content': '主要发现...'
-    }
-]
-
-path = generate_quick_report(
-    title="快速报告",
-    sections=sections,
-    output_path='quick_report.html'
-)
-```
-
----
 
 ## 📚 附录
 
