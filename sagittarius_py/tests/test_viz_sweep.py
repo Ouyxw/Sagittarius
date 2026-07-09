@@ -19,6 +19,7 @@ from sagittarius.viz.sweep import (
     plot_sweep_heatmap,
     plot_sweep_line_slice,
     plot_final_observable_map,
+    plot_observables_comparison,
     plot_failed_run_mask,
     extract_sweep_summary,
     generate_synthetic_sweep_data,
@@ -534,3 +535,128 @@ class TestSweepIntegration:
         assert 'pop0' in summary
         
         plt.close('all')
+
+
+class TestObservablesComparison:
+    """Test plot_observables_comparison function."""
+    
+    def create_test_data(self):
+        """Create test sweep data with multiple observables."""
+        omega = np.linspace(0.5, 5.0, 20)
+        
+        # Create multiple observables
+        pop0 = np.sin(omega)**2 * np.exp(-0.1 * omega)
+        pop1 = np.cos(omega)**2 * np.exp(-0.1 * omega)
+        energy = omega**2 / (1 + omega)
+        
+        return {
+            'parameters': {
+                'omega': omega,
+            },
+            'results': {
+                'pop0': pop0,
+                'pop1': pop1,
+                'energy': energy,
+            },
+        }
+    
+    def test_basic_comparison(self):
+        """Test basic multi-observable comparison."""
+        data = self.create_test_data()
+        
+        fig, ax = plt.subplots(figsize=(12, 7))
+        result_ax = plot_observables_comparison(data, ax=ax)
+        
+        assert result_ax is not None
+        assert len(ax.get_lines()) == 3  # Three observables plotted
+        
+        # Check legend has all three observables
+        legend_texts = [t.get_text() for t in ax.get_legend().get_texts()]
+        assert 'pop0' in legend_texts
+        assert 'pop1' in legend_texts
+        assert 'energy' in legend_texts
+        
+        plt.close(fig)
+    
+    def test_with_custom_colors(self):
+        """Test comparison with custom colors."""
+        data = self.create_test_data()
+        colors = ['red', 'green', 'blue']
+        
+        fig, ax = plt.subplots(figsize=(12, 7))
+        plot_observables_comparison(data, ax=ax, colors=colors)
+        
+        lines = ax.get_lines()
+        assert len(lines) == 3
+        
+        # Check colors are applied
+        for line, expected_color in zip(lines, colors):
+            assert line.get_color() == expected_color
+        
+        plt.close(fig)
+    
+    def test_with_normalization(self):
+        """Test comparison with normalization."""
+        data = self.create_test_data()
+        
+        fig, ax = plt.subplots(figsize=(12, 7))
+        plot_observables_comparison(data, ax=ax, normalize=True)
+        
+        # Check y-axis label mentions normalization
+        ylabel = ax.get_ylabel()
+        assert 'Normalized' in ylabel
+        
+        # Check all values are in [0, 1] range
+        for line in ax.get_lines():
+            y_data = line.get_ydata()
+            assert np.min(y_data) >= 0.0
+            assert np.max(y_data) <= 1.0
+        
+        plt.close(fig)
+    
+    def test_specific_observables(self):
+        """Test plotting only specific observables."""
+        data = self.create_test_data()
+        
+        fig, ax = plt.subplots(figsize=(12, 7))
+        plot_observables_comparison(data, observables=['pop0', 'energy'], ax=ax)
+        
+        assert len(ax.get_lines()) == 2
+        
+        legend_texts = [t.get_text() for t in ax.get_legend().get_texts()]
+        assert 'pop0' in legend_texts
+        assert 'energy' in legend_texts
+        assert 'pop1' not in legend_texts
+        
+        plt.close(fig)
+    
+    def test_disclaimer_present(self):
+        """Test that disclaimer is present in the figure."""
+        data = self.create_test_data()
+        
+        fig, ax = plt.subplots(figsize=(12, 7))
+        plot_observables_comparison(data, ax=ax)
+        
+        # Check for disclaimer text
+        texts = [child for child in fig.get_children() if isinstance(child, plt.Text)]
+        disclaimer_found = False
+        for text in texts:
+            if 'EXPLORATORY VISUALIZATION' in text.get_text():
+                disclaimer_found = True
+                break
+        
+        assert disclaimer_found, "Disclaimer not found in figure"
+        plt.close(fig)
+    
+    def test_missing_observable_warning(self):
+        """Test warning when observable is missing."""
+        data = self.create_test_data()
+        
+        fig, ax = plt.subplots(figsize=(12, 7))
+        # Should print warning but not raise error
+        plot_observables_comparison(data, observables=['pop0', 'nonexistent'], ax=ax)
+        
+        # Only pop0 should be plotted
+        assert len(ax.get_lines()) == 1
+        plt.close(fig)
+
