@@ -8,3 +8,14 @@ __pycache__/
 GEMINI.md
 *build/
 CI_artifacts/
+# Debug and temporary files
+core.*
+*.deb
+check_label_positions.py
+debug_*.py
+
+# Visualization output directories (generated artifacts)
+comprehensive_viz_outputs/
+example_outputs/
+sagittarius_py/comprehensive_viz_outputs/
+sagittarius_py/example_outputs/
