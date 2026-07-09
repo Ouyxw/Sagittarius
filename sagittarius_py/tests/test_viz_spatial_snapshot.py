@@ -8,6 +8,12 @@ import pandas as pd
 from unittest.mock import MagicMock, patch
 import matplotlib.pyplot as plt
 
+@pytest.fixture(autouse=True)
+def cleanup_matplotlib_figures():
+    """Automatically close all figures after each test to prevent memory warnings."""
+    yield
+    plt.close('all')
+
 
 # Mock Register class
 class MockAtom:

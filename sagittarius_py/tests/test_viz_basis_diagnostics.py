@@ -15,6 +15,12 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+@pytest.fixture(autouse=True)
+def cleanup_matplotlib_figures():
+    """Automatically close all figures after each test to prevent memory warnings."""
+    yield
+    plt.close('all')
 from sagittarius.viz import (
     generate_basis_diagnostics,
     plot_basis_space_diagram,

@@ -21,6 +21,13 @@ from sagittarius.viz import (
 )
 
 
+@pytest.fixture(autouse=True)
+def cleanup_matplotlib_figures():
+    """Automatically close all figures after each test to prevent memory warnings."""
+    yield
+    plt.close('all')
+
+
 # Mock classes for testing
 class MockResult:
     """Mock SimulationResult object."""

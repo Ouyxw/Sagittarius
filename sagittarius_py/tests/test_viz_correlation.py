@@ -15,6 +15,12 @@ import pytest
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+@pytest.fixture(autouse=True)
+def cleanup_matplotlib_figures():
+    """Automatically close all figures after each test to prevent memory warnings."""
+    yield
+    plt.close('all')
 from matplotlib.axes import Axes
 
 from sagittarius.viz import (

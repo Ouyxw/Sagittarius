@@ -7,6 +7,12 @@ Tests for show_blockade_disks parameter in plot_register().
 import pytest
 import numpy as np
 import matplotlib.pyplot as plt
+
+@pytest.fixture(autouse=True)
+def cleanup_matplotlib_figures():
+    """Automatically close all figures after each test to prevent memory warnings."""
+    yield
+    plt.close('all')
 from matplotlib.patches import Circle
 from sagittarius.viz import plot_register
 

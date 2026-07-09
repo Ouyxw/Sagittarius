@@ -7,6 +7,12 @@ Validates convergence plots and feasibility diagrams for MWIS problem solving.
 import numpy as np
 import pytest
 import matplotlib.pyplot as plt
+
+@pytest.fixture(autouse=True)
+def cleanup_matplotlib_figures():
+    """Automatically close all figures after each test to prevent memory warnings."""
+    yield
+    plt.close('all')
 from unittest.mock import Mock
 
 from sagittarius.viz.mwis_diagnostics import (

@@ -5,6 +5,12 @@ Tests for small-system debugging visualization utilities.
 import pytest
 import numpy as np
 import matplotlib.pyplot as plt
+
+@pytest.fixture(autouse=True)
+def cleanup_matplotlib_figures():
+    """Automatically close all figures after each test to prevent memory warnings."""
+    yield
+    plt.close('all')
 from sagittarius.viz.small_system_debug import (
     plot_state_probabilities,
     plot_density_matrix_diagonal,
