@@ -8,6 +8,13 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, Union, Any, List, Tuple
 
 import numpy as np
+from .trajectory_contract import (
+    TRAJECTORY_DATA_SCHEMA_VERSION,
+    deserialize_trajectories,
+    serialize_trajectories,
+    trajectory_manifest,
+    validate_trajectory_manifest,
+)
 RESULT_ARTIFACT_SCHEMA_VERSION = "result-artifact/v1"
 RESULT_ARTIFACT_TYPE = "sagittarius.simulation_result"
 SHARED_RESULT_SCHEMA_VERSION = "shared-result/v1"
@@ -55,6 +62,8 @@ RUN_MANIFEST_SCHEMA = {
             "observable_metadata",
             "saveat",
             "effective_saveat",
+            "store_trajectories",
+            "trajectory_storage",
         ],
         "initial_state": ["basis_size", "norm"],
         "backend_diagnostics": [
@@ -405,6 +414,16 @@ def validate_run_manifest(manifest: Dict[str, Any]) -> None:
     solver = manifest["solver"]
     if not (isinstance(solver.get("t_span"), list) and len(solver["t_span"]) == 2):
         raise _manifest_schema_error("Run manifest solver.t_span must contain exactly [t_start, t_end].", "Regenerate the manifest from Simulation.run().")
+
+    if not isinstance(solver["store_trajectories"], bool):
+        raise _manifest_schema_error("Run manifest solver.store_trajectories must be a boolean.", "Regenerate the manifest from Simulation.run().")
+    if solver["trajectory_storage"]["requested"] != solver["store_trajectories"]:
+        raise _manifest_schema_error("Run manifest solver.trajectory_storage.requested must match solver.store_trajectories.", "Regenerate the manifest from Simulation.run().")
+
+    try:
+        validate_trajectory_manifest(solver["trajectory_storage"])
+    except ValueError as exc:
+        raise _manifest_schema_error(str(exc), "Regenerate the manifest from Simulation.run().") from exc
 
     if manifest.get("event_taxonomy_schema") != EVENT_TAXONOMY_SCHEMA_VERSION:
         raise _manifest_schema_error(
@@ -1004,6 +1023,16 @@ def _config_manifest(
         "observable_metadata": _json_compatible(observable_metadata or []),
         "saveat": _json_compatible(config.saveat),
         "effective_saveat": _json_compatible(effective_saveat),
+        "store_trajectories": bool(config.store_trajectories),
+        "trajectory_storage": {
+            "requested": bool(config.store_trajectories),
+            "stored": False,
+            "schema_version": TRAJECTORY_DATA_SCHEMA_VERSION,
+            "axis_order": ["trajectory", "time"],
+            "observable_names": [],
+            "trajectory_count": 0,
+            "time_count": 0,
+        },
     }
 
 
@@ -1618,6 +1647,9 @@ def _simulation_result_with_manifest(
         effective_solver=effective_solver,
         readout=readout,
     )
+    manifest["solver"]["trajectory_storage"] = trajectory_manifest(
+        trajectories, data, requested=config.store_trajectories
+    )
     validate_run_manifest(manifest)
     return SimulationResult(data, metadata=metadata, diagnostics=diagnostics, manifest=manifest, trajectories=trajectories)
 
@@ -1703,13 +1735,14 @@ class SimulationResult:
         """Return the stable JSON artifact envelope for this result."""
         shared_result = self.to_shared_result()
         
-        # Serialize trajectories if present
-        trajectories_serialized = None
-        if self.trajectories is not None:
-            trajectories_serialized = {
-                obs_name: traj.tolist()  # Convert numpy arrays to lists
-                for obs_name, traj in self.trajectories.items()
-            }
+        try:
+            trajectories_serialized = serialize_trajectories(self.trajectories, self.data)
+        except ValueError as exc:
+            raise _serialization_error(
+                "SERIALIZATION_TRAJECTORY_SCHEMA_INVALID",
+                str(exc),
+                "Store finite two-dimensional trajectory arrays aligned with data['t'] and observable order.",
+            ) from exc
         
         return {
             "schema_version": RESULT_ARTIFACT_SCHEMA_VERSION,
@@ -1794,13 +1827,16 @@ class SimulationResult:
             if shared_result is not None:
                 validate_shared_result(shared_result)
             
-            # Deserialize trajectories if present
-            trajectories = None
-            if "trajectories" in data and data["trajectories"] is not None:
-                trajectories = {
-                    obs_name: np.array(traj_list)
-                    for obs_name, traj_list in data["trajectories"].items()
-                }
+            try:
+                trajectories = deserialize_trajectories(data.get("trajectories"), data["data"])
+            except ValueError as exc:
+                err = _serialization_error(
+                    "SERIALIZATION_TRAJECTORY_SCHEMA_INVALID",
+                    str(exc),
+                    "Regenerate the result artifact with trajectory-data/v1 aligned to data['t'] and observable order.",
+                )
+                emit_failure_diagnostic(err.issue)
+                raise err from exc
             
             return cls(
                 data["data"],
@@ -1829,14 +1865,16 @@ class SimulationResult:
                 emit_failure_diagnostic(err.issue)
                 raise err
             
-            # Handle legacy format without trajectories
-            trajectories = None
-            if "trajectories" in data and data["trajectories"] is not None:
-                trajectories = {
-                    obs_name: np.array(traj_list)
-                    for obs_name, traj_list in data["trajectories"].items()
-                }
-            
+            try:
+                trajectories = deserialize_trajectories(data.get("trajectories"), data["data"])
+            except ValueError as exc:
+                err = _serialization_error(
+                    "SERIALIZATION_TRAJECTORY_SCHEMA_INVALID",
+                    str(exc),
+                    "Convert legacy trajectories to arrays aligned with result time and observable order.",
+                )
+                emit_failure_diagnostic(err.issue)
+                raise err from exc
             return cls(data["data"], metadata=data.get("metadata"), diagnostics=data.get("diagnostics"), manifest=data.get("manifest"), trajectories=trajectories)
         if not isinstance(data, dict):
             err = _serialization_error(

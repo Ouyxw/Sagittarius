@@ -59,3 +59,7 @@ log_event("hamiltonian_built"; atom_count=4, basis_size=8, use_gpu=false)
 ```
 
 The payload fields follow [`SPEC-OBS-001-event-taxonomy.md`](../reference/SPEC-OBS-001-event-taxonomy.md) and can be captured with Julia's standard `Logging` tools. Native solver calls emit `solver_start` and `solver_finish`; `setup_workers` emits `cluster_setup_start` and `cluster_setup_finish`; basis and Hamiltonian builders emit their physics events.
+
+## MCWF Individual-Trajectory Return Contract
+
+`solve_mc_trajectories(...; return_individual_trajectories=true)` returns aggregate averages plus individual observable samples. For Python bridge persistence, the individual array is interpreted as `(observable, time, trajectory)` and is normalized to one `(trajectory, time)` array per observable. Its observable ordering and time values must match the returned aggregate observables. `SolverConfig(store_trajectories=true)` requests this mode; the Python artifact writer validates and stores the normalized result as `trajectory-data/v1` and records effective dimensions in `run-manifest/v1`.

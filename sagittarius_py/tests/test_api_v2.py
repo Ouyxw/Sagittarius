@@ -296,3 +296,14 @@ def test_store_trajectories_populates_result_trajectories(monkeypatch):
     assert result.trajectories is not None
     assert "pop" in result.trajectories
     assert result.trajectories["pop"].shape == (3, 3)
+    storage = result.manifest["solver"]["trajectory_storage"]
+    assert result.manifest["solver"]["store_trajectories"] is True
+    assert storage == {
+        "requested": True,
+        "stored": True,
+        "schema_version": "trajectory-data/v1",
+        "axis_order": ["trajectory", "time"],
+        "observable_names": ["pop"],
+        "trajectory_count": 3,
+        "time_count": 3,
+    }

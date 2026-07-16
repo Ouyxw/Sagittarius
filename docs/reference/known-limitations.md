@@ -21,6 +21,8 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 - Blockade-reduced bases can reduce state space substantially, and repeated reduced-basis construction is cached by geometry/blockade metadata. The reduced basis is still an approximation that must be selected and validated against the problem's physical error budget.
 - GPU execution paths are still maturing. Sparse pattern reuse, CUDA sparse value-buffer reuse, and CPU/GPU parity tests exist for the CUDA path, but CUDA remains experimental and AMDGPU/Metal are not parity-tested production backends.
 - Benchmark results are only meaningful with the exact hardware, `version-info/v1` metadata, backend settings, solver tolerances, and problem configuration used to produce them.
+- Raw MCWF trajectory retention scales with observable count, output time samples, and trajectory count. It is opt-in diagnostic data, so plan memory and artifact capacity before enabling it for large ensembles.
+- Stored samples require a common finite time axis and the same trajectory count for every observable. `trajectory-data/v1` rejects mismatched shapes, time values, or observable ordering during save/load. Raw samples are intentionally absent from `shared-result/v1`.
 
 ## Physics and Numerics
 
