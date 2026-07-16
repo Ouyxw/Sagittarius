@@ -25,7 +25,7 @@ This is the canonical Phase 19 Python API reference. Plotting helpers are analys
 | 13 | Met | Spatial snapshot and frame helpers preserve positions, values, and time metadata. |
 | 14 | Met | Open-system diagnostic views require the appropriate trace, positivity, comparison, or trajectory data. |
 | 15 | Partial | Sweep plots preserve axes, failed-run masks, and caller-supplied manifest links, but no stable user-facing sweep artifact schema exists. |
-| 16 | Partial | Benchmark plots are diagnostic views. They do not validate dictionary inputs as `benchmark-artifact/v1`; governance review remains mandatory. |
+| 16 | Met | Governed benchmark plots validate `benchmark-artifact/v1`; explicitly named diagnostic-only counterparts accept ordinary mappings and cannot support public performance claims. |
 | 17 | Met | State-vector and density-matrix helpers reject missing, malformed, and unsafe-size inputs. |
 | 18 | Met | Figure export writes optional PNG, SVG, or PDF outputs and provenance sidecars with available artifact, schema, seed, backend, basis, and plot metadata. |
 | 19 | Partial | The visualization suite covers rendering and validation with non-interactive matplotlib in its rendering tests. A dedicated no-unexpected-Julia-initialization regression remains required before Phase 19 can be closed. |
@@ -118,7 +118,7 @@ This is the canonical Phase 19 Python API reference. Plotting helpers are analys
 
 ## 🔍 Detailed API Documentation
 
-*(Due to length constraints, showing first 3 APIs as example. Full document contains all 40+ APIs)*
+The canonical export catalog below is complete. Runtime docstrings remain authoritative for exact signatures and argument-level validation.
 
 ### `plot_register()`
 
@@ -718,3 +718,75 @@ seed = result.seed
 trajectories = result.trajectories  # np.ndarray, shape (n_traj, n_times)
 ```
 
+
+## Canonical Public Export Catalog
+
+`__all__` is the public import contract for `sagittarius.viz`. It currently contains 63 exports: the original 56 visualization, extraction, export, reporting, sweep, and diagnostic helpers, plus seven governed benchmark/MWIS interfaces introduced to preserve artifact governance. All plots return a matplotlib `Axes` unless noted; helpers accepting `ax` draw into that axes. Exact signatures and validation are in the referenced runtime docstrings.
+
+| Export | Module | Accepted input / contract | Result and boundary |
+| :--- | :--- | :--- | :--- |
+| `plot_register` | `register` | `Register` or 2D coordinates | Register layout; optional blockade/edge overlay. |
+| `plot_interaction_graph` | `register` | Register or coordinates plus interaction radius/edges | Unit-disk interaction graph. |
+| `plot_pulse_waveform` | `pulse` | Pulse declaration and optional time grid | Waveform plot and sampled values. |
+| `plot_pulse_both_fields` | `pulse` | Pulse sequence and optional time grid | Dual-field pulse plot. |
+| `sample_pulse_waveform` | `pulse` | Pulse declaration and time grid | Data-only waveform samples. |
+| `plot_observables` | `result` | Result with time and named series | Observable time-series plot. |
+| `plot_bitstring_distribution` | `result` | Readout-capable result | Final-bitstring distribution plot. |
+| `plot_shot_histogram` | `result` | Measurement-sample payload | Shot-count/probability histogram. |
+| `plot_population_heatmap` | `result` | Compatible atom population series | Atom-by-time heatmap. |
+| `plot_mwis_problem` | `mwis_viz` | MWIS graph, weights, optional selection | MWIS problem diagnostic. |
+| `plot_mwis_comparison` | `mwis_viz` | MWIS graph and solution sets | Side-by-side solution comparison. |
+| `annotate_solution_quality` | `mwis_viz` | Axes and MWIS quality metadata | Adds diagnostic annotations; returns axes. |
+| `save_diagnostic_mwis_figure` | `mwis_viz` | Figure and ordinary diagnostic metadata | Diagnostic-only figure/sidecar writer; not evidence validation. |
+| `generate_basis_diagnostics` | `basis_diagnostics` | Register/basis/blockade metadata | Reusable basis diagnostic mapping. |
+| `plot_basis_space_diagram` | `basis_diagnostics` | Generated basis diagnostic mapping | Basis-pruning diagram. |
+| `plot_bitstring_space_grid` | `basis_diagnostics` | Generated basis diagnostic mapping | Valid/forbidden bitstring grid. |
+| `plot_blockade_constraint_graph` | `basis_diagnostics` | Basis diagnostic mapping and register | Blockade constraint graph. |
+| `plot_comprehensive_basis_diagnostics` | `basis_diagnostics` | Basis diagnostic mapping and register | Multi-panel diagnostics; returns figure/axes collection. |
+| `extract_geometry_diagnostics` | `geometry_diagnostics` | Register geometry and optional blockade radius | Reusable geometry diagnostic mapping. |
+| `plot_geometry_diagnostics` | `geometry_diagnostics` | Geometry diagnostic mapping | Distance, interaction, and adjacency diagnostics. |
+| `plot_unit_disk_graph` | `geometry_diagnostics` | Register/geometry mapping and radius | Unit-disk graph view. |
+| `plot_pair_correlation_matrix` | `correlation_viz` | Result with pair-correlation observables | Pair-correlation heatmap. |
+| `plot_connected_correlation_matrix` | `correlation_viz` | Result with connected correlations | Connected-correlation heatmap. |
+| `plot_pauli_zz_matrix` | `correlation_viz` | Result with Pauli-ZZ observables | Pauli-ZZ heatmap. |
+| `plot_blockade_conflict_heatmap` | `correlation_viz` | Result/register-compatible conflict data | Blockade conflict diagnostic. |
+| `extract_spatial_snapshot` | `spatial_snapshot` | Result, frame/time selector, positions | One spatial-frame mapping. |
+| `extract_frame_sequence` | `spatial_snapshot` | Result, positions, frame selectors | Ordered spatial-frame mappings. |
+| `save_frame_data` | `spatial_snapshot` | Extracted frame mapping and path | Writes diagnostic frame data. |
+| `plot_spatial_snapshot` | `spatial_snapshot` | Extracted spatial-frame mapping | One-frame population view. |
+| `plot_multi_panel_snapshots` | `spatial_snapshot` | Sequence of extracted frame mappings | Multi-frame axes collection. |
+| `plot_time_grid_diagnostics` | `diagnostics` | Result with time samples | Output-grid diagnostic. |
+| `plot_lindblad_validation` | `diagnostics` | Lindblad result and validation metrics | Trace/positivity diagnostic. |
+| `plot_mcwf_vs_lindblad` | `diagnostics` | Compatible MCWF and Lindblad results | Solver-comparison diagnostic. |
+| `plot_trajectory_statistics` | `diagnostics` | Result with persisted trajectories | Mean/spread/confidence diagnostic. |
+| `plot_mwis_convergence` | `mwis_diagnostics` | MWIS iteration/metric data | Convergence diagnostic. |
+| `plot_mwis_feasibility_diagram` | `mwis_diagnostics` | MWIS feasibility/violation data | Feasibility diagnostic. |
+| `plot_diagnostic_runtime_scaling` | `benchmark_perf` | Ordinary benchmark-row mappings | Diagnostic-only runtime plot; no public claim. |
+| `plot_diagnostic_memory_scaling` | `benchmark_perf` | Ordinary benchmark-row mappings | Diagnostic-only memory plot; no public claim. |
+| `plot_diagnostic_solver_comparison` | `benchmark_perf` | Ordinary benchmark-row mappings | Diagnostic-only solver comparison; no public claim. |
+| `plot_diagnostic_success_failure_summary` | `benchmark_perf` | Ordinary benchmark-row mappings | Diagnostic-only success/failure summary; no public claim. |
+| `plot_diagnostic_cpu_gpu_error_comparison` | `benchmark_perf` | Ordinary CPU/GPU mappings | Diagnostic-only parity/error plot; no public claim. |
+| `plot_state_probabilities` | `small_system_debug` | Small state vector | State-probability bar chart; enforces size limit. |
+| `plot_density_matrix_diagonal` | `small_system_debug` | Small density matrix | Diagonal diagnostic; enforces size limit. |
+| `plot_density_matrix_magnitude` | `small_system_debug` | Small density matrix | Magnitude heatmap; enforces size limit. |
+| `plot_density_matrix_phase` | `small_system_debug` | Small density matrix | Phase heatmap; enforces size limit. |
+| `export_figure` | `export` | Figure, output path, optional provenance | Writes figure and optional descriptive sidecar. |
+| `export_from_result` | `export` | Result, plot/export settings | Result-driven figure export and sidecar. |
+| `ReportGenerator` | `report` | Report configuration and result/figure inputs | Report builder object; output is descriptive. |
+| `generate_quick_report` | `report` | Result/figure inputs and output path | Writes report and returns its path. |
+| `plot_sweep_heatmap` | `sweep` | In-memory sweep mapping | 2D sweep plot; no sweep artifact schema. |
+| `plot_sweep_line_slice` | `sweep` | In-memory sweep mapping and fixed/varying parameters | 1D sweep slice. |
+| `plot_final_observable_map` | `sweep` | In-memory sweep mapping and observable | Final-observable map. |
+| `plot_observables_comparison` | `sweep` | In-memory sweep mapping and observables | Multi-observable comparison. |
+| `plot_failed_run_mask` | `sweep` | In-memory sweep mapping and failure mask | Failed-run diagnostic. |
+| `extract_sweep_summary` | `sweep` | In-memory sweep mapping | Summary-statistics mapping. |
+| `generate_synthetic_sweep_data` | `sweep` | Generation ranges/counts/seed | Synthetic demo data only. |
+| `plot_runtime_scaling` | `benchmark_governed` | Validated `benchmark-artifact/v1` mapping or JSON path | Governed runtime plot. |
+| `plot_memory_scaling` | `benchmark_governed` | Validated `benchmark-artifact/v1` mapping or JSON path | Governed memory plot. |
+| `plot_solver_comparison` | `benchmark_governed` | Validated `benchmark-artifact/v1` mapping or JSON path | Governed solver comparison. |
+| `plot_success_failure_summary` | `benchmark_governed` | Validated `benchmark-artifact/v1` mapping or JSON path | Governed failure summary. |
+| `plot_cpu_gpu_error_comparison` | `benchmark_governed` | Validated `benchmark-artifact/v1` mapping or JSON path | Governed CPU/GPU error comparison. |
+| `validate_benchmark_artifact` | `benchmark_governed` | `benchmark-artifact/v1` mapping or JSON path | Validated artifact mapping or `ValueError`. |
+| `save_mwis_benchmark_figure` | `mwis_governed` | Figure plus validated `benchmark-artifact/v1` | Governed MWIS figure and sidecar. |
+
+The seven `benchmark_governed`/`mwis_governed` exports are intentionally distinct from the explicitly named `diagnostic` helpers. Do not promote a diagnostic plot, mapping, sidecar, or local timing to public performance evidence.
