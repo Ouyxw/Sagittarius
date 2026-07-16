@@ -35,7 +35,7 @@ This is the canonical Phase 19 Python API reference. Plotting helpers are analys
 - Visualization is backend-free only for helpers that consume Python data already available to the caller. A visualization helper neither initializes nor validates a simulation backend.
 - Export sidecars and report classifications are descriptive metadata, not new artifact schemas and not independent evidence validation.
 - Sweep helpers accept an in-memory mapping. They are not a substitute for a versioned sweep artifact, failure-row contract, or manifest resolver.
-- Benchmark charts must be sourced from retained `benchmark-artifact/v1` evidence before public use. The presence of an `artifact_id`, a fitted curve, or a `benchmark_evidence` label does not make local timing a project claim. Follow [SPEC-GOV-001](../governance/SPEC-GOV-001-performance-claims.md), [SPEC-GOV-002](../governance/SPEC-GOV-002-disclosure-control.md), and [SPEC-GOV-004](../governance/SPEC-GOV-004-benchmarking-plan.md).
+- Public `plot_runtime_scaling`, `plot_memory_scaling`, `plot_solver_comparison`, `plot_success_failure_summary`, `plot_cpu_gpu_error_comparison`, and `save_mwis_benchmark_figure` accept only a validated `benchmark-artifact/v1` envelope or JSON path. Their `plot_diagnostic_*` and `save_diagnostic_mwis_figure` counterparts accept ordinary mappings, are diagnostic-only, and must not support public performance claims. Follow [SPEC-GOV-001](../governance/SPEC-GOV-001-performance-claims.md), [SPEC-GOV-002](../governance/SPEC-GOV-002-disclosure-control.md), and [SPEC-GOV-004](../governance/SPEC-GOV-004-benchmarking-plan.md).
 
 ## 📋 Quick Reference Card
 
@@ -83,11 +83,16 @@ This is the canonical Phase 19 Python API reference. Plotting helpers are analys
 
 | Function | Module | Purpose | Returns |
 |----------|--------|---------|---------|
-| [`plot_runtime_scaling()`](#plot_runtime_scaling) | `viz.benchmark_perf` | Runtime vs atom count scaling | `Axes` |
-| [`plot_memory_scaling()`](#plot_memory_scaling) | `viz.benchmark_perf` | Memory usage scaling curve | `Axes` |
-| [`plot_solver_comparison()`](#plot_solver_comparison) | `viz.benchmark_perf` | Multi-solver performance comparison | `Axes` |
-| [`plot_success_failure_summary()`](#plot_success_failure_summary) | `viz.benchmark_perf` | Success/failure rate summary | `Axes` |
-| [`plot_cpu_gpu_error_comparison()`](#plot_cpu_gpu_error_comparison) | `viz.benchmark_perf` | CPU vs GPU error comparison | `Axes` |
+| [`plot_runtime_scaling()`](#plot_runtime_scaling) | `viz` | Governed runtime scaling from `benchmark-artifact/v1` | `Axes` |
+| `plot_diagnostic_runtime_scaling()` | `viz` | Diagnostic runtime scaling from caller mappings | `Axes` |
+| [`plot_memory_scaling()`](#plot_memory_scaling) | `viz` | Governed memory scaling from `benchmark-artifact/v1` | `Axes` |
+| `plot_diagnostic_memory_scaling()` | `viz` | Diagnostic memory scaling from caller mappings | `Axes` |
+| [`plot_solver_comparison()`](#plot_solver_comparison) | `viz` | Governed solver comparison from `benchmark-artifact/v1` | `Axes` |
+| `plot_diagnostic_solver_comparison()` | `viz` | Diagnostic solver comparison from caller mappings | `Axes` |
+| [`plot_success_failure_summary()`](#plot_success_failure_summary) | `viz` | Governed success/failure summary from `benchmark-artifact/v1` | `Axes` |
+| `plot_diagnostic_success_failure_summary()` | `viz` | Diagnostic success/failure summary from caller mappings | `Axes` |
+| [`plot_cpu_gpu_error_comparison()`](#plot_cpu_gpu_error_comparison) | `viz` | Governed CPU/GPU error comparison from `benchmark-artifact/v1` | `Axes` |
+| `plot_diagnostic_cpu_gpu_error_comparison()` | `viz` | Diagnostic CPU/GPU error comparison from caller mappings | `Axes` |
 | [`plot_state_probabilities()`](#plot_state_probabilities) | `viz.small_system_debug` | State vector \|ψᵢ\|² bar chart | `Axes` |
 | [`plot_density_matrix_diagonal()`](#plot_density_matrix_diagonal) | `viz.small_system_debug` | Density matrix diagonal elements | `Axes` |
 | [`plot_density_matrix_magnitude()`](#plot_density_matrix_magnitude) | `viz.small_system_debug` | Density matrix magnitude heatmap | `Axes` |

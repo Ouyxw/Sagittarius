@@ -53,6 +53,7 @@ The repository scripts that produce claim-ready artifacts are:
 Generated benchmark JSON files carry `benchmark-artifact/v1`, companion CSV/Markdown tables, runtime/build/backend metadata, process memory usage, and linked run manifests when simulations produce `SimulationResult` objects.
 
 ## Visualization Outputs
+Public `plot_runtime_scaling`, `plot_memory_scaling`, `plot_solver_comparison`, `plot_success_failure_summary`, `plot_cpu_gpu_error_comparison`, and `save_mwis_benchmark_figure` validate a complete `benchmark-artifact/v1` envelope before rendering. The separate `plot_diagnostic_*` and `save_diagnostic_mwis_figure` helpers accept local mappings solely for diagnostic use and are not claim-ready evidence.
 
 Phase 19 figures, sidecars, and reports are presentation outputs. They do not convert local timing dictionaries into benchmark evidence. Before a chart, report, or exported image is used to support a public performance statement, reviewers must verify the source `benchmark-artifact/v1`, linked manifests, version metadata, and disclosure workflow. A caller-provided `artifact_id` or `benchmark_evidence` classification is not evidence validation.
 

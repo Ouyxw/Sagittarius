@@ -1,3 +1,4 @@
+import json
 """
 MWIS visualization tests.
 
@@ -795,9 +796,9 @@ def test_annotate_with_approximation_ratio(output_dir, simple_register, sample_w
     assert os.path.exists(save_path)
 
 
-def test_save_mwis_benchmark_figure(output_dir, simple_register, sample_weights, sample_edges):
+def test_save_diagnostic_mwis_figure(output_dir, simple_register, sample_weights, sample_edges):
     """Test saving benchmark figure with metadata sidecar."""
-    from sagittarius.viz import save_mwis_benchmark_figure
+    from sagittarius.viz import save_diagnostic_mwis_figure
     
     fig, ax = plt.subplots(figsize=(10, 10))
     plot_mwis_problem(
@@ -829,7 +830,7 @@ def test_save_mwis_benchmark_figure(output_dir, simple_register, sample_weights,
     }
     
     output_path = os.path.join(output_dir, "mwis_benchmark_test.png")
-    save_mwis_benchmark_figure(fig, output_path, metadata, dpi=150)
+    save_diagnostic_mwis_figure(fig, output_path, metadata, dpi=150)
     
     # Check both files exist
     assert os.path.exists(output_path)
@@ -883,7 +884,7 @@ def test_plot_mwis_comparison_metadata_validation(output_dir, simple_register, s
 
 def test_benchmark_workflow_integration(output_dir, chain_register):
     """Test complete benchmark workflow integration."""
-    from sagittarius.viz import save_mwis_benchmark_figure
+    from sagittarius.viz import save_diagnostic_mwis_figure
     
     # Simulate benchmark case: N=5, density=0.5, seed=42
     n_atoms = 5
@@ -938,9 +939,44 @@ def test_benchmark_workflow_integration(output_dir, chain_register):
     }
     
     output_path = os.path.join(output_dir, "mwis_benchmark_workflow.png")
-    save_mwis_benchmark_figure(fig, output_path, metadata, dpi=150)
+    save_diagnostic_mwis_figure(fig, output_path, metadata, dpi=150)
     
     assert os.path.exists(output_path)
     assert os.path.exists(output_path.replace('.png', '.json'))
     
     plt.close()
+
+
+def test_governed_mwis_export_rejects_unvalidated_metadata(tmp_path):
+    from sagittarius.viz import save_mwis_benchmark_figure
+
+    fig, _ = plt.subplots()
+    with pytest.raises(ValueError, match="required governance fields"):
+        save_mwis_benchmark_figure(
+            fig,
+            str(tmp_path / "governed-mwis.png"),
+            {"artifact_id": "not-an-artifact"},
+        )
+
+
+def test_governed_mwis_export_writes_validated_artifact_sidecar(tmp_path):
+    from sagittarius.viz import save_mwis_benchmark_figure
+
+    artifact = {
+        "schema_version": "benchmark-artifact/v1",
+        "artifact_type": "sagittarius.benchmark",
+        "name": "mwis-visualization-test",
+        "parameters": {"problem": "mwis"},
+        "timings": [{"n_atoms": 2, "runtime_seconds": 0.1}],
+        "versions": {"schema_version": "version-info/v1"},
+        "hardware": {"platform": "test"},
+        "diagnostics": {"schema_version": "doctor/v2.1"},
+        "run_manifests": [],
+        "artifacts": {"csv": None, "markdown": None},
+    }
+    fig, _ = plt.subplots()
+    output = tmp_path / "governed-mwis.png"
+    save_mwis_benchmark_figure(fig, str(output), artifact)
+    sidecar = json.loads(output.with_suffix(".json").read_text())
+    assert sidecar["schema_version"] == "benchmark-artifact/v1"
+    assert sidecar["source_benchmark_artifact"]["name"] == "mwis-visualization-test"

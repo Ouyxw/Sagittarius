@@ -24,7 +24,7 @@ from sagittarius.viz.mwis_viz import (
     plot_mwis_problem,
     plot_mwis_comparison,
     annotate_solution_quality,
-    save_mwis_benchmark_figure,
+    save_diagnostic_mwis_figure,
 )
 from sagittarius.viz.basis_diagnostics import (
     generate_basis_diagnostics,
@@ -62,11 +62,11 @@ from sagittarius.viz.mwis_diagnostics import (
     plot_mwis_feasibility_diagram,
 )
 from sagittarius.viz.benchmark_perf import (
-    plot_runtime_scaling,
-    plot_memory_scaling,
-    plot_solver_comparison,
-    plot_success_failure_summary,
-    plot_cpu_gpu_error_comparison,
+    plot_diagnostic_runtime_scaling,
+    plot_diagnostic_memory_scaling,
+    plot_diagnostic_solver_comparison,
+    plot_diagnostic_success_failure_summary,
+    plot_diagnostic_cpu_gpu_error_comparison,
 )
 from sagittarius.viz.small_system_debug import (
     plot_state_probabilities,
@@ -105,7 +105,7 @@ __all__ = [
     "plot_mwis_problem",
     "plot_mwis_comparison",
     "annotate_solution_quality",
-    "save_mwis_benchmark_figure",
+    "save_diagnostic_mwis_figure",
     "generate_basis_diagnostics",
     "plot_basis_space_diagram",
     "plot_bitstring_space_grid",
@@ -131,11 +131,11 @@ __all__ = [
     "plot_mwis_convergence",
     "plot_mwis_feasibility_diagram",
     # Benchmark performance analysis
-    "plot_runtime_scaling",
-    "plot_memory_scaling",
-    "plot_solver_comparison",
-    "plot_success_failure_summary",
-    "plot_cpu_gpu_error_comparison",
+    "plot_diagnostic_runtime_scaling",
+    "plot_diagnostic_memory_scaling",
+    "plot_diagnostic_solver_comparison",
+    "plot_diagnostic_success_failure_summary",
+    "plot_diagnostic_cpu_gpu_error_comparison",
     # Small-system debugging views
     "plot_state_probabilities",
     "plot_density_matrix_diagonal",
@@ -155,4 +155,24 @@ __all__ = [
     "plot_failed_run_mask",
     "extract_sweep_summary",
     "generate_synthetic_sweep_data",
+]
+
+from sagittarius.viz.benchmark_governed import (
+    plot_runtime_scaling,
+    plot_memory_scaling,
+    plot_solver_comparison,
+    plot_success_failure_summary,
+    plot_cpu_gpu_error_comparison,
+    validate_benchmark_artifact,
+)
+from sagittarius.viz.mwis_governed import save_mwis_benchmark_figure
+
+__all__ += [
+    "plot_runtime_scaling",
+    "plot_memory_scaling",
+    "plot_solver_comparison",
+    "plot_success_failure_summary",
+    "plot_cpu_gpu_error_comparison",
+    "validate_benchmark_artifact",
+    "save_mwis_benchmark_figure",
 ]

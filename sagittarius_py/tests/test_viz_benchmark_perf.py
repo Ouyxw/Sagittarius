@@ -12,11 +12,11 @@ def cleanup_matplotlib_figures():
     yield
     plt.close('all')
 from sagittarius.viz.benchmark_perf import (
-    plot_runtime_scaling,
-    plot_memory_scaling,
-    plot_solver_comparison,
-    plot_success_failure_summary,
-    plot_cpu_gpu_error_comparison,
+    plot_diagnostic_runtime_scaling,
+    plot_diagnostic_memory_scaling,
+    plot_diagnostic_solver_comparison,
+    plot_diagnostic_success_failure_summary,
+    plot_diagnostic_cpu_gpu_error_comparison,
 )
 
 
@@ -32,7 +32,7 @@ class TestPlotRuntimeScaling:
             {'n_atoms': 20, 'runtime_seconds': 8.7, 'artifact_id': 'bench_004'},
         ]
         
-        ax = plot_runtime_scaling(artifacts, show_fit=True)
+        ax = plot_diagnostic_runtime_scaling(artifacts, show_fit=True)
         assert ax is not None
         assert ax.get_xlabel() == 'Number of Atoms (N)'
         assert ax.get_ylabel() == 'Runtime (seconds)'
@@ -45,7 +45,7 @@ class TestPlotRuntimeScaling:
         ]
         
         with pytest.raises(ValueError, match="missing 'n_atoms'"):
-            plot_runtime_scaling(artifacts)
+            plot_diagnostic_runtime_scaling(artifacts)
     
     def test_missing_runtime_field(self):
         """Test error when runtime_seconds field is missing."""
@@ -54,7 +54,7 @@ class TestPlotRuntimeScaling:
         ]
         
         with pytest.raises(ValueError, match="missing 'runtime_seconds'"):
-            plot_runtime_scaling(artifacts)
+            plot_diagnostic_runtime_scaling(artifacts)
     
     def test_custom_title(self):
         """Test custom title override."""
@@ -63,7 +63,7 @@ class TestPlotRuntimeScaling:
             {'n_atoms': 10, 'runtime_seconds': 0.5},
         ]
         
-        ax = plot_runtime_scaling(artifacts, title="Custom Title")
+        ax = plot_diagnostic_runtime_scaling(artifacts, title="Custom Title")
         assert "Custom Title" in ax.get_title()
         plt.close()
     
@@ -74,7 +74,7 @@ class TestPlotRuntimeScaling:
             {'n_atoms': 10, 'runtime_seconds': 0.5},
         ]
         
-        ax = plot_runtime_scaling(artifacts, show_fit=True)
+        ax = plot_diagnostic_runtime_scaling(artifacts, show_fit=True)
         # Should not raise error, just skip fitting
         assert ax is not None
         plt.close()
@@ -91,7 +91,7 @@ class TestPlotMemoryScaling:
             {'hilbert_dim': 128, 'memory_bytes': 1024 * 2000, 'artifact_id': 'mem_003'},
         ]
         
-        ax = plot_memory_scaling(artifacts, y_unit='KB')
+        ax = plot_diagnostic_memory_scaling(artifacts, y_unit='KB')
         assert ax is not None
         assert 'KB' in ax.get_ylabel()
         plt.close()
@@ -103,7 +103,7 @@ class TestPlotMemoryScaling:
         ]
         
         with pytest.raises(ValueError, match="Invalid y_unit"):
-            plot_memory_scaling(artifacts, y_unit='TB')
+            plot_diagnostic_memory_scaling(artifacts, y_unit='TB')
     
     def test_missing_hilbert_dim(self):
         """Test error when hilbert_dim is missing."""
@@ -112,7 +112,7 @@ class TestPlotMemoryScaling:
         ]
         
         with pytest.raises(ValueError, match="missing 'hilbert_dim'"):
-            plot_memory_scaling(artifacts)
+            plot_diagnostic_memory_scaling(artifacts)
 
 
 class TestPlotSolverComparison:
@@ -126,7 +126,7 @@ class TestPlotSolverComparison:
             {'solver_name': 'MCWF', 'metric_value': 3.67, 'metric_std': 0.23},
         ]
         
-        ax = plot_solver_comparison(results, metric='runtime')
+        ax = plot_diagnostic_solver_comparison(results, metric='runtime')
         assert ax is not None
         assert 'Runtime' in ax.get_xlabel()
         plt.close()
@@ -138,7 +138,7 @@ class TestPlotSolverComparison:
             {'solver_name': 'EM', 'metric_value': 2.45},
         ]
         
-        ax = plot_solver_comparison(results, show_error_bars=False)
+        ax = plot_diagnostic_solver_comparison(results, show_error_bars=False)
         assert ax is not None
         plt.close()
     
@@ -149,7 +149,7 @@ class TestPlotSolverComparison:
         ]
         
         with pytest.raises(ValueError, match="missing 'solver_name'"):
-            plot_solver_comparison(results)
+            plot_diagnostic_solver_comparison(results)
 
 
 class TestPlotSuccessFailureSummary:
@@ -164,7 +164,7 @@ class TestPlotSuccessFailureSummary:
             {'status': 'success', 'solver': 'EM', 'n_atoms': 10},
         ]
         
-        ax = plot_success_failure_summary(runs, group_by='solver')
+        ax = plot_diagnostic_success_failure_summary(runs, group_by='solver')
         assert ax is not None
         assert 'Solver' in ax.get_xlabel()
         plt.close()
@@ -177,7 +177,7 @@ class TestPlotSuccessFailureSummary:
             {'status': 'success', 'solver': 'Tsit5', 'n_atoms': 15},
         ]
         
-        ax = plot_success_failure_summary(runs, group_by='n_atoms')
+        ax = plot_diagnostic_success_failure_summary(runs, group_by='n_atoms')
         assert ax is not None
         plt.close()
     
@@ -188,7 +188,7 @@ class TestPlotSuccessFailureSummary:
         ]
         
         with pytest.raises(ValueError, match="missing 'status'"):
-            plot_success_failure_summary(runs)
+            plot_diagnostic_success_failure_summary(runs)
 
 
 class TestPlotCpuGpuErrorComparison:
@@ -205,7 +205,7 @@ class TestPlotCpuGpuErrorComparison:
             {'observable': 'pop_1', 'value': 0.503, 'reference_value': 0.5},
         ]
         
-        ax = plot_cpu_gpu_error_comparison(cpu_results, gpu_results)
+        ax = plot_diagnostic_cpu_gpu_error_comparison(cpu_results, gpu_results)
         assert ax is not None
         assert 'Relative Error' in ax.get_ylabel()
         plt.close()
@@ -219,7 +219,7 @@ class TestPlotCpuGpuErrorComparison:
             {'observable': 'energy', 'value': -1.235, 'reference_value': -1.230},
         ]
         
-        ax = plot_cpu_gpu_error_comparison(
+        ax = plot_diagnostic_cpu_gpu_error_comparison(
             cpu_results, gpu_results, error_metric='absolute_error'
         )
         assert ax is not None
@@ -235,7 +235,7 @@ class TestPlotCpuGpuErrorComparison:
         ]
         
         with pytest.raises(ValueError, match="No common observables"):
-            plot_cpu_gpu_error_comparison(cpu_results, gpu_results)
+            plot_diagnostic_cpu_gpu_error_comparison(cpu_results, gpu_results)
     
     def test_missing_fields(self):
         """Test error when required fields are missing."""
@@ -247,8 +247,45 @@ class TestPlotCpuGpuErrorComparison:
         ]
         
         with pytest.raises(ValueError, match="missing 'value'"):
-            plot_cpu_gpu_error_comparison(cpu_results, gpu_results)
+            plot_diagnostic_cpu_gpu_error_comparison(cpu_results, gpu_results)
 
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
+
+from sagittarius.viz.benchmark_governed import plot_runtime_scaling, validate_benchmark_artifact
+
+
+def _governed_artifact(rows):
+    return {
+        "schema_version": "benchmark-artifact/v1",
+        "artifact_type": "sagittarius.benchmark",
+        "name": "visualization-governance-test",
+        "parameters": {"scenario": "unit"},
+        "timings": rows,
+        "versions": {"schema_version": "version-info/v1"},
+        "hardware": {"platform": "test"},
+        "diagnostics": {"schema_version": "doctor/v2.1"},
+        "run_manifests": [],
+        "artifacts": {"csv": None, "markdown": None},
+    }
+
+
+def test_governed_runtime_plot_accepts_valid_artifact():
+    artifact = _governed_artifact([
+        {"n_atoms": 5, "runtime_seconds": 0.1},
+        {"n_atoms": 10, "runtime_seconds": 0.5},
+    ])
+    assert plot_runtime_scaling(artifact) is not None
+
+
+def test_governed_runtime_plot_rejects_diagnostic_rows():
+    with pytest.raises(ValueError, match="benchmark-artifact/v1"):
+        plot_runtime_scaling([{"n_atoms": 5, "runtime_seconds": 0.1}])
+
+
+def test_governed_artifact_rejects_wrong_schema_version():
+    artifact = _governed_artifact([{"n_atoms": 5, "runtime_seconds": 0.1}])
+    artifact["schema_version"] = "benchmark-artifact/v0"
+    with pytest.raises(ValueError, match="schema_version"):
+        validate_benchmark_artifact(artifact)

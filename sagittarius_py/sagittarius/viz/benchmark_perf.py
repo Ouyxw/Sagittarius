@@ -1,14 +1,10 @@
 """
 Benchmark performance analysis visualization utilities.
 
-Generates standardized charts from governed benchmark artifacts for performance analysis,
+Provides diagnostic chart primitives for caller-supplied rows. Governed public entry points live in `benchmark_governed.py` and validate `benchmark-artifact/v1` before delegating here.
 including runtime scaling, memory usage, solver comparisons, and success/failure summaries.
 
-All functions are backend-free and operate on pure Python/NumPy data structures.
-Charts include "DIAGNOSTIC VIEW" disclaimers and are NOT for hardware calibration.
-
-IMPORTANT: Performance conclusions must follow governance specifications (SPEC-GOV-001).
-Local timing data should NOT be used as official performance evidence without proper validation.
+All functions in this module are explicitly diagnostic-only and operate on pure Python/NumPy data structures. They must not be used for hardware calibration or performance claims.
 """
 
 import numpy as np
@@ -36,7 +32,7 @@ def _load_benchmark_artifact(artifact_path: Union[str, Path]) -> Dict[str, Any]:
     return data
 
 
-def plot_runtime_scaling(
+def plot_diagnostic_runtime_scaling(
     artifacts: List[Dict[str, Any]],
     ax: Optional[Axes] = None,
     title: Optional[str] = None,
@@ -147,7 +143,7 @@ def plot_runtime_scaling(
     return ax
 
 
-def plot_memory_scaling(
+def plot_diagnostic_memory_scaling(
     artifacts: List[Dict[str, Any]],
     ax: Optional[Axes] = None,
     title: Optional[str] = None,
@@ -242,7 +238,7 @@ def plot_memory_scaling(
     return ax
 
 
-def plot_solver_comparison(
+def plot_diagnostic_solver_comparison(
     results: List[Dict[str, Any]],
     metric: str = 'runtime',
     ax: Optional[Axes] = None,
@@ -346,7 +342,7 @@ def plot_solver_comparison(
     return ax
 
 
-def plot_success_failure_summary(
+def plot_diagnostic_success_failure_summary(
     benchmark_runs: List[Dict[str, Any]],
     ax: Optional[Axes] = None,
     title: Optional[str] = None,
@@ -468,7 +464,7 @@ def plot_success_failure_summary(
     return ax
 
 
-def plot_cpu_gpu_error_comparison(
+def plot_diagnostic_cpu_gpu_error_comparison(
     cpu_results: List[Dict[str, Any]],
     gpu_results: List[Dict[str, Any]],
     ax: Optional[Axes] = None,

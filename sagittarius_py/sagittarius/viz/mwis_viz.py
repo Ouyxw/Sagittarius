@@ -429,7 +429,7 @@ def annotate_solution_quality(
            color=color if conflict_count > 0 else 'black')
 
 
-def save_mwis_benchmark_figure(
+def save_diagnostic_mwis_figure(
     fig,
     output_path: str,
     metadata: Dict[str, Any],
@@ -437,7 +437,7 @@ def save_mwis_benchmark_figure(
     save_metadata_sidecar: bool = True,
 ) -> None:
     """
-    Save MWIS benchmark figure with optional JSON metadata sidecar.
+    Save diagnostic MWIS figure with optional JSON metadata sidecar.
     
     Saves the matplotlib figure and optionally generates a JSON sidecar file
     containing benchmark metadata for artifact tracking and governance compliance.
