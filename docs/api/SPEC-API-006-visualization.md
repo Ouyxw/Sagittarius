@@ -4,6 +4,39 @@
 
 ---
 
+## Contract Status and Acceptance Evidence
+
+This is the canonical Phase 19 Python API reference. Plotting helpers are analysis and reporting tools; they do not create hardware-calibration evidence or performance claims. Runtime docstrings remain the authoritative source for exact signatures.
+
+| Criterion | Status | Evidence and boundary |
+| :---: | :--- | :--- |
+| 1 | Met | `plot_register` and `plot_interaction_graph`; backend-free rendering is covered by register tests. |
+| 2 | Met | Pulse sampling and plotting support the documented declaration forms and zero-based register ordering; covered by pulse tests. |
+| 3 | Met | `plot_observables` accepts selected series and axes without replacing `SimulationResult.plot`; covered by result tests. |
+| 4 | Met | `plot_population_heatmap` validates compatible population data and atom ordering. |
+| 5 | Partial | `plot_bitstring_distribution` renders readout-capable result data. Dedicated plotting coverage for a `load_result()` artifact round trip is still required. |
+| 6 | Met | `plot_shot_histogram` consumes seeded measurement-sample data. |
+| 7 | Met | Basis diagnostics report represented and forbidden bitstrings, with an explicit small-system limit. |
+| 8 | Met | MWIS helpers render node selection, weights, graph edges, and violations for small examples. |
+| 9 | Met | Extractors and plotters are separate public helpers and return reusable Python or matplotlib objects. |
+| 10 | Met | This document and all exported diagnostic views distinguish exploratory analysis from governed evidence. |
+| 11 | Met | Basis and geometry diagnostics provide pruning, bitstrings, interaction matrices, and blockade adjacency before simulation. |
+| 12 | Met | Correlation helpers validate compatible observables and raise actionable errors when data is absent. |
+| 13 | Met | Spatial snapshot and frame helpers preserve positions, values, and time metadata. |
+| 14 | Met | Open-system diagnostic views require the appropriate trace, positivity, comparison, or trajectory data. |
+| 15 | Partial | Sweep plots preserve axes, failed-run masks, and caller-supplied manifest links, but no stable user-facing sweep artifact schema exists. |
+| 16 | Partial | Benchmark plots are diagnostic views. They do not validate dictionary inputs as `benchmark-artifact/v1`; governance review remains mandatory. |
+| 17 | Met | State-vector and density-matrix helpers reject missing, malformed, and unsafe-size inputs. |
+| 18 | Met | Figure export writes optional PNG, SVG, or PDF outputs and provenance sidecars with available artifact, schema, seed, backend, basis, and plot metadata. |
+| 19 | Partial | The visualization suite covers rendering and validation with non-interactive matplotlib in its rendering tests. A dedicated no-unexpected-Julia-initialization regression remains required before Phase 19 can be closed. |
+
+## Scope and Governance Boundaries
+
+- Visualization is backend-free only for helpers that consume Python data already available to the caller. A visualization helper neither initializes nor validates a simulation backend.
+- Export sidecars and report classifications are descriptive metadata, not new artifact schemas and not independent evidence validation.
+- Sweep helpers accept an in-memory mapping. They are not a substitute for a versioned sweep artifact, failure-row contract, or manifest resolver.
+- Benchmark charts must be sourced from retained `benchmark-artifact/v1` evidence before public use. The presence of an `artifact_id`, a fitted curve, or a `benchmark_evidence` label does not make local timing a project claim. Follow [SPEC-GOV-001](../governance/SPEC-GOV-001-performance-claims.md), [SPEC-GOV-002](../governance/SPEC-GOV-002-disclosure-control.md), and [SPEC-GOV-004](../governance/SPEC-GOV-004-benchmarking-plan.md).
+
 ## 📋 Quick Reference Card
 
 ### Core Visualization (Requirements 1-6)

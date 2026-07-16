@@ -173,6 +173,7 @@ See [`SPEC-GOV-004-benchmarking-plan.md`](../governance/SPEC-GOV-004-benchmarkin
 | Phase 14 | Noise model metadata, custom Lindblad declarations, correlated noise, stochastic realization metadata. |
 | Phase 15 | Implemented seed and output-grid metadata; planned sampling results, experiment configs, and sweep artifacts. |
 | Phase 16 | Optional readout noise and interop/export metadata. |
+| Phase 19 | Visualization figures, report files, and sidecars are derived presentation outputs; no versioned sweep artifact or visualization schema is currently defined. |
 
 ## Maintenance Triggers
 

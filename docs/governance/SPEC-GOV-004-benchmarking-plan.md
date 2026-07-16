@@ -86,6 +86,10 @@ Performance results are publishable only after the relevant correctness gates pa
 - MWIS examples are checked against exact ILP or another declared exact baseline;
 - solver-sensitive scenarios include a tighter-tolerance or smaller-step sanity comparison.
 
+## Visualization and Report Outputs
+
+Visualization helpers may summarize governed benchmark rows, but chart generation is not a benchmark-validation step. Reports and figure sidecars must retain the source artifact path or identifier when available and must not use fitted curves, local timing dictionaries, or user-selected classifications as performance evidence. Public use still requires the artifact and disclosure checks in this plan and in `SPEC-GOV-001`.
+
 ## Reporting Rules
 
 Benchmark reports should use bounded wording from [`SPEC-GOV-001-performance-claims.md`](SPEC-GOV-001-performance-claims.md).

@@ -30,6 +30,14 @@ Sagittarius is an early research SDK. This page records practical limits and uns
 - Current open-system noise is limited to local Markovian Rydberg decay and pure dephasing. Custom Lindblad channels, correlated dephasing, collective decay, stochastic Hamiltonian noise, time-dependent rates, and readout errors are planned or unsupported; see [`SPEC-PHYS-004-noise-models.md`](../physics/SPEC-PHYS-004-noise-models.md).
 - Reduced-basis simulations should be cross-checked against dense/full-basis evolution for small systems when introducing new physics assumptions.
 
+## Visualization and Reporting
+
+- Phase 19 visualization helpers are analysis tools, not hardware-calibration controls, numerical verification, or independent performance evidence. They require compatible Python-side result data and do not make unavailable observables or manifest fields available.
+- Register and geometry views are two-dimensional. Basis and state diagnostics intentionally reject systems above their documented small-system limits rather than attempting unreadable or unsafe plots.
+- Sweep helpers currently accept in-memory mappings with caller-supplied failed-run and manifest-link fields. There is no versioned user-facing sweep artifact schema, artifact-path resolver, or retained failure-row contract.
+- Figure sidecars and reports preserve available provenance fields, but their classification is descriptive. A `benchmark_evidence` label or an artifact ID does not validate an artifact or authorize a public performance statement.
+- Benchmark plotting functions can render ordinary dictionaries for diagnostic use. Before public use, users must validate and retain `benchmark-artifact/v1` evidence and follow the governance documents linked below.
+
 ## Data and Reproducibility
 
 - Python `SimulationResult.save()` persists a `result-artifact/v1` envelope with data, metadata, diagnostics, a validated `run-manifest/v1` manifest for SDK-generated simulation results, and an embedded `shared-result/v1` payload. Julia-native result writers should emit the same shared payload shape for cross-language tooling.
