@@ -6,7 +6,7 @@
 
 ## 📋 Quick Reference Card
 
-### Core Visualization (需求 1-6)
+### Core Visualization (Requirements 1-6)
 
 | Function | Module | Purpose | Returns |
 |----------|--------|---------|---------|
@@ -20,7 +20,7 @@
 | [`plot_shot_histogram()`](#plot_shot_histogram) | `viz.result` | Measurement shot distribution histogram | `Axes` |
 | [`plot_population_heatmap()`](#plot_population_heatmap) | `viz.result` | Atom×time population heatmap | `Axes` |
 
-### Diagnostics & Analysis (需求 7-14)
+### Diagnostics & Analysis (Requirements 7-14)
 
 | Function | Module | Purpose | Returns |
 |----------|--------|---------|---------|
@@ -46,7 +46,7 @@
 | [`plot_mcwf_vs_lindblad()`](#plot_mcwf_vs_lindblad) | `viz.diagnostics` | MCWF vs Lindblad comparison | `Axes` |
 | [`plot_trajectory_statistics()`](#plot_trajectory_statistics) | `viz.diagnostics` | Trajectory mean±σ confidence intervals | `Axes` |
 
-### Benchmark & Debugging (需求 15-17)
+### Benchmark & Debugging (Requirements 15-17)
 
 | Function | Module | Purpose | Returns |
 |----------|--------|---------|---------|
@@ -60,7 +60,7 @@
 | [`plot_density_matrix_magnitude()`](#plot_density_matrix_magnitude) | `viz.small_system_debug` | Density matrix magnitude heatmap | `Axes` |
 | [`plot_density_matrix_phase()`](#plot_density_matrix_phase) | `viz.small_system_debug` | Density matrix phase heatmap | `Axes` |
 
-### Export & Reporting (需求 18-20)
+### Export & Reporting (Requirements 18-20)
 
 | Function | Module | Purpose | Returns |
 |----------|--------|---------|---------|

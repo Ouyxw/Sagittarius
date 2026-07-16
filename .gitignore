@@ -19,3 +19,12 @@ comprehensive_viz_outputs/
 example_outputs/
 sagittarius_py/comprehensive_viz_outputs/
 sagittarius_py/example_outputs/
+
+# Generated visualization examples, reports, and local test logs
+animation_frames.json
+mcwf_result_with_trajectories.json
+pytest_*_output.txt
+sagittarius_py/animation_frames.json
+sagittarius_py/example_*.json
+viz_demo_comprehensive/
+workspace/examples/output/

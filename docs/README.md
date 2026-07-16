@@ -23,6 +23,7 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Pulse and indexing contract](api/SPEC-API-001-pulse-and-indexing-contract.md)
 - [Observable library contract](api/SPEC-API-004-observable-library.md)
 - [Solver configuration contract](api/SPEC-API-005-solver-configuration.md)
+- [Visualization and reporting API](api/SPEC-API-006-visualization.md)
 
 ## Physics Guides
 

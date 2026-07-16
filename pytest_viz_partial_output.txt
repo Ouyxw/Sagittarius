@@ -1,9 +1,0 @@
-.....................................................................    [100%]
-=============================== warnings summary ===============================
-tests/test_viz_mwis.py::test_plot_mwis_comparison_three_solutions
-tests/test_viz_mwis.py::test_benchmark_workflow_integration
-  /workspaces/Sagittarius/sagittarius_py/sagittarius/viz/mwis_viz.py:386: UserWarning: Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all Axes decorations.
-    plt.tight_layout()
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-69 passed, 2 warnings in 8.95s
