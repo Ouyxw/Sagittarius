@@ -94,3 +94,51 @@ def test_mcwf_seed_and_saveat_are_reproducible():
     assert first.manifest["random"]["effective_seed"] == 123
     assert first.manifest["solver"]["saveat"] == 9
     assert np.allclose(first.manifest["solver"]["effective_saveat"], np.linspace(0.0, 2.0, 9))
+
+
+def test_mcwf_individual_trajectories_bridge_and_artifact_round_trip(tmp_path):
+    """Exercise Julia MCWF samples through Python normalization and persistence."""
+    from sagittarius import load_result
+
+    trajectory_count = 8
+    time_count = 5
+    result_path = tmp_path / "mcwf-trajectories.json"
+    register = Register([Atom(0, 0)], C6=0.0)
+    sequence = PulseSequence(omega=0.0, delta=0.0)
+    config = SolverConfig(
+        gamma=0.4,
+        use_mc=True,
+        n_trajectories=trajectory_count,
+        seed=20260716,
+        saveat=time_count,
+        store_trajectories=True,
+    )
+
+    result = Simulation(register, sequence, config).run(
+        np.array([0.0, 1.0], dtype=complex),
+        0.0,
+        1.0,
+        observables={"pop": 0},
+    )
+
+    assert result.trajectories is not None
+    assert list(result.trajectories) == ["pop"]
+    assert result.trajectories["pop"].shape == (trajectory_count, time_count)
+    assert np.all(np.isfinite(result.trajectories["pop"]))
+    assert np.allclose(result.data["t"], np.linspace(0.0, 1.0, time_count))
+    assert np.allclose(result.data["pop"], result.trajectories["pop"].mean(axis=0))
+    assert result.manifest["solver"]["trajectory_storage"] == {
+        "requested": True,
+        "stored": True,
+        "schema_version": "trajectory-data/v1",
+        "axis_order": ["trajectory", "time"],
+        "observable_names": ["pop"],
+        "trajectory_count": trajectory_count,
+        "time_count": time_count,
+    }
+
+    result.save(result_path)
+    loaded = load_result(result_path)
+    assert np.array_equal(loaded.trajectories["pop"], result.trajectories["pop"])
+    assert loaded.data == result.data
+    assert loaded.manifest["solver"]["trajectory_storage"] == result.manifest["solver"]["trajectory_storage"]
