@@ -13,11 +13,11 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from sagittarius.viz import (
-    plot_runtime_scaling,
-    plot_memory_scaling,
-    plot_solver_comparison,
-    plot_success_failure_summary,
-    plot_cpu_gpu_error_comparison,
+    plot_diagnostic_runtime_scaling,
+    plot_diagnostic_memory_scaling,
+    plot_diagnostic_solver_comparison,
+    plot_diagnostic_success_failure_summary,
+    plot_diagnostic_cpu_gpu_error_comparison,
 )
 
 # 输出目录配置 - example同目录下的output文件夹
@@ -42,7 +42,7 @@ def example_runtime_scaling():
     ]
     
     # Generate plot with power-law fit
-    ax = plot_runtime_scaling(artifacts, show_fit=True)
+    ax = plot_diagnostic_runtime_scaling(artifacts, show_fit=True)
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'benchmark_runtime_scaling.png'), dpi=150, bbox_inches='tight')
     print("✓ Saved: benchmark_runtime_scaling.png")
@@ -69,7 +69,7 @@ def example_memory_scaling():
     ]
     
     # Generate plot with exponential fit
-    ax = plot_memory_scaling(artifacts)
+    ax = plot_diagnostic_memory_scaling(artifacts)
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'benchmark_memory_scaling.png'), dpi=150, bbox_inches='tight')
     print("✓ Saved: benchmark_memory_scaling.png")
@@ -95,7 +95,7 @@ def example_solver_comparison():
     ]
     
     # Generate comparison plot
-    ax = plot_solver_comparison(artifacts)
+    ax = plot_diagnostic_solver_comparison(artifacts)
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'benchmark_solver_comparison.png'), dpi=150, bbox_inches='tight')
     print("✓ Saved: benchmark_solver_comparison.png")
@@ -133,14 +133,14 @@ def example_success_failure_summary():
                 })
     
     # Generate success/failure summary by solver type
-    ax = plot_success_failure_summary(artifacts, group_by='solver_type')
+    ax = plot_diagnostic_success_failure_summary(artifacts, group_by='solver_type')
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'benchmark_success_failure_solver.png'), dpi=150, bbox_inches='tight')
     print("✓ Saved: benchmark_success_failure_solver.png")
     plt.close()
     
     # Generate success/failure summary by atom count
-    ax = plot_success_failure_summary(artifacts, group_by='n_atoms')
+    ax = plot_diagnostic_success_failure_summary(artifacts, group_by='n_atoms')
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'benchmark_success_failure_size.png'), dpi=150, bbox_inches='tight')
     print("✓ Saved: benchmark_success_failure_size.png")
@@ -184,7 +184,7 @@ def example_cpu_gpu_comparison():
         })
     
     # Generate CPU vs GPU comparison
-    ax = plot_cpu_gpu_error_comparison(cpu_results, gpu_results)
+    ax = plot_diagnostic_cpu_gpu_error_comparison(cpu_results, gpu_results)
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'benchmark_cpu_gpu_comparison.png'), dpi=150, bbox_inches='tight')
     print("✓ Saved: benchmark_cpu_gpu_comparison.png")
