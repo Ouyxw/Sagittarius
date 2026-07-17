@@ -173,6 +173,7 @@ See [`SPEC-GOV-004-benchmarking-plan.md`](../governance/SPEC-GOV-004-benchmarkin
 | Phase 14 | Noise model metadata, custom Lindblad declarations, correlated noise, stochastic realization metadata. |
 | Phase 15 | Implemented seed and output-grid metadata; planned sampling results, experiment configs, and sweep artifacts. |
 | Phase 16 | Optional readout noise and interop/export metadata. |
+| Phase 19 | Visualization figures, report files, and sidecars are derived presentation outputs; no versioned sweep artifact or visualization schema is currently defined. |
 
 ## Maintenance Triggers
 
@@ -183,3 +184,23 @@ Update this page when:
 - indexing or bitstring semantics change;
 - new solver paths, observables, noise models, sampling APIs, or sweep artifacts are added;
 - Python/Julia parity contracts change.
+
+## MCWF Trajectory Persistence Contract
+
+`SimulationResult.trajectories` is an optional Python-side diagnostic payload for individual MCWF samples. New `result-artifact/v1` files persist it under the envelope-level `trajectories` field as `trajectory-data/v1`; it is deliberately not added to `shared-result/v1`, which contains language-neutral aggregate series only.
+
+```json
+{
+  "schema_version": "trajectory-data/v1",
+  "artifact_type": "sagittarius.mcwf_trajectories",
+  "axis_order": ["trajectory", "time"],
+  "observable_names": ["pop_0", "pop_1"],
+  "time_values": [0.0, 0.5, 1.0],
+  "shape": {"trajectory_count": 100, "time_count": 3},
+  "series": {"pop_0": [[0.0, 0.1, 0.2]], "pop_1": [[1.0, 0.9, 0.8]]}
+}
+```
+
+Each `series[observable]` is a finite, two-dimensional numeric array with shape `(trajectory_count, time_count)`. `observable_names` and `series` key order exactly match the non-time series order in result `data`; `time_values` exactly matches `data.t`; and every observable shares the same trajectory and time dimensions. Saving and loading validate all of these invariants. Older unversioned observable-to-array trajectory mappings remain readable when they satisfy the same alignment rules; newly saved artifacts always use `trajectory-data/v1`.
+
+The containing `run-manifest/v1` solver section records `store_trajectories` (requested configuration) and `trajectory_storage` (requested/stored state, nested schema version, axis order, observable order, and effective trajectory/time counts). `result-artifact/v1` remains the envelope version because `trajectories` is an optional, backward-compatible field; incompatible future trajectory semantics require a new nested trajectory schema version.

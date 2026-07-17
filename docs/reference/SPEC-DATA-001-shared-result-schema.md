@@ -29,3 +29,7 @@ Sagittarius shared simulation outputs use `shared-result/v1` as the language-neu
 Final-state readout distributions are compatibility series, not observable trajectories: they are present under `series.final_bitstring_probabilities` when available, while `observable_names` continues to list only named observable time series. The corresponding run manifest `readout` section records full versus reduced basis mode, represented bitstrings, whether forbidden reduced-basis bitstrings were excluded, and whether `SimulationResult.sample(shots, seed=...)` is supported.
 
 Julia-native workflows should emit the same `shared-result/v1` shape when serializing solver outputs so Python and Julia artifacts can be consumed by the same downstream tools.
+
+## Individual MCWF Samples
+
+`shared-result/v1` intentionally excludes raw individual MCWF trajectories: its observable series are aggregate, language-neutral outputs. When requested, Python result envelopes store raw samples only in the optional `result-artifact/v1.trajectories` field using `trajectory-data/v1`. That payload declares its observable order, `["trajectory", "time"]` axis order, exact time values, and shape metadata; it must not be copied into `shared_result.series`.

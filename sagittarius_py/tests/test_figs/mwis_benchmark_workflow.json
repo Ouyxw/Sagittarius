@@ -1,0 +1,42 @@
+{
+  "artifact_id": "mwis-benchmark-chain-n5",
+  "schema_version": "benchmark-artifact/v1",
+  "n_atoms": 5,
+  "geometry": "chain",
+  "density": 0.5,
+  "seed": 42,
+  "algorithms_compared": [
+    "AQC",
+    "Greedy",
+    "Optimal"
+  ],
+  "solutions": {
+    "AQC": {
+      "bitstring": "10101",
+      "metrics": {
+        "tts": 3.45,
+        "p_success": 0.92,
+        "runtime": 2.5
+      }
+    },
+    "Greedy": {
+      "bitstring": "10100",
+      "metrics": {
+        "ratio": 0.85,
+        "runtime": 0.001
+      }
+    },
+    "Optimal": {
+      "bitstring": "10101",
+      "metrics": {
+        "weight": 3.0,
+        "runtime": 0.5
+      }
+    }
+  },
+  "timestamp": "2026-07-07T01:00:00Z",
+  "commit_sha": "benchmark-test-sha",
+  "visualization_saved_at": "2026-07-09T03:43:45.671694Z",
+  "image_path": "/workspaces/Sagittarius/sagittarius_py/tests/test_figs/mwis_benchmark_workflow.png",
+  "image_dpi": 150
+}

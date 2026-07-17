@@ -166,6 +166,10 @@ def test_run_manifest_schema_validates_generated_manifest():
     validate_run_manifest(manifest)
     assert RUN_MANIFEST_SCHEMA["schema_version"] == RUN_MANIFEST_SCHEMA_VERSION
     assert manifest["schema_version"] == RUN_MANIFEST_SCHEMA_VERSION
+    invalid_manifest = json.loads(json.dumps(manifest))
+    invalid_manifest["solver"]["trajectory_storage"]["time_count"] = 1
+    with pytest.raises(SagittariusSerializationError):
+        validate_run_manifest(invalid_manifest)
     assert manifest["register"]["atom_count"] == 2
     assert manifest["register"]["geometry"]["blockade_edge_count"] == 1
     assert manifest["pulse"]["omega"]["kind"] == "local_vector"
@@ -185,6 +189,12 @@ def test_run_manifest_schema_validates_generated_manifest():
     assert manifest["event_ids"] == ["SAG-EVT-0004", "SAG-EVT-0005", "SAG-EVT-0006"]
     assert manifest["solver"]["saveat"] is None
     assert manifest["solver"]["effective_saveat"] is None
+    assert manifest["solver"]["store_trajectories"] is False
+    assert manifest["solver"]["trajectory_storage"] == {
+        "requested": False, "stored": False, "schema_version": "trajectory-data/v1",
+        "axis_order": ["trajectory", "time"], "observable_names": [],
+        "trajectory_count": 0, "time_count": 0,
+    }
     assert manifest["random"] == {"seed": None, "effective_seed": None, "n_trajectories": None}
     assert manifest["readout"] == {
         "basis_mode": "full",
@@ -225,6 +235,12 @@ def test_validate_run_manifest_rejects_unknown_event_id():
             "observable_metadata": [],
             "saveat": None,
             "effective_saveat": None,
+            "store_trajectories": False,
+            "trajectory_storage": {
+                "requested": False, "stored": False, "schema_version": "trajectory-data/v1",
+                "axis_order": ["trajectory", "time"], "observable_names": [],
+                "trajectory_count": 0, "time_count": 0,
+            },
         },
         "initial_state": {"basis_size": 1, "norm": 1.0},
         "backend_diagnostics": {
@@ -293,3 +309,44 @@ def test_simulation_result_to_shared_result_uses_manifest_semantics():
     assert shared["basis_size"] == 4
     assert shared["manifest_schema"] == RUN_MANIFEST_SCHEMA_VERSION
     assert shared["observable_names"] == ["pop"]
+
+
+def test_trajectory_data_v1_round_trip_and_manifest_contract(tmp_path):
+    path = tmp_path / "trajectories.json"
+    data = {"pop0": [0.1, 0.2, 0.3], "pop1": [0.9, 0.8, 0.7], "t": [0.0, 0.5, 1.0]}
+    trajectories = {
+        "pop0": np.array([[0.0, 0.2, 0.4], [0.2, 0.2, 0.2]]),
+        "pop1": np.array([[1.0, 0.8, 0.6], [0.8, 0.8, 0.8]]),
+    }
+    result = SimulationResult(data, trajectories=trajectories)
+    payload = result.to_envelope()
+    assert payload["trajectories"]["schema_version"] == "trajectory-data/v1"
+    assert payload["trajectories"]["axis_order"] == ["trajectory", "time"]
+    assert payload["trajectories"]["observable_names"] == ["pop0", "pop1"]
+    assert payload["trajectories"]["shape"] == {"trajectory_count": 2, "time_count": 3}
+    result.save(str(path))
+    loaded = load_result(str(path))
+    assert list(loaded.trajectories) == ["pop0", "pop1"]
+    assert np.array_equal(loaded.trajectories["pop0"], trajectories["pop0"])
+
+
+def test_trajectory_payload_rejects_shape_time_and_order_mismatch():
+    data = {"pop0": [0.1, 0.2], "pop1": [0.9, 0.8], "t": [0.0, 1.0]}
+    with pytest.raises(SagittariusSerializationError) as order_error:
+        SimulationResult(data, trajectories={"pop1": np.ones((1, 2)), "pop0": np.ones((1, 2))}).to_envelope()
+    assert order_error.value.issue.code == "SERIALIZATION_TRAJECTORY_SCHEMA_INVALID"
+    with pytest.raises(SagittariusSerializationError):
+        SimulationResult(data, trajectories={"pop0": np.ones((1, 3)), "pop1": np.ones((1, 3))}).to_envelope()
+
+
+def test_load_rejects_trajectory_payload_with_mismatched_time_axis(tmp_path):
+    path = tmp_path / "bad-trajectories.json"
+    payload = SimulationResult(
+        {"pop": [0.1, 0.2], "t": [0.0, 1.0]},
+        trajectories={"pop": np.ones((2, 2))},
+    ).to_envelope()
+    payload["trajectories"]["time_values"] = [0.0, 2.0]
+    path.write_text(json.dumps(payload))
+    with pytest.raises(SagittariusSerializationError) as excinfo:
+        load_result(str(path))
+    assert excinfo.value.issue.code == "SERIALIZATION_TRAJECTORY_SCHEMA_INVALID"
