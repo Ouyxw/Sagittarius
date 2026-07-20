@@ -1,6 +1,6 @@
 [project]
 name = "sagittarius-py"
-version = "1.0.1"
+version = "1.0.2"
 description = "A neutral-atom quantum emulator with Julia and Python SDKs"
 readme = "README.md"
 requires-python = ">=3.10"

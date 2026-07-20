@@ -123,6 +123,9 @@ def test_phase13_release_evidence_workflows_are_hardened():
     assert "package_resource" in testpypi
     assert "testpypi-project.json" in testpypi
     assert "phase13-testpypi-${{ inputs.expected-version }}" in testpypi
+    assert "TESTPYPI_INSTALL_ATTEMPTS" in testpypi
+    assert "testpypi_release_visible" in testpypi
+    assert "--retries 0" in testpypi
 
     assert "name,driver_version,memory.total" in cuda
     assert "cuda-wheel-smoke.log" in cuda

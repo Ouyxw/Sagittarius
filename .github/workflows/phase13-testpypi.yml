@@ -6,7 +6,7 @@ on:
       expected-version:
         description: "Expected sagittarius-py version to verify after TestPyPI install"
         required: true
-        default: "1.0.1"
+        default: "1.0.2"
 
 jobs:
   testpypi-candidate:
@@ -95,13 +95,52 @@ jobs:
           packages-dir: sagittarius_py/dist
 
       - name: Verify TestPyPI install
+        env:
+          EXPECTED_VERSION: ${{ inputs.expected-version }}
+          TESTPYPI_INSTALL_ATTEMPTS: "12"
+          TESTPYPI_INSTALL_RETRY_SECONDS: "15"
         run: |
           python -m venv /tmp/sagittarius-testpypi-venv
           /tmp/sagittarius-testpypi-venv/bin/python -m pip install --upgrade pip
-          /tmp/sagittarius-testpypi-venv/bin/python -m pip install \
-            --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple/ \
-            sagittarius-py==${{ inputs.expected-version }}
+          testpypi_release_visible() {
+            /tmp/sagittarius-testpypi-venv/bin/python - "$EXPECTED_VERSION" <<'PYTHON'
+          import json
+          import sys
+          from urllib.error import HTTPError, URLError
+          from urllib.request import urlopen
+
+          expected = sys.argv[1]
+          url = f"https://test.pypi.org/pypi/sagittarius-py/{expected}/json"
+          try:
+              with urlopen(url, timeout=15) as response:
+                  payload = json.load(response)
+          except (HTTPError, URLError, TimeoutError) as error:
+              print(f"TestPyPI release is not visible yet: {error}")
+              raise SystemExit(1)
+
+          if payload.get("info", {}).get("version") != expected or not payload.get("urls"):
+              print(f"TestPyPI release metadata is incomplete for {expected}")
+              raise SystemExit(1)
+          print(f"TestPyPI JSON release is visible for {expected}")
+          PYTHON
+          }
+
+          for attempt in $(seq 1 "$TESTPYPI_INSTALL_ATTEMPTS"); do
+            if testpypi_release_visible && /tmp/sagittarius-testpypi-venv/bin/python -m pip install \
+              --retries 0 \
+              --timeout 15 \
+              --index-url https://test.pypi.org/simple/ \
+              --extra-index-url https://pypi.org/simple/ \
+              "sagittarius-py==$EXPECTED_VERSION"; then
+              break
+            fi
+            if [ "$attempt" -eq "$TESTPYPI_INSTALL_ATTEMPTS" ]; then
+              echo "TestPyPI release $EXPECTED_VERSION was not installable after $TESTPYPI_INSTALL_ATTEMPTS attempts."
+              exit 1
+            fi
+            echo "TestPyPI release $EXPECTED_VERSION is not installable yet (attempt $attempt/$TESTPYPI_INSTALL_ATTEMPTS); retrying in $TESTPYPI_INSTALL_RETRY_SECONDS seconds."
+            sleep "$TESTPYPI_INSTALL_RETRY_SECONDS"
+          done
           cd /tmp
           /tmp/sagittarius-testpypi-venv/bin/sagittarius backend resolve
           /tmp/sagittarius-testpypi-venv/bin/python - <<'PY'
