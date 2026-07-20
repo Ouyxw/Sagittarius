@@ -152,7 +152,12 @@ def test_python_package_metadata_is_release_ready():
     assert "Programming Language :: Python :: 3.11" in project["classifiers"]
     assert "Programming Language :: Python :: 3.12" in project["classifiers"]
     assert "Programming Language :: Julia" not in project["classifiers"]
-    assert {"Homepage", "Documentation", "Source", "Issues"} <= project["urls"].keys()
+    assert project["urls"] == {
+        "Documentation": "https://github.com/Ouyxw/Sagittarius/tree/main/docs",
+        "Homepage": "https://github.com/Ouyxw/Sagittarius",
+        "Issues": "https://github.com/Ouyxw/Sagittarius/issues",
+        "Source": "https://github.com/Ouyxw/Sagittarius",
+    }
 
 
 def test_wheel_metadata_contains_release_fields(built_artifacts):

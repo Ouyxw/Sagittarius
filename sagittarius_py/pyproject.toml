@@ -41,10 +41,10 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/SagittariusProject/Sagittarius/tree/main/docs"
-Homepage = "https://github.com/SagittariusProject/Sagittarius"
-Issues = "https://github.com/SagittariusProject/Sagittarius/issues"
-Source = "https://github.com/SagittariusProject/Sagittarius"
+Documentation = "https://github.com/Ouyxw/Sagittarius/tree/main/docs"
+Homepage = "https://github.com/Ouyxw/Sagittarius"
+Issues = "https://github.com/Ouyxw/Sagittarius/issues"
+Source = "https://github.com/Ouyxw/Sagittarius"
 
 [project.scripts]
 sagittarius = "sagittarius.cli:main"
