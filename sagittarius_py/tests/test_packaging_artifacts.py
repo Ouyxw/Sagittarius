@@ -27,9 +27,20 @@ REQUIRED_BACKEND_FILES = {
     "sagittarius/julia/Sagittarius.jl/src/program.jl",
     "sagittarius/julia/Sagittarius.jl/src/cluster.jl",
 }
+FORBIDDEN_RELEASE_PARTS = {
+    ".github",
+    ".vscode",
+    "__pycache__",
+    "agent_memories",
+    "ci_artifacts",
+    "docs",
+    "tests",
+    "workspace",
+}
+FORBIDDEN_RELEASE_SUFFIXES = {".key", ".pem", ".p12", ".pfx"}
 
 
-def _run(command, *, cwd=PY_PACKAGE_ROOT, env=None):
+def _run(command, *, cwd=PY_PACKAGE_ROOT, env=None, check=True):
     return subprocess.run(
         command,
         cwd=cwd,
@@ -37,7 +48,7 @@ def _run(command, *, cwd=PY_PACKAGE_ROOT, env=None):
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        check=True,
+        check=check,
     )
 
 
@@ -122,11 +133,38 @@ print(json.dumps({{
 
 @pytest.fixture(scope="session")
 def built_artifacts(tmp_path_factory):
+    configured_dist = os.environ.get("SAGITTARIUS_RELEASE_DIST_DIR")
+    if configured_dist:
+        out_dir = Path(configured_dist).resolve()
+        wheels = sorted(out_dir.glob("*.whl"))
+        sdists = sorted(out_dir.glob("*.tar.gz"))
+        assert len(wheels) == 1, wheels
+        assert len(sdists) == 1, sdists
+        return wheels[0], sdists[0]
+
     out_dir = tmp_path_factory.mktemp("sagittarius-artifacts")
     _run(["uv", "build", "--wheel", "--sdist", "--out-dir", str(out_dir)])
     wheel = next(out_dir.glob("*.whl"))
     sdist = next(out_dir.glob("*.tar.gz"))
     return wheel, sdist
+
+
+def _assert_release_content_is_public(names):
+    for name in names:
+        parts = {part.lower() for part in Path(name).parts}
+        basename = Path(name).name.lower()
+        assert not (parts & FORBIDDEN_RELEASE_PARTS), name
+        assert not basename.startswith("debug_"), name
+        assert basename not in {".env", ".env.local"}, name
+        assert Path(basename).suffix not in FORBIDDEN_RELEASE_SUFFIXES, name
+
+
+
+def _wheel_version(wheel: Path) -> str:
+    with zipfile.ZipFile(wheel) as archive:
+        metadata_name = next(name for name in archive.namelist() if name.endswith(".dist-info/METADATA"))
+        metadata = email.message_from_bytes(archive.read(metadata_name))
+    return str(metadata["Version"])
 
 
 def test_packaging_readme_and_license_match_repository_root():
@@ -233,6 +271,107 @@ def test_sdist_contains_embedded_julia_backend(built_artifacts):
     assert REQUIRED_BACKEND_FILES <= names
 
 
+def test_wheel_excludes_forbidden_release_content(built_artifacts):
+    wheel, _ = built_artifacts
+
+    with zipfile.ZipFile(wheel) as archive:
+        names = set(archive.namelist())
+
+    _assert_release_content_is_public(names)
+
+
+def test_sdist_excludes_forbidden_release_content(built_artifacts):
+    _, sdist = built_artifacts
+
+    with tarfile.open(sdist) as archive:
+        names = {name.partition("/")[2] for name in archive.getnames() if "/" in name}
+
+    _assert_release_content_is_public(names)
+
+
+def test_candidate_manifest_records_and_verifies_distributions(built_artifacts, tmp_path):
+    wheel, sdist = built_artifacts
+    version = _wheel_version(wheel)
+    identity = {
+        "schema_version": "phase13-candidate-artifact/v1",
+        "package": "sagittarius-py",
+        "version": version,
+        "candidate_tag": "candidate/test",
+        "commit": "a" * 40,
+        "source_ref": "refs/tags/candidate/test",
+        "main_ref": "origin/main",
+        "clean_worktree": True,
+        "versions": {
+            "python": version,
+            "julia_canonical": version,
+            "julia_embedded": version,
+        },
+        "run_url": "https://example.invalid/run",
+    }
+    identity_path = tmp_path / "identity.json"
+    manifest_path = tmp_path / "candidate-manifest.json"
+    verified_path = tmp_path / "verified.json"
+    identity_path.write_text(json.dumps(identity), encoding="utf-8")
+
+    _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "phase13_candidate_artifact.py"),
+            "manifest",
+            "--identity",
+            str(identity_path),
+            "--dist-dir",
+            str(wheel.parent),
+            "--output",
+            str(manifest_path),
+        ],
+        cwd=REPO_ROOT,
+    )
+    _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "phase13_candidate_artifact.py"),
+            "verify",
+            "--manifest",
+            str(manifest_path),
+            "--dist-dir",
+            str(wheel.parent),
+            "--expected-version",
+            version,
+            "--expected-commit",
+            "a" * 40,
+            "--expected-tag",
+            "candidate/test",
+            "--output",
+            str(verified_path),
+        ],
+        cwd=REPO_ROOT,
+    )
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    verified = json.loads(verified_path.read_text(encoding="utf-8"))
+    assert set(manifest["distributions"]) == {wheel.name, sdist.name}
+    assert verified["status"] == "verified"
+
+    manifest["distributions"][wheel.name]["sha256"] = "0" * 64
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    rejected = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "phase13_candidate_artifact.py"),
+            "verify",
+            "--manifest",
+            str(manifest_path),
+            "--dist-dir",
+            str(wheel.parent),
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+    )
+    assert rejected.returncode != 0
+    assert "SHA-256 mismatch" in rejected.stdout
+
+
 @pytest.mark.requires_julia_backend
 def test_clean_venv_installed_wheel_release_smoke(built_artifacts, tmp_path):
     if os.environ.get("SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE") != "1":
@@ -262,6 +401,43 @@ def test_clean_venv_installed_wheel_release_smoke(built_artifacts, tmp_path):
     assert result["manifest_schema"] == "run-manifest/v1"
     assert result["shared_result_schema"] == "shared-result/v1"
     assert result["rows"] >= 2
+
+
+@pytest.mark.requires_julia_backend
+def test_clean_venv_installed_sdist_release_smoke(built_artifacts, tmp_path):
+    if os.environ.get("SAGITTARIUS_RUN_RELEASE_SDIST_SMOKE") != "1":
+        pytest.skip("Set SAGITTARIUS_RUN_RELEASE_SDIST_SMOKE=1 to run the clean sdist release smoke test.")
+
+    _, sdist = built_artifacts
+    venv_dir = tmp_path / "sdist-venv"
+    work_dir = tmp_path / "outside-repo-sdist"
+    work_dir.mkdir()
+
+    _run(["uv", "venv", "--seed", str(venv_dir)])
+    python = _venv_python(venv_dir)
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    env.pop("SAGITTARIUS_JULIA_BACKEND_PATH", None)
+    env["PYTHONNOUSERSITE"] = "1"
+    env["SAGITTARIUS_SOURCE_ROOT_FOR_TEST"] = str(REPO_ROOT)
+    _run(
+        [str(python), "-m", "pip", "install", "--force-reinstall", str(sdist)],
+        cwd=work_dir,
+        env=env,
+    )
+    sagittarius_cli = _venv_executable(venv_dir, "sagittarius")
+    _run([str(sagittarius_cli), "backend", "resolve"], cwd=work_dir, env=env)
+
+    completed = _run(
+        [str(python), "-c", _clean_wheel_cpu_probe_script("sdist-result.json")],
+        cwd=work_dir,
+        env=env,
+    )
+    result = json.loads(completed.stdout.strip().splitlines()[-1])
+    assert result["backend_source"] == "package_resource"
+    assert result["artifact_schema"] == "result-artifact/v1"
+    assert result["manifest_schema"] == "run-manifest/v1"
+    assert result["shared_result_schema"] == "shared-result/v1"
 
 
 @pytest.mark.requires_julia_backend

@@ -11,6 +11,27 @@ on:
       - "REQUIREMENTS.md"
       - ".github/workflows/phase13-clean-artifact.yml"
   workflow_dispatch:
+    inputs:
+      candidate-run-id:
+        description: "Run ID from Phase 13 Canonical Candidate Artifact"
+        required: true
+      candidate-artifact-name:
+        description: "Canonical candidate artifact name"
+        required: true
+      expected-version:
+        description: "Expected candidate version"
+        required: true
+        default: "1.0.2"
+      expected-commit:
+        description: "Expected full candidate commit SHA"
+        required: true
+      candidate-tag:
+        description: "Expected immutable candidate tag"
+        required: true
+
+permissions:
+  actions: read
+  contents: read
 
 jobs:
   clean-wheel-smoke:
@@ -20,10 +41,16 @@ jobs:
     env:
       PYTHONNOUSERSITE: "1"
       PYTHONPATH: ""
+      EVIDENCE_DIR: ${{ runner.temp }}/phase13-clean-artifact-evidence
       SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE: "1"
+      SAGITTARIUS_RUN_RELEASE_SDIST_SMOKE: "1"
+      SAGITTARIUS_RELEASE_DIST_DIR: ${{ github.event_name == 'workflow_dispatch' && format('{0}/phase13-candidate-dist', github.workspace) || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.expected-commit || github.sha }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -41,10 +68,67 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "sagittarius_py/uv.lock"
 
+      - name: Create clean-smoke evidence directory
+        shell: bash
+        run: |
+          evidence_dir="$RUNNER_TEMP/phase13-clean-artifact-evidence"
+          mkdir -p "$evidence_dir"
+          echo "EVIDENCE_DIR=$evidence_dir" >> "$GITHUB_ENV"
+
+      - name: Download canonical candidate
+        if: github.event_name == 'workflow_dispatch'
+        uses: ./.github/actions/phase13-download-candidate
+        with:
+          run-id: ${{ inputs.candidate-run-id }}
+          artifact-name: ${{ inputs.candidate-artifact-name }}
+          expected-version: ${{ inputs.expected-version }}
+          expected-commit: ${{ inputs.expected-commit }}
+          expected-tag: ${{ inputs.candidate-tag }}
+          github-token: ${{ github.token }}
+          destination: phase13-candidate-dist
+
       - name: Run clean artifact smoke
+        shell: bash
         working-directory: sagittarius_py
-        run: >-
-          uv run python -m pytest
-          tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_release_smoke
-          tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_uninstall_reinstall_smoke
-          -q
+        run: |
+          set -o pipefail
+          uv run python -m pytest \
+            tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_release_smoke \
+            tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_uninstall_reinstall_smoke \
+            tests/test_packaging_artifacts.py::test_clean_venv_installed_sdist_release_smoke \
+            -q 2>&1 | tee "$EVIDENCE_DIR/clean-artifact-smoke.log"
+
+      - name: Record clean-smoke evidence
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+          CANDIDATE_COMMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.expected-commit || github.sha }}
+          CANDIDATE_REF: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.candidate-tag) || github.ref }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          evidence_dir = Path(os.environ["EVIDENCE_DIR"])
+          evidence_dir.mkdir(parents=True, exist_ok=True)
+          manifest = Path("phase13-candidate-dist/candidate-manifest.json")
+          if manifest.exists():
+              (evidence_dir / "candidate-manifest.json").write_bytes(manifest.read_bytes())
+          (evidence_dir / "job-result.json").write_text(json.dumps({
+              "schema_version": "phase13-clean-artifact-evidence/v1",
+              "status": os.environ["JOB_STATUS"],
+              "commit": os.environ["CANDIDATE_COMMIT"],
+              "ref": os.environ["CANDIDATE_REF"],
+              "candidate_run_id": "${{ inputs.candidate-run-id }}",
+              "validation_command": "pytest clean wheel, sdist, and uninstall/reinstall smokes",
+          }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload clean-smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase13-clean-artifact-${{ github.run_id }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error

@@ -1,0 +1,151 @@
+name: Phase 13 Canonical Candidate Artifact
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected-version:
+        description: "Frozen sagittarius-py and Sagittarius.jl version"
+        required: true
+        default: "1.0.2"
+      candidate-tag:
+        description: "Immutable candidate tag resolving to the selected commit"
+        required: true
+        default: "v1.0.2"
+
+jobs:
+  build-candidate:
+    name: Validate identity and build canonical distributions
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      PYTHONNOUSERSITE: "1"
+      PYTHONPATH: ""
+      EVIDENCE_DIR: ${{ runner.temp }}/phase13-candidate-evidence
+    steps:
+      - name: Checkout candidate tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.candidate-tag }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "sagittarius_py/uv.lock"
+
+      - name: Create evidence directories
+        shell: bash
+        run: |
+          candidate_commit="$(git rev-parse HEAD)"
+          evidence_dir="$RUNNER_TEMP/phase13-candidate-evidence"
+          mkdir -p "$evidence_dir" sagittarius_py/dist
+          echo "EVIDENCE_DIR=$evidence_dir" >> "$GITHUB_ENV"
+          echo "CANDIDATE_COMMIT=$candidate_commit" >> "$GITHUB_ENV"
+
+      - name: Validate candidate identity
+        shell: bash
+        env:
+          EXPECTED_VERSION: ${{ inputs.expected-version }}
+          CANDIDATE_TAG: ${{ inputs.candidate-tag }}
+        run: |
+          set -o pipefail
+          python scripts/phase13_candidate_artifact.py identity \
+            --repo-root . \
+            --expected-version "$EXPECTED_VERSION" \
+            --candidate-tag "$CANDIDATE_TAG" \
+            --expected-commit "$CANDIDATE_COMMIT" \
+            --source-ref "refs/tags/$CANDIDATE_TAG" \
+            --main-ref origin/main \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --output "$EVIDENCE_DIR/candidate-identity.json" \
+            2>&1 | tee "$EVIDENCE_DIR/identity.log"
+
+      - name: Build wheel and sdist once
+        shell: bash
+        working-directory: sagittarius_py
+        run: |
+          set -o pipefail
+          uv build --wheel --sdist --out-dir dist 2>&1 \
+            | tee "$EVIDENCE_DIR/build.log"
+
+      - name: Validate metadata and artifact contents
+        shell: bash
+        working-directory: sagittarius_py
+        run: |
+          set -o pipefail
+          SAGITTARIUS_RELEASE_DIST_DIR="$PWD/dist" uv run python -m pytest \
+            tests/test_packaging_artifacts.py::test_wheel_metadata_contains_release_fields \
+            tests/test_packaging_artifacts.py::test_sdist_contains_readme_license_and_pyproject_metadata \
+            tests/test_packaging_artifacts.py::test_wheel_contains_embedded_julia_backend \
+            tests/test_packaging_artifacts.py::test_sdist_contains_embedded_julia_backend \
+            tests/test_packaging_artifacts.py::test_wheel_excludes_forbidden_release_content \
+            tests/test_packaging_artifacts.py::test_sdist_excludes_forbidden_release_content \
+            -q 2>&1 | tee "$EVIDENCE_DIR/content-check.log"
+          uv run python -m twine check dist/* 2>&1 \
+            | tee "$EVIDENCE_DIR/twine-check.log"
+
+      - name: Create canonical candidate manifest
+        env:
+          EXPECTED_VERSION: ${{ inputs.expected-version }}
+          CANDIDATE_TAG: ${{ inputs.candidate-tag }}
+        run: |
+          python scripts/phase13_candidate_artifact.py manifest \
+            --identity "$EVIDENCE_DIR/candidate-identity.json" \
+            --dist-dir sagittarius_py/dist \
+            --output sagittarius_py/dist/candidate-manifest.json
+          python scripts/phase13_candidate_artifact.py verify \
+            --manifest sagittarius_py/dist/candidate-manifest.json \
+            --dist-dir sagittarius_py/dist \
+            --expected-version "$EXPECTED_VERSION" \
+            --expected-commit "$CANDIDATE_COMMIT" \
+            --expected-tag "$CANDIDATE_TAG" \
+            --output "$EVIDENCE_DIR/candidate-verification.json"
+          cp sagittarius_py/dist/candidate-manifest.json "$EVIDENCE_DIR/"
+
+      - name: Record job result
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+          CANDIDATE_TAG: ${{ inputs.candidate-tag }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["EVIDENCE_DIR"], "job-result.json")
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text(json.dumps({
+              "schema_version": "phase13-candidate-job/v1",
+              "status": os.environ["JOB_STATUS"],
+              "commit": os.environ.get("CANDIDATE_COMMIT"),
+              "ref": f"refs/tags/{os.environ['CANDIDATE_TAG']}",
+              "run_url": f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+          }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload canonical candidate distributions
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase13-candidate-${{ inputs.expected-version }}-${{ github.run_id }}
+          path: sagittarius_py/dist
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload candidate build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase13-candidate-evidence-${{ github.run_id }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 90

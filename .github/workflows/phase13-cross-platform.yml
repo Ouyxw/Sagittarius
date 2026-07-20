@@ -2,6 +2,27 @@ name: Phase 13 Cross-Platform Artifact Matrix
 
 on:
   workflow_dispatch:
+    inputs:
+      candidate-run-id:
+        description: "Run ID from Phase 13 Canonical Candidate Artifact"
+        required: true
+      candidate-artifact-name:
+        description: "Canonical candidate artifact name"
+        required: true
+      expected-version:
+        description: "Expected candidate version"
+        required: true
+        default: "1.0.2"
+      expected-commit:
+        description: "Expected full candidate commit SHA"
+        required: true
+      candidate-tag:
+        description: "Expected immutable candidate tag"
+        required: true
+
+permissions:
+  actions: read
+  contents: read
 
 jobs:
   artifact-matrix:
@@ -31,9 +52,14 @@ jobs:
       PYTHONNOUSERSITE: "1"
       PYTHONPATH: ""
       SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE: "1"
+      SAGITTARIUS_RUN_RELEASE_SDIST_SMOKE: "1"
+      SAGITTARIUS_RELEASE_DIST_DIR: ${{ github.workspace }}/phase13-candidate-dist
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.expected-commit }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -51,21 +77,42 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "sagittarius_py/uv.lock"
 
-      - name: Run package metadata and clean wheel smoke
+      - name: Create matrix evidence directory
+        shell: bash
+        run: mkdir -p phase13-cross-platform-evidence
+
+      - name: Download canonical candidate
+        uses: ./.github/actions/phase13-download-candidate
+        with:
+          run-id: ${{ inputs.candidate-run-id }}
+          artifact-name: ${{ inputs.candidate-artifact-name }}
+          expected-version: ${{ inputs.expected-version }}
+          expected-commit: ${{ inputs.expected-commit }}
+          expected-tag: ${{ inputs.candidate-tag }}
+          github-token: ${{ github.token }}
+          destination: phase13-candidate-dist
+
+      - name: Run package metadata and clean wheel/sdist smoke
+        shell: bash
         working-directory: sagittarius_py
-        run: >-
-          uv run python -m pytest
-          tests/test_packaging_artifacts.py
-          tests/test_installation_docs.py
-          -q
+        run: |
+          set -o pipefail
+          uv run python -m pytest \
+            tests/test_packaging_artifacts.py \
+            tests/test_installation_docs.py \
+            -q 2>&1 | tee "$GITHUB_WORKSPACE/phase13-cross-platform-evidence/validation.log"
 
       - name: Write matrix evidence
+        if: always()
         shell: bash
         env:
           MATRIX_OS: ${{ matrix.os }}
           MATRIX_PYTHON: ${{ matrix.python-version }}
           MATRIX_JULIA: ${{ matrix.julia-version }}
           GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_STATUS: ${{ job.status }}
+          CANDIDATE_COMMIT: ${{ inputs.expected-commit }}
+          CANDIDATE_REF: refs/tags/${{ inputs.candidate-tag }}
         run: |
           python - <<'PY'
           from datetime import datetime, timezone
@@ -74,6 +121,9 @@ jobs:
 
           evidence_dir = Path("phase13-cross-platform-evidence")
           evidence_dir.mkdir(exist_ok=True)
+          manifest = Path("phase13-candidate-dist/candidate-manifest.json")
+          if manifest.exists():
+              (evidence_dir / "candidate-manifest.json").write_bytes(manifest.read_bytes())
           os_name = os.environ["MATRIX_OS"]
           python_version = os.environ["MATRIX_PYTHON"]
           julia_version = os.environ["MATRIX_JULIA"]
@@ -82,14 +132,14 @@ jobs:
           lines = [
               "# Phase 13 Cross-Platform Evidence",
               "",
-              "- Status: passed",
+              f"- Status: {os.environ['JOB_STATUS']}",
               f"- OS runner: {os_name}",
               f"- Python: {python_version}",
               f"- Julia: {julia_version}",
               "- Workflow: phase13-cross-platform.yml",
               f"- Run URL: {os.environ['GITHUB_RUN_URL']}",
-              f"- Commit: {os.environ['GITHUB_SHA']}",
-              f"- Ref: {os.environ['GITHUB_REF']}",
+              f"- Commit: {os.environ['CANDIDATE_COMMIT']}",
+              f"- Ref: {os.environ['CANDIDATE_REF']}",
               f"- Recorded at: {datetime.now(timezone.utc).isoformat()}",
               "- Validation command: uv run python -m pytest tests/test_packaging_artifacts.py tests/test_installation_docs.py -q",
           ]
@@ -97,8 +147,9 @@ jobs:
           PY
 
       - name: Upload matrix evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: phase13-cross-platform-${{ matrix.os }}-py${{ matrix.python-version }}-julia${{ matrix.julia-version }}
-          path: phase13-cross-platform-evidence/*.md
+          path: phase13-cross-platform-evidence
           if-no-files-found: error

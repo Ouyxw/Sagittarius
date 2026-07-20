@@ -1,0 +1,52 @@
+name: Download and verify Phase 13 candidate
+description: Download a canonical candidate artifact from its build run and verify its identity and digests.
+
+inputs:
+  run-id:
+    description: Workflow run ID that produced the canonical candidate artifact.
+    required: true
+  artifact-name:
+    description: Canonical candidate artifact name.
+    required: true
+  expected-version:
+    description: Expected Python and Julia package version.
+    required: true
+  expected-commit:
+    description: Expected full candidate commit SHA.
+    required: true
+  expected-tag:
+    description: Expected immutable candidate tag.
+    required: true
+  github-token:
+    description: Token with actions:read access.
+    required: true
+  destination:
+    description: Destination directory relative to the workspace.
+    required: false
+    default: phase13-candidate-dist
+
+runs:
+  using: composite
+  steps:
+    - name: Download canonical candidate
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.destination }}
+        run-id: ${{ inputs.run-id }}
+        github-token: ${{ inputs.github-token }}
+
+    - name: Verify candidate manifest and distribution digests
+      shell: bash
+      env:
+        CANDIDATE_DESTINATION: ${{ inputs.destination }}
+        EXPECTED_VERSION: ${{ inputs.expected-version }}
+        EXPECTED_COMMIT: ${{ inputs.expected-commit }}
+        EXPECTED_TAG: ${{ inputs.expected-tag }}
+      run: |
+        python "$GITHUB_WORKSPACE/scripts/phase13_candidate_artifact.py" verify \
+          --manifest "$CANDIDATE_DESTINATION/candidate-manifest.json" \
+          --dist-dir "$CANDIDATE_DESTINATION" \
+          --expected-version "$EXPECTED_VERSION" \
+          --expected-commit "$EXPECTED_COMMIT" \
+          --expected-tag "$EXPECTED_TAG"

@@ -12,6 +12,8 @@ on:
       - "REQUIREMENTS.md"
       - ".github/workflows/pr-fast-ci.yml"
       - ".github/workflows/phase13-*.yml"
+      - ".github/actions/phase13-download-candidate/**"
+      - "scripts/phase13_candidate_artifact.py"
   push:
     branches:
       - develop/**
@@ -22,6 +24,8 @@ on:
       - "REQUIREMENTS.md"
       - ".github/workflows/pr-fast-ci.yml"
       - ".github/workflows/phase13-*.yml"
+      - ".github/actions/phase13-download-candidate/**"
+      - "scripts/phase13_candidate_artifact.py"
   workflow_dispatch:
 
 jobs:
@@ -58,4 +62,7 @@ jobs:
           tests/test_packaging_artifacts.py::test_sdist_contains_readme_license_and_pyproject_metadata
           tests/test_packaging_artifacts.py::test_wheel_contains_embedded_julia_backend
           tests/test_packaging_artifacts.py::test_sdist_contains_embedded_julia_backend
+          tests/test_packaging_artifacts.py::test_wheel_excludes_forbidden_release_content
+          tests/test_packaging_artifacts.py::test_sdist_excludes_forbidden_release_content
+          tests/test_packaging_artifacts.py::test_candidate_manifest_records_and_verifies_distributions
           -q

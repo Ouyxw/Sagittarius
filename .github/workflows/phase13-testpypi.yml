@@ -7,6 +7,18 @@ on:
         description: "Expected sagittarius-py version to verify after TestPyPI install"
         required: true
         default: "1.0.2"
+      candidate-run-id:
+        description: "Run ID from Phase 13 Canonical Candidate Artifact"
+        required: true
+      candidate-artifact-name:
+        description: "Canonical candidate artifact name"
+        required: true
+      expected-commit:
+        description: "Expected full candidate commit SHA"
+        required: true
+      candidate-tag:
+        description: "Expected immutable candidate tag"
+        required: true
 
 jobs:
   testpypi-candidate:
@@ -17,12 +29,17 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      actions: read
     env:
       PYTHONNOUSERSITE: "1"
       PYTHONPATH: ""
+      EVIDENCE_DIR: ${{ runner.temp }}/phase13-testpypi-evidence
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.expected-commit }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -46,9 +63,24 @@ jobs:
           mkdir -p "$evidence_dir"
           echo "EVIDENCE_DIR=$evidence_dir" >> "$GITHUB_ENV"
 
-      - name: Build artifacts
-        working-directory: sagittarius_py
-        run: uv build --wheel --sdist --out-dir dist
+      - name: Download canonical candidate
+        uses: ./.github/actions/phase13-download-candidate
+        with:
+          run-id: ${{ inputs.candidate-run-id }}
+          artifact-name: ${{ inputs.candidate-artifact-name }}
+          expected-version: ${{ inputs.expected-version }}
+          expected-commit: ${{ inputs.expected-commit }}
+          expected-tag: ${{ inputs.candidate-tag }}
+          github-token: ${{ github.token }}
+          destination: phase13-candidate-dist
+
+      - name: Stage canonical distributions for TestPyPI
+        shell: bash
+        run: |
+          mkdir -p sagittarius_py/dist
+          cp phase13-candidate-dist/*.whl sagittarius_py/dist/
+          cp phase13-candidate-dist/*.tar.gz sagittarius_py/dist/
+          cp phase13-candidate-dist/candidate-manifest.json "$EVIDENCE_DIR/"
 
       - name: Verify built package version and record distribution digests
         working-directory: sagittarius_py
@@ -100,6 +132,7 @@ jobs:
           TESTPYPI_INSTALL_ATTEMPTS: "12"
           TESTPYPI_INSTALL_RETRY_SECONDS: "15"
         run: |
+          exec > >(tee "$EVIDENCE_DIR/testpypi-install.log") 2>&1
           python -m venv /tmp/sagittarius-testpypi-venv
           /tmp/sagittarius-testpypi-venv/bin/python -m pip install --upgrade pip
           testpypi_release_visible() {
@@ -199,6 +232,8 @@ jobs:
         if: success()
         env:
           EXPECTED_VERSION: ${{ inputs.expected-version }}
+          CANDIDATE_COMMIT: ${{ inputs.expected-commit }}
+          CANDIDATE_REF: refs/tags/${{ inputs.candidate-tag }}
         run: |
           python - <<'PY'
           import json
@@ -218,19 +253,50 @@ jobs:
                       raise
                   time.sleep(10)
           evidence_dir = Path(os.environ["EVIDENCE_DIR"])
+          manifest = json.loads((evidence_dir / "candidate-manifest.json").read_text(encoding="utf-8"))
+          canonical_hashes = {
+              filename: entry["sha256"]
+              for filename, entry in manifest["distributions"].items()
+          }
+          testpypi_hashes = {item["filename"]: item["digests"]["sha256"] for item in payload["urls"]}
+          assert testpypi_hashes == canonical_hashes, (testpypi_hashes, canonical_hashes)
           (evidence_dir / "testpypi-project.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           release = {
               "schema_version": "phase13-testpypi-evidence/v1",
-              "commit": os.environ["GITHUB_SHA"],
-              "ref": os.environ["GITHUB_REF"],
+              "commit": os.environ["CANDIDATE_COMMIT"],
+              "ref": os.environ["CANDIDATE_REF"],
               "run_url": "{}/{}/actions/runs/{}".format(os.environ["GITHUB_SERVER_URL"], os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_RUN_ID"]),
               "expected_version": os.environ["EXPECTED_VERSION"],
               "testpypi_json_url": url,
               "testpypi_sha256": {item["filename"]: item["digests"]["sha256"] for item in payload["urls"]},
+              "candidate_run_id": "${{ inputs.candidate-run-id }}",
           }
           (evidence_dir / "release-evidence.json").write_text(json.dumps(release, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           PY
 
+
+      - name: Record TestPyPI job result
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+          CANDIDATE_COMMIT: ${{ inputs.expected-commit }}
+          CANDIDATE_REF: refs/tags/${{ inputs.candidate-tag }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          evidence_dir = Path(os.environ["EVIDENCE_DIR"])
+          evidence_dir.mkdir(parents=True, exist_ok=True)
+          (evidence_dir / "job-result.json").write_text(json.dumps({
+              "schema_version": "phase13-testpypi-job/v1",
+              "status": os.environ["JOB_STATUS"],
+              "commit": os.environ["CANDIDATE_COMMIT"],
+              "ref": os.environ["CANDIDATE_REF"],
+              "candidate_run_id": "${{ inputs.candidate-run-id }}",
+          }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
       - name: Upload TestPyPI release evidence
         if: always()
         uses: actions/upload-artifact@v4

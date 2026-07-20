@@ -233,23 +233,23 @@ out.
 
 ## Current CI Gap Register
 
-The following gaps were confirmed against the workflows and tests present on
-2026-07-20. `Planned` means the gate is not implemented. `Mixed` means useful
-test logic or earlier evidence exists, but it is not yet bound to the final frozen
-distribution set.
+The following register reflects the workflows and tests present on 2026-07-20.
+`Done` means the CI control is implemented, not that a final candidate has passed
+it. `Mixed` means part of the control or historical evidence exists but final
+closure still has missing implementation or execution evidence.
 
-| CI capability | Status | Required closure |
+| CI capability | Status | Current implementation or required closure |
 | :--- | :--- | :--- |
-| Canonical candidate build | Planned | Add one clean job that builds wheel and sdist once, records the freeze identity and SHA-256 digests, and uploads the distributions for downstream jobs. |
-| Ref and version identity guard | Planned | Reject unapproved refs; require the full SHA to be contained in `main`; verify candidate tag, workflow input, Python version, canonical Julia version, and embedded Julia version agree. |
-| Cross-workflow artifact reuse | Planned | Make clean-install, cross-platform, TestPyPI, and CUDA jobs download and verify the canonical distributions instead of rebuilding through their local pytest fixture. |
-| Artifact forbidden-content tests | Planned | Add wheel and sdist denylist assertions for repository configuration, internal development material, debug scripts, scratch workspaces, local evidence, and secrets. |
-| Clean sdist installation | Planned | Build and install from the retained sdist in a repository-external environment, then run backend resolution, package-resource, version, schema, and one-atom CPU checks. |
+| Canonical candidate build | Done | `phase13-candidate-artifact.yml` builds wheel and sdist once and records identity, filenames, sizes, versions, and SHA-256 digests in `phase13-candidate-artifact/v1`. |
+| Ref and version identity guard | Done | The candidate job requires a version-bearing immutable tag, exact checkout/tag/full-SHA agreement, containment in `origin/main`, a clean tree, and matching Python, canonical Julia, and embedded Julia versions. |
+| Cross-workflow artifact reuse | Done | Manual clean-install, cross-platform, TestPyPI, and CUDA jobs download the selected candidate run and reject manifest, filename, size, version, tag, commit, or digest disagreement. The automatic `main` clean smoke remains a branch diagnostic rather than frozen-candidate evidence. |
+| Artifact forbidden-content tests | Done | Wheel and sdist tests reject repository configuration, internal development paths, debug files, scratch/evidence paths, environment files, and private-key suffixes. |
+| Clean sdist installation | Done | Clean and matrix release jobs install the retained sdist outside the repository and run backend resolution, package-resource, schema, and one-atom CPU checks. |
 | Full Python release regression | Planned | Run the complete Python test suite for the frozen candidate, separating backend-free and Julia-backed jobs where useful. The fast PR subset is not sufficient release evidence. |
 | Julia-native regression | Planned | Establish a Julia `test/` suite and run `Pkg.test()` before claiming a simultaneous stable Julia-native release. Python-driven backend tests do not replace native package tests. |
 | Final-candidate platform and service evidence | Mixed | Rerun clean CPU, every declared platform row, the strengthened TestPyPI CPU smoke, and real-hardware CUDA parity for the final commit and distribution digests. Earlier runs remain historical evidence only. |
-| Digest reconciliation | Planned | Assert that local candidate digests, downloaded workflow artifact digests, TestPyPI JSON digests, CUDA-tested wheel digest, and production upload digests are identical. Recording them independently is insufficient. |
-| Failure evidence retention | Mixed | Use unconditional evidence upload and retain logs, commands, identities, diagnostics, and partial results for failed clean, matrix, TestPyPI, and CUDA gates. |
+| Digest reconciliation | Mixed | Canonical downloads are verified locally and TestPyPI file hashes must exactly equal the manifest. Production upload and post-publication digest reconciliation remain unavailable. |
+| Failure evidence retention | Done | Candidate, clean, matrix, TestPyPI, and CUDA jobs use unconditional status/evidence steps and retain available logs, identities, manifests, diagnostics, and partial results. |
 | Production publication and post-install smoke | Planned | Add a separately protected production workflow that promotes the validated files, then installs the pinned version from production PyPI outside the repository and records the result. |
 
 The current CUDA smoke and parity test is implemented; its missing work is a
