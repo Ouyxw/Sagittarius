@@ -11,8 +11,8 @@ Sagittarius separates day-to-day pull-request validation from release-candidate 
 | `.github/workflows/pr-fast-ci.yml` | Automatic on pull requests to `develop/**` and `main`; automatic on direct pushes to `develop/**` as a fallback; manual on demand | `ubuntu-latest` | Fast documentation, metadata, artifact-content, and portable benchmark import checks. | Every feature, documentation, packaging, and CI PR; direct develop pushes are still discouraged but covered. |
 | `.github/workflows/phase13-clean-artifact.yml` | Automatic on relevant pushes to `main`; manual on demand | `ubuntu-latest` | Clean wheel install plus uninstall/reinstall release smoke outside the source checkout. | Release-prep, packaging/backend changes, or manual verification before publication. |
 | `.github/workflows/phase13-cross-platform.yml` | Manual only | Linux, macOS, Windows matrix | Release-candidate OS/Python/Julia artifact matrix with uploaded per-row evidence. | Run before marking cross-platform wheel evidence complete. |
-| `.github/workflows/phase13-testpypi.yml` | Manual only | `ubuntu-latest` | Build, check, publish to TestPyPI, and verify clean TestPyPI install. | Run only after TestPyPI credentials/trusted publishing and publication policy are ready. |
-| `.github/workflows/phase13-cuda-wheel.yml` | Manual only | Self-hosted Linux CUDA runner | Hardware-backed CUDA wheel smoke and CPU/CUDA parity evidence. | Run only when validating CUDA wheel support on real NVIDIA hardware. |
+| `.github/workflows/phase13-testpypi.yml` | Manual only, protected by the `testpypi` environment | `ubuntu-latest` | Build, verify candidate version, publish to TestPyPI through OIDC, verify a clean install, and retain release evidence. | Run only with a new candidate version after TestPyPI trusted publishing and publication policy are ready. |
+| `.github/workflows/phase13-cuda-wheel.yml` | Manual only | Self-hosted Linux CUDA runner | Hardware-backed CUDA wheel smoke and CPU/CUDA parity with retained GPU and smoke-log evidence. | Run only when validating CUDA wheel support on real NVIDIA hardware. |
 
 ## Pull Request CI
 
@@ -45,8 +45,8 @@ For release readiness, retain:
 - commit SHA and branch or tag;
 - job status for every required matrix row;
 - uploaded `phase13-cross-platform-<os>-py<python>-julia<julia>` artifacts;
-- TestPyPI install output, when applicable;
-- CUDA runner evidence, when CUDA support is being claimed.
+- a `phase13-testpypi-<version>` artifact containing commit, ref, run URL, wheel/sdist SHA-256 digests, clean-install diagnostic, and TestPyPI JSON file hashes;
+- a `phase13-cuda-wheel-<run-id>` artifact containing the GPU name/driver/memory capture, smoke log, commit, ref, run URL, runner OS, validation command, and required opt-in flags when CUDA support is being claimed.
 
 Do not mark the Phase 13 cross-platform matrix gate complete in `REQUIREMENTS.md` until every documented matrix row has passed and its evidence is retained.
 

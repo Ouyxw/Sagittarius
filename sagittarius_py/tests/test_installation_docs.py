@@ -105,3 +105,24 @@ def test_phase13_ci_workflow_policy_is_documented():
     assert "Automatic on relevant pushes to `main`" in ci_docs
     assert "Manual only" in ci_docs
     assert "Evidence Retention" in ci_docs
+
+
+def test_phase13_release_evidence_workflows_are_hardened():
+    testpypi = _read(".github/workflows/phase13-testpypi.yml")
+    cuda = _read(".github/workflows/phase13-cuda-wheel.yml")
+
+    assert "environment: testpypi" in testpypi
+    assert "id-token: write" in testpypi
+    assert "skip-existing:" not in testpypi
+    assert "Verify built package version and record distribution digests" in testpypi
+    assert "phase13-testpypi-evidence/v1" in testpypi
+    assert "clean-install-diagnostic.json" in testpypi
+    assert "testpypi-project.json" in testpypi
+    assert "phase13-testpypi-${{ inputs.expected-version }}" in testpypi
+
+    assert "name,driver_version,memory.total" in cuda
+    assert "cuda-wheel-smoke.log" in cuda
+    assert "phase13-cuda-wheel-evidence/v1" in cuda
+    assert "SAGITTARIUS_RUN_CUDA_WHEEL_SMOKE" in cuda
+    assert "SAGITTARIUS_ENABLE_GPU_TESTS" in cuda
+    assert "phase13-cuda-wheel-${{ github.run_id }}" in cuda

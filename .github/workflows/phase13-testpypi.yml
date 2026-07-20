@@ -12,6 +12,7 @@ jobs:
   testpypi-candidate:
     name: Build, check, publish to TestPyPI, and install
     runs-on: ubuntu-latest
+    environment: testpypi
     timeout-minutes: 60
     permissions:
       id-token: write
@@ -39,9 +40,49 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "sagittarius_py/uv.lock"
 
+      - name: Create release evidence directory
+        run: |
+          evidence_dir="$RUNNER_TEMP/phase13-testpypi-evidence"
+          mkdir -p "$evidence_dir"
+          echo "EVIDENCE_DIR=$evidence_dir" >> "$GITHUB_ENV"
+
       - name: Build artifacts
         working-directory: sagittarius_py
         run: uv build --wheel --sdist --out-dir dist
+
+      - name: Verify built package version and record distribution digests
+        working-directory: sagittarius_py
+        env:
+          EXPECTED_VERSION: ${{ inputs.expected-version }}
+        run: |
+          uv run python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import tarfile
+          import zipfile
+          from pathlib import Path
+
+          dist = Path("dist")
+          wheel = next(dist.glob("*.whl"))
+          sdist = next(dist.glob("*.tar.gz"))
+          with zipfile.ZipFile(wheel) as archive:
+              metadata = next(name for name in archive.namelist() if name.endswith(".dist-info/METADATA"))
+              wheel_version = next(line.removeprefix("Version: ") for line in archive.read(metadata).decode().splitlines() if line.startswith("Version: "))
+          with tarfile.open(sdist) as archive:
+              pkg_info = next(member for member in archive.getmembers() if member.name.endswith("/PKG-INFO"))
+              sdist_version = next(line.removeprefix("Version: ") for line in archive.extractfile(pkg_info).read().decode().splitlines() if line.startswith("Version: "))
+          expected = os.environ["EXPECTED_VERSION"]
+          assert wheel_version == expected, (wheel_version, expected)
+          assert sdist_version == expected, (sdist_version, expected)
+          evidence = {
+              "schema_version": "phase13-testpypi-evidence/v1",
+              "expected_version": expected,
+              "built_versions": {"wheel": wheel_version, "sdist": sdist_version},
+              "distributions": {path.name: {"sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in (wheel, sdist)},
+          }
+          Path(os.environ["EVIDENCE_DIR"], "build-artifacts.json").write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
 
       - name: Check package metadata
         working-directory: sagittarius_py
@@ -52,7 +93,6 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: sagittarius_py/dist
-          skip-existing: true
 
       - name: Verify TestPyPI install
         run: |
@@ -66,9 +106,59 @@ jobs:
           /tmp/sagittarius-testpypi-venv/bin/sagittarius backend resolve
           /tmp/sagittarius-testpypi-venv/bin/python - <<'PY'
           import json
+          import os
           import sagittarius
           report = sagittarius.doctor()
           assert report["backend_source"] == "package_resource", report["julia_backend"]
           assert sagittarius.version_info()["package_version"] == "${{ inputs.expected-version }}"
-          print(json.dumps({"backend_source": report["backend_source"]}, sort_keys=True))
+          diagnostic = {"backend_source": report["backend_source"], "doctor": report, "package_version": sagittarius.version_info()["package_version"]}
+          with open(os.path.join(os.environ["EVIDENCE_DIR"], "clean-install-diagnostic.json"), "w", encoding="utf-8") as stream:
+              json.dump(diagnostic, stream, indent=2, sort_keys=True)
+              stream.write("\n")
+          print(json.dumps(diagnostic, sort_keys=True))
           PY
+
+
+      - name: Record TestPyPI file hashes and release identity
+        if: success()
+        env:
+          EXPECTED_VERSION: ${{ inputs.expected-version }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import time
+          from pathlib import Path
+          from urllib.request import urlopen
+
+          url = "https://test.pypi.org/pypi/sagittarius-py/{}/json".format(os.environ["EXPECTED_VERSION"])
+          for attempt in range(6):
+              try:
+                  with urlopen(url, timeout=30) as response:
+                      payload = json.load(response)
+                  break
+              except Exception:
+                  if attempt == 5:
+                      raise
+                  time.sleep(10)
+          evidence_dir = Path(os.environ["EVIDENCE_DIR"])
+          (evidence_dir / "testpypi-project.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          release = {
+              "schema_version": "phase13-testpypi-evidence/v1",
+              "commit": os.environ["GITHUB_SHA"],
+              "ref": os.environ["GITHUB_REF"],
+              "run_url": "{}/{}/actions/runs/{}".format(os.environ["GITHUB_SERVER_URL"], os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_RUN_ID"]),
+              "expected_version": os.environ["EXPECTED_VERSION"],
+              "testpypi_json_url": url,
+              "testpypi_sha256": {item["filename"]: item["digests"]["sha256"] for item in payload["urls"]},
+          }
+          (evidence_dir / "release-evidence.json").write_text(json.dumps(release, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload TestPyPI release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase13-testpypi-${{ inputs.expected-version }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error

@@ -34,11 +34,53 @@ jobs:
           cache-dependency-glob: "sagittarius_py/uv.lock"
 
       - name: Show CUDA host visibility
-        run: nvidia-smi
+        run: |
+          evidence_dir="$RUNNER_TEMP/phase13-cuda-wheel-evidence"
+          mkdir -p "$evidence_dir"
+          echo "EVIDENCE_DIR=$evidence_dir" >> "$GITHUB_ENV"
+          nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader \
+            | tee "$evidence_dir/nvidia-smi.csv"
 
       - name: Run CUDA wheel smoke and parity
         working-directory: sagittarius_py
-        run: >-
-          uv run python -m pytest
-          tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_cuda_smoke_and_parity
-          -q
+        run: |
+          set -o pipefail
+          uv run python -m pytest \
+            tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_cuda_smoke_and_parity \
+            -q 2>&1 | tee "$EVIDENCE_DIR/cuda-wheel-smoke.log"
+
+      - name: Record CUDA wheel evidence
+        if: always()
+        env:
+          VALIDATION_COMMAND: >-
+            uv run python -m pytest
+            tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_cuda_smoke_and_parity
+            -q
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          evidence = {
+              "schema_version": "phase13-cuda-wheel-evidence/v1",
+              "commit": os.environ["GITHUB_SHA"],
+              "ref": os.environ["GITHUB_REF"],
+              "run_url": "{}/{}/actions/runs/{}".format(os.environ["GITHUB_SERVER_URL"], os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_RUN_ID"]),
+              "runner_os": os.environ["RUNNER_OS"],
+              "validation_command": os.environ["VALIDATION_COMMAND"],
+              "required_environment": {
+                  "SAGITTARIUS_RUN_CUDA_WHEEL_SMOKE": "1",
+                  "SAGITTARIUS_ENABLE_GPU_TESTS": "1",
+              },
+          }
+          Path(os.environ["EVIDENCE_DIR"], "cuda-wheel-evidence.json").write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload CUDA wheel evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase13-cuda-wheel-${{ github.run_id }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
