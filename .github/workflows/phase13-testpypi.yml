@@ -6,7 +6,7 @@ on:
       expected-version:
         description: "Expected sagittarius-py version to verify after TestPyPI install"
         required: true
-        default: "1.0.0"
+        default: "1.0.1"
 
 jobs:
   testpypi-candidate:
