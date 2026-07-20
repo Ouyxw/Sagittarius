@@ -31,7 +31,7 @@ def test_doctor_cpu_without_backend_initialization(monkeypatch):
 
 def _make_backend_tree(path: Path) -> Path:
     (path / "src").mkdir(parents=True)
-    (path / "Project.toml").write_text('name = "Sagittarius"\nversion = "0.1.0"\n', encoding="utf-8")
+    (path / "Project.toml").write_text('name = "Sagittarius"\nversion = "1.0.0"\n', encoding="utf-8")
     (path / "src" / "Sagittarius.jl").write_text("module Sagittarius\nend\n", encoding="utf-8")
     return path
 

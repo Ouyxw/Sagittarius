@@ -112,7 +112,7 @@ Release notes should eventually record a matrix like:
 
 | Python package | Julia backend | Contract schemas | Notes |
 | :--- | :--- | :--- | :--- |
-| `sagittarius-py 0.x` | `Sagittarius.jl 0.x` | `run-manifest/v1`, `shared-result/v1`, `event-taxonomy/v1` | Compatible monorepo release. |
+| `sagittarius-py 1.0.0` | `Sagittarius.jl 1.0.0` | `run-manifest/v1`, `shared-result/v1`, `event-taxonomy/v1` | Initial stable compatible monorepo release. |
 
 Until independent releases exist, the git commit is the primary compatibility identifier. Result artifacts should keep recording git/build metadata so runs remain auditable.
 

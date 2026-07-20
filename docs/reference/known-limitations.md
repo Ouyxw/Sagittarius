@@ -1,10 +1,10 @@
 # Known Limitations
 
-Sagittarius is an early research SDK. This page records practical limits and unsupported scenarios so examples, benchmarks, and hardware-facing studies can be interpreted correctly.
+Sagittarius 1.0.0 is a stable research SDK. This page records practical limits and unsupported scenarios so examples, benchmarks, and hardware-facing studies can be interpreted correctly.
 
 ## API Stability
 
-- The Python SDK and Julia developer API are still evolving. Names, defaults, result fields, and error behavior may change before a stable release.
+- Sagittarius 1.0.0 defines the supported Python SDK and Julia developer API surface. Future incompatible changes require a documented compatibility and versioning decision under [`SPEC-GOV-005-repository-versioning.md`](../governance/SPEC-GOV-005-repository-versioning.md).
 - Explicit `GlobalPulse`, `LocalPulseVector`, and `CallablePulse` wrappers are supported, while scalar/list/dict/callable shorthand forms remain backward-compatible. See [`SPEC-API-001-pulse-and-indexing-contract.md`](../api/SPEC-API-001-pulse-and-indexing-contract.md) for the current contract.
 - Python atom indices are zero-based and follow `Register.atoms` order. Julia internals are one-based; this boundary is documented in [`SPEC-API-002-python-julia-parity.md`](../api/SPEC-API-002-python-julia-parity.md) and covered by cross-language golden tests.
 
