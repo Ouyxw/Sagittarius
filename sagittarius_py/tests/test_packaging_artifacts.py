@@ -151,7 +151,7 @@ def test_python_package_metadata_is_release_ready():
     assert "Programming Language :: Python :: 3.10" in project["classifiers"]
     assert "Programming Language :: Python :: 3.11" in project["classifiers"]
     assert "Programming Language :: Python :: 3.12" in project["classifiers"]
-    assert "Programming Language :: Julia" in project["classifiers"]
+    assert "Programming Language :: Julia" not in project["classifiers"]
     assert {"Homepage", "Documentation", "Source", "Issues"} <= project["urls"].keys()
 
 
@@ -170,6 +170,7 @@ def test_wheel_metadata_contains_release_fields(built_artifacts):
     assert "Programming Language :: Python :: 3.10" in classifiers
     assert "Programming Language :: Python :: 3.11" in classifiers
     assert "Programming Language :: Python :: 3.12" in classifiers
+    assert "Programming Language :: Julia" not in classifiers
     assert metadata["Project-URL"] is not None
     assert any(name.endswith(".dist-info/licenses/LICENSE") for name in names)
     assert "Sagittarius is a research SDK" in metadata.get_payload()
