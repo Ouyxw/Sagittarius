@@ -10,14 +10,37 @@ and build-once promotion rules are defined by
 
 1. Confirm the repository visibility and MIT license plan is approved.
 2. Build wheel and sdist from a clean checkout.
-3. Run artifact metadata checks, including `twine check` over both files.
-4. Publish the exact release candidate to TestPyPI only.
-5. Install the TestPyPI candidate into a fresh environment outside the source checkout.
-6. Run `sagittarius backend resolve` and the minimal CPU smoke from the installed package.
-7. Complete uninstall/reinstall, cross-platform matrix, and GPU evidence gates before production PyPI.
-8. Promote the exact wheel and sdist whose recorded digests passed the required gates; do not rebuild for production publication.
+3. Record the candidate tag, full commit, Python/Julia versions, filenames, and
+   SHA-256 digests.
+4. Run metadata, forbidden-content, complete Python regression, Julia-backed
+   parity, clean wheel, uninstall/reinstall, and clean sdist-install checks.
+5. Make every downstream job consume or verify the same retained distributions.
+6. Publish the exact release candidate to TestPyPI only.
+7. Install the TestPyPI candidate into a fresh environment outside the source
+   checkout and reconcile the index file digests with the candidate record.
+8. Run `sagittarius backend resolve` and the minimal CPU smoke from the installed
+   package.
+9. Complete the final-candidate cross-platform matrix and real-hardware CUDA
+   evidence gates before production PyPI.
+10. Promote the exact wheel and sdist whose recorded digests passed the required
+    gates; do not rebuild for production publication.
+11. Install the pinned version from production PyPI outside the repository and
+    retain the post-publication smoke evidence.
 
 Production PyPI upload remains blocked until the Phase 13 release-readiness table marks every PyPI gate complete.
+
+## Remaining CI Preconditions
+
+The current workflows do not yet provide one canonical candidate build consumed
+by every gate. They also lack ref/`main` containment enforcement, complete Python
+release regression, native Julia `Pkg.test()` coverage, forbidden-content
+denylist tests, clean sdist installation, unconditional failed-gate evidence, a
+protected production publisher, and a production-index installation smoke.
+
+The existing cross-platform pass applies to its recorded historical commit. The
+strengthened TestPyPI CPU smoke and the real-hardware CUDA smoke must run against
+the final candidate distributions. Earlier or independently rebuilt artifacts do
+not close those gates.
 
 ## Validated TestPyPI Candidate
 

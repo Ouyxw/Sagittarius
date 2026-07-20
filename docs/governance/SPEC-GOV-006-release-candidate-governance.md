@@ -231,6 +231,46 @@ digests, runner identity, validation command, gate result, and relevant diagnost
 or result artifacts. Failed gate artifacts are evidence and must not be filtered
 out.
 
+## Current CI Gap Register
+
+The following gaps were confirmed against the workflows and tests present on
+2026-07-20. `Planned` means the gate is not implemented. `Mixed` means useful
+test logic or earlier evidence exists, but it is not yet bound to the final frozen
+distribution set.
+
+| CI capability | Status | Required closure |
+| :--- | :--- | :--- |
+| Canonical candidate build | Planned | Add one clean job that builds wheel and sdist once, records the freeze identity and SHA-256 digests, and uploads the distributions for downstream jobs. |
+| Ref and version identity guard | Planned | Reject unapproved refs; require the full SHA to be contained in `main`; verify candidate tag, workflow input, Python version, canonical Julia version, and embedded Julia version agree. |
+| Cross-workflow artifact reuse | Planned | Make clean-install, cross-platform, TestPyPI, and CUDA jobs download and verify the canonical distributions instead of rebuilding through their local pytest fixture. |
+| Artifact forbidden-content tests | Planned | Add wheel and sdist denylist assertions for repository configuration, internal development material, debug scripts, scratch workspaces, local evidence, and secrets. |
+| Clean sdist installation | Planned | Build and install from the retained sdist in a repository-external environment, then run backend resolution, package-resource, version, schema, and one-atom CPU checks. |
+| Full Python release regression | Planned | Run the complete Python test suite for the frozen candidate, separating backend-free and Julia-backed jobs where useful. The fast PR subset is not sufficient release evidence. |
+| Julia-native regression | Planned | Establish a Julia `test/` suite and run `Pkg.test()` before claiming a simultaneous stable Julia-native release. Python-driven backend tests do not replace native package tests. |
+| Final-candidate platform and service evidence | Mixed | Rerun clean CPU, every declared platform row, the strengthened TestPyPI CPU smoke, and real-hardware CUDA parity for the final commit and distribution digests. Earlier runs remain historical evidence only. |
+| Digest reconciliation | Planned | Assert that local candidate digests, downloaded workflow artifact digests, TestPyPI JSON digests, CUDA-tested wheel digest, and production upload digests are identical. Recording them independently is insufficient. |
+| Failure evidence retention | Mixed | Use unconditional evidence upload and retain logs, commands, identities, diagnostics, and partial results for failed clean, matrix, TestPyPI, and CUDA gates. |
+| Production publication and post-install smoke | Planned | Add a separately protected production workflow that promotes the validated files, then installs the pinned version from production PyPI outside the repository and records the result. |
+
+The current CUDA smoke and parity test is implemented; its missing work is a
+successful real-NVIDIA execution against the final candidate wheel. The current
+cross-platform matrix has historical passing evidence, and the current TestPyPI
+workflow has earlier clean-install evidence, but neither closes a later candidate
+unless commit and distribution digests match.
+
+The following supply-chain checks are recommended hardening after the blocking
+identity and regression gaps above are closed:
+
+- Markdown link or documentation build checks;
+- dependency vulnerability and license checks;
+- secret scanning;
+- an SBOM and artifact attestation;
+- pinning third-party GitHub Actions to reviewed immutable commit SHAs.
+
+These controls support public release quality, but they must not be reported as
+substitutes for software, numerical, parity, installation, or hardware
+verification.
+
 ## Production Approval Checklist
 
 Before production PyPI upload, the release owner confirms:
@@ -240,11 +280,17 @@ Before production PyPI upload, the release owner confirms:
 - [ ] The worktree used for the build was clean.
 - [ ] Wheel and sdist contents passed required and forbidden content checks.
 - [ ] Wheel and sdist SHA-256 digests are recorded.
+- [ ] The complete Python release regression passed for the frozen candidate.
+- [ ] Required Julia-backed parity tests passed; `Pkg.test()` passed when a
+      stable Julia-native release is being claimed.
 - [ ] Clean CPU install and uninstall/reinstall evidence passed.
+- [ ] A clean installation and CPU smoke from the retained sdist passed.
 - [ ] Every claimed cross-platform row passed for the candidate distributions.
 - [ ] TestPyPI installed-package CPU evidence passed for the candidate files.
+- [ ] TestPyPI file digests equal the canonical candidate digests.
 - [ ] Real-hardware CUDA evidence passed for the candidate wheel when CUDA support
       is included in the release claim.
+- [ ] Required failure evidence was retained rather than discarded.
 - [ ] Known limitations and CUDA maturity wording match the evidence.
 - [ ] Repository visibility, MIT licensing, project URLs, issue tracker, README,
       user docs, and disclosure review are approved.

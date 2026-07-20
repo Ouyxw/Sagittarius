@@ -47,6 +47,29 @@ A branch CUDA run is pre-merge risk screening. It becomes final publication
 evidence only when the tested commit and wheel digest are unchanged, the commit
 is contained in `main`, and that exact wheel is the production candidate.
 
+## Known Release-Gate Gaps
+
+The existing workflows implement useful tests, but they do not yet form a closed
+production release pipeline:
+
+| Gap | Current behavior | Required CI change |
+| :--- | :--- | :--- |
+| Canonical build | TestPyPI builds explicitly; clean, matrix, and CUDA tests build through their local pytest fixture. | Add one candidate build artifact and freeze manifest. |
+| Candidate identity | Manual workflows accept the selected branch and do not require containment in `main` or agreement among tag, Python, and Julia versions. | Add an early identity guard shared by every release workflow. |
+| Digest reuse | Workflows record some identities independently but do not all consume or reconcile the same wheel/sdist digests. | Download the canonical files and fail on any digest mismatch. |
+| Artifact denylist | Packaging tests assert required content but do not reject all internal or sensitive paths. | Add wheel and sdist forbidden-content tests. |
+| Sdist installation | The sdist is inspected and checked by `twine`, but release smoke installs the wheel only. | Install from the retained sdist in a clean external environment and run the CPU smoke. |
+| Full regression | Fast PR CI runs a selected packaging/documentation subset; no release workflow runs the complete Python suite. | Add backend-free and Julia-backed full release-regression jobs. |
+| Julia-native tests | No Julia `test/` suite or `Pkg.test()` CI job is present. | Add native Julia tests before a stable Julia-native release is claimed. |
+| Final external evidence | Cross-platform evidence applies to an earlier commit; strengthened TestPyPI and real-hardware CUDA evidence remain pending for the final candidate. | Rerun every applicable gate for the frozen commit and canonical distributions. |
+| Failure artifacts | Cross-platform evidence is written only after success, and clean-smoke evidence is not uploaded as a release bundle. | Upload logs and partial diagnostics with `if: always()`. |
+| Production promotion | No protected production PyPI workflow or production-index install smoke exists. | Promote the validated files and verify a pinned external installation after publication. |
+
+Until these gaps close, a workflow pass is component evidence, not approval of a
+production distribution set. Supply-chain hardening should subsequently add
+documentation link/build checks, dependency and license review, secret scanning,
+SBOM/attestation generation, and immutable action pinning.
+
 ## Evidence Retention
 
 For release readiness, retain:

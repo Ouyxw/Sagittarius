@@ -169,6 +169,11 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **CUDA Hardware Evidence** | High | Mixed | `.github/workflows/phase13-cuda-wheel.yml` remains manual on a self-hosted CUDA runner and retains GPU name/driver/memory, smoke log, and run metadata in a `phase13-cuda-wheel-<run-id>` artifact; CUDA wheel support is release-validated only after this hardware-backed evidence passes. |
 | **CI Documentation** | Medium | Done | `docs/reference/ci-workflows.md` defines automatic workflows, manual release gates, evidence retention, and maintenance rules. |
 | **Release Candidate Governance** | High | Mixed | `docs/governance/SPEC-GOV-006-release-candidate-governance.md` defines `main`-based release lineage, immutable candidate identity, branch cleanup, package/documentation boundaries, build-once artifact promotion, and the distinction between pre-merge CUDA risk screening and final digest-bound CUDA publication evidence. Workflow enforcement of one frozen distribution set across every gate remains to be implemented. |
+| **Canonical Candidate Artifact** | High | Planned | Add one clean candidate-build job that records ref, full commit, Python/Julia versions, filenames, and SHA-256 digests, then supplies the same wheel and sdist to clean-install, cross-platform, TestPyPI, CUDA, and production jobs. |
+| **Release Identity Enforcement** | High | Planned | Release workflows must reject unapproved refs, commits not contained in `main`, version/tag disagreement, embedded Julia version drift, and distribution digest mismatch. |
+| **Release Regression Coverage** | High | Mixed | Fast PR packaging tests and targeted backend tests exist, but no release workflow runs the complete Python suite. Add backend-free and Julia-backed full-suite jobs; add a Julia `test/` suite and `Pkg.test()` before claiming a stable Julia-native release. |
+| **Sdist and Forbidden-Content Coverage** | High | Planned | Add wheel/sdist denylist tests and a repository-external install plus CPU smoke from the retained sdist. Existing tests verify required contents and install the wheel only. |
+| **Production Promotion and Failure Evidence** | High | Planned | Retain failed-gate logs and partial diagnostics, add a separately protected production PyPI workflow that uploads the validated files without rebuilding, and verify a pinned installation from production PyPI. |
 
 ### Phase 13 Acceptance Criteria
 
@@ -182,6 +187,11 @@ This document outlines the development lifecycle of Sagittarius, from a function
 8. CI tests installation artifacts across the declared Python, Julia, and operating-system support matrix.
 9. PyPI publication remains blocked until all release-readiness requirements and artifact smoke tests pass.
 10. Production publication promotes the exact wheel and sdist whose commit, version, tag, and SHA-256 digests passed every applicable release gate.
+11. Every release gate consumes or verifies the canonical candidate distribution digests rather than rebuilding an untracked equivalent.
+12. The frozen candidate passes the complete Python release regression and all required Julia-backed parity tests.
+13. A clean repository-external installation from the retained sdist passes version, backend-source, schema, and one-atom CPU checks.
+14. Failed release gates retain their logs, commands, candidate identity, and available diagnostics.
+15. Production publication uses the validated files and is followed by a pinned clean-install smoke from production PyPI.
 
 ### Phase 13 PyPI Readiness Completion Plan
 
@@ -193,7 +203,7 @@ follow `docs/governance/SPEC-GOV-006-release-candidate-governance.md`.
 
 2. Backend setup commands: Done. `sagittarius backend resolve`, `sagittarius backend install cuda`, and `sagittarius doctor` provide the documented command path; CUDA setup remains explicit and opt-in.
 
-3. CI and release automation: Done for fast PR CI, clean artifact smoke, CI documentation, and retained cross-platform matrix evidence. The TestPyPI `1.0.0` clean-install gate has passed, while the strengthened CPU-smoke gate must pass on the next frozen candidate; the CUDA workflow remains a manual release gate until retained real-hardware evidence passes. See `docs/reference/ci-workflows.md`.
+3. CI and release automation: Done for fast PR CI, clean artifact smoke, CI documentation, and historical cross-platform matrix evidence. Remaining work is to build one canonical candidate distribution set, enforce ref/version/`main` containment, reuse and reconcile its digests across every gate, run complete Python release regression, add sdist-install and forbidden-content coverage, retain failure evidence, execute the strengthened TestPyPI and real-hardware CUDA gates for the final candidate, and add protected production promotion plus post-publication smoke. See `docs/reference/ci-workflows.md`.
 
 4. Uninstall/reinstall smoke coverage: Done. The release-artifact smoke installs the wheel, resolves the backend, runs a minimal CPU simulation, uninstalls the package, verifies it is no longer importable, reinstalls the same wheel outside the source checkout, and verifies backend source detection, JuliaPkg resolution, artifact metadata, and minimal CPU simulation after reinstall.
 
