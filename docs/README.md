@@ -65,3 +65,4 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Disclosure control](governance/SPEC-GOV-002-disclosure-control.md)
 - [Benchmarking plan](governance/SPEC-GOV-004-benchmarking-plan.md)
 - [Repository and versioning governance](governance/SPEC-GOV-005-repository-versioning.md)
+- [Release candidate and publication governance](governance/SPEC-GOV-006-release-candidate-governance.md)

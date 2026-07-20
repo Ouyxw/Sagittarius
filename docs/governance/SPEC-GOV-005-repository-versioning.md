@@ -13,6 +13,10 @@ This document defines how Sagittarius manages a mixed Python and Julia scientifi
 
 Sagittarius should remain a monorepo while the Python SDK and Julia backend still share fast-moving physics semantics, solver behavior, artifact schemas, and cross-language tests.
 
+Release candidate freezing, branch-to-`main` integration, immutable tags,
+build-once artifact promotion, and production gate identity are governed by
+[`SPEC-GOV-006-release-candidate-governance.md`](SPEC-GOV-006-release-candidate-governance.md).
+
 The target is not an undifferentiated mixed-language project. The target is a hybrid monorepo with clear package, documentation, test, and release boundaries:
 
 ```text

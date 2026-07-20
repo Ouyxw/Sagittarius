@@ -168,6 +168,7 @@ This document outlines the development lifecycle of Sagittarius, from a function
 | **TestPyPI Publication Evidence** | Medium | Mixed | `.github/workflows/phase13-testpypi.yml` successfully published and clean-installed the `1.0.0` candidate through the protected OIDC path. The strengthened workflow now also requires an installed-package one-atom CPU simulation and result artifact, so the next frozen candidate must retain new `phase13-testpypi-<version>` evidence before production publication. |
 | **CUDA Hardware Evidence** | High | Mixed | `.github/workflows/phase13-cuda-wheel.yml` remains manual on a self-hosted CUDA runner and retains GPU name/driver/memory, smoke log, and run metadata in a `phase13-cuda-wheel-<run-id>` artifact; CUDA wheel support is release-validated only after this hardware-backed evidence passes. |
 | **CI Documentation** | Medium | Done | `docs/reference/ci-workflows.md` defines automatic workflows, manual release gates, evidence retention, and maintenance rules. |
+| **Release Candidate Governance** | High | Mixed | `docs/governance/SPEC-GOV-006-release-candidate-governance.md` defines `main`-based release lineage, immutable candidate identity, branch cleanup, package/documentation boundaries, build-once artifact promotion, and the distinction between pre-merge CUDA risk screening and final digest-bound CUDA publication evidence. Workflow enforcement of one frozen distribution set across every gate remains to be implemented. |
 
 ### Phase 13 Acceptance Criteria
 
@@ -180,10 +181,13 @@ This document outlines the development lifecycle of Sagittarius, from a function
 7. Unsupported or missing Julia installations produce documented, actionable diagnostics.
 8. CI tests installation artifacts across the declared Python, Julia, and operating-system support matrix.
 9. PyPI publication remains blocked until all release-readiness requirements and artifact smoke tests pass.
+10. Production publication promotes the exact wheel and sdist whose commit, version, tag, and SHA-256 digests passed every applicable release gate.
 
 ### Phase 13 PyPI Readiness Completion Plan
 
-Before any public PyPI upload, complete these remaining blockers:
+Before any public PyPI upload, complete these remaining blockers. Candidate
+identity, branch integration, artifact promotion, CUDA timing, and branch cleanup
+follow `docs/governance/SPEC-GOV-006-release-candidate-governance.md`.
 
 1. CPU-first dependency profile: Done. Default JuliaPkg and backend project metadata resolve CPU-required packages without CUDA.jl; CUDA is available only through the packaged opt-in profile.
 

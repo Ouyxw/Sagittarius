@@ -6,6 +6,12 @@ This document defines which GitHub Actions workflows run automatically, which ar
 
 Sagittarius separates day-to-day pull-request validation from release-candidate installation validation. The fast tier should stay short enough for ordinary development, while the release tier intentionally exercises clean installs, JuliaPkg resolution, platform differences, TestPyPI, and optional GPU hardware.
 
+The authoritative candidate identity and build-once promotion requirements live
+in [`SPEC-GOV-006-release-candidate-governance.md`](../governance/SPEC-GOV-006-release-candidate-governance.md).
+The current workflows retain useful per-run evidence, but production publication
+must remain blocked until every required workflow consumes or verifies the same
+frozen distribution digests.
+
 | Workflow | Trigger | Runs on | Purpose | Expected use |
 | :--- | :--- | :--- | :--- | :--- |
 | `.github/workflows/pr-fast-ci.yml` | Automatic on pull requests to `develop/**` and `main`; automatic on direct pushes to `develop/**` as a fallback; manual on demand | `ubuntu-latest` | Fast documentation, metadata, artifact-content, and portable benchmark import checks. | Every feature, documentation, packaging, and CI PR; direct develop pushes are still discouraged but covered. |
@@ -36,6 +42,10 @@ The following workflows are release gates and should not be required for every f
 - `phase13-cuda-wheel.yml`
 
 Run them for release candidates, package/backend changes, or when their specific evidence is needed. The cross-platform, TestPyPI, and CUDA workflows remain manual because they are expensive, depend on external services or hardware, and produce release evidence rather than ordinary development feedback.
+
+A branch CUDA run is pre-merge risk screening. It becomes final publication
+evidence only when the tested commit and wheel digest are unchanged, the commit
+is contained in `main`, and that exact wheel is the production candidate.
 
 ## Evidence Retention
 

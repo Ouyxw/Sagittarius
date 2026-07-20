@@ -2,6 +2,10 @@
 
 Sagittarius is not published on production PyPI yet. Treat every package artifact as public source distribution material because the Python wheel and sdist include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`.
 
+The candidate commit, tag, distribution digests, branch integration, CUDA timing,
+and build-once promotion rules are defined by
+[`SPEC-GOV-006-release-candidate-governance.md`](../../governance/SPEC-GOV-006-release-candidate-governance.md).
+
 ## Required Order
 
 1. Confirm the repository visibility and MIT license plan is approved.
@@ -11,6 +15,7 @@ Sagittarius is not published on production PyPI yet. Treat every package artifac
 5. Install the TestPyPI candidate into a fresh environment outside the source checkout.
 6. Run `sagittarius backend resolve` and the minimal CPU smoke from the installed package.
 7. Complete uninstall/reinstall, cross-platform matrix, and GPU evidence gates before production PyPI.
+8. Promote the exact wheel and sdist whose recorded digests passed the required gates; do not rebuild for production publication.
 
 Production PyPI upload remains blocked until the Phase 13 release-readiness table marks every PyPI gate complete.
 
