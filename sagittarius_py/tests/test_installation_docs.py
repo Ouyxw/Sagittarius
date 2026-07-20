@@ -117,6 +117,10 @@ def test_phase13_release_evidence_workflows_are_hardened():
     assert "Verify built package version and record distribution digests" in testpypi
     assert "phase13-testpypi-evidence/v1" in testpypi
     assert "clean-install-diagnostic.json" in testpypi
+    assert "testpypi-cpu-result.json" in testpypi
+    assert "pop_atom_0" in testpypi
+    assert "RESULT_ARTIFACT_SCHEMA_VERSION" in testpypi
+    assert "package_resource" in testpypi
     assert "testpypi-project.json" in testpypi
     assert "phase13-testpypi-${{ inputs.expected-version }}" in testpypi
 

@@ -45,7 +45,7 @@ For release readiness, retain:
 - commit SHA and branch or tag;
 - job status for every required matrix row;
 - uploaded `phase13-cross-platform-<os>-py<python>-julia<julia>` artifacts;
-- a `phase13-testpypi-<version>` artifact containing commit, ref, run URL, wheel/sdist SHA-256 digests, clean-install diagnostic, and TestPyPI JSON file hashes;
+- a `phase13-testpypi-<version>` artifact containing commit, ref, run URL, wheel/sdist SHA-256 digests, clean-install diagnostic, installed-package CPU result artifact with schema checks, and TestPyPI JSON file hashes;
 - a `phase13-cuda-wheel-<run-id>` artifact containing the GPU name/driver/memory capture, smoke log, commit, ref, run URL, runner OS, validation command, and required opt-in flags when CUDA support is being claimed.
 
 Do not mark the Phase 13 cross-platform matrix gate complete in `REQUIREMENTS.md` until every documented matrix row has passed and its evidence is retained.

@@ -111,7 +111,44 @@ jobs:
           report = sagittarius.doctor()
           assert report["backend_source"] == "package_resource", report["julia_backend"]
           assert sagittarius.version_info()["package_version"] == "${{ inputs.expected-version }}"
-          diagnostic = {"backend_source": report["backend_source"], "doctor": report, "package_version": sagittarius.version_info()["package_version"]}
+
+          import numpy as np
+          from pathlib import Path
+
+          register = sagittarius.Register([sagittarius.Atom(0.0, 0.0, 0.0)], C6=0.0)
+          simulation = sagittarius.Simulation(
+              register,
+              sagittarius.PulseSequence(omega=0.0, delta=0.0),
+              sagittarius.SolverConfig(saveat=[0.0, 0.1]),
+          )
+          result = simulation.run(
+              np.array([1.0, 0.0], dtype=complex),
+              0.0,
+              0.1,
+              observables={"pop_atom_0": 0},
+          )
+          artifact_path = Path(os.environ["EVIDENCE_DIR"], "testpypi-cpu-result.json")
+          result.save(artifact_path)
+          artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+          assert artifact["schema_version"] == sagittarius.RESULT_ARTIFACT_SCHEMA_VERSION
+          assert artifact["manifest"]["schema_version"] == sagittarius.RUN_MANIFEST_SCHEMA_VERSION
+          assert artifact["shared_result"]["schema_version"] == sagittarius.SHARED_RESULT_SCHEMA_VERSION
+          assert artifact["manifest"]["versions"]["julia"]["source"] == "package_resource"
+          assert "pop_atom_0" in artifact["shared_result"]["series"]
+          assert len(result.to_pandas()) >= 2
+
+          diagnostic = {
+              "backend_source": report["backend_source"],
+              "doctor": report,
+              "package_version": sagittarius.version_info()["package_version"],
+              "cpu_smoke": {
+                  "artifact": artifact_path.name,
+                  "result_schema": artifact["schema_version"],
+                  "manifest_schema": artifact["manifest"]["schema_version"],
+                  "shared_result_schema": artifact["shared_result"]["schema_version"],
+                  "rows": len(result.to_pandas()),
+              },
+          }
           with open(os.path.join(os.environ["EVIDENCE_DIR"], "clean-install-diagnostic.json"), "w", encoding="utf-8") as stream:
               json.dump(diagnostic, stream, indent=2, sort_keys=True)
               stream.write("\n")
