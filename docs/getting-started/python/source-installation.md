@@ -48,7 +48,7 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-This `pip install -e .` workflow is development-only. It still depends on the editable source checkout for Python code updates and is not equivalent to an independent PyPI install. Local wheel artifacts now embed the Julia backend, but independent `pip install sagittarius-py` from PyPI is not supported yet.
+This `pip install -e .` workflow is development-only. It still depends on the editable source checkout for Python code updates and is not equivalent to an independent PyPI install. Local wheel artifacts now embed the Julia backend, but independent `pip install sagittarius-py` from production PyPI is not supported yet. For the validated TestPyPI `1.0.0` release candidate, see [Python package installation status](package-installation.md).
 
 If Julia is installed but cannot be found automatically, specify its executable before resolving:
 

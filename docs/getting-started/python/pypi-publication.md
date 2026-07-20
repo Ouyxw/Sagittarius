@@ -14,6 +14,10 @@ Sagittarius is not published on production PyPI yet. Treat every package artifac
 
 Production PyPI upload remains blocked until the Phase 13 release-readiness table marks every PyPI gate complete.
 
+## Validated TestPyPI Candidate
+
+The trusted-publishing workflow successfully published and clean-installed `sagittarius-py==1.0.0` from TestPyPI. This satisfies the TestPyPI release-candidate gate only; it does not authorize a production PyPI upload. External users evaluating that candidate should use the documented version-pinned, dual-index command in [Python package installation status](package-installation.md). Retain the corresponding `phase13-testpypi-1.0.0` evidence artifact with the release record.
+
 ## Manual TestPyPI Workflow
 
 The repository includes `.github/workflows/phase13-testpypi.yml` as a manual workflow, protected by the GitHub `testpypi` environment. It builds wheel and sdist artifacts, verifies that both contain the requested version, runs metadata checks, publishes to TestPyPI with GitHub OIDC trusted publishing, and verifies installation from TestPyPI in a clean virtual environment. It deliberately fails if that version already exists; each candidate must use a new PEP 440 version.

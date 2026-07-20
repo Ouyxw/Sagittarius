@@ -53,7 +53,18 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-The `pip install -e .` path is development-only and still depends on the editable source checkout for Python code updates. Independent `pip install sagittarius-py` from PyPI is not supported yet; local wheel artifacts now embed the Julia backend but are still gated by Phase 13 release-readiness work.
+The `pip install -e .` path is development-only and still depends on the editable source checkout for Python code updates. Independent `pip install sagittarius-py` from production PyPI is not supported yet; local wheel artifacts now embed the Julia backend but remain gated by Phase 13 release-readiness work.
+
+A TestPyPI candidate, `sagittarius-py==1.0.0`, has passed clean-install validation. It is a release-candidate path, not a production support promise. Install it with the TestPyPI index plus PyPI for dependencies, then explicitly resolve the CPU-first Julia backend:
+
+```bash
+python -m pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  sagittarius-py==1.0.0
+sagittarius backend resolve
+sagittarius doctor
+```
 
 For source installs, backend setup, package status, container setup, and environment troubleshooting, see the [installation overview](docs/getting-started/installation.md). Python-specific setup lives under [docs/getting-started/python](docs/getting-started/python/source-installation.md); Julia-native setup lives under [docs/getting-started/julia](docs/getting-started/julia/projects.md).
 

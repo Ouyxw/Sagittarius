@@ -126,3 +126,22 @@ def test_phase13_release_evidence_workflows_are_hardened():
     assert "SAGITTARIUS_RUN_CUDA_WHEEL_SMOKE" in cuda
     assert "SAGITTARIUS_ENABLE_GPU_TESTS" in cuda
     assert "phase13-cuda-wheel-${{ github.run_id }}" in cuda
+
+
+def test_testpypi_candidate_installation_is_documented():
+    docs = "\n\n".join(
+        [
+            _read("README.md"),
+            _read("docs/getting-started/installation.md"),
+            _read("docs/getting-started/python/package-installation.md"),
+            _read("docs/getting-started/python/pypi-publication.md"),
+            _read("docs/getting-started/package-installation.md"),
+        ]
+    )
+
+    assert "sagittarius-py==1.0.0" in docs
+    assert "https://test.pypi.org/simple/" in docs
+    assert "--extra-index-url https://pypi.org/simple/" in docs
+    assert "sagittarius backend resolve" in docs
+    assert "package_resource" in docs
+    assert "production PyPI" in docs
