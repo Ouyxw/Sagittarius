@@ -83,8 +83,8 @@ Tags follow these rules:
 
 - Tags used as release identities are immutable after they are pushed.
 - A candidate tag may identify a frozen build before final approval, for example
-  `candidate/sagittarius-py-v1.0.6-1`.
-- The production tag uses `v<version>`, for example `v1.0.6`, and points to the
+  `candidate/sagittarius-py-v1.0.7-1`.
+- The production tag uses `v<version>`, for example `v1.0.7`, and points to the
   exact source commit used to build the published files.
 - The candidate and production tags may point to the same commit after all gates
   pass.

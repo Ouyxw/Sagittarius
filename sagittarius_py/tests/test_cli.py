@@ -1,6 +1,7 @@
 import json
 import subprocess
 import sys
+import types
 
 from click.testing import CliRunner
 
@@ -88,6 +89,34 @@ def test_backend_profiles_command_lists_cuda_profile():
     assert cuda["package_names"] == ["CUDA"]
     assert cuda["packages"]["CUDA"]["version"] == "6.2.0"
     assert cuda["install_command"] == "sagittarius backend install cuda"
+
+
+def test_backend_profile_installs_from_json_parsed_in_julia(monkeypatch):
+    import sagittarius.runtime as runtime
+
+    scripts = []
+
+    class FakeJulia:
+        def seval(self, source):
+            scripts.append(source)
+
+    fake_juliacall = types.ModuleType("juliacall")
+    fake_juliacall.Main = FakeJulia()
+    monkeypatch.setitem(sys.modules, "juliacall", fake_juliacall)
+    monkeypatch.setattr(runtime, "_configure_juliacall_environment", lambda: None)
+    monkeypatch.setattr(
+        runtime,
+        "resolve_backend_dependencies",
+        lambda: {"schema_version": "backend-setup/v1", "action": "resolve", "backend": "CPU", "returncode": 0},
+    )
+
+    report = runtime.install_backend_profile("cuda")
+
+    assert report["backend"] == "CUDA"
+    assert len(scripts) == 1
+    assert "using JSON" in scripts[0]
+    assert "specs = JSON.parse(" in scripts[0]
+    assert "specs = [{" not in scripts[0]
 
 
 def test_backend_install_cuda_dry_run_reports_profile_without_installing():

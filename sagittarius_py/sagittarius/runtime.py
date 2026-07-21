@@ -183,7 +183,7 @@ def package_version() -> str:
     try:
         return metadata.version("sagittarius-py")
     except metadata.PackageNotFoundError:
-        return "1.0.6"
+        return "1.0.7"
 
 
 def _valid_julia_backend_path(path: Path) -> bool:
@@ -312,14 +312,15 @@ def install_backend_profile(backend: str, *, resolve: bool = True, initialize_ba
         _configure_juliacall_environment()
         from juliacall import Main as jl
 
-        specs = json.dumps([
+        specs_json = json.dumps([
             {"name": name, **spec}
             for name, spec in sorted(packages.items())
         ])
         jl.seval(f"""
             using Pkg
             using UUIDs
-            specs = {specs}
+            using JSON
+            specs = JSON.parse({json.dumps(specs_json)})
             for spec in specs
                 version = haskey(spec, "version") ? VersionNumber(spec["version"]) : nothing
                 package_spec = isnothing(version) ?
