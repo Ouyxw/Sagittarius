@@ -1,6 +1,6 @@
 [project]
 name = "sagittarius-py"
-version = "1.0.2"
+version = "1.0.3"
 description = "A neutral-atom quantum emulator with Julia and Python SDKs"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -69,6 +69,7 @@ sagittarius = [
     "juliapkg-cuda.json",
     "julia/Sagittarius.jl/Project.toml",
     "julia/Sagittarius.jl/Manifest.toml",
+    "julia/Sagittarius.jl/test/*.jl",
     "julia/Sagittarius.jl/src/*.jl",
 ]
 

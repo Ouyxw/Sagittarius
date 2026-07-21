@@ -12,7 +12,7 @@ on:
       expected-version:
         description: "Expected candidate version"
         required: true
-        default: "1.0.2"
+        default: "1.0.3"
       expected-commit:
         description: "Expected full candidate commit SHA"
         required: true
