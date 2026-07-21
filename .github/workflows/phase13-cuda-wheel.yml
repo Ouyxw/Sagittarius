@@ -32,7 +32,6 @@ jobs:
     env:
       PYTHONNOUSERSITE: "1"
       PYTHONPATH: ""
-      EVIDENCE_DIR: ${{ runner.temp }}/phase13-cuda-wheel-evidence
       SAGITTARIUS_RUN_CUDA_WHEEL_SMOKE: "1"
       SAGITTARIUS_ENABLE_GPU_TESTS: "1"
       SAGITTARIUS_RELEASE_DIST_DIR: ${{ github.workspace }}/phase13-candidate-dist

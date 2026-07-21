@@ -33,7 +33,6 @@ jobs:
     env:
       PYTHONNOUSERSITE: "1"
       PYTHONPATH: ""
-      EVIDENCE_DIR: ${{ runner.temp }}/phase13-testpypi-evidence
     steps:
       - name: Checkout
         uses: actions/checkout@v4

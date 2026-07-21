@@ -41,7 +41,6 @@ jobs:
     env:
       PYTHONNOUSERSITE: "1"
       PYTHONPATH: ""
-      EVIDENCE_DIR: ${{ runner.temp }}/phase13-clean-artifact-evidence
       SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE: "1"
       SAGITTARIUS_RUN_RELEASE_SDIST_SMOKE: "1"
       SAGITTARIUS_RELEASE_DIST_DIR: ${{ github.event_name == 'workflow_dispatch' && format('{0}/phase13-candidate-dist', github.workspace) || '' }}

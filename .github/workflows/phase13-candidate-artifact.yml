@@ -22,7 +22,6 @@ jobs:
     env:
       PYTHONNOUSERSITE: "1"
       PYTHONPATH: ""
-      EVIDENCE_DIR: ${{ runner.temp }}/phase13-candidate-evidence
     steps:
       - name: Checkout candidate tag
         uses: actions/checkout@v4
