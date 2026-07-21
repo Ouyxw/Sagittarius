@@ -28,7 +28,7 @@ and build-once promotion rules are defined by
 11. Install the pinned version from production PyPI outside the repository and
     retain the post-publication smoke evidence.
 
-Production PyPI upload remains blocked until a separately reviewed, protected production workflow promotes the canonical files, production file hashes are reconciled with the candidate manifest, and a clean production-index smoke is retained.
+The separately reviewed, protected production workflow is implemented but unexecuted. Production PyPI upload remains blocked until it promotes a newly validated canonical candidate, reconciles production file hashes with the manifest, and retains a clean production-index smoke.
 
 ## Remaining CI Preconditions
 

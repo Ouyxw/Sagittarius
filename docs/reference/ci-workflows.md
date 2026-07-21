@@ -9,7 +9,7 @@ Sagittarius separates day-to-day pull-request validation from release-candidate 
 The authoritative candidate identity and build-once promotion requirements live
 in [`SPEC-GOV-006-release-candidate-governance.md`](../governance/SPEC-GOV-006-release-candidate-governance.md).
 The release workflows now share one manifest-bound candidate distribution set.
-The current canonical candidate has passed all listed validation gates. Production publication remains blocked until a separate protected promotion workflow, production digest reconciliation, and a production-index smoke are in place.
+The production-promotion workflow is implemented but unexecuted; production publication remains blocked until a newly frozen candidate passes every gate and the workflow records production digest reconciliation and a production-index smoke.
 
 | Workflow | Trigger | Runs on | Purpose | Expected use |
 | :--- | :--- | :--- | :--- | :--- |
@@ -20,6 +20,7 @@ The current canonical candidate has passed all listed validation gates. Producti
 | `.github/workflows/phase13-cross-platform.yml` | Manual only | Linux, macOS, Windows matrix | Release-candidate OS/Python/Julia artifact matrix with uploaded per-row evidence. | Run before marking cross-platform wheel evidence complete. |
 | `.github/workflows/phase13-testpypi.yml` | Manual only, protected by the `testpypi` environment | `ubuntu-latest` | Verify and publish the canonical files through OIDC, reconcile TestPyPI hashes, verify a clean install, and retain release evidence. | Run only with a new candidate version after TestPyPI trusted publishing and publication policy are ready. |
 | `.github/workflows/phase13-cuda-wheel.yml` | Manual only | Self-hosted Linux CUDA runner | Hardware-backed CUDA wheel smoke and CPU/CUDA parity with retained GPU and smoke-log evidence. | Run only when validating CUDA wheel support on real NVIDIA hardware. |
+| `.github/workflows/phase13-production-pypi.yml` | Manual only, protected by the `pypi-production` environment | `ubuntu-latest` | Promote the manifest-verified canonical wheel and sdist through OIDC, reconcile production hashes, and retain a clean production-index smoke. | Run only after all 1.0.8 candidate gates pass and production approval is granted. |
 
 ## Pull Request CI
 
@@ -62,8 +63,8 @@ The production pipeline remains open on these items:
 | :--- | :--- | :--- |
 | Final regression evidence | The manifest-bound backend-free Python, Julia-backed Python, and native Julia `Pkg.test()` gates passed for the current canonical candidate. | Rerun them for every new candidate and retain their evidence. |
 | Final external evidence | Clean artifact, every declared matrix row, TestPyPI, and real-hardware CUDA gates passed for the current canonical candidate. | Rerun every applicable gate when the candidate commit or distribution digests change. |
-| Production digest reconciliation | Canonical downloads and TestPyPI hashes are checked, but no production uploader exists. | Reconcile the exact production and post-publication files with the candidate manifest. |
-| Production promotion | No protected production PyPI workflow or production-index install smoke exists. | Promote the validated files without rebuilding and verify a pinned external installation. |
+| Production digest reconciliation | The protected production workflow compares PyPI JSON hashes with the manifest after upload. | Execute it only for the frozen candidate and retain its evidence artifact. |
+| Production promotion | The protected workflow downloads and verifies canonical files; it never rebuilds distributions. | Complete environment approval and the production-index smoke for the frozen candidate. |
 
 Until these gaps close, implemented controls and individual passes do not approve
 a production distribution set. Supply-chain hardening should subsequently add

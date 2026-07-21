@@ -1,10 +1,10 @@
-name: Phase 13 TestPyPI Candidate
+name: Phase 13 Production PyPI Promotion
 
 on:
   workflow_dispatch:
     inputs:
       expected-version:
-        description: "Expected sagittarius-py version to verify after TestPyPI install"
+        description: "Expected sagittarius-py version to verify after production PyPI install"
         required: true
         default: "1.0.8"
       candidate-run-id:
@@ -19,12 +19,15 @@ on:
       candidate-tag:
         description: "Expected immutable candidate tag"
         required: true
+      production-tag:
+        description: "Immutable production tag resolving to the expected candidate commit"
+        required: true
 
 jobs:
-  testpypi-candidate:
-    name: Build, check, publish to TestPyPI, and install
+  production-pypi-promotion:
+    name: Promote canonical files to PyPI and verify installation
     runs-on: ubuntu-latest
-    environment: testpypi
+    environment: pypi-production
     timeout-minutes: 60
     permissions:
       id-token: write
@@ -58,9 +61,19 @@ jobs:
 
       - name: Create release evidence directory
         run: |
-          evidence_dir="$RUNNER_TEMP/phase13-testpypi-evidence"
+          evidence_dir="$RUNNER_TEMP/phase13-production-pypi-evidence"
           mkdir -p "$evidence_dir"
           echo "EVIDENCE_DIR=$evidence_dir" >> "$GITHUB_ENV"
+
+      - name: Verify production tag identity
+        env:
+          EXPECTED_COMMIT: ${{ inputs.expected-commit }}
+          PRODUCTION_TAG: ${{ inputs.production-tag }}
+        run: |
+          git fetch --force origin "refs/tags/$PRODUCTION_TAG:refs/tags/$PRODUCTION_TAG"
+          test "$(git cat-file -t "$PRODUCTION_TAG")" = "tag"
+          test "$(git rev-parse "${PRODUCTION_TAG}^{commit}")" = "$EXPECTED_COMMIT"
+          test "$(git tag --points-at "$EXPECTED_COMMIT" | grep -Fx "$PRODUCTION_TAG")" = "$PRODUCTION_TAG"
 
       - name: Download canonical candidate
         uses: ./.github/actions/phase13-download-candidate
@@ -73,7 +86,7 @@ jobs:
           github-token: ${{ github.token }}
           destination: phase13-candidate-dist
 
-      - name: Stage canonical distributions for TestPyPI
+      - name: Stage canonical distributions for production PyPI
         shell: bash
         run: |
           mkdir -p sagittarius_py/dist
@@ -107,7 +120,7 @@ jobs:
           assert wheel_version == expected, (wheel_version, expected)
           assert sdist_version == expected, (sdist_version, expected)
           evidence = {
-              "schema_version": "phase13-testpypi-evidence/v1",
+              "schema_version": "phase13-production-pypi-evidence/v1",
               "expected_version": expected,
               "built_versions": {"wheel": wheel_version, "sdist": sdist_version},
               "distributions": {path.name: {"sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in (wheel, sdist)},
@@ -119,63 +132,61 @@ jobs:
         working-directory: sagittarius_py
         run: uv run python -m twine check dist/*
 
-      - name: Publish to TestPyPI
+      - name: Publish to production PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          repository-url: https://test.pypi.org/legacy/
           packages-dir: sagittarius_py/dist
 
-      - name: Verify TestPyPI install
+      - name: Verify production PyPI install
         env:
           EXPECTED_VERSION: ${{ inputs.expected-version }}
-          TESTPYPI_INSTALL_ATTEMPTS: "12"
-          TESTPYPI_INSTALL_RETRY_SECONDS: "15"
+          PYPI_INSTALL_ATTEMPTS: "12"
+          PYPI_INSTALL_RETRY_SECONDS: "15"
         run: |
-          exec > >(tee "$EVIDENCE_DIR/testpypi-install.log") 2>&1
-          python -m venv /tmp/sagittarius-testpypi-venv
-          /tmp/sagittarius-testpypi-venv/bin/python -m pip install --upgrade pip
-          testpypi_release_visible() {
-            /tmp/sagittarius-testpypi-venv/bin/python - "$EXPECTED_VERSION" <<'PYTHON'
+          exec > >(tee "$EVIDENCE_DIR/production-pypi-install.log") 2>&1
+          python -m venv /tmp/sagittarius-production-pypi-venv
+          /tmp/sagittarius-production-pypi-venv/bin/python -m pip install --upgrade pip
+          production_pypi_release_visible() {
+            /tmp/sagittarius-production-pypi-venv/bin/python - "$EXPECTED_VERSION" <<'PYTHON'
           import json
           import sys
           from urllib.error import HTTPError, URLError
           from urllib.request import urlopen
 
           expected = sys.argv[1]
-          url = f"https://test.pypi.org/pypi/sagittarius-py/{expected}/json"
+          url = f"https://pypi.org/pypi/sagittarius-py/{expected}/json"
           try:
               with urlopen(url, timeout=15) as response:
                   payload = json.load(response)
           except (HTTPError, URLError, TimeoutError) as error:
-              print(f"TestPyPI release is not visible yet: {error}")
+              print(f"production PyPI release is not visible yet: {error}")
               raise SystemExit(1)
 
           if payload.get("info", {}).get("version") != expected or not payload.get("urls"):
-              print(f"TestPyPI release metadata is incomplete for {expected}")
+              print(f"production PyPI release metadata is incomplete for {expected}")
               raise SystemExit(1)
-          print(f"TestPyPI JSON release is visible for {expected}")
+          print(f"production PyPI JSON release is visible for {expected}")
           PYTHON
           }
 
-          for attempt in $(seq 1 "$TESTPYPI_INSTALL_ATTEMPTS"); do
-            if testpypi_release_visible && /tmp/sagittarius-testpypi-venv/bin/python -m pip install \
+          for attempt in $(seq 1 "$PYPI_INSTALL_ATTEMPTS"); do
+            if production_pypi_release_visible && /tmp/sagittarius-production-pypi-venv/bin/python -m pip install \
               --retries 0 \
               --timeout 15 \
-              --index-url https://test.pypi.org/simple/ \
-              --extra-index-url https://pypi.org/simple/ \
+              --index-url https://pypi.org/simple/ \
               "sagittarius-py==$EXPECTED_VERSION"; then
               break
             fi
-            if [ "$attempt" -eq "$TESTPYPI_INSTALL_ATTEMPTS" ]; then
-              echo "TestPyPI release $EXPECTED_VERSION was not installable after $TESTPYPI_INSTALL_ATTEMPTS attempts."
+            if [ "$attempt" -eq "$PYPI_INSTALL_ATTEMPTS" ]; then
+              echo "production PyPI release $EXPECTED_VERSION was not installable after $PYPI_INSTALL_ATTEMPTS attempts."
               exit 1
             fi
-            echo "TestPyPI release $EXPECTED_VERSION is not installable yet (attempt $attempt/$TESTPYPI_INSTALL_ATTEMPTS); retrying in $TESTPYPI_INSTALL_RETRY_SECONDS seconds."
-            sleep "$TESTPYPI_INSTALL_RETRY_SECONDS"
+            echo "production PyPI release $EXPECTED_VERSION is not installable yet (attempt $attempt/$PYPI_INSTALL_ATTEMPTS); retrying in $PYPI_INSTALL_RETRY_SECONDS seconds."
+            sleep "$PYPI_INSTALL_RETRY_SECONDS"
           done
           cd /tmp
-          /tmp/sagittarius-testpypi-venv/bin/sagittarius backend resolve
-          /tmp/sagittarius-testpypi-venv/bin/python - <<'PY'
+          /tmp/sagittarius-production-pypi-venv/bin/sagittarius backend resolve
+          /tmp/sagittarius-production-pypi-venv/bin/python - <<'PY'
           import json
           import os
           import sagittarius
@@ -198,7 +209,7 @@ jobs:
               0.1,
               observables={"pop_atom_0": 0},
           )
-          artifact_path = Path(os.environ["EVIDENCE_DIR"], "testpypi-cpu-result.json")
+          artifact_path = Path(os.environ["EVIDENCE_DIR"], "production-pypi-cpu-result.json")
           result.save(artifact_path)
           artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
           assert artifact["schema_version"] == sagittarius.RESULT_ARTIFACT_SCHEMA_VERSION
@@ -227,12 +238,13 @@ jobs:
           PY
 
 
-      - name: Record TestPyPI file hashes and release identity
+      - name: Record production PyPI file hashes and release identity
         if: success()
         env:
           EXPECTED_VERSION: ${{ inputs.expected-version }}
           CANDIDATE_COMMIT: ${{ inputs.expected-commit }}
           CANDIDATE_REF: refs/tags/${{ inputs.candidate-tag }}
+          PRODUCTION_TAG: ${{ inputs.production-tag }}
         run: |
           python - <<'PY'
           import json
@@ -241,7 +253,7 @@ jobs:
           from pathlib import Path
           from urllib.request import urlopen
 
-          url = "https://test.pypi.org/pypi/sagittarius-py/{}/json".format(os.environ["EXPECTED_VERSION"])
+          url = "https://pypi.org/pypi/sagittarius-py/{}/json".format(os.environ["EXPECTED_VERSION"])
           for attempt in range(6):
               try:
                   with urlopen(url, timeout=30) as response:
@@ -257,29 +269,31 @@ jobs:
               filename: entry["sha256"]
               for filename, entry in manifest["distributions"].items()
           }
-          testpypi_hashes = {item["filename"]: item["digests"]["sha256"] for item in payload["urls"]}
-          assert testpypi_hashes == canonical_hashes, (testpypi_hashes, canonical_hashes)
-          (evidence_dir / "testpypi-project.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          production_pypi_hashes = {item["filename"]: item["digests"]["sha256"] for item in payload["urls"]}
+          assert production_pypi_hashes == canonical_hashes, (production_pypi_hashes, canonical_hashes)
+          (evidence_dir / "production-pypi-project.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           release = {
-              "schema_version": "phase13-testpypi-evidence/v1",
+              "schema_version": "phase13-production-pypi-evidence/v1",
               "commit": os.environ["CANDIDATE_COMMIT"],
               "ref": os.environ["CANDIDATE_REF"],
               "run_url": "{}/{}/actions/runs/{}".format(os.environ["GITHUB_SERVER_URL"], os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_RUN_ID"]),
               "expected_version": os.environ["EXPECTED_VERSION"],
-              "testpypi_json_url": url,
-              "testpypi_sha256": {item["filename"]: item["digests"]["sha256"] for item in payload["urls"]},
+              "production_pypi_json_url": url,
+              "production_pypi_sha256": {item["filename"]: item["digests"]["sha256"] for item in payload["urls"]},
+              "production_tag": os.environ["PRODUCTION_TAG"],
               "candidate_run_id": "${{ inputs.candidate-run-id }}",
           }
           (evidence_dir / "release-evidence.json").write_text(json.dumps(release, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           PY
 
 
-      - name: Record TestPyPI job result
+      - name: Record production PyPI job result
         if: always()
         env:
           JOB_STATUS: ${{ job.status }}
           CANDIDATE_COMMIT: ${{ inputs.expected-commit }}
           CANDIDATE_REF: refs/tags/${{ inputs.candidate-tag }}
+          PRODUCTION_TAG: ${{ inputs.production-tag }}
         run: |
           python - <<'PY'
           import json
@@ -289,17 +303,18 @@ jobs:
           evidence_dir = Path(os.environ["EVIDENCE_DIR"])
           evidence_dir.mkdir(parents=True, exist_ok=True)
           (evidence_dir / "job-result.json").write_text(json.dumps({
-              "schema_version": "phase13-testpypi-job/v1",
+              "schema_version": "phase13-production-pypi-job/v1",
               "status": os.environ["JOB_STATUS"],
               "commit": os.environ["CANDIDATE_COMMIT"],
               "ref": os.environ["CANDIDATE_REF"],
+              "production_tag": os.environ["PRODUCTION_TAG"],
               "candidate_run_id": "${{ inputs.candidate-run-id }}",
           }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           PY
-      - name: Upload TestPyPI release evidence
+      - name: Upload production PyPI release evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase13-testpypi-${{ inputs.expected-version }}
+          name: phase13-production-pypi-${{ inputs.expected-version }}
           path: ${{ env.EVIDENCE_DIR }}
           if-no-files-found: error

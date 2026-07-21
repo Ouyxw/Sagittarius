@@ -250,7 +250,7 @@ closure still has missing implementation or execution evidence.
 | Final-candidate platform and service evidence | Done | The current canonical candidate passed clean CPU, every declared platform row, strengthened TestPyPI CPU smoke, and real-hardware CUDA parity for its recorded distributions. Rerun all applicable gates after any candidate change. |
 | Digest reconciliation | Mixed | Canonical downloads and TestPyPI file hashes are verified against the manifest. Production upload and post-publication digest reconciliation remain required. |
 | Failure evidence retention | Done | Candidate, clean, matrix, TestPyPI, and CUDA jobs use unconditional status/evidence steps and retain available logs, identities, manifests, diagnostics, and partial results. |
-| Production publication and post-install smoke | Planned | Add a separately protected production workflow that promotes the validated files, then installs the pinned version from production PyPI outside the repository and records the result. |
+| Production publication and post-install smoke | Mixed | `.github/workflows/phase13-production-pypi.yml` promotes only manifest-verified canonical files, reconciles production hashes, and records an external pinned install; first approved execution remains required. |
 
 The current CUDA smoke and parity test is implemented; its missing work is a
 successful real-NVIDIA execution against the final candidate wheel. The current
