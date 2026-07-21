@@ -62,3 +62,48 @@ Before publication, documentation may describe the intended production install c
 - Do not use the TestPyPI workflow as the production publisher. Production requires a distinct reviewed workflow and explicit approval.
 - Production promotion must retain the canonical-artifact contract, manifest verification, published-hash reconciliation, and clean-environment smoke evidence.
 - Preserve existing diagnostic and artifact schemas. No cloud adapter work is in scope.
+
+
+## Continuation Update — 2026-07-21 (1.0.8 Candidate)
+
+### Frozen Candidate Identity
+
+- `main` and `origin/main` are clean at `b297313dfd363bed043a254bf923f128c32ae272` (`Merge pull request #2 from Ouyxw/feature/pypi-production-promotion`).
+- The immutable candidate tag is `candidate/sagittarius-py-v1.0.8-1`, resolving to that same commit.
+- The canonical build succeeded with run ID `29817528283`.
+- Every downstream gate must consume this exact artifact: `phase13-candidate-1.0.8-29817528283`.
+- Keep using the following identity inputs: version `1.0.8`; commit `b297313dfd363bed043a254bf923f128c32ae272`; candidate tag `candidate/sagittarius-py-v1.0.8-1`.
+- Do **not** create `v1.0.8`, move the candidate tag, or rebuild distributions yet.
+
+### Implemented Control Plane
+
+- Python, canonical Julia, and embedded Julia versions were bumped to `1.0.8`; `uv.lock` and the Python runtime fallback were updated.
+- The Phase 13 manual workflow defaults now show `1.0.8` and the candidate-tag example is `candidate/sagittarius-py-v1.0.8-1`.
+- `.github/workflows/phase13-production-pypi.yml` is merged. It verifies an annotated production tag against the candidate commit, downloads and verifies the canonical artifact without rebuilding, publishes via OIDC, reconciles production PyPI JSON hashes against the manifest, and performs a repository-external pinned production-index CPU smoke with retained evidence.
+- Release/governance/install documents state that the production workflow is implemented but unexecuted; CUDA remains experimental.
+
+### Gate Evidence Status
+
+The following `1.0.8` gates have passed for the exact canonical artifact, as reported by the release operator:
+
+- Phase 13 Canonical Candidate Artifact
+- Phase 13 Candidate Release Regression
+- Phase 13 Clean Artifact Smoke
+- Phase 13 Cross-Platform Artifact Matrix
+- Phase 13 CUDA Wheel Smoke
+
+The Node/punycode/Buffer notices in GitHub Actions logs were dependency deprecation warnings, not gate failures. A prior Clean Artifact failure was corrected by using the candidate tag above rather than the future production tag `v1.0.8`.
+
+### External Publisher and Remaining Blockers
+
+- The `sagittarius-py` production PyPI GitHub Actions Trusted Publisher has been configured with the production workflow and `pypi-production` environment.
+- The repository environment page exposes deployment branches/tags, secrets, and variables, but not required reviewers or prevent-self-review. This is consistent with GitHub plan/visibility limits for private repositories. Therefore the required enforced production approval control is **not yet available**.
+- Do not run the production upload merely because OIDC is configured. Resolve the protected-environment requirement through an approved repository-visibility/disclosure path or a GitHub plan that supports private-repository deployment reviewers; do not make the repository public solely to unblock publishing.
+
+### Next Resumption Steps
+
+1. Run `Phase 13 TestPyPI Candidate` once with the frozen candidate inputs above. This upload is irreversible for version `1.0.8`; retain `phase13-testpypi-1.0.8` evidence and verify its index hashes, package-resource backend, and CPU artifact smoke.
+2. Review all gate evidence plus TestPyPI evidence. If source or distributions must change after a TestPyPI upload, cut a new package version; never overwrite artifacts or tags.
+3. Resolve the required production-environment approval control. This is the current production-release blocker.
+4. Only after approval control and every gate are complete, create annotated `v1.0.8` at `b297313dfd363bed043a254bf923f128c32ae272`, run `Phase 13 Production PyPI Promotion` from that tag with the same candidate identity, and retain the production hash/install evidence.
+5. Only after production evidence passes, update wording to “available on PyPI” and create a public release entry if authorized.
