@@ -44,7 +44,7 @@ runs:
         EXPECTED_COMMIT: ${{ inputs.expected-commit }}
         EXPECTED_TAG: ${{ inputs.expected-tag }}
       run: |
-        python "$GITHUB_WORKSPACE/scripts/phase13_candidate_artifact.py" verify \
+        uv --directory "$GITHUB_WORKSPACE/sagittarius_py" run --locked python "$GITHUB_WORKSPACE/scripts/phase13_candidate_artifact.py" verify \
           --manifest "$CANDIDATE_DESTINATION/candidate-manifest.json" \
           --dist-dir "$CANDIDATE_DESTINATION" \
           --expected-version "$EXPECTED_VERSION" \

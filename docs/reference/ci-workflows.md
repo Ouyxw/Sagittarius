@@ -16,6 +16,7 @@ final-candidate platform, TestPyPI, and real-hardware CUDA evidence pass.
 | :--- | :--- | :--- | :--- | :--- |
 | `.github/workflows/pr-fast-ci.yml` | Automatic on pull requests to `develop/**` and `main`; automatic on direct pushes to `develop/**` as a fallback; manual on demand | `ubuntu-latest` | Fast documentation, metadata, artifact-content, and portable benchmark import checks. | Every feature, documentation, packaging, and CI PR; direct develop pushes are still discouraged but covered. |
 | `.github/workflows/phase13-candidate-artifact.yml` | Manual only | `ubuntu-latest` | Validate tag/commit/`main`/version identity, build wheel and sdist once, apply content checks, and record `phase13-candidate-artifact/v1`. | Run first for a frozen candidate; pass its run ID and artifact name to every downstream gate. |
+| `.github/workflows/phase13-release-regression.yml` | Manual only | `ubuntu-latest` | Manifest-bound backend-free Python, Julia-backed Python, and native Julia `Pkg.test()` regression. | Run after the canonical build and before external publication gates. |
 | `.github/workflows/phase13-clean-artifact.yml` | Automatic on relevant pushes to `main`; manual on demand | `ubuntu-latest` | Automatic branch diagnostic or canonical-candidate clean wheel, sdist, and uninstall/reinstall smoke outside the checkout. | Use the manual canonical path for final-candidate evidence; automatic `main` runs are diagnostics. |
 | `.github/workflows/phase13-cross-platform.yml` | Manual only | Linux, macOS, Windows matrix | Release-candidate OS/Python/Julia artifact matrix with uploaded per-row evidence. | Run before marking cross-platform wheel evidence complete. |
 | `.github/workflows/phase13-testpypi.yml` | Manual only, protected by the `testpypi` environment | `ubuntu-latest` | Verify and publish the canonical files through OIDC, reconcile TestPyPI hashes, verify a clean install, and retain release evidence. | Run only with a new candidate version after TestPyPI trusted publishing and publication policy are ready. |
@@ -38,6 +39,7 @@ Feature PRs should add targeted tests for the changed subsystem in addition to r
 The following workflows are release gates and should not be required for every feature PR:
 
 - `phase13-candidate-artifact.yml`
+- `phase13-release-regression.yml`
 - `phase13-clean-artifact.yml`
 - `phase13-cross-platform.yml`
 - `phase13-testpypi.yml`
@@ -45,9 +47,7 @@ The following workflows are release gates and should not be required for every f
 
 Run `phase13-candidate-artifact.yml` first with the immutable candidate tag and
 expected version. Supply its run ID, artifact name, full commit, version, and tag
-to the manual clean, matrix, TestPyPI, and CUDA workflows. Their shared action
-verifies manifest schema, identity, filenames, sizes, versions, and SHA-256
-digests before validation begins.
+to the manual regression, clean, matrix, TestPyPI, and CUDA workflows. Every regression job downloads and verifies the same manifest-bound distributions before validation begins.
 
 A branch CUDA run is pre-merge risk screening. It becomes final publication
 evidence only when the tested commit and wheel digest are unchanged, the commit
@@ -61,8 +61,7 @@ The production pipeline remains open on these items:
 
 | Gap | Current behavior | Required CI change or evidence |
 | :--- | :--- | :--- |
-| Full regression | Fast PR CI and packaging release checks do not run the complete Python suite. | Add backend-free and Julia-backed full release-regression jobs for the frozen candidate. |
-| Julia-native tests | No Julia `test/` suite or `Pkg.test()` CI job is present. | Add native Julia tests before a stable Julia-native release is claimed. |
+| Final regression evidence | The manifest-bound backend-free Python, Julia-backed Python, and native Julia `Pkg.test()` workflows are implemented. | Run all three jobs against the frozen candidate and retain their evidence. |
 | Final external evidence | Historical matrix and TestPyPI runs predate this canonical candidate path; final real-hardware CUDA evidence is pending. | Rerun clean CPU, every declared matrix row, strengthened TestPyPI, and real-hardware CUDA against one frozen manifest. |
 | Production digest reconciliation | Canonical downloads and TestPyPI hashes are checked, but no production uploader exists. | Reconcile the exact production and post-publication files with the candidate manifest. |
 | Production promotion | No protected production PyPI workflow or production-index install smoke exists. | Promote the validated files without rebuilding and verify a pinned external installation. |

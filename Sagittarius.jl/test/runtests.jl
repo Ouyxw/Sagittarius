@@ -10,7 +10,8 @@ using Sagittarius
     @test pulse(0.5) == 2.5
     @test pulse(1.5) == 0.0
 
-    basis_states = reduced_basis(register; blockade_radius=1.0)
+    basis_states, basis_mapping = reduced_basis(register; blockade_radius=1.0)
     @test 0 in basis_states
     @test length(basis_states) == 4
+    @test basis_mapping[0] == 1
 end

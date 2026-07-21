@@ -12,7 +12,7 @@ on:
       expected-version:
         description: "Expected candidate version"
         required: true
-        default: "1.0.4"
+        default: "1.0.5"
       expected-commit:
         description: "Expected full candidate commit SHA"
         required: true
@@ -58,7 +58,7 @@ jobs:
       - name: Run backend-free Python regression
         working-directory: sagittarius_py
         run: |
-          uv run python -m pytest -q \
+          uv run python -m pytest tests -q \
             --ignore=tests/test_api_v2.py \
             --ignore=tests/test_benchmarks.py \
             --ignore=tests/test_cluster.py \
@@ -110,7 +110,7 @@ jobs:
       - name: Run Julia-backed Python regression
         working-directory: sagittarius_py
         run: |
-          uv run python -m pytest -q \
+          uv run python -m pytest tests -q \
             tests/test_api_v2.py tests/test_benchmarks.py tests/test_cluster.py \
             tests/test_cross_language_golden.py tests/test_invariants.py \
             tests/test_julia_native_api.py tests/test_local_pulses.py \
@@ -132,9 +132,26 @@ jobs:
         with:
           ref: ${{ inputs.expected-commit }}
           fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "sagittarius_py/uv.lock"
       - uses: julia-actions/setup-julia@v2
         with:
           version: "1.11"
+      - name: Download and validate canonical candidate
+        uses: ./.github/actions/phase13-download-candidate
+        with:
+          run-id: ${{ inputs.candidate-run-id }}
+          artifact-name: ${{ inputs.candidate-artifact-name }}
+          expected-version: ${{ inputs.expected-version }}
+          expected-commit: ${{ inputs.expected-commit }}
+          expected-tag: ${{ inputs.candidate-tag }}
+          github-token: ${{ github.token }}
+          destination: phase13-candidate-dist
       - name: Validate candidate identity and run native tests
         env:
           EXPECTED_VERSION: ${{ inputs.expected-version }}
@@ -152,5 +169,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: phase13-regression-julia-native-${{ github.run_id }}
-          path: Sagittarius.jl/test
+          path: phase13-candidate-dist/candidate-manifest.json
           if-no-files-found: warn
