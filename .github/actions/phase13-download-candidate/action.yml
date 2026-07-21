@@ -39,7 +39,7 @@ runs:
     - name: Verify candidate manifest and distribution digests
       shell: bash
       env:
-        CANDIDATE_DESTINATION: ${{ inputs.destination }}
+        CANDIDATE_DESTINATION: ${{ github.workspace }}/${{ inputs.destination }}
         EXPECTED_VERSION: ${{ inputs.expected-version }}
         EXPECTED_COMMIT: ${{ inputs.expected-commit }}
         EXPECTED_TAG: ${{ inputs.expected-tag }}
