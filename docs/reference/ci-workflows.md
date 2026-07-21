@@ -9,8 +9,7 @@ Sagittarius separates day-to-day pull-request validation from release-candidate 
 The authoritative candidate identity and build-once promotion requirements live
 in [`SPEC-GOV-006-release-candidate-governance.md`](../governance/SPEC-GOV-006-release-candidate-governance.md).
 The release workflows now share one manifest-bound candidate distribution set.
-Production publication remains blocked until the remaining regression gates and
-final-candidate platform, TestPyPI, and real-hardware CUDA evidence pass.
+The current canonical candidate has passed all listed validation gates. Production publication remains blocked until a separate protected promotion workflow, production digest reconciliation, and a production-index smoke are in place.
 
 | Workflow | Trigger | Runs on | Purpose | Expected use |
 | :--- | :--- | :--- | :--- | :--- |
@@ -61,8 +60,8 @@ The production pipeline remains open on these items:
 
 | Gap | Current behavior | Required CI change or evidence |
 | :--- | :--- | :--- |
-| Final regression evidence | The manifest-bound backend-free Python, Julia-backed Python, and native Julia `Pkg.test()` workflows are implemented. | Run all three jobs against the frozen candidate and retain their evidence. |
-| Final external evidence | Historical matrix and TestPyPI runs predate this canonical candidate path; final real-hardware CUDA evidence is pending. | Rerun clean CPU, every declared matrix row, strengthened TestPyPI, and real-hardware CUDA against one frozen manifest. |
+| Final regression evidence | The manifest-bound backend-free Python, Julia-backed Python, and native Julia `Pkg.test()` gates passed for the current canonical candidate. | Rerun them for every new candidate and retain their evidence. |
+| Final external evidence | Clean artifact, every declared matrix row, TestPyPI, and real-hardware CUDA gates passed for the current canonical candidate. | Rerun every applicable gate when the candidate commit or distribution digests change. |
 | Production digest reconciliation | Canonical downloads and TestPyPI hashes are checked, but no production uploader exists. | Reconcile the exact production and post-publication files with the candidate manifest. |
 | Production promotion | No protected production PyPI workflow or production-index install smoke exists. | Promote the validated files without rebuilding and verify a pinned external installation. |
 

@@ -1,8 +1,8 @@
-# Python Package Installation Status
+# Python Package Installation
 
-The Python SDK is not yet published as an independent production PyPI package. Do not advertise unqualified `pip install sagittarius-py` as a supported user installation path until Phase 13 release-readiness criteria are met. The version-pinned TestPyPI candidate described below is a validated release-candidate path only. See [PyPI publication policy](pypi-publication.md) and [Python compatibility matrix](compatibility-matrix.md) for TestPyPI, platform, and production-release gates.
+This is the authoritative guide for Python package installation. Sagittarius is preparing a production PyPI promotion, but it is not published on production PyPI yet. Do not run or advertise `pip install sagittarius-py` as a current consumer-install command. After publication, this guide will state the released version and production install command.
 
-## Supported Today
+## Developer Source Installation
 
 The supported Python installation model is a complete source checkout followed by Python dependency synchronization and JuliaPkg resolution:
 
@@ -23,20 +23,17 @@ python -m juliapkg resolve
 
 Editable installs still depend on the configured source checkout for Python code updates and should not be treated as a released wheel-install equivalent.
 
-## Validated TestPyPI Candidate
+## Planned Production Installation
 
-`Sagittarius` has a clean-install-validated TestPyPI candidate: `sagittarius-py==1.0.0`. Use a fresh virtual environment outside this source checkout. Keep the exact version pin and use PyPI as the extra index for dependencies; the single-index command suggested by TestPyPI may not resolve every dependency.
+After a successful production upload and production-index smoke, the consumer path will be a version-pinned PyPI installation followed by backend resolution:
 
 ```bash
-python -m pip install \
-  --index-url https://test.pypi.org/simple/ \
-  --extra-index-url https://pypi.org/simple/ \
-  sagittarius-py==1.0.0
+python -m pip install sagittarius-py==<released-version>
 sagittarius backend resolve
 sagittarius doctor
 ```
 
-The expected doctor report identifies `backend_source` as `package_resource`. This candidate is CPU-first. CUDA remains an explicit experimental backend profile and requires its own setup and real-hardware release evidence. Production PyPI, a floating TestPyPI version, and unqualified `pip install sagittarius-py` remain unsupported.
+Do not substitute a candidate version for `<released-version>` or use this command before publication. The expected doctor report identifies `backend_source` as `package_resource`. The default package profile is CPU-first; CUDA remains an explicit experimental backend profile and requires its own setup.
 
 ## Local Artifact Status
 
@@ -60,15 +57,9 @@ SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1 \
 
 The smoke tests build wheel/sdist artifacts, create clean seeded virtual environments outside the source tree, install the built wheel with the venv's `python -m pip install`, run the installed `sagittarius backend resolve` command, run a one-atom CPU simulation, save a result artifact, and validate the result artifact schema, run manifest schema, shared-result schema, doctor `backend_source`, and version metadata. The uninstall/reinstall smoke additionally uninstalls the wheel, verifies the package is no longer importable, reinstalls the same wheel, reruns backend resolution, and confirms the reinstalled package still uses the embedded `package_resource` backend rather than a stale source checkout.
 
-## Not Supported Yet for Python Users
+## Publication Status
 
-The following are planned Phase 13 outcomes, not current installation promises:
-
-- independent `pip install sagittarius-py` from PyPI;
-- passing evidence from the cross-platform wheel/sdist matrix workflow across the declared Python, Julia, and operating-system rows;
-- production PyPI publication; the TestPyPI `1.0.0` candidate is validated but remains a release candidate;
-- hardware-backed CUDA wheel smoke execution on a real GPU runner;
-- passing release-candidate evidence from the clean wheel and uninstall/reinstall smokes.
+The current canonical candidate has passed its candidate build, release regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates. CUDA remains experimental. Production publication is still pending a separately reviewed and protected promotion workflow that uploads the same canonical files, reconciles production file hashes with the candidate manifest, and records a clean production-index installation smoke. See the [PyPI publication policy](pypi-publication.md).
 
 ## Python Wheel and Source Distribution Criteria
 
@@ -84,7 +75,7 @@ A release artifact is ready only after these checks pass:
 - default CPU installation does not require CUDA.jl, an NVIDIA driver, or GPU hardware;
 - unsupported or missing Julia installations produce documented, actionable diagnostics;
 - wheel and sdist pass metadata checks, including `twine check`;
-- Ubuntu CI runs the clean artifact and uninstall/reinstall smokes; the declared cross-platform matrix and TestPyPI `1.0.0` install evidence have passed, while hardware-backed CUDA wheel smoke evidence and production publication approval remain required before production release claims.
+- the canonical candidate passes the candidate build, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates; before publication, a protected exact-file promotion, production hash reconciliation, and production-index smoke remain required.
 
 ## Upgrade and Uninstall Guidance
 

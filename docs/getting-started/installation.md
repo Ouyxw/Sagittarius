@@ -1,14 +1,14 @@
 # Installation Overview
 
-Sagittarius currently supports source-based installation from a complete repository checkout. Production PyPI installation is not supported yet, and `pip install sagittarius-py` should not be advertised until the Phase 13 wheel and source-distribution criteria are met. A version-pinned TestPyPI candidate, `sagittarius-py==1.0.0`, has passed clean-install validation; it remains a release-candidate path rather than a production support promise.
+Sagittarius is preparing its first production PyPI promotion. The package is not available on production PyPI yet, so do not advertise or run an unqualified `pip install sagittarius-py` command as a current installation path. Until publication completes, a complete repository checkout is the supported path for users and contributors.
 
 Use this page as the installation map. Python and Julia user paths are split into language-specific subdirectories under `getting-started/`.
 
 | Task | Guide |
 | :--- | :--- |
-| Install and test the Python SDK from a source checkout. | [Python source installation](python/source-installation.md) |
+| Install and test the Python SDK from a source checkout (developer path). | [Python source installation](python/source-installation.md) |
 | Use Sagittarius from an independent Python experiment. | [Python experiment projects](python/experiment-projects.md) |
-| Install the validated TestPyPI candidate or understand Python wheel, sdist, editable install, upgrade, and uninstall status. | [Python package installation status](python/package-installation.md) |
+| Install a released Python package after publication, or understand wheel, sdist, editable install, upgrade, and uninstall status. | [Python package installation](python/package-installation.md) |
 | Resolve Julia packages, choose a Julia executable, or prepare Python CPU/GPU backend execution. | [Python backend setup](python/backend-setup.md) |
 | Use `Sagittarius.jl` from an independent Julia project. | [Julia projects](julia/projects.md) |
 | Prepare native Julia runtime and backend execution. | [Julia backend setup](julia/backend-setup.md) |
@@ -39,4 +39,4 @@ julia --project=. -e 'using Pkg; Pkg.develop(path="../Sagittarius/Sagittarius.jl
 
 The Python SDK resolves the Julia backend through an explicit lookup order: `SAGITTARIUS_JULIA_BACKEND_PATH` for environment overrides, an adjacent editable/source checkout, and packaged backend resources embedded under `sagittarius/julia/Sagittarius.jl`. Editable source installs prefer the checkout so Julia source edits take effect immediately; wheel installs use the packaged backend resource when no adjacent checkout exists. Julia-native users depend on `Sagittarius.jl` directly and do not need the Python wheel path.
 
-Phase 13 packaging now embeds the Julia backend sources and project metadata in Python artifacts. Remaining release-readiness work covers CUDA hardware evidence and final PyPI publication approval. The TestPyPI `1.0.0` candidate, package metadata checks, Ubuntu clean artifact CI, uninstall/reinstall smoke coverage, and the declared cross-platform matrix have passed. The embedded copy does not replace `Sagittarius.jl` as the native Julia entry point.
+Phase 13 packaging embeds the Julia backend sources and project metadata in Python artifacts. The current canonical candidate has passed its candidate, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel validation gates; CUDA nevertheless remains experimental. A separately reviewed, protected production-promotion workflow, production-file hash reconciliation, and a clean production-index smoke are still required before publication. The embedded copy does not replace `Sagittarius.jl` as the native Julia entry point.

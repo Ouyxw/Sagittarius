@@ -1,6 +1,6 @@
 # PyPI Publication Policy
 
-Sagittarius is not published on production PyPI yet. Treat every package artifact as public source distribution material because the Python wheel and sdist include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`.
+Sagittarius is not published on production PyPI yet. The current canonical candidate has passed its Phase 13 validation gates, but publication remains pending. Treat every package artifact as public source distribution material because the Python wheel and sdist include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`.
 
 The candidate commit, tag, distribution digests, branch integration, CUDA timing,
 and build-once promotion rules are defined by
@@ -28,25 +28,15 @@ and build-once promotion rules are defined by
 11. Install the pinned version from production PyPI outside the repository and
     retain the post-publication smoke evidence.
 
-Production PyPI upload remains blocked until the Phase 13 release-readiness table marks every PyPI gate complete.
+Production PyPI upload remains blocked until a separately reviewed, protected production workflow promotes the canonical files, production file hashes are reconciled with the candidate manifest, and a clean production-index smoke is retained.
 
 ## Remaining CI Preconditions
 
-Canonical build-once distributions, ref/version/`main` identity enforcement,
-digest-verified reuse, wheel/sdist denylist checks, clean retained-sdist
-installation, TestPyPI digest reconciliation, and unconditional current-gate
-evidence uploads are implemented. Remaining CI work is complete Python release
-regression, native Julia `Pkg.test()` coverage, a protected production publisher,
-production digest reconciliation, and a production-index installation smoke.
+The current canonical candidate passed candidate-artifact, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates. The remaining controls are a protected production publisher that promotes the canonical files without rebuilding, reconciliation of the published production hashes against the candidate manifest, and a pinned clean install from the production index. CUDA remains experimental and must not be described as stable in release materials.
 
-The existing cross-platform pass applies to its recorded historical commit. The
-strengthened TestPyPI CPU smoke and the real-hardware CUDA smoke must run against
-the final candidate distributions. Earlier or independently rebuilt artifacts do
-not close those gates.
+## Historical TestPyPI Evidence
 
-## Validated TestPyPI Candidate
-
-The trusted-publishing workflow successfully published and clean-installed `sagittarius-py==1.0.0` from TestPyPI. This is clean-install evidence only; it does not authorize a production PyPI upload. The workflow now also executes a one-atom CPU simulation from the installed package, validates its result artifact, manifest, shared-result schema, and `package_resource` backend source, and retains that result as evidence. Because `1.0.0` predates this CPU-smoke gate, the next frozen candidate must pass the strengthened workflow. External users evaluating that candidate should use the documented version-pinned, dual-index command in [Python package installation status](package-installation.md). Retain the corresponding `phase13-testpypi-1.0.0` evidence artifact with the release record.
+Historical TestPyPI evidence is retained as release-governance evidence only; it is not a consumer installation path and does not authorize a production upload. The current canonical candidate has passed the strengthened TestPyPI installed-package CPU smoke, including result-artifact, manifest, shared-result, and `package_resource` backend checks. Retain its versioned TestPyPI evidence artifact with the release record.
 
 ## Manual TestPyPI Workflow
 
@@ -56,4 +46,4 @@ The configured pending publisher must match GitHub owner `Ouyxw`, repository `Sa
 
 ## Accidental Upload Prevention
 
-Do not configure production PyPI credentials until the publication checklist is approved. TestPyPI validation must use the test package index and must not imply production release support.
+Do not configure production PyPI credentials outside the separately reviewed and protected production workflow. TestPyPI validation must use the test package index and must not imply production release support.

@@ -1,6 +1,6 @@
 # Python Compatibility Matrix
 
-This matrix is the Phase 13 release-validation target for Python package artifacts. It describes the supported CPU install path for wheels and source distributions. CUDA remains experimental and is validated separately on a CUDA runner.
+This matrix records Phase 13 release validation for Python package artifacts. It defines the CPU support target for a published wheel or source distribution; production publication is pending separately. CUDA remains experimental even though it is validated on a separate CUDA runner.
 
 ## Supported CPU Artifact Matrix
 
@@ -15,13 +15,13 @@ This matrix is the Phase 13 release-validation target for Python package artifac
 ## Policy
 
 - The default CPU install path must not require CUDA.jl, NVIDIA drivers, or GPU hardware.
-- A release candidate is not cross-platform ready until the matrix workflow passes for every row above.
+- A production candidate is not cross-platform ready until the matrix workflow passes for every row above; the current canonical candidate has passed all declared rows.
 - Cross-platform validation uses installed wheel artifacts outside the source checkout and requires `backend_source=package_resource` in doctor/version metadata.
 - CUDA release claims require the separate `phase13-cuda-wheel.yml` workflow on real NVIDIA GPU hardware.
 - AMDGPU and Metal package profiles remain future work and are not part of the Phase 13 CPU artifact matrix.
 
 ## Workflow
 
-Run `.github/workflows/phase13-cross-platform.yml` manually for release candidates. The workflow builds artifacts, runs metadata checks, installs the wheel in a fresh virtual environment outside the repository, runs `sagittarius backend resolve`, and executes the minimal CPU simulation smoke.
+Run `.github/workflows/phase13-cross-platform.yml` manually for release candidates. The workflow downloads and verifies the canonical artifacts rather than rebuilding them, then installs the wheel in a fresh virtual environment outside the repository, runs `sagittarius backend resolve`, and executes the minimal CPU simulation smoke.
 
 Each passing matrix row writes a `phase13-cross-platform-evidence/*.md` file and uploads it with an artifact name of the form `phase13-cross-platform-<os>-py<python>-julia<julia>`. Keep those artifacts, the workflow run URL, the commit SHA, and the release-candidate tag or branch together with release notes before marking the matrix evidence gate complete in `REQUIREMENTS.md`.

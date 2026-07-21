@@ -4,7 +4,7 @@ Spec ID: `SPEC-GOV-006`
 Status: `Policy`
 Roadmap: Phase 13
 Version: `release-candidate-governance/v1`
-Last reviewed: 2026-07-20
+Last reviewed: 2026-07-21
 
 
 This document defines how Sagittarius turns reviewed source into a frozen Python
@@ -160,7 +160,7 @@ content, including:
 - local result, benchmark, and CI evidence directories;
 - credentials, environment files, tokens, and private keys.
 
-The PyPI README and stable user documentation describe only released behavior.
+Before publication, the PyPI README and stable user documentation may describe the intended production command and release prerequisites, but must state that the package is not yet available on production PyPI. After publication, they describe only the released version and behavior.
 Development documentation from `main` must be marked as unreleased or published
 under a separate `dev` version. Internal development material must not appear in
 the user documentation navigation.
@@ -245,10 +245,10 @@ closure still has missing implementation or execution evidence.
 | Cross-workflow artifact reuse | Done | Manual clean-install, cross-platform, TestPyPI, and CUDA jobs download the selected candidate run and reject manifest, filename, size, version, tag, commit, or digest disagreement. The automatic `main` clean smoke remains a branch diagnostic rather than frozen-candidate evidence. |
 | Artifact forbidden-content tests | Done | Wheel and sdist tests reject repository configuration, internal development paths, debug files, scratch/evidence paths, environment files, and private-key suffixes. |
 | Clean sdist installation | Done | Clean and matrix release jobs install the retained sdist outside the repository and run backend resolution, package-resource, schema, and one-atom CPU checks. |
-| Full Python release regression | Planned | Run the complete Python test suite for the frozen candidate, separating backend-free and Julia-backed jobs where useful. The fast PR subset is not sufficient release evidence. |
-| Julia-native regression | Planned | Establish a Julia `test/` suite and run `Pkg.test()` before claiming a simultaneous stable Julia-native release. Python-driven backend tests do not replace native package tests. |
-| Final-candidate platform and service evidence | Mixed | Rerun clean CPU, every declared platform row, the strengthened TestPyPI CPU smoke, and real-hardware CUDA parity for the final commit and distribution digests. Earlier runs remain historical evidence only. |
-| Digest reconciliation | Mixed | Canonical downloads are verified locally and TestPyPI file hashes must exactly equal the manifest. Production upload and post-publication digest reconciliation remain unavailable. |
+| Full Python release regression | Done | The current canonical candidate passed the complete backend-free and Julia-backed Python release regression. Rerun it for every changed candidate. |
+| Julia-native regression | Done | The current canonical candidate passed native Julia `Pkg.test()`. Rerun it for every changed candidate before claiming a simultaneous stable Julia-native release. |
+| Final-candidate platform and service evidence | Done | The current canonical candidate passed clean CPU, every declared platform row, strengthened TestPyPI CPU smoke, and real-hardware CUDA parity for its recorded distributions. Rerun all applicable gates after any candidate change. |
+| Digest reconciliation | Mixed | Canonical downloads and TestPyPI file hashes are verified against the manifest. Production upload and post-publication digest reconciliation remain required. |
 | Failure evidence retention | Done | Candidate, clean, matrix, TestPyPI, and CUDA jobs use unconditional status/evidence steps and retain available logs, identities, manifests, diagnostics, and partial results. |
 | Production publication and post-install smoke | Planned | Add a separately protected production workflow that promotes the validated files, then installs the pinned version from production PyPI outside the repository and records the result. |
 
