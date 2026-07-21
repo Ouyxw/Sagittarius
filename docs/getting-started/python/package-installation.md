@@ -59,7 +59,7 @@ The smoke tests build wheel/sdist artifacts, create clean seeded virtual environ
 
 ## Publication Status
 
-The current canonical candidate has passed its candidate build, release regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates. CUDA remains experimental. Production publication is still pending a separately reviewed and protected promotion workflow that uploads the same canonical files, reconciles production file hashes with the candidate manifest, and records a clean production-index installation smoke. See the [PyPI publication policy](pypi-publication.md).
+The current canonical candidate has passed its candidate build, release regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates. CUDA remains experimental. Production publication is pending the approved execution of the separately reviewed and protected promotion workflow against a newly validated canonical candidate; it must reconcile production hashes and record a clean production-index installation smoke. See the [PyPI publication policy](pypi-publication.md).
 
 ## Python Wheel and Source Distribution Criteria
 
