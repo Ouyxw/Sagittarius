@@ -6,7 +6,7 @@ on:
       expected-version:
         description: "Expected sagittarius-py version to verify after TestPyPI install"
         required: true
-        default: "1.0.3"
+        default: "1.0.4"
       candidate-run-id:
         description: "Run ID from Phase 13 Canonical Candidate Artifact"
         required: true

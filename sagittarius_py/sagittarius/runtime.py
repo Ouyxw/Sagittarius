@@ -183,7 +183,7 @@ def package_version() -> str:
     try:
         return metadata.version("sagittarius-py")
     except metadata.PackageNotFoundError:
-        return "1.0.3"
+        return "1.0.4"
 
 
 def _valid_julia_backend_path(path: Path) -> bool:
