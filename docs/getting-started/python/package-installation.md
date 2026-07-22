@@ -1,6 +1,6 @@
 # Python Package Installation
 
-This is the authoritative guide for Python package installation. Sagittarius `1.0.9` is available on [production PyPI](https://pypi.org/project/sagittarius-py/1.0.9/). Install it in an isolated virtual environment and resolve the packaged Julia backend before running simulations.
+This is the authoritative guide for Python package installation. Sagittarius `1.0.10` is available on [production PyPI](https://pypi.org/project/sagittarius-py/1.0.10/). Install it in an isolated virtual environment and resolve the packaged Julia backend before running simulations.
 
 ## Developer Source Installation
 
@@ -30,7 +30,7 @@ Create and activate a virtual environment, then install the released version and
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install sagittarius-py==1.0.9
+python -m pip install sagittarius-py==1.0.10
 sagittarius backend resolve
 sagittarius doctor
 ```
@@ -61,7 +61,7 @@ The smoke tests build wheel/sdist artifacts, create clean seeded virtual environ
 
 ## Publication Status
 
-The MIT TestPyPI `1.0.8` candidate remains historical evidence and cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.9` passed its candidate build, release regression, clean-artifact, cross-platform, TestPyPI, CUDA-wheel, and protected production-promotion gates. The production workflow promoted the canonical files without rebuilding, reconciled production hashes, and recorded a clean production-index installation smoke. CUDA remains experimental.
+The MIT TestPyPI `1.0.8` candidate remains historical evidence and cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.10` passed its candidate build, release regression, clean-artifact, cross-platform, TestPyPI, CUDA-wheel, and protected production-promotion gates. The production workflow promoted the canonical files without rebuilding, reconciled production hashes, and recorded a clean production-index installation smoke. CUDA remains experimental.
 
 ## Python Wheel and Source Distribution Criteria
 

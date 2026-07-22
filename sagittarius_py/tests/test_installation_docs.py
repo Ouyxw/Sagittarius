@@ -34,7 +34,7 @@ def test_phase13_source_install_baseline_is_documented():
     assert "source checkout" in docs
     assert "embedded Julia backend" in docs
     assert "available on production PyPI" in docs
-    assert "sagittarius-py==1.0.9" in docs
+    assert "sagittarius-py==1.0.10" in docs
 
 
 def test_source_install_docs_do_not_contain_control_characters():
@@ -134,7 +134,7 @@ def test_production_pypi_release_is_documented():
         ]
     )
 
-    assert "sagittarius-py==1.0.9" in docs
+    assert "sagittarius-py==1.0.10" in docs
     assert "available on production PyPI" in docs
     assert "protected production-promotion" in docs
     assert "production-index smoke" in docs
