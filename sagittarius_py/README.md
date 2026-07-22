@@ -158,7 +158,7 @@ It is research scaffolding, not a finalized benchmark suite.
 
 ```bash
 cd sagittarius_py
-uv run python check_env.py
+uv run sagittarius doctor
 uv run python -m pytest tests/
 ```
 

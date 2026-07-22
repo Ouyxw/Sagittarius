@@ -105,7 +105,7 @@ CPU simulations do not require an NVIDIA GPU. The regular CPU test suite should 
 
 ```bash
 cd sagittarius_py
-uv run python check_env.py
+uv run sagittarius doctor
 uv run python -m pytest tests/
 ```
 
