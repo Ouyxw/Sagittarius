@@ -32,11 +32,11 @@ The separately reviewed, protected production workflow is implemented but unexec
 
 ## Remaining CI Preconditions
 
-The current canonical candidate passed candidate-artifact, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates. The remaining controls are a protected production publisher that promotes the canonical files without rebuilding, reconciliation of the published production hashes against the candidate manifest, and a pinned clean install from the production index. CUDA remains experimental and must not be described as stable in release materials.
+The MIT TestPyPI `1.0.8` candidate passed candidate-artifact, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates as historical evidence. It cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.9` is not yet frozen and must repeat every applicable gate. Only then may the protected production publisher promote the verified files, reconcile published hashes against the new candidate manifest, and retain a pinned production-index clean install. CUDA remains experimental and must not be described as stable in release materials.
 
 ## Historical TestPyPI Evidence
 
-Historical TestPyPI evidence is retained as release-governance evidence only; it is not a consumer installation path and does not authorize a production upload. The current canonical candidate has passed the strengthened TestPyPI installed-package CPU smoke, including result-artifact, manifest, shared-result, and `package_resource` backend checks. Retain its versioned TestPyPI evidence artifact with the release record.
+The MIT TestPyPI `1.0.8` evidence is retained as historical release-governance evidence only; it is not a consumer installation path and does not authorize a production upload. It passed the strengthened installed-package CPU smoke, including result-artifact, manifest, shared-result, and `package_resource` backend checks. Retain its versioned evidence artifact with the release record, but do not reuse it for Apache-2.0 `1.0.9`.
 
 ## Manual TestPyPI Workflow
 

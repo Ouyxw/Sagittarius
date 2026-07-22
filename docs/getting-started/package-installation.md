@@ -19,6 +19,6 @@ SAGITTARIUS_RUN_RELEASE_ARTIFACT_SMOKE=1 \
   uv run python -m pytest tests/test_packaging_artifacts.py::test_clean_venv_installed_wheel_release_smoke
 ```
 
-This is a local release-readiness gate, not PyPI publication approval. Production PyPI remains blocked until GPU runner evidence and publication approval are complete. The TestPyPI `1.0.0` candidate, uninstall/reinstall smoke tests, and the declared cross-platform matrix have passed; package metadata checks, Ubuntu clean artifact CI, and a gated CUDA wheel smoke are in place.
+This is a local release-readiness gate, not PyPI publication approval. The MIT TestPyPI `1.0.8` candidate is historical evidence and cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.9` is not yet frozen; it must pass fresh candidate, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates before production publication can be considered.
 
 The old path is kept as a compatibility entry so existing links continue to land on the right language-specific guide.
