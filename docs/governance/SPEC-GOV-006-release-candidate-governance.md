@@ -13,6 +13,9 @@ production PyPI. It supplements
 [`SPEC-GOV-005-repository-versioning.md`](SPEC-GOV-005-repository-versioning.md)
 and
 [`pypi-publication.md`](../getting-started/python/pypi-publication.md).
+Public repository disclosure and the independent-approval control are further
+defined by
+[`SPEC-GOV-007-public-release-authorization.md`](SPEC-GOV-007-public-release-authorization.md).
 
 ## Decision Summary
 
