@@ -52,12 +52,14 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-The `pip install -e .` path is development-only and still depends on the editable source checkout for Python code updates. For consumer installations, Sagittarius `1.0.9` is available on production PyPI:
+The `pip install -e .` path is development-only and still depends on the editable source checkout for Python code updates. For consumer installations, Sagittarius is available on production PyPI:
 
 ```bash
-python -m pip install sagittarius-py==1.0.9
+python -m pip install sagittarius-py
 sagittarius backend resolve
 ```
+
+For reproducible environments, pin the version required by your project.
 
 See the [Python package installation guide](docs/getting-started/python/package-installation.md) for virtual-environment setup, verification, upgrades, and uninstall guidance.
 

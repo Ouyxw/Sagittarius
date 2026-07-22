@@ -8,6 +8,14 @@ def _read(relative_path: str) -> str:
     return (REPO_ROOT / relative_path).read_text(encoding="utf-8")
 
 
+def test_pypi_readme_installation_is_version_neutral():
+    readme = _read("sagittarius_py/README.md")
+
+    assert "available on production PyPI" in readme
+    assert "python -m pip install sagittarius-py" in readme
+    assert "python -m pip install sagittarius-py==" not in readme
+
+
 def test_phase13_source_install_baseline_is_documented():
     docs = "\n\n".join(
         [
