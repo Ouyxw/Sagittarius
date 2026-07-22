@@ -177,4 +177,4 @@ CPU tests do not require CUDA. GPU tests are opt-in and require a working backen
 
 ## License
 
-Sagittarius is distributed under the [MIT License](LICENSE).
+Sagittarius is distributed under the [Apache License 2.0](LICENSE).

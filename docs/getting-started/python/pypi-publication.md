@@ -1,6 +1,6 @@
 # PyPI Publication Policy
 
-Sagittarius is not published on production PyPI yet. The current canonical candidate has passed its Phase 13 validation gates, but publication remains pending. Treat every package artifact as public source distribution material because the Python wheel and sdist include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`.
+Sagittarius is not published on production PyPI yet. The TestPyPI `1.0.8` candidate was distributed under MIT and is not eligible for production promotion after the Apache-2.0 licensing decision. Freeze a new `1.0.9` candidate and rerun every Phase 13 gate before production publication. Treat every package artifact as public source distribution material because the Python wheel and sdist include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`.
 
 The candidate commit, tag, distribution digests, branch integration, CUDA timing,
 and build-once promotion rules are defined by
@@ -8,7 +8,7 @@ and build-once promotion rules are defined by
 
 ## Required Order
 
-1. Confirm the repository visibility and MIT license plan is approved.
+1. Confirm the repository visibility and Apache-2.0 license plan is approved.
 2. Run `phase13-candidate-artifact.yml` for the immutable candidate tag. It
    requires the commit to be contained in `main`, checks version/tag/source
    agreement and a clean checkout, then builds wheel and sdist once.

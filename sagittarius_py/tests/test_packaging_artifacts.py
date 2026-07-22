@@ -170,6 +170,7 @@ def _wheel_version(wheel: Path) -> str:
 def test_packaging_readme_and_license_match_repository_root():
     assert (PY_PACKAGE_ROOT / "README.md").read_bytes() == (REPO_ROOT / "README.md").read_bytes()
     assert (PY_PACKAGE_ROOT / "LICENSE").read_bytes() == (REPO_ROOT / "LICENSE").read_bytes()
+    assert (PY_PACKAGE_ROOT / "NOTICE").read_bytes() == (REPO_ROOT / "NOTICE").read_bytes()
 
 
 def test_python_package_metadata_is_release_ready():
@@ -182,8 +183,8 @@ def test_python_package_metadata_is_release_ready():
     project = pyproject["project"]
 
     assert project["readme"] == "README.md"
-    assert project["license"] == "MIT"
-    assert project["license-files"] == ["LICENSE"]
+    assert project["license"] == "Apache-2.0"
+    assert project["license-files"] == ["LICENSE", "NOTICE"]
     assert project["authors"] == [{"name": "Sagittarius contributors"}]
     assert "neutral atoms" in project["keywords"]
     assert "Programming Language :: Python :: 3.10" in project["classifiers"]
@@ -208,7 +209,7 @@ def test_wheel_metadata_contains_release_fields(built_artifacts):
 
     assert metadata["Name"] == "sagittarius-py"
     assert metadata["Summary"] == "A neutral-atom quantum emulator with Julia and Python SDKs"
-    assert metadata["License-Expression"] == "MIT" or metadata["License"] == "MIT"
+    assert metadata["License-Expression"] == "Apache-2.0" or metadata["License"] == "Apache-2.0"
     classifiers = metadata.get_all("Classifier")
     assert "Programming Language :: Python :: 3.10" in classifiers
     assert "Programming Language :: Python :: 3.11" in classifiers
@@ -216,6 +217,7 @@ def test_wheel_metadata_contains_release_fields(built_artifacts):
     assert "Programming Language :: Julia" not in classifiers
     assert metadata["Project-URL"] is not None
     assert any(name.endswith(".dist-info/licenses/LICENSE") for name in names)
+    assert any(name.endswith(".dist-info/licenses/NOTICE") for name in names)
     assert "Sagittarius is a research SDK" in metadata.get_payload()
 
 
@@ -227,6 +229,7 @@ def test_sdist_contains_readme_license_and_pyproject_metadata(built_artifacts):
 
     assert "README.md" in names
     assert "LICENSE" in names
+    assert "NOTICE" in names
     assert "pyproject.toml" in names
 
 

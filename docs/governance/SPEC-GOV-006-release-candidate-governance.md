@@ -295,7 +295,7 @@ Before production PyPI upload, the release owner confirms:
       is included in the release claim.
 - [ ] Required failure evidence was retained rather than discarded.
 - [ ] Known limitations and CUDA maturity wording match the evidence.
-- [ ] Repository visibility, MIT licensing, project URLs, issue tracker, README,
+- [ ] Repository visibility, Apache-2.0 licensing, project URLs, issue tracker, README,
       user docs, and disclosure review are approved.
 - [ ] Production publishing uses a protected environment and the exact validated
       files.

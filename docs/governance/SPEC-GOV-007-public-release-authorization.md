@@ -17,7 +17,7 @@ It is an engineering governance record, not legal advice.
 
 The intended disclosure is the complete `Ouyxw/Sagittarius` monorepo, including
 the Julia SDK, Python SDK, documentation, CI workflows, and retained public
-release records, under the existing MIT License. Sagittarius is not split for
+release records, under the Apache License 2.0. Sagittarius is not split for
 this release: Python distributions embed the Julia backend and source
 development refers to the monorepo.
 
@@ -37,7 +37,7 @@ recorded in GitHub.
 | Decision status | `Draft`, `Approved`, `Delayed`, or `Withdrawn` |
 | Intended public date | `YYYY-MM-DD` |
 | Repository and visibility | `Ouyxw/Sagittarius`; private to public, full monorepo and Git history |
-| License | MIT; root `LICENSE` and `sagittarius_py/LICENSE` reviewed for identity |
+| License | Apache-2.0; root `LICENSE` and `sagittarius_py/LICENSE` reviewed for identity |
 | Owner/approver | GitHub account or authorized organization role |
 | Independent reviewer | GitHub account different from the production-release operator |
 | Production-release operator | GitHub account permitted to trigger the production workflow |
