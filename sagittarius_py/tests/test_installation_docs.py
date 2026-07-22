@@ -25,8 +25,8 @@ def test_phase13_source_install_baseline_is_documented():
     assert "development-only" in docs
     assert "source checkout" in docs
     assert "embedded Julia backend" in docs
-    assert "not published yet" in docs
-    assert "pip install sagittarius-py" in docs
+    assert "available on production PyPI" in docs
+    assert "sagittarius-py==1.0.9" in docs
 
 
 def test_source_install_docs_do_not_contain_control_characters():
@@ -116,7 +116,7 @@ def test_phase13_release_evidence_workflows_are_hardened():
     assert "phase13-cuda-wheel-${{ github.run_id }}" in cuda
 
 
-def test_production_pypi_pending_boundary_is_documented():
+def test_production_pypi_release_is_documented():
     docs = "\n\n".join(
         [
             _read("README.md"),
@@ -126,9 +126,9 @@ def test_production_pypi_pending_boundary_is_documented():
         ]
     )
 
-    assert "sagittarius-py==<released-version>" in docs
-    assert "not published yet" in docs
-    assert "protected production workflow" in docs
+    assert "sagittarius-py==1.0.9" in docs
+    assert "available on production PyPI" in docs
+    assert "protected production-promotion" in docs
     assert "production-index smoke" in docs
     assert "package_resource" in docs
     assert "production PyPI" in docs

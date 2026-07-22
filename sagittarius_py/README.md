@@ -52,7 +52,14 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-The `pip install -e .` path is development-only and still depends on the editable source checkout for Python code updates. A production PyPI release is being prepared but is not published yet; do not use an unqualified `pip install sagittarius-py` command until the release record says that the package is available. Once published, the authoritative consumer-install instructions will be in the [Python package installation guide](docs/getting-started/python/package-installation.md).
+The `pip install -e .` path is development-only and still depends on the editable source checkout for Python code updates. For consumer installations, Sagittarius `1.0.9` is available on production PyPI:
+
+```bash
+python -m pip install sagittarius-py==1.0.9
+sagittarius backend resolve
+```
+
+See the [Python package installation guide](https://github.com/Ouyxw/Sagittarius/blob/main/docs/getting-started/python/package-installation.md) for virtual-environment setup, verification, upgrades, and uninstall guidance.
 
 For source installs, backend setup, package-release status, container setup, and environment troubleshooting, see the [installation overview](docs/getting-started/installation.md). Python-specific setup lives under [docs/getting-started/python](docs/getting-started/python/source-installation.md); Julia-native setup lives under [docs/getting-started/julia](docs/getting-started/julia/projects.md).
 

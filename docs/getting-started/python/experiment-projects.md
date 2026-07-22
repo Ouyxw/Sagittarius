@@ -54,7 +54,7 @@ dependencies = [
 sagittarius-py = { path = "../Sagittarius/sagittarius_py", editable = true }
 ```
 
-Editable experiment environments load the adjacent `Sagittarius.jl` checkout first, so Julia backend edits in the repository take effect without rebuilding a wheel. The editable dependency also points to the local checkout for Python source updates, so moving the checkout requires updating the uv source path and running `uv sync` again. Released wheels use `package_resource` when installed away from the checkout. Production PyPI publication is pending; see [Python package installation](package-installation.md) for the current release status.
+Editable experiment environments load the adjacent `Sagittarius.jl` checkout first, so Julia backend edits in the repository take effect without rebuilding a wheel. The editable dependency also points to the local checkout for Python source updates, so moving the checkout requires updating the uv source path and running `uv sync` again. Released wheels use `package_resource` when installed away from the checkout. Experiments that do not modify Sagittarius can instead install `sagittarius-py==1.0.9` from PyPI; see [Python package installation](package-installation.md).
 
 ## Run Experiment Scripts
 

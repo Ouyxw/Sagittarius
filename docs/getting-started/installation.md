@@ -1,6 +1,6 @@
 # Installation Overview
 
-Sagittarius is preparing its first production PyPI promotion. The package is not available on production PyPI yet, so do not advertise or run an unqualified `pip install sagittarius-py` command as a current installation path. Until publication completes, a complete repository checkout is the supported path for users and contributors.
+Sagittarius `1.0.9` is available on production PyPI. Python users should install it in a virtual environment with `python -m pip install sagittarius-py==1.0.9`; a complete repository checkout remains the supported path for contributors and source development.
 
 Use this page as the installation map. Python and Julia user paths are split into language-specific subdirectories under `getting-started/`.
 
@@ -8,7 +8,7 @@ Use this page as the installation map. Python and Julia user paths are split int
 | :--- | :--- |
 | Install and test the Python SDK from a source checkout (developer path). | [Python source installation](python/source-installation.md) |
 | Use Sagittarius from an independent Python experiment. | [Python experiment projects](python/experiment-projects.md) |
-| Install a released Python package after publication, or understand wheel, sdist, editable install, upgrade, and uninstall status. | [Python package installation](python/package-installation.md) |
+| Install the released Python package, or understand wheel, sdist, editable install, upgrade, and uninstall status. | [Python package installation](python/package-installation.md) |
 | Resolve Julia packages, choose a Julia executable, or prepare Python CPU/GPU backend execution. | [Python backend setup](python/backend-setup.md) |
 | Use `Sagittarius.jl` from an independent Julia project. | [Julia projects](julia/projects.md) |
 | Prepare native Julia runtime and backend execution. | [Julia backend setup](julia/backend-setup.md) |
@@ -17,7 +17,16 @@ Use this page as the installation map. Python and Julia user paths are split int
 
 ## Current Support Boundary
 
-The supported Python baseline is:
+The supported Python consumer baseline is:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install sagittarius-py==1.0.9
+sagittarius backend resolve
+```
+
+The Python contributor baseline is:
 
 ```bash
 git clone <repository_url> Sagittarius
@@ -37,4 +46,4 @@ julia --project=. -e 'using Pkg; Pkg.develop(path="../Sagittarius/Sagittarius.jl
 
 The Python SDK resolves the Julia backend through an explicit lookup order: `SAGITTARIUS_JULIA_BACKEND_PATH` for environment overrides, an adjacent editable/source checkout, and packaged backend resources embedded under `sagittarius/julia/Sagittarius.jl`. Editable source installs prefer the checkout so Julia source edits take effect immediately; wheel installs use the packaged backend resource when no adjacent checkout exists. Julia-native users depend on `Sagittarius.jl` directly and do not need the Python wheel path.
 
-Phase 13 packaging embeds the Julia backend sources and project metadata in Python artifacts. The MIT TestPyPI `1.0.8` candidate is historical evidence: it passed candidate, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel validation gates, while CUDA remains experimental. It cannot be promoted after the Apache-2.0 licensing decision. A new Apache-2.0 `1.0.9` candidate must be frozen and pass every applicable gate again before the protected production-promotion workflow can reconcile production-file hashes and retain a clean production-index smoke. The embedded copy does not replace `Sagittarius.jl` as the native Julia entry point.
+Phase 13 packaging embeds the Julia backend sources and project metadata in Python artifacts. The MIT TestPyPI `1.0.8` candidate remains historical evidence and cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.9` passed the candidate, regression, clean-artifact, cross-platform, TestPyPI, CUDA-wheel, and protected production-promotion gates; production-file hashes were reconciled and a clean production-index smoke was retained. CUDA remains experimental. The embedded copy does not replace `Sagittarius.jl` as the native Julia entry point.

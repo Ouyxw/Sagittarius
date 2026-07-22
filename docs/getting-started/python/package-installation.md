@@ -1,6 +1,6 @@
 # Python Package Installation
 
-This is the authoritative guide for Python package installation. Sagittarius is preparing a production PyPI promotion, but it is not published on production PyPI yet. Do not run or advertise `pip install sagittarius-py` as a current consumer-install command. After publication, this guide will state the released version and production install command.
+This is the authoritative guide for Python package installation. Sagittarius `1.0.9` is available on [production PyPI](https://pypi.org/project/sagittarius-py/1.0.9/). Install it in an isolated virtual environment and resolve the packaged Julia backend before running simulations.
 
 ## Developer Source Installation
 
@@ -23,17 +23,19 @@ python -m juliapkg resolve
 
 Editable installs still depend on the configured source checkout for Python code updates and should not be treated as a released wheel-install equivalent.
 
-## Planned Production Installation
+## Production Installation
 
-After a successful production upload and production-index smoke, the consumer path will be a version-pinned PyPI installation followed by backend resolution:
+Create and activate a virtual environment, then install the released version and resolve its Julia dependencies:
 
 ```bash
-python -m pip install sagittarius-py==<released-version>
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install sagittarius-py==1.0.9
 sagittarius backend resolve
 sagittarius doctor
 ```
 
-Do not substitute a candidate version for `<released-version>` or use this command before publication. The expected doctor report identifies `backend_source` as `package_resource`. The default package profile is CPU-first; CUDA remains an explicit experimental backend profile and requires its own setup.
+Using `python -m pip` ensures that installation targets the active virtual environment. The expected doctor report identifies `backend_source` as `package_resource`. The default package profile is CPU-first; CUDA remains an explicit experimental backend profile and requires its own setup. Do not use `--break-system-packages` to install into a distribution-managed Python.
 
 ## Local Artifact Status
 
@@ -59,7 +61,7 @@ The smoke tests build wheel/sdist artifacts, create clean seeded virtual environ
 
 ## Publication Status
 
-The MIT TestPyPI `1.0.8` candidate passed its candidate build, release regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates as historical evidence; CUDA remains experimental. It cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.9` is frozen and must pass every applicable gate before the separately reviewed, protected promotion workflow can reconcile production hashes and record a clean production-index installation smoke. The exact-file production promotion runs through the protected production workflow and requires its configured approval before upload.
+The MIT TestPyPI `1.0.8` candidate remains historical evidence and cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.9` passed its candidate build, release regression, clean-artifact, cross-platform, TestPyPI, CUDA-wheel, and protected production-promotion gates. The production workflow promoted the canonical files without rebuilding, reconciled production hashes, and recorded a clean production-index installation smoke. CUDA remains experimental.
 
 ## Python Wheel and Source Distribution Criteria
 
@@ -75,7 +77,7 @@ A release artifact is ready only after these checks pass:
 - default CPU installation does not require CUDA.jl, an NVIDIA driver, or GPU hardware;
 - unsupported or missing Julia installations produce documented, actionable diagnostics;
 - wheel and sdist pass metadata checks, including `twine check`;
-- the canonical candidate passes the candidate build, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates; before publication, a protected exact-file promotion, production hash reconciliation, and production-index smoke remain required.
+- the canonical candidate passes the candidate build, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates, followed by protected exact-file promotion, production hash reconciliation, and a production-index smoke.
 
 ## Upgrade and Uninstall Guidance
 
@@ -93,6 +95,13 @@ For editable experiment projects, update the uv source path if the checkout move
 cd ~/workspace/my_experiment
 uv sync --reinstall-package sagittarius-py
 uv run python -m juliapkg resolve
+```
+
+For released-package environments, upgrade within the active virtual environment and resolve the backend again:
+
+```bash
+python -m pip install --upgrade sagittarius-py
+sagittarius backend resolve
 ```
 
 For local wheel smoke environments, upgrade by reinstalling the same built wheel into the target virtual environment, then rerun backend resolution from outside the source checkout:

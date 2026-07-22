@@ -1,6 +1,6 @@
 # Python Source Installation
 
-This guide describes the Python developer path: install and test the SDK from a complete Sagittarius source checkout, then resolve Julia dependencies in that Python environment. For released-package installation after production publication, use [Python package installation](package-installation.md).
+This guide describes the Python developer path: install and test the SDK from a complete Sagittarius source checkout, then resolve Julia dependencies in that Python environment. For the released PyPI package, use [Python package installation](package-installation.md).
 
 ## Prerequisites
 
@@ -48,7 +48,7 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-This `pip install -e .` workflow is development-only. It still depends on the editable source checkout for Python code updates and is not equivalent to a released package install. Local wheel artifacts embed the Julia backend. Production PyPI publication is pending, so do not use an unqualified `pip install sagittarius-py` command until [Python package installation](package-installation.md) records a released version.
+This `pip install -e .` workflow is development-only. It still depends on the editable source checkout for Python code updates and is not equivalent to a released package install. Local wheel artifacts embed the Julia backend. For ordinary consumer use, install `sagittarius-py==1.0.9` from PyPI as described in [Python package installation](package-installation.md).
 
 If Julia is installed but cannot be found automatically, specify its executable before resolving:
 
