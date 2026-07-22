@@ -61,7 +61,7 @@ sagittarius backend resolve
 
 For reproducible environments, pin the version required by your project.
 
-See the [Python package installation guide](docs/getting-started/python/package-installation.md) for virtual-environment setup, verification, upgrades, and uninstall guidance.
+See the [Python package installation guide](https://github.com/Ouyxw/Sagittarius/blob/main/docs/getting-started/python/package-installation.md) for virtual-environment setup, verification, upgrades, and uninstall guidance.
 
 For source installs, backend setup, package-release status, container setup, and environment troubleshooting, see the [installation overview](docs/getting-started/installation.md). Python-specific setup lives under [docs/getting-started/python](docs/getting-started/python/source-installation.md); Julia-native setup lives under [docs/getting-started/julia](docs/getting-started/julia/projects.md).
 
