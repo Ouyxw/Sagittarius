@@ -1,5 +1,3 @@
 prune tests
-exclude debug_gaussian.py
-exclude debug_ramp.py
 global-exclude *.py[cod]
 global-exclude __pycache__

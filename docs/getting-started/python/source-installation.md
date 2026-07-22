@@ -68,7 +68,7 @@ See [Python backend setup](backend-setup.md) for Julia executable discovery, Jul
 
 ```bash
 cd sagittarius_py
-uv run python check_env.py
+uv run sagittarius doctor
 uv run python -m pytest tests/
 ```
 

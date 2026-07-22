@@ -3,25 +3,23 @@ name: PR Fast CI
 on:
   pull_request:
     branches:
-      - develop/**
+      - dev
       - main
     paths:
       - "Sagittarius.jl/**"
       - "sagittarius_py/**"
       - "docs/**"
-      - "REQUIREMENTS.md"
       - ".github/workflows/pr-fast-ci.yml"
       - ".github/workflows/phase13-*.yml"
       - ".github/actions/phase13-download-candidate/**"
       - "scripts/phase13_candidate_artifact.py"
   push:
     branches:
-      - develop/**
+      - dev
     paths:
       - "Sagittarius.jl/**"
       - "sagittarius_py/**"
       - "docs/**"
-      - "REQUIREMENTS.md"
       - ".github/workflows/pr-fast-ci.yml"
       - ".github/workflows/phase13-*.yml"
       - ".github/actions/phase13-download-candidate/**"

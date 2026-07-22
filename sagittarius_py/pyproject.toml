@@ -4,8 +4,8 @@ version = "1.0.8"
 description = "A neutral-atom quantum emulator with Julia and Python SDKs"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
-license-files = ["LICENSE"]
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 authors = [
     { name = "Sagittarius contributors" },
 ]

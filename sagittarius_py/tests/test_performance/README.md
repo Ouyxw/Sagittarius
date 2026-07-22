@@ -34,4 +34,4 @@ uv run python benchmark_ablation.py
 ```
 
 ## Output
-Each benchmark writes a `benchmark-artifact/v1` JSON envelope plus companion CSV and Markdown files. The JSON captures parameters, timings, process memory usage, `version_info()` metadata, backend diagnostics, and linked run manifests when a benchmark run produces `SimulationResult` objects. Use [../../../docs/governance/performance-claims.md](../../../docs/governance/performance-claims.md) before turning these rows into public performance statements.
+Each benchmark writes a `benchmark-artifact/v1` JSON envelope plus companion CSV and Markdown files. The JSON captures parameters, timings, process memory usage, `version_info()` metadata, backend diagnostics, and linked run manifests when a benchmark run produces `SimulationResult` objects. Treat these rows as diagnostic unless they are retained with complete hardware, solver, backend, version, correctness, and failure metadata.

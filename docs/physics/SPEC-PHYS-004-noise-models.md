@@ -257,4 +257,4 @@ New theory-noise models should include:
 - seeded reproducibility tests for stochastic ensembles;
 - full-vs-reduced basis parity checks;
 - serialization and manifest validation;
-- documentation updates in this spec and `docs/reference/known-limitations.md`.
+- documentation updates in this spec and any affected public API or getting-started guide.
