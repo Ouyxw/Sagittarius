@@ -39,7 +39,7 @@ Please start the AI collaboration workflow:
 1. Read and follow AGENTS.md.
 2. Read docs/development/agent-workflow-template.md.
 3. Recover context using the template's Context Recovery section.
-4. Read REQUIREMENTS.md for <target phase or requirement item>.
+4. Read docs/development/requirements.md for <target phase or requirement item>.
 5. List the relevant SPEC/docs files for this task.
 6. Create or update a Branch Customization Block at <branch workflow doc path>, for example docs/development/branches/<branch-name>.md.
 7. Include Branch Baseline, Scope, Requirement Items, Cross-Phase Dependencies, Required Context, Change Surface, Required Validation, and Handoff Requirements.
@@ -55,7 +55,7 @@ Please start the AI collaboration workflow:
 1. 读取并遵守 AGENTS.md。
 2. 读取 docs/development/agent-workflow-template.md。
 3. 按模板中的 Context Recovery 恢复上下文。
-4. 读取 REQUIREMENTS.md 中 <目标 Phase 或需求项>。
+4. 读取 docs/development/requirements.md 中 <目标 Phase 或需求项>。
 5. 列出本任务涉及的 SPEC/docs 文件。
 6. 创建或更新分支工作文档 <branch workflow doc path>，例如 docs/development/branches/<branch-name>.md。
 7. 写入 Branch Baseline、Scope、Requirement Items、Cross-Phase Dependencies、Required Context、Change Surface、Required Validation 和 Handoff Requirements。
@@ -108,7 +108,7 @@ Please implement only this slice.
 Before editing, check git status and identify existing uncommitted changes.
 After implementation:
 - run the targeted tests listed in the branch workflow document;
-- update formal docs required by docs/status.md;
+- update formal docs required by docs/development/status.md;
 - update the branch workflow document's Requirement Items, Current Slice, Validation Log, and Progress Log;
 - summarize changed surfaces, tests run, docs updated, and residual risks.
 ```
@@ -121,7 +121,7 @@ After implementation:
 修改前先检查 git status，并识别已有未提交改动。
 实现后：
 - 运行分支工作文档中列出的 targeted tests；
-- 按 docs/status.md 更新正式文档；
+- 按 docs/development/status.md 更新正式文档；
 - 更新分支工作文档中的 Requirement Items、Current Slice、Validation Log 和 Progress Log；
 - 总结代码影响面、测试结果、文档更新和残余风险。
 ```

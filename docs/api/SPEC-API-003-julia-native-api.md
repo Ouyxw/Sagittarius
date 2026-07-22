@@ -7,7 +7,7 @@ Version: `julia-native-api/v1`
 Last reviewed: 2026-06-30
 
 
-Sagittarius exposes a Julia-native API for users who want direct access to registers, pulse ASTs, bases, Hamiltonians, jump operators, solvers, and structured logging without going through the Python SDK. For side-by-side Python and Julia workflows, see [`dual-sdk-examples.md`](../getting-started/dual-sdk-examples.md).
+Sagittarius exposes a Julia-native API for users who want direct access to registers, pulse ASTs, bases, Hamiltonians, jump operators, solvers, and structured logging without going through the Python SDK. Cross-language semantics are specified by [`SPEC-API-002-python-julia-parity.md`](SPEC-API-002-python-julia-parity.md).
 
 ## Registers
 

@@ -7,8 +7,8 @@ Sagittarius is a research SDK for classical simulation of Rydberg neutral-atom a
 Follow these references before changing behavior:
 
 - `docs/SOP.md` for lifecycle and quality principles.
-- `REQUIREMENTS.md` for roadmap phase scope and acceptance criteria.
-- `docs/status.md` for documentation maintenance triggers.
+- `docs/development/requirements.md` for roadmap phase scope and acceptance criteria.
+- `docs/development/status.md` for documentation maintenance triggers.
 - `docs/reference/known-limitations.md` for current unsupported scenarios.
 - `docs/reference/development-sop.md` for logging, diagnostics, manifest, artifact, and benchmark contracts.
 
@@ -18,7 +18,7 @@ Follow these references before changing behavior:
 - Prefer existing Python and Julia API patterns over new abstractions.
 - Preserve Python/Julia semantic parity for atom ordering, bitstrings, pulse addressing, solver options, manifests, and result artifacts.
 - Do not weaken validation, diagnostics, schema versioning, or reproducibility metadata.
-- Any change to public behavior must update tests and the relevant docs listed in `docs/status.md`.
+- Any change to public behavior must update tests and the relevant docs listed in `docs/development/status.md`.
 
 ## Scientific Software Rules
 
@@ -62,9 +62,9 @@ GPU tests are opt-in and must not be treated as ordinary CPU CI:
 
 When code changes affect public APIs, schema fields, solver behavior, backend behavior, artifacts, benchmarks, or limitations, update:
 
-- `REQUIREMENTS.md`
+- `docs/development/requirements.md`
 - relevant `docs/api/`, `docs/physics/`, `docs/reference/`, or `docs/governance/` pages
-- `docs/status.md` if document status or maintenance triggers change
+- `docs/development/status.md` if document status or maintenance triggers change
 - `README.md` only for user-visible capability or installation changes
 
 ## Release and Packaging Rules

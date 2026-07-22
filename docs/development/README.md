@@ -5,9 +5,12 @@ This directory contains reusable development-process templates for Sagittarius c
 Use these templates together with:
 
 - [`../SOP.md`](../SOP.md) for scientific computing lifecycle principles;
-- [`../status.md`](../status.md) for documentation maintenance triggers;
 - [`../../AGENTS.md`](../../AGENTS.md) for repository-level AI agent instructions;
-- [`../reference/development-sop.md`](../reference/development-sop.md) for logging, diagnostics, artifact, manifest, benchmark, and claim contracts.
+- [`../reference/development-sop.md`](../reference/development-sop.md) for logging, diagnostics, artifact, manifest, benchmark, and claim contracts;
+- [Requirements](requirements.md) for roadmap phase scope and acceptance criteria;
+- [Documentation status](status.md) for maintenance triggers;
+- [PyPI publication runbook](pypi-publication.md) for internal release operations;
+- [Containerization](containerization.md) for experimental CUDA devcontainer setup.
 
 ## Templates
 

@@ -33,8 +33,8 @@ git status --short
 git branch --show-current
 git rev-parse --short HEAD
 sed -n '1,220p' AGENTS.md
-sed -n '1,320p' REQUIREMENTS.md
-sed -n '1,180p' docs/status.md
+sed -n '1,320p' docs/development/requirements.md
+sed -n '1,180p' docs/development/status.md
 sed -n '1,180p' docs/reference/known-limitations.md
 ```
 
@@ -81,7 +81,7 @@ Merge policy: <remove before merge | retain as development record | extract into
 
 | ID | Requirement | Priority | Source | Specs | Status | Tests | Docs | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| <P14-R1> | <requirement text> | <High/Medium/Low> | `REQUIREMENTS.md` Phase <N> | <docs paths> | Planned | TBD | TBD | <notes> |
+| <P14-R1> | <requirement text> | <High/Medium/Low> | `docs/development/requirements.md` Phase <N> | <docs paths> | Planned | TBD | TBD | <notes> |
 
 Status values: `Planned`, `In progress`, `Implemented`, `Verified`, `Deferred`, `Blocked`.
 
@@ -161,7 +161,7 @@ Status values: `Planned`, `In progress`, `Implemented`, `Verified`, `Deferred`, 
 6. Inspect existing implementation and tests before designing new abstractions.
 7. Implement the approved slice.
 8. Add or update tests that prove behavior and prevent regression.
-9. Update formal docs listed in `docs/status.md` for the touched surface.
+9. Update formal docs listed in `docs/development/status.md` for the touched surface.
 10. Update the branch-local workflow document with progress and validation results.
 11. Run targeted tests, then broaden based on risk.
 12. Inspect `git diff` for unrelated edits and schema/documentation drift.
@@ -199,7 +199,7 @@ Common mappings:
 | Python SDK API | `sagittarius_py/sagittarius/` | `sagittarius_py/tests/` | `docs/api/`, README if user-visible |
 | Julia backend API | `Sagittarius.jl/src/` and packaged copy if applicable | Julia-native and cross-language tests | `docs/api/SPEC-API-003*`, parity docs |
 | Solver semantics | Python and Julia solver paths | solver config, invariants, parity, numerical sanity | `SPEC-API-005`, data model, limitations |
-| Artifact or schema | serializers, validators, result objects | serialization and artifact tests | `docs/reference/*`, `docs/status.md` |
+| Artifact or schema | serializers, validators, result objects | serialization and artifact tests | `docs/reference/*`, `docs/development/status.md` |
 | Benchmark behavior | benchmark scripts and artifact writers | benchmark artifact tests, smoke scenarios | `docs/benchmarks/`, governance docs |
 | Packaging | `pyproject.toml`, package data, CLI, workflows | packaging artifact and clean-env tests | installation docs, CI workflows |
 
@@ -229,7 +229,7 @@ Before changing schemas, manifests, diagnostics, events, or result artifacts:
 - Update writers, readers, validators, fixtures, and round-trip tests together.
 - Preserve compatibility with supported older artifacts where documented.
 - Keep `data`, `metadata`, `diagnostics`, `manifest`, and `shared_result` responsibilities separate.
-- Update `docs/reference/data-model.md`, the relevant schema doc, and `docs/status.md` if triggers change.
+- Update `docs/reference/data-model.md`, the relevant schema doc, and `docs/development/status.md` if triggers change.
 - Include requested/effective configuration where backend execution can differ from user input.
 
 ## Numerical and Scientific Change Checklist
@@ -245,7 +245,7 @@ For physics, solver, observable, noise, sampling, or benchmark changes:
 
 ## Documentation Maintenance Checklist
 
-Use `docs/status.md` as the routing table.
+Use `docs/development/status.md` as the routing table.
 
 At minimum, update docs when:
 
@@ -318,7 +318,7 @@ Use this for final AI summaries, PR comments, or branch notes.
 
 Feature and development branches may tailor this template by adding stricter checks. They should not remove these baseline requirements:
 
-- context recovery from `AGENTS.md`, `REQUIREMENTS.md`, and relevant specs;
+- context recovery from `AGENTS.md`, `docs/development/requirements.md`, and relevant specs;
 - branch baseline and requirement-item status tracking for long-running branches;
 - tests for behavior changes;
 - docs updates for public behavior or schema changes;

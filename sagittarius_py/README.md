@@ -17,7 +17,7 @@ The project is under active development. APIs, backend support, and benchmark re
 - Runtime diagnostics and versioned result serialization.
 - MWIS-on-unit-disk-graph examples with classical baselines.
 
-See [REQUIREMENTS.md](REQUIREMENTS.md) for the roadmap and [known limitations](docs/reference/known-limitations.md) for current constraints.
+See [development requirements](docs/development/requirements.md) for the roadmap and [known limitations](docs/reference/known-limitations.md) for current constraints.
 
 ## Repository Layout
 
@@ -115,7 +115,7 @@ H = hamiltonian(reg, fill(1.0, 3), zeros(3); basis_context=context)
 println("Reduced basis size: ", length(context.basis))
 ```
 
-See the [Julia native API](docs/api/SPEC-API-003-julia-native-api.md) and [dual-SDK examples](docs/getting-started/dual-sdk-examples.md).
+See the [Julia native API](docs/api/SPEC-API-003-julia-native-api.md) and [Python/Julia parity contract](docs/api/SPEC-API-002-python-julia-parity.md).
 
 ## Physical Units and Indexing
 
@@ -173,7 +173,7 @@ CPU tests do not require CUDA. GPU tests are opt-in and require a working backen
 - [Python/Julia parity contract](docs/api/SPEC-API-002-python-julia-parity.md)
 - [Backend support](docs/reference/SPEC-BACKEND-001-backends.md)
 - [Known limitations](docs/reference/known-limitations.md)
-- [Containerized development](docs/getting-started/containerization.md)
+- [Containerized development](docs/development/containerization.md)
 
 ## License
 

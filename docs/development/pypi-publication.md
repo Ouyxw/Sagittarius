@@ -4,7 +4,7 @@ Sagittarius is not published on production PyPI yet. The TestPyPI `1.0.8` candid
 
 The candidate commit, tag, distribution digests, branch integration, CUDA timing,
 and build-once promotion rules are defined by
-[`SPEC-GOV-006-release-candidate-governance.md`](../../governance/SPEC-GOV-006-release-candidate-governance.md).
+[`SPEC-GOV-006-release-candidate-governance.md`](../governance/SPEC-GOV-006-release-candidate-governance.md).
 
 ## Required Order
 

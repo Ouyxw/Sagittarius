@@ -37,7 +37,7 @@ def test_source_install_docs_do_not_contain_control_characters():
 
 
 def test_phase13_source_install_baseline_roadmap_status_is_done():
-    roadmap = _read("REQUIREMENTS.md")
+    roadmap = _read("docs/development/requirements.md")
 
     assert "| **Source Installation Baseline** | High | Done |" in roadmap
 
@@ -47,7 +47,7 @@ def test_phase13_cross_platform_matrix_is_documented():
         [
             _read("docs/getting-started/python/package-installation.md"),
             _read("docs/getting-started/python/compatibility-matrix.md"),
-            _read("REQUIREMENTS.md"),
+            _read("docs/development/requirements.md"),
             _read(".github/workflows/phase13-cross-platform.yml"),
         ]
     )
@@ -71,7 +71,7 @@ def test_phase13_uninstall_reinstall_smoke_is_documented():
     docs = "\n\n".join(
         [
             _read("docs/getting-started/python/package-installation.md"),
-            _read("REQUIREMENTS.md"),
+            _read("docs/development/requirements.md"),
             _read(".github/workflows/phase13-clean-artifact.yml"),
         ]
     )
@@ -85,8 +85,8 @@ def test_phase13_uninstall_reinstall_smoke_is_documented():
 def test_phase13_ci_workflow_policy_is_documented():
     ci_docs = _read("docs/reference/ci-workflows.md")
     package_docs = _read("docs/getting-started/python/package-installation.md")
-    status_docs = _read("docs/status.md")
-    roadmap = _read("REQUIREMENTS.md")
+    status_docs = _read("docs/development/status.md")
+    roadmap = _read("docs/development/requirements.md")
 
     assert "reference/ci-workflows.md" in package_docs
     assert "reference/ci-workflows.md" in status_docs
@@ -141,7 +141,7 @@ def test_production_pypi_pending_boundary_is_documented():
             _read("README.md"),
             _read("docs/getting-started/installation.md"),
             _read("docs/getting-started/python/package-installation.md"),
-            _read("docs/getting-started/python/pypi-publication.md"),
+            _read("docs/development/pypi-publication.md"),
             _read("docs/getting-started/package-installation.md"),
         ]
     )

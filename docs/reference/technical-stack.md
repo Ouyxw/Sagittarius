@@ -119,7 +119,7 @@ See [`package-installation.md`](../getting-started/package-installation.md), [`i
 
 ## Containers and GPU Development
 
-CUDA-focused container workflows are documented in [`containerization.md`](../getting-started/containerization.md).
+CUDA-focused container workflows are documented in [`containerization.md`](../development/containerization.md).
 
 Important constraints:
 

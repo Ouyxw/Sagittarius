@@ -77,4 +77,4 @@ Before marking a disclosure `Approved`:
 - [`SPEC-GOV-001-performance-claims.md`](SPEC-GOV-001-performance-claims.md) defines how measured performance can be stated.
 - [`SPEC-GOV-003-prior-art-notes.md`](SPEC-GOV-003-prior-art-notes.md) defines which Rydberg/MWIS and neutral-atom concepts should be treated as background rather than Sagittarius-specific invention.
 - [`known-limitations.md`](../reference/known-limitations.md) defines constraints that public disclosures should not contradict.
-- [`dual-sdk-examples.md`](../getting-started/dual-sdk-examples.md) and [`minimal-examples.md`](../getting-started/minimal-examples.md) provide safer example material that should still be reviewed if published outside the repository context.
+- [`minimal-examples.md`](../getting-started/minimal-examples.md) provides user-facing example material that should still be reviewed if published outside the repository context.

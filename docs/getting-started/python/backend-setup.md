@@ -129,7 +129,7 @@ GPU tests are opt-in:
 SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python -m pytest tests/test_gpu_acceleration.py
 ```
 
-CUDA requires a compatible host driver, device passthrough if containerized, CUDA runtime compatibility, Julia CUDA packages, and a visible GPU device. See [Backend maturity](../../reference/SPEC-BACKEND-001-backends.md) and [Containerized development](../containerization.md).
+CUDA requires a compatible host driver, device passthrough if containerized, CUDA runtime compatibility, Julia CUDA packages, and a visible GPU device. See [Backend maturity](../../reference/SPEC-BACKEND-001-backends.md) and [Development containerization](../../development/containerization.md).
 
 ## Backend Commands
 

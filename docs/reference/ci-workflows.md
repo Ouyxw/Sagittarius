@@ -85,11 +85,11 @@ For release readiness, retain:
 - a `phase13-testpypi-<version>` artifact containing commit, ref, run URL, wheel/sdist SHA-256 digests, clean-install diagnostic, installed-package CPU result artifact with schema checks, and TestPyPI JSON file hashes;
 - a `phase13-cuda-wheel-<run-id>` artifact containing the GPU name/driver/memory capture, smoke log, commit, ref, run URL, runner OS, validation command, and required opt-in flags when CUDA support is being claimed.
 
-Do not mark the Phase 13 cross-platform matrix gate complete in `REQUIREMENTS.md` until every documented matrix row has passed and its evidence is retained.
+Do not mark the Phase 13 cross-platform matrix gate complete in `docs/development/requirements.md` until every documented matrix row has passed and its evidence is retained.
 
 ## Maintenance Rules
 
 - Keep automatic PR workflows fast and deterministic.
 - Keep release workflows explicit, auditable, and manually runnable.
-- Update `docs/status.md`, `REQUIREMENTS.md`, and this document when workflow triggers, release gates, or evidence requirements change.
+- Update `docs/development/status.md`, `docs/development/requirements.md`, and this document when workflow triggers, release gates, or evidence requirements change.
 - Do not add `pull_request` triggers to `phase13-cross-platform.yml`, `phase13-testpypi.yml`, or `phase13-cuda-wheel.yml` without a deliberate release-process update.

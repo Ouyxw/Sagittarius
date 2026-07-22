@@ -14,8 +14,7 @@ Use this page as the installation map. Python and Julia user paths are split int
 | Prepare native Julia runtime and backend execution. | [Julia backend setup](julia/backend-setup.md) |
 | Run quick Python verification examples. | [Python minimal examples](python/minimal-examples.md) |
 | Run quick Julia-native verification examples. | [Julia minimal examples](julia/minimal-examples.md) |
-| Compare equivalent Python and Julia workflows. | [Dual SDK examples](dual-sdk-examples.md) |
-| Use Docker or VS Code Dev Containers. | [Containerized development](containerization.md) |
+| Use Docker or VS Code Dev Containers. |  [Development containerization](../development/containerization.md) | |
 
 ## Current Support Boundary
 

@@ -1,6 +1,6 @@
 # Sagittarius Documentation
 
-This directory groups Sagittarius documentation by reader intent: getting started, API contracts, reference material, and release governance. See [Documentation status](status.md) for phase mapping and maintenance triggers.
+This directory groups Sagittarius documentation by reader intent: getting started, API contracts, reference material, and release governance. See [Documentation status](development/status.md) for phase mapping and maintenance triggers.
 
 ## Start Here
 
@@ -13,8 +13,6 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Julia projects](getting-started/julia/projects.md)
 - [Julia backend setup](getting-started/julia/backend-setup.md)
 - [Julia minimal examples](getting-started/julia/minimal-examples.md)
-- [Dual SDK examples](getting-started/dual-sdk-examples.md)
-- [Containerized development](getting-started/containerization.md)
 
 ## API Guides
 
@@ -43,6 +41,10 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 ## Development Workflows
 
 - [Development workflows overview](development/README.md)
+- [Development requirements](development/requirements.md)
+- [Documentation status](development/status.md)
+- [PyPI publication runbook](development/pypi-publication.md)
+- [Experimental CUDA devcontainer](development/containerization.md)
 - [Agent workflow template](development/agent-workflow-template.md)
 - [Prompt context standards](development/prompt-context.md)
 
