@@ -6,11 +6,11 @@ on:
       expected-version:
         description: "Frozen sagittarius-py and Sagittarius.jl version"
         required: true
-        default: "1.0.8"
+        default: "1.0.9"
       candidate-tag:
         description: "Immutable candidate tag resolving to the selected commit"
         required: true
-        default: "candidate/sagittarius-py-v1.0.8-1"
+        default: "candidate/sagittarius-py-v1.0.9-1"
 
 jobs:
   build-candidate:
