@@ -8,7 +8,6 @@ on:
       - "Sagittarius.jl/**"
       - "sagittarius_py/**"
       - "docs/getting-started/**"
-      - "docs/development/requirements.md"
       - ".github/workflows/phase13-clean-artifact.yml"
   workflow_dispatch:
     inputs:

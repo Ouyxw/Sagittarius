@@ -41,7 +41,7 @@ Local wheel and source-distribution builds now include the embedded Julia backen
 
 ## CI Workflow Policy
 
-Ordinary pull requests use the lightweight automatic PR workflow. Clean wheel, cross-platform, TestPyPI, and CUDA workflows are release gates and are either `main`-only or manual. See [CI workflows](../../reference/ci-workflows.md) for the authoritative trigger matrix, release evidence requirements, and maintenance rules.
+Ordinary pull requests use [PR Fast CI](../../../.github/workflows/pr-fast-ci.yml). Clean wheel, cross-platform, TestPyPI, and CUDA workflows are release gates and are either `main`-only or manual; their definitions under `.github/workflows/` are the authoritative trigger and evidence contracts.
 
 ## Release Artifact Smoke Test
 
@@ -59,7 +59,7 @@ The smoke tests build wheel/sdist artifacts, create clean seeded virtual environ
 
 ## Publication Status
 
-The MIT TestPyPI `1.0.8` candidate passed its candidate build, release regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates as historical evidence; CUDA remains experimental. It cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.9` is not yet frozen and must pass every applicable gate before the separately reviewed, protected promotion workflow can reconcile production hashes and record a clean production-index installation smoke. See the [PyPI publication policy](../../development/pypi-publication.md).
+The MIT TestPyPI `1.0.8` candidate passed its candidate build, release regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates as historical evidence; CUDA remains experimental. It cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.9` is not yet frozen and must pass every applicable gate before the separately reviewed, protected promotion workflow can reconcile production hashes and record a clean production-index installation smoke. The exact-file production promotion runs through the protected production workflow and requires its configured approval before upload..
 
 ## Python Wheel and Source Distribution Criteria
 

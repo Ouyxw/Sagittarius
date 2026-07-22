@@ -1,6 +1,6 @@
 # Sagittarius Documentation
 
-This directory groups Sagittarius documentation by reader intent: getting started, API contracts, reference material, and release governance. See [Documentation status](development/status.md) for phase mapping and maintenance triggers.
+This directory contains the public Sagittarius installation guides, API contracts, and physics documentation.
 
 ## Start Here
 
@@ -29,42 +29,3 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Pulse shapes in neutral-atom simulations](physics/SPEC-PHYS-002-pulse-shapes.md)
 - [Observables in neutral-atom simulations](physics/SPEC-PHYS-003-observables.md)
 - [Noise models](physics/SPEC-PHYS-004-noise-models.md)
-
-## Benchmark Protocols
-
-- [Benchmark protocols overview](benchmarks/README.md)
-- [Phase 16 benchmark protocol](benchmarks/protocol.md)
-- [Benchmark tiers](benchmarks/tiers.md)
-- [Benchmark families](benchmarks/families.md)
-- [Benchmark artifact contracts](benchmarks/artifact-contracts.md)
-
-## Development Workflows
-
-- [Development workflows overview](development/README.md)
-- [Development requirements](development/requirements.md)
-- [Documentation status](development/status.md)
-- [PyPI publication runbook](development/pypi-publication.md)
-- [Experimental CUDA devcontainer](development/containerization.md)
-- [Agent workflow template](development/agent-workflow-template.md)
-- [Prompt context standards](development/prompt-context.md)
-
-## Reference
-
-- [Architecture overview](reference/architecture-overview.md)
-- [Data model](reference/data-model.md)
-- [Technical stack](reference/technical-stack.md)
-- [Backend maturity](reference/SPEC-BACKEND-001-backends.md)
-- [Known limitations](reference/known-limitations.md)
-- [Shared result schema](reference/SPEC-DATA-001-shared-result-schema.md)
-- [Event taxonomy](reference/SPEC-OBS-001-event-taxonomy.md)
-- [Development SOP](reference/development-sop.md)
-- [CI workflows](reference/ci-workflows.md)
-
-## Governance
-
-- [Performance claims](governance/SPEC-GOV-001-performance-claims.md)
-- [Prior-art notes](governance/SPEC-GOV-003-prior-art-notes.md)
-- [Disclosure control](governance/SPEC-GOV-002-disclosure-control.md)
-- [Benchmarking plan](governance/SPEC-GOV-004-benchmarking-plan.md)
-- [Repository and versioning governance](governance/SPEC-GOV-005-repository-versioning.md)
-- [Release candidate and publication governance](governance/SPEC-GOV-006-release-candidate-governance.md)

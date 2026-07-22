@@ -15,9 +15,9 @@ The project is under active development. APIs, backend support, and benchmark re
 - CPU execution and experimental GPU backends, with CUDA as the primary target.
 - Python and Julia APIs with shared physical semantics.
 - Runtime diagnostics and versioned result serialization.
-- MWIS-on-unit-disk-graph examples with classical baselines.
+- MWIS-oriented register and visualization primitives for unit-disk-graph studies.
 
-See [development requirements](docs/development/requirements.md) for the roadmap and [known limitations](docs/reference/known-limitations.md) for current constraints.
+See the [API guides](docs/README.md#api-guides) and [physics guides](docs/README.md#physics-guides) for the supported public contracts.
 
 ## Repository Layout
 
@@ -25,8 +25,7 @@ See [development requirements](docs/development/requirements.md) for the roadmap
 Sagittarius/
 |-- Sagittarius.jl/          # Julia backend
 |-- sagittarius_py/          # Python SDK and tests
-|-- docs/                    # User and developer documentation
-|-- examples/                # Short user-facing examples
+|-- docs/                    # User, API, and physics documentation
 `-- scripts/                 # Repository maintenance tools
 ```
 
@@ -131,7 +130,7 @@ Enable GPU execution through `SolverConfig`:
 cfg = SolverConfig(use_gpu=True, gpu_backend="CUDA")
 ```
 
-Backend names include `CUDA`, `AMDGPU`, and `Metal`, but support and test coverage differ. Check the [backend maturity matrix](docs/reference/SPEC-BACKEND-001-backends.md) before use.
+Backend names include `CUDA`, `AMDGPU`, and `Metal`, but support and test coverage differ. CPU is the stable default, CUDA is experimental, and AMDGPU/Metal remain planned backends.
 
 ```python
 from sagittarius import backend_maturity, doctor, version_info
@@ -143,17 +142,6 @@ print(doctor(backend="CUDA", initialize_backend=True))
 
 CUDA is the primary containerized development target, but remains experimental. GPU execution still requires compatible host drivers, runtime libraries, and device passthrough.
 
-## MWIS Example
-
-The `sagittarius_py/projects/mwis_udg/` project demonstrates maximum weighted independent set workflows on unit-disk graphs:
-
-```bash
-cd sagittarius_py/projects/mwis_udg
-uv run python example_mwis.py
-```
-
-It is research scaffolding, not a finalized benchmark suite.
-
 ## Verification
 
 ```bash
@@ -162,7 +150,7 @@ uv run sagittarius doctor
 uv run python -m pytest tests/
 ```
 
-CPU tests do not require CUDA. GPU tests are opt-in and require a working backend. Performance results must include the hardware, solver settings, backend configuration, and version metadata described in the [performance claims policy](docs/governance/SPEC-GOV-001-performance-claims.md).
+CPU tests do not require CUDA. GPU tests are opt-in and require a working backend. Performance results must record the hardware, solver settings, backend configuration, version metadata, and retained benchmark artifacts.
 
 ## Documentation
 
@@ -171,9 +159,8 @@ CPU tests do not require CUDA. GPU tests are opt-in and require a working backen
 - [Julia minimal examples](docs/getting-started/julia/minimal-examples.md)
 - [Physical units and parameter selection](docs/physics/SPEC-PHYS-001-units.md)
 - [Python/Julia parity contract](docs/api/SPEC-API-002-python-julia-parity.md)
-- [Backend support](docs/reference/SPEC-BACKEND-001-backends.md)
-- [Known limitations](docs/reference/known-limitations.md)
-- [Containerized development](docs/development/containerization.md)
+- [Solver configuration](docs/api/SPEC-API-005-solver-configuration.md)
+- [Noise models](docs/physics/SPEC-PHYS-004-noise-models.md)
 
 ## License
 

@@ -58,7 +58,7 @@ Julia native code can emit taxonomy-aligned structured logs with:
 log_event("hamiltonian_built"; atom_count=4, basis_size=8, use_gpu=false)
 ```
 
-The payload fields follow [`SPEC-OBS-001-event-taxonomy.md`](../reference/SPEC-OBS-001-event-taxonomy.md) and can be captured with Julia's standard `Logging` tools. Native solver calls emit `solver_start` and `solver_finish`; `setup_workers` emits `cluster_setup_start` and `cluster_setup_finish`; basis and Hamiltonian builders emit their physics events.
+The payload fields follow the taxonomy exposed by `event_taxonomy()` and can be captured with Julia's standard `Logging` tools. Native solver calls emit `solver_start` and `solver_finish`; `setup_workers` emits `cluster_setup_start` and `cluster_setup_finish`; basis and Hamiltonian builders emit their physics events.
 
 ## MCWF Individual-Trajectory Return Contract
 
