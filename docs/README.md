@@ -14,6 +14,10 @@ This directory contains the public Sagittarius installation guides, API contract
 - [Julia backend setup](getting-started/julia/backend-setup.md)
 - [Julia minimal examples](getting-started/julia/minimal-examples.md)
 
+## Release Notes
+
+- [1.0.11 candidate release notes](development/release-notes-1.0.11.md)
+
 ## API Guides
 
 - [Julia native API](api/SPEC-API-003-julia-native-api.md)
