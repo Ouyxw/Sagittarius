@@ -32,11 +32,20 @@ function _observable_basis(N_atoms; basis=nothing, basis_context=nothing)
     return basis
 end
 
+const _CUDA_MODULES = Ref{Union{Nothing, Tuple{Module, Module}}}(nothing)
+
+function _is_cuda_vector(state)
+    modules = _CUDA_MODULES[]
+    isnothing(modules) && return false
+    cuda = modules[1]
+    return state isa cuda.CuVector
+end
+
 function _state_probability(state, idx::Int)
     if state isa AbstractMatrix
         return Float64(real(state[idx, idx]))
     end
-    if isdefined(@__MODULE__, :CUDA) && state isa CUDA.CuVector
+    if _is_cuda_vector(state)
         return Float64(abs2(Array(state)[idx]))
     end
     return Float64(abs2(state[idx]))
@@ -241,41 +250,44 @@ function _copy_sparse_values_to_gpu!(gpu_sparse, cpu_sparse)
 end
 
 function _ensure_cuda_loaded!()
-    if !isdefined(@__MODULE__, :CUDA)
-        Core.eval(@__MODULE__, :(using CUDA))
-    end
-    if !isdefined(getfield(@__MODULE__, :CUDA), :CUSPARSE)
-        Core.eval(@__MODULE__, :(using CUDA.CUSPARSE))
-    end
-    return nothing
+    cached = _CUDA_MODULES[]
+    !isnothing(cached) && return cached
+
+    modules = Core.eval(@__MODULE__, quote
+        using CUDA
+        using CUDA.CUSPARSE
+        (CUDA, CUDA.CUSPARSE)
+    end)
+    _CUDA_MODULES[] = modules
+    return modules
 end
 
-function _cached_gpu_sparse!(op)
+function _cached_gpu_sparse!(op, cusparse)
     cpu_sparse = sparse(op)
     if isnothing(op.cached_sparse_H)
-        op.cached_sparse_H = CUDA.CUSPARSE.CuSparseMatrixCSC(cpu_sparse)
+        op.cached_sparse_H = cusparse.CuSparseMatrixCSC(cpu_sparse)
     else
         updated = _copy_sparse_values_to_gpu!(op.cached_sparse_H, cpu_sparse)
         if isnothing(updated)
-            op.cached_sparse_H = CUDA.CUSPARSE.CuSparseMatrixCSC(cpu_sparse)
+            op.cached_sparse_H = cusparse.CuSparseMatrixCSC(cpu_sparse)
         end
     end
     return op.cached_sparse_H
 end
 
-function _solve_schrodinger_gpu_loaded(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
+function _solve_schrodinger_gpu_loaded(cuda, cusparse, ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
     function f(ψ, p, t)
         op = H_func(t)
         if hasproperty(op, :use_gpu) && op.use_gpu
-            if ψ isa CUDA.CuVector
-                return (_cached_gpu_sparse!(op) * ψ) .* (-1im)
+            if ψ isa cuda.CuVector
+                return (_cached_gpu_sparse!(op, cusparse) * ψ) .* (-1im)
             else
                 return (sparse(op) * ψ) .* (-1im)
             end
         else
             H_sparse = sparse(op)
-            if ψ isa CUDA.CuVector
-                return (CUDA.CUSPARSE.CuSparseMatrixCSC(H_sparse) * ψ) .* (-1im)
+            if ψ isa cuda.CuVector
+                return (cusparse.CuSparseMatrixCSC(H_sparse) * ψ) .* (-1im)
             else
                 return (H_sparse * ψ) .* (-1im)
             end
@@ -298,9 +310,11 @@ end
 
 function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
     _log_solver_start(; backend=backend, use_gpu=true, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius, method=method, adaptive=adaptive, dt=dt)
-    _ensure_cuda_loaded!()
+    cuda, cusparse = _ensure_cuda_loaded!()
     return Base.invokelatest(
         _solve_schrodinger_gpu_loaded,
+        cuda,
+        cusparse,
         ψ0,
         H_func,
         tspan;

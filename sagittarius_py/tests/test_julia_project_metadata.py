@@ -13,8 +13,11 @@ def test_gpu_solver_uses_latest_world_after_dynamic_cuda_load():
     solver_text = solver_path.read_text(encoding="utf-8")
 
     assert "function _ensure_cuda_loaded!()" in solver_text
-    assert "Core.eval(@__MODULE__, :(using CUDA))" in solver_text
+    assert "modules = Core.eval(@__MODULE__, quote" in solver_text
+    assert "(CUDA, CUDA.CUSPARSE)" in solver_text
     assert "function _solve_schrodinger_gpu_loaded" in solver_text
+    assert "cuda, cusparse = _ensure_cuda_loaded!()" in solver_text
+    assert "_cached_gpu_sparse!(op, cusparse)" in solver_text
     assert "Base.invokelatest(" in solver_text
 
 
