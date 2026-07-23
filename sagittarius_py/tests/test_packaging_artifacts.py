@@ -27,6 +27,10 @@ REQUIRED_BACKEND_FILES = {
     "sagittarius/julia/Sagittarius.jl/src/program.jl",
     "sagittarius/julia/Sagittarius.jl/src/cluster.jl",
 }
+REQUIRED_VISUALIZATION_FILES = {
+    path.relative_to(PY_PACKAGE_ROOT).as_posix()
+    for path in (PY_PACKAGE_ROOT / "sagittarius" / "viz").glob("*.py")
+}
 FORBIDDEN_RELEASE_PARTS = {
     ".github",
     ".vscode",
@@ -263,6 +267,15 @@ def test_wheel_contains_embedded_julia_backend(built_artifacts):
         names = set(archive.namelist())
 
     assert REQUIRED_BACKEND_FILES <= names
+
+
+def test_wheel_contains_visualization_package(built_artifacts):
+    wheel, _ = built_artifacts
+
+    with zipfile.ZipFile(wheel) as archive:
+        names = set(archive.namelist())
+
+    assert REQUIRED_VISUALIZATION_FILES <= names
 
 
 def test_sdist_contains_embedded_julia_backend(built_artifacts):

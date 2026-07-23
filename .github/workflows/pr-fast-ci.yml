@@ -59,6 +59,7 @@ jobs:
           tests/test_packaging_artifacts.py::test_wheel_metadata_contains_release_fields
           tests/test_packaging_artifacts.py::test_sdist_contains_readme_license_and_pyproject_metadata
           tests/test_packaging_artifacts.py::test_wheel_contains_embedded_julia_backend
+          tests/test_packaging_artifacts.py::test_wheel_contains_visualization_package
           tests/test_packaging_artifacts.py::test_sdist_contains_embedded_julia_backend
           tests/test_packaging_artifacts.py::test_wheel_excludes_forbidden_release_content
           tests/test_packaging_artifacts.py::test_sdist_excludes_forbidden_release_content
