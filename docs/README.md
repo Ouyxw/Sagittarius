@@ -16,7 +16,7 @@ This directory contains the public Sagittarius installation guides, API contract
 
 ## Release Notes
 
-- [1.0.11 candidate release notes](development/release-notes-1.0.11.md)
+- [1.0.11 release notes](development/release-notes-1.0.11.md)
 
 ## API Guides
 

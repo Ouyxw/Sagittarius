@@ -48,7 +48,7 @@ python -m pip install -e .
 python -m juliapkg resolve
 ```
 
-This `pip install -e .` workflow is development-only. It still depends on the editable source checkout for Python code updates and is not equivalent to a released package install. Local wheel artifacts embed the Julia backend. For ordinary consumer use, install `sagittarius-py==1.0.10` from PyPI as described in [Python package installation](package-installation.md).
+This `pip install -e .` workflow is development-only. It still depends on the editable source checkout for Python code updates and is not equivalent to a released package install. Local wheel artifacts embed the Julia backend. For ordinary consumer use, install `sagittarius-py==1.0.11` from PyPI as described in [Python package installation](package-installation.md).
 
 If Julia is installed but cannot be found automatically, specify its executable before resolving:
 
