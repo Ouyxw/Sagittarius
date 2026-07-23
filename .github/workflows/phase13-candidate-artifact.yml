@@ -10,7 +10,7 @@ on:
       candidate-tag:
         description: "Immutable candidate tag resolving to the selected commit"
         required: true
-        default: "candidate/sagittarius-py-v1.0.11-2"
+        default: "candidate/sagittarius-py-v1.0.11-3"
 
 jobs:
   build-candidate:
