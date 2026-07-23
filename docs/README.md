@@ -38,6 +38,11 @@ This directory groups Sagittarius documentation by reader intent: getting starte
 - [Benchmark families](benchmarks/families.md)
 - [Benchmark artifact contracts](benchmarks/artifact-contracts.md)
 
+## Release Records
+
+- [1.0.11 release notes](development/release-notes-1.0.11.md)
+- [1.0.11 production release evidence](development/release-evidence-1.0.11.md)
+
 ## Development Workflows
 
 - [Development workflows overview](development/README.md)
