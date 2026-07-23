@@ -45,15 +45,33 @@ FORBIDDEN_RELEASE_SUFFIXES = {".key", ".pem", ".p12", ".pfx"}
 
 
 def _run(command, *, cwd=PY_PACKAGE_ROOT, env=None, check=True):
-    return subprocess.run(
+    completed = subprocess.run(
         command,
         cwd=cwd,
         env=env,
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        check=check,
+        check=False,
     )
+    if check and completed.returncode:
+        output = completed.stdout or "<no output captured>"
+        raise AssertionError(
+            f"Command failed with exit code {completed.returncode}: {command!r}\n"
+            f"Captured output:\n{output}"
+        )
+    return completed
+
+
+def test_run_reports_captured_output_on_failure():
+    command = [sys.executable, "-c", "print('child diagnostic'); raise SystemExit(7)"]
+
+    with pytest.raises(AssertionError) as exc_info:
+        _run(command)
+
+    message = str(exc_info.value)
+    assert "exit code 7" in message
+    assert "child diagnostic" in message
 
 
 def _json_from_output(output: str):
