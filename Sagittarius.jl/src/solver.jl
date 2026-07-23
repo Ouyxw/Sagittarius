@@ -240,9 +240,17 @@ function _copy_sparse_values_to_gpu!(gpu_sparse, cpu_sparse)
     return nothing
 end
 
+function _ensure_cuda_loaded!()
+    if !isdefined(@__MODULE__, :CUDA)
+        Core.eval(@__MODULE__, :(using CUDA))
+    end
+    if !isdefined(getfield(@__MODULE__, :CUDA), :CUSPARSE)
+        Core.eval(@__MODULE__, :(using CUDA.CUSPARSE))
+    end
+    return nothing
+end
+
 function _cached_gpu_sparse!(op)
-    @eval using CUDA
-    @eval using CUDA.CUSPARSE
     cpu_sparse = sparse(op)
     if isnothing(op.cached_sparse_H)
         op.cached_sparse_H = CUDA.CUSPARSE.CuSparseMatrixCSC(cpu_sparse)
@@ -255,10 +263,7 @@ function _cached_gpu_sparse!(op)
     return op.cached_sparse_H
 end
 
-function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
-    _log_solver_start(; backend=backend, use_gpu=true, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius, method=method, adaptive=adaptive, dt=dt)
-    @eval using CUDA
-    @eval using CUDA.CUSPARSE
+function _solve_schrodinger_gpu_loaded(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
     function f(ψ, p, t)
         op = H_func(t)
         if hasproperty(op, :use_gpu) && op.use_gpu
@@ -289,6 +294,26 @@ function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1
     result_type = isnothing(observables) ? "schrodinger_gpu" : "schrodinger_gpu_observables"
     _log_solver_finish(result_type, length(ψ0); backend=backend)
     return isnothing(observables) ? sol : (sol, saved_values)
+end
+
+function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
+    _log_solver_start(; backend=backend, use_gpu=true, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius, method=method, adaptive=adaptive, dt=dt)
+    _ensure_cuda_loaded!()
+    return Base.invokelatest(
+        _solve_schrodinger_gpu_loaded,
+        ψ0,
+        H_func,
+        tspan;
+        observables=observables,
+        reltol=reltol,
+        abstol=abstol,
+        backend=backend,
+        blockade_radius=blockade_radius,
+        saveat=saveat,
+        method=method,
+        adaptive=adaptive,
+        dt=dt,
+    )
 end
 
 function solve_lindblad(ρ0::Matrix{ComplexF64}, H_func, J_ops, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CPU", use_gpu=false, blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)

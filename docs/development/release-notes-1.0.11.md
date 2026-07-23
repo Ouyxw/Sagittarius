@@ -6,6 +6,7 @@
 
 - Fixed Python wheel package discovery to include `sagittarius` subpackages automatically.
 - The `sagittarius.viz` visualization package is now included in the `sagittarius-py` wheel.
+- Fixed the Julia CUDA solver world-age failure caused by dynamically loading CUDA immediately before the GPU ODE callback; GPU hardware revalidation remains required before release.
 
 ## Impact on `1.0.10`
 

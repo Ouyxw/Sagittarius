@@ -8,6 +8,16 @@ def test_julia_project_declares_direct_standard_library_dependencies():
     assert 'Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"' in project_text
 
 
+def test_gpu_solver_uses_latest_world_after_dynamic_cuda_load():
+    solver_path = Path(__file__).resolve().parents[2] / "Sagittarius.jl" / "src" / "solver.jl"
+    solver_text = solver_path.read_text(encoding="utf-8")
+
+    assert "function _ensure_cuda_loaded!()" in solver_text
+    assert "Core.eval(@__MODULE__, :(using CUDA))" in solver_text
+    assert "function _solve_schrodinger_gpu_loaded" in solver_text
+    assert "Base.invokelatest(" in solver_text
+
+
 def test_julia_project_does_not_make_cuda_a_default_dependency():
     project_path = Path(__file__).resolve().parents[2] / "Sagittarius.jl" / "Project.toml"
     project_text = project_path.read_text(encoding="utf-8")
