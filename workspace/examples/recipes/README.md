@@ -18,5 +18,6 @@ uv run python ../workspace/examples/recipes/rabi.py --output-dir ../artifacts/ra
 - `open_system_decay.py`: local Markovian Rydberg decay and pure dephasing with an analytic population reference.
 - `mwis_udg.py`: a small weighted UDG/MWIS AQC workflow with readout distribution and exact small-instance reference.
 
+- `wheel_installed_mwis_udg.py`: self-contained template for an external project using an installed wheel.
 See the [Python experiment recipes guide](../../../docs/getting-started/python/experiment-recipes.md)
 for expected output shapes and interpretation boundaries.

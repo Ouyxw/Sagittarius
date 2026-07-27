@@ -167,6 +167,7 @@ CPU tests do not require CUDA. GPU tests are opt-in and require a working backen
 - [Python minimal examples](docs/getting-started/python/minimal-examples.md)
 - [Julia minimal examples](docs/getting-started/julia/minimal-examples.md)
 - [Python experiment recipes](docs/getting-started/python/experiment-recipes.md)
+- [Wheel-installed Python recipe](docs/getting-started/python/wheel-experiment-recipe.md)
 - [Physical units and parameter selection](docs/physics/SPEC-PHYS-001-units.md)
 - [Python/Julia parity contract](docs/api/SPEC-API-002-python-julia-parity.md)
 - [Solver configuration](docs/api/SPEC-API-005-solver-configuration.md)
