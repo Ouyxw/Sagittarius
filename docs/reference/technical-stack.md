@@ -21,7 +21,7 @@ This page summarizes the current Sagittarius technical stack, dependency boundar
 | Distributed path | Julia Distributed, cluster helpers | Early cluster foundation; broader HPC remains Phase 17. |
 | Optimization examples | NetworkX, PuLP, DOcplex | UDG/MWIS example generation, exact baselines, verification workflows. |
 | Testing | pytest, Julia package tests where applicable | Python tests, backend tests, parity tests, benchmark artifact tests. |
-| Packaging | setuptools, uv workflows, juliapkg metadata | Source-checkout-oriented today; relocatable packaging is Phase 13. |
+| Packaging | setuptools, uv workflows, juliapkg metadata | Production PyPI wheel/sdist plus source-checkout development. |
 
 ## Python Package
 
@@ -69,7 +69,7 @@ Current behavior:
 - `sagittarius_py/sagittarius/juliapkg.json` declares the Julia dependency environment used by Python workflows;
 - the CUDA devcontainer generates JuliaCall shell configuration at post-create time with `.devcontainer/setup-juliacall-env.sh`, deriving `PYTHON_JULIACALL_EXE`, `PYTHON_JULIACALL_PROJECT`, and `PYTHON_JULIACALL_BINDIR` from the container runtime instead of hard-coding Juliaup versioned paths.
 
-Phase 13 tracks the transition toward relocatable wheels, package-resource lookup, and cleaner CPU-first installation behavior.
+Released wheels use embedded package resources and a CPU-first JuliaPkg profile; source checkouts continue to prefer the adjacent Julia backend for development.
 
 ## Backend Maturity
 
@@ -103,17 +103,14 @@ GPU tests are opt-in and require a working CUDA environment. Benchmark results s
 
 ## Packaging and Installation Status
 
-Current support is source-checkout oriented:
+Sagittarius 1.0.11 is available on production PyPI. Consumer installs use the published wheel or sdist, while contributors continue to use a complete source checkout:
 
 - clone the complete repository;
 - install the Python package from `sagittarius_py/`;
 - resolve Julia dependencies with `python -m juliapkg resolve`;
 - keep `Sagittarius.jl/` and `sagittarius_py/` together unless using explicit development overrides.
 
-Phase 13 packaging work now includes relocatable wheel artifacts, installed-package resource lookup, a CPU-first dependency profile that does not require CUDA for regular CPU users, and `sagittarius backend` setup commands. Remaining release-readiness work includes:
-
-- cross-platform matrix pass evidence;
-- PyPI release readiness criteria.
+Phase 13 packaging includes relocatable wheel artifacts, installed-package resource lookup, a CPU-first dependency profile that does not require CUDA for regular CPU users, and `sagittarius backend` setup commands. The 1.0.11 release retained cross-platform, CUDA-wheel, TestPyPI, production-hash, and clean production-index evidence.
 
 See [`package-installation.md`](../getting-started/package-installation.md), [`installation.md`](../getting-started/installation.md), and [`backend-setup.md`](../getting-started/backend-setup.md).
 

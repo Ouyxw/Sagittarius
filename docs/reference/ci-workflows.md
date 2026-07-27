@@ -9,7 +9,7 @@ Sagittarius separates day-to-day pull-request validation from release-candidate 
 The authoritative candidate identity and build-once promotion requirements live
 in [`SPEC-GOV-006-release-candidate-governance.md`](../governance/SPEC-GOV-006-release-candidate-governance.md).
 The release workflows now share one manifest-bound candidate distribution set.
-The production-promotion workflow is implemented but unexecuted; production publication remains blocked until a newly frozen candidate passes every gate and the workflow records production digest reconciliation and a production-index smoke.
+The production-promotion workflow was executed for Sagittarius 1.0.11 after every required gate passed; its release record includes production digest reconciliation and a clean production-index smoke. Future releases must repeat the same candidate-bound process.
 
 | Workflow | Trigger | Runs on | Purpose | Expected use |
 | :--- | :--- | :--- | :--- | :--- |
@@ -20,7 +20,7 @@ The production-promotion workflow is implemented but unexecuted; production publ
 | `.github/workflows/phase13-cross-platform.yml` | Manual only | Linux, macOS, Windows matrix | Release-candidate OS/Python/Julia artifact matrix with uploaded per-row evidence. | Run before marking cross-platform wheel evidence complete. |
 | `.github/workflows/phase13-testpypi.yml` | Manual only, protected by the `testpypi` environment | `ubuntu-latest` | Verify and publish the canonical files through OIDC, reconcile TestPyPI hashes, verify a clean install, and retain release evidence. | Run only with a new candidate version after TestPyPI trusted publishing and publication policy are ready. |
 | `.github/workflows/phase13-cuda-wheel.yml` | Manual only | Self-hosted Linux CUDA runner | Hardware-backed CUDA wheel smoke and CPU/CUDA parity with retained GPU and smoke-log evidence. | Run only when validating CUDA wheel support on real NVIDIA hardware. |
-| `.github/workflows/phase13-production-pypi.yml` | Manual only, protected by the `pypi-production` environment | `ubuntu-latest` | Promote the manifest-verified canonical wheel and sdist through OIDC, reconcile production hashes, and retain a clean production-index smoke. | Run only after all 1.0.8 candidate gates pass and production approval is granted. |
+| `.github/workflows/phase13-production-pypi.yml` | Manual only, protected by the `pypi-production` environment | `ubuntu-latest` | Promote the manifest-verified canonical wheel and sdist through OIDC, reconcile production hashes, and retain a clean production-index smoke. | Run only after every gate for the frozen candidate passes and production approval is granted. |
 
 ## Pull Request CI
 
@@ -53,11 +53,11 @@ A branch CUDA run is pre-merge risk screening. It becomes final publication
 evidence only when the tested commit and wheel digest are unchanged, the commit
 is contained in `main`, and that exact wheel is the production candidate.
 
-## Remaining Release-Gate Gaps
+## Release-Gate Reuse Requirements
 
 Canonical identity, build-once reuse, artifact denylist, retained-sdist smoke,
 TestPyPI digest reconciliation, and current-gate failure uploads are implemented.
-The production pipeline remains open on these items:
+The 1.0.11 production pipeline completed these items. They remain mandatory for every future candidate:
 
 | Gap | Current behavior | Required CI change or evidence |
 | :--- | :--- | :--- |
@@ -66,8 +66,8 @@ The production pipeline remains open on these items:
 | Production digest reconciliation | The protected production workflow compares PyPI JSON hashes with the manifest after upload. | Execute it only for the frozen candidate and retain its evidence artifact. |
 | Production promotion | The protected workflow downloads and verifies canonical files; it never rebuilds distributions. | Complete environment approval and the production-index smoke for the frozen candidate. |
 
-Until these gaps close, implemented controls and individual passes do not approve
-a production distribution set. Supply-chain hardening should subsequently add
+Passing an earlier release does not approve a new production distribution set.
+Supply-chain hardening should subsequently add
 documentation link/build checks, dependency and license review, secret scanning,
 SBOM/attestation generation, and immutable action pinning.
 

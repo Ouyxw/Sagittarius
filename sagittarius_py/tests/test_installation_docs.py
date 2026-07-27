@@ -8,6 +8,14 @@ def _read(relative_path: str) -> str:
     return (REPO_ROOT / relative_path).read_text(encoding="utf-8")
 
 
+def test_pypi_readme_installation_is_version_neutral():
+    readme = _read("sagittarius_py/README.md")
+
+    assert "available on production PyPI" in readme
+    assert "python -m pip install sagittarius-py" in readme
+    assert "python -m pip install sagittarius-py==" not in readme
+
+
 def test_phase13_source_install_baseline_is_documented():
     docs = "\n\n".join(
         [
@@ -25,8 +33,8 @@ def test_phase13_source_install_baseline_is_documented():
     assert "development-only" in docs
     assert "source checkout" in docs
     assert "embedded Julia backend" in docs
-    assert "not published yet" in docs
-    assert "pip install sagittarius-py" in docs
+    assert "available on production PyPI" in docs
+    assert "sagittarius-py==1.0.11" in docs
 
 
 def test_source_install_docs_do_not_contain_control_characters():
@@ -36,18 +44,12 @@ def test_source_install_docs_do_not_contain_control_characters():
     assert r"C:\absolute\path\to\julia.exe" in guide
 
 
-def test_phase13_source_install_baseline_roadmap_status_is_done():
-    roadmap = _read("docs/development/requirements.md")
-
-    assert "| **Source Installation Baseline** | High | Done |" in roadmap
-
 
 def test_phase13_cross_platform_matrix_is_documented():
     docs = "\n\n".join(
         [
             _read("docs/getting-started/python/package-installation.md"),
             _read("docs/getting-started/python/compatibility-matrix.md"),
-            _read("docs/development/requirements.md"),
             _read(".github/workflows/phase13-cross-platform.yml"),
         ]
     )
@@ -60,7 +62,6 @@ def test_phase13_cross_platform_matrix_is_documented():
     assert "Python 3.12" in docs or "3.12" in docs
     assert "Julia 1.10.3" in docs or "1.10.3" in docs
     assert "phase13-cross-platform.yml" in docs
-    assert "Cross-Platform Installation Matrix** | High | Mixed" in docs
     assert "phase13-cross-platform-evidence" in docs
     assert "actions/upload-artifact" in docs
     assert "Run URL" in docs
@@ -71,40 +72,28 @@ def test_phase13_uninstall_reinstall_smoke_is_documented():
     docs = "\n\n".join(
         [
             _read("docs/getting-started/python/package-installation.md"),
-            _read("docs/development/requirements.md"),
             _read(".github/workflows/phase13-clean-artifact.yml"),
         ]
     )
 
     assert "test_clean_venv_installed_wheel_uninstall_reinstall_smoke" in docs
-    assert "Uninstall/Reinstall Smoke Coverage** | Medium | Done" in docs
     assert "package_resource" in docs
     assert "no longer importable" in docs
 
 
 def test_phase13_ci_workflow_policy_is_documented():
-    ci_docs = _read("docs/reference/ci-workflows.md")
     package_docs = _read("docs/getting-started/python/package-installation.md")
-    status_docs = _read("docs/development/status.md")
-    roadmap = _read("docs/development/requirements.md")
-
-    assert "reference/ci-workflows.md" in package_docs
-    assert "reference/ci-workflows.md" in status_docs
-    assert "Phase 13 CI and Release Automation" in roadmap
     pr_fast_ci = _read(".github/workflows/pr-fast-ci.yml")
-    assert ".github/workflows/pr-fast-ci.yml" in ci_docs
-    assert "Automatic on pull requests" in ci_docs
-    assert "direct pushes to `develop/**`" in ci_docs
-    assert "push:" in pr_fast_ci
-    assert "develop/**" in pr_fast_ci
+
+    assert ".github/workflows/pr-fast-ci.yml" in package_docs
+    assert "pull_request:" in pr_fast_ci
+    assert "- main" in pr_fast_ci
+    assert "- dev" in pr_fast_ci
     assert "workflow_dispatch" in _read(".github/workflows/phase13-cross-platform.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-cross-platform.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-testpypi.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-cuda-wheel.yml")
     assert "pull_request" not in _read(".github/workflows/phase13-clean-artifact.yml")
-    assert "Automatic on relevant pushes to `main`" in ci_docs
-    assert "Manual only" in ci_docs
-    assert "Evidence Retention" in ci_docs
 
 
 def test_phase13_release_evidence_workflows_are_hardened():
@@ -135,20 +124,19 @@ def test_phase13_release_evidence_workflows_are_hardened():
     assert "phase13-cuda-wheel-${{ github.run_id }}" in cuda
 
 
-def test_production_pypi_pending_boundary_is_documented():
+def test_production_pypi_release_is_documented():
     docs = "\n\n".join(
         [
             _read("README.md"),
             _read("docs/getting-started/installation.md"),
             _read("docs/getting-started/python/package-installation.md"),
-            _read("docs/development/pypi-publication.md"),
             _read("docs/getting-started/package-installation.md"),
         ]
     )
 
-    assert "sagittarius-py==<released-version>" in docs
-    assert "not published yet" in docs
-    assert "protected production workflow" in docs
+    assert "sagittarius-py==1.0.11" in docs
+    assert "available on production PyPI" in docs
+    assert "protected production-promotion" in docs
     assert "production-index smoke" in docs
     assert "package_resource" in docs
     assert "production PyPI" in docs

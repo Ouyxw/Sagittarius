@@ -52,4 +52,4 @@ Expected output:
 
 ## CUDA Notes
 
-CUDA support is experimental. Julia-native GPU use should be treated as a backend-specific workflow and should be paired with the backend maturity policy in [Backend maturity](../../reference/SPEC-BACKEND-001-backends.md). Python `doctor()` diagnostics are useful for Python SDK runs, but Julia-native users should also verify the Julia CUDA environment directly when using GPU entry points.
+CUDA support is experimental and should be treated as a backend-specific workflow. Python `doctor()` diagnostics are useful for Python SDK runs, but Julia-native users should also verify the Julia CUDA environment directly when using GPU entry points.

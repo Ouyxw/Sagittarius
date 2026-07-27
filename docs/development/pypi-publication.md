@@ -1,6 +1,6 @@
 # PyPI Publication Policy
 
-Sagittarius is not published on production PyPI yet. The TestPyPI `1.0.8` candidate was distributed under MIT and is not eligible for production promotion after the Apache-2.0 licensing decision. Freeze a new `1.0.9` candidate and rerun every Phase 13 gate before production publication. Treat every package artifact as public source distribution material because the Python wheel and sdist include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`.
+Sagittarius 1.0.11 is published on production PyPI under Apache-2.0. The earlier TestPyPI 1.0.8 candidate remains historical MIT-licensed evidence and is not eligible for production promotion. Treat every package artifact as public source distribution material because the Python wheel and sdist include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`.
 
 The candidate commit, tag, distribution digests, branch integration, CUDA timing,
 and build-once promotion rules are defined by
@@ -28,15 +28,15 @@ and build-once promotion rules are defined by
 11. Install the pinned version from production PyPI outside the repository and
     retain the post-publication smoke evidence.
 
-The separately reviewed, protected production workflow is implemented but unexecuted. Production PyPI upload remains blocked until it promotes a newly validated canonical candidate, reconciles production file hashes with the manifest, and retains a clean production-index smoke.
+The separately reviewed, protected production workflow successfully promoted Sagittarius 1.0.11, reconciled the production file hashes with the canonical manifest, and retained a clean production-index smoke. Every future release must repeat this process with a newly validated canonical candidate.
 
-## Remaining CI Preconditions
+## Completed 1.0.11 Release Gates
 
-The MIT TestPyPI `1.0.8` candidate passed candidate-artifact, regression, clean-artifact, cross-platform, TestPyPI, and CUDA-wheel gates as historical evidence. It cannot be promoted after the Apache-2.0 licensing decision. Apache-2.0 `1.0.9` is not yet frozen and must repeat every applicable gate. Only then may the protected production publisher promote the verified files, reconcile published hashes against the new candidate manifest, and retain a pinned production-index clean install. CUDA remains experimental and must not be described as stable in release materials.
+Apache-2.0 1.0.11 passed the canonical candidate, regression, clean-artifact, cross-platform, TestPyPI, CUDA-wheel, and protected production-promotion gates. Published hashes were reconciled against the canonical manifest and a pinned production-index clean install was retained. CUDA remains experimental and must not be described as stable in release materials.
 
 ## Historical TestPyPI Evidence
 
-The MIT TestPyPI `1.0.8` evidence is retained as historical release-governance evidence only; it is not a consumer installation path and does not authorize a production upload. It passed the strengthened installed-package CPU smoke, including result-artifact, manifest, shared-result, and `package_resource` backend checks. Retain its versioned evidence artifact with the release record, but do not reuse it for Apache-2.0 `1.0.9`.
+The MIT TestPyPI `1.0.8` evidence is retained as historical release-governance evidence only; it is not a consumer installation path and does not authorize a production upload. It passed the strengthened installed-package CPU smoke, including result-artifact, manifest, shared-result, and `package_resource` backend checks. Retain its versioned evidence artifact with the historical release record, but do not reuse it as evidence for an Apache-2.0 release.
 
 ## Manual TestPyPI Workflow
 

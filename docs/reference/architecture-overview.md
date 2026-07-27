@@ -121,7 +121,7 @@ This layer allows results, benchmark claims, and public reports to be audited af
 
 ## Current Architecture Constraints
 
-- Python artifacts now embed the Julia backend under `sagittarius/julia/Sagittarius.jl`; local release smoke covers clean-venv wheel installation, CPU-first JuliaPkg resolution, CPU simulation, and artifact metadata. Phase 13 now has Ubuntu clean artifact CI for the wheel path; remaining release gates include uninstall/reinstall smoke coverage, cross-platform matrix pass evidence, hardware evidence for CUDA wheel parity, successful TestPyPI execution, and final PyPI publication approval.
+- Python artifacts embed the Julia backend under `sagittarius/julia/Sagittarius.jl`. Sagittarius 1.0.11 passed the clean wheel and sdist installation, uninstall/reinstall, cross-platform, TestPyPI, real-hardware CUDA-wheel, and protected production-promotion gates. CUDA remains experimental despite that release evidence.
 - CUDA is experimental and requires explicit runtime diagnostics and parity evidence before performance claims.
 - AMDGPU and Metal are planned backend names, not mature execution paths.
 - Solver method dispatch is implemented for current solver paths through an auditable `method`/`adaptive`/`dt` contract; unsupported backend paths must reject explicitly rather than silently substituting algorithms.
