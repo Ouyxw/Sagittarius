@@ -1,0 +1,107 @@
+# Python Executable Experiment Recipes
+
+The recipes in [`workspace/examples/recipes/`](../../../workspace/examples/recipes/) are short,
+Julia-backed Phase 15 workflows for users who want a reproducible result
+artifact rather than an isolated API snippet. They run on the CPU-default
+backend, use only the public Python SDK, and write both a `result-artifact/v1`
+file and a convenient copy of its embedded `run-manifest/v1`.
+
+They are not Phase 16 benchmarks: their outputs do not establish performance,
+scalability, hardware-calibration, or optimization-quality claims.
+
+## Prerequisites
+
+Use either the source-install path or an equivalent independent Python project
+with Sagittarius installed and Julia dependencies resolved. From a source
+checkout:
+
+```bash
+cd Sagittarius/sagittarius_py
+uv sync
+uv run python -m juliapkg resolve
+```
+
+Each command below uses an explicit output directory so reruns do not overwrite
+another recipe's evidence.
+
+## Rabi Flip
+
+```bash
+uv run python ../workspace/examples/recipes/rabi.py --output-dir ../artifacts/rabi
+```
+
+The recipe drives one atom for half a Rabi period. It checks that the final
+Rydberg population is near one and writes a five-sample population trajectory.
+
+## Two-Atom Blockade
+
+```bash
+uv run python ../workspace/examples/recipes/two_atom_blockade.py --output-dir ../artifacts/two-atom-blockade
+```
+
+Two atoms separated by `0.5` use `blockade_radius=0.6`. The recipe checks the
+three-state reduced basis and records atom populations, total population, and
+the forbidden double-excitation observable, which remains zero.
+
+## Landau-Zener Sweep
+
+```bash
+uv run python ../workspace/examples/recipes/landau_zener.py --output-dir ../artifacts/landau-zener
+```
+
+This single-atom example uses a `Pulse.ramp` detuning sweep from `-4` to `4`
+with a constant drive. Its output is a 17-sample population trajectory. The
+final transfer probability depends on the stated schedule and is not presented
+as a universal Landau-Zener accuracy claim.
+
+## Open-System Decay and Dephasing
+
+```bash
+uv run python ../workspace/examples/recipes/open_system_decay.py --output-dir ../artifacts/open-system-decay
+```
+
+An initially excited atom evolves under local Markovian decay (`gamma=0.5`) and
+pure dephasing (`gamma_phi=0.25`). With zero drive and a diagonal initial
+state, pure dephasing does not alter the population, so the recipe can compare
+the final population with `exp(-gamma * duration)` while its manifest records
+both noise rates. This covers the currently supported local Markovian channels;
+custom and correlated channels are
+not available yet.
+
+## Small UDG/MWIS Workflow
+
+```bash
+uv run python ../workspace/examples/recipes/mwis_udg.py --output-dir ../artifacts/mwis-udg
+```
+
+The recipe creates a three-node weighted unit-disk graph, uses local detuning
+ramps in register order, runs a blockade-reduced schedule, and writes typed
+MWIS-cost, blockade-violation, and total-population observables. It also prints
+the most likely final bitstring from the saved readout distribution and the
+exact weight of this tiny enumerated reference instance. The comparison is for
+interpretation of this example only, not an optimization-performance claim.
+
+## Inspecting Output
+
+Every recipe prints paths such as:
+
+```text
+recipe: rabi
+result artifact: ../artifacts/rabi/rabi.result.json
+manifest copy: ../artifacts/rabi/rabi.run-manifest.json
+final_rydberg_population: 1.0
+```
+
+The result file is the authoritative envelope. Load it through the public API:
+
+```python
+from sagittarius import load_result
+
+result = load_result("../artifacts/rabi/rabi.result.json")
+print(result.manifest["schema_version"])
+print(result.data["rydberg_population"][-1])
+```
+
+The manifest records the actual register, pulse, solver, backend diagnostics,
+versions, output grid, and readout metadata. Keep the result artifact whenever
+the numerical output is used in a report or subsequent analysis.
