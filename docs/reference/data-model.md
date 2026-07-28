@@ -119,6 +119,7 @@ Readout-capable results store `metadata.readout.final_bitstring_probabilities` a
 | `run-manifest/v1` | Per-simulation reproducibility manifest. |
 | `result-artifact/v1` | Persistent `SimulationResult` envelope. |
 | `shared-result/v1` | Language-neutral result payload. |
+| `sweep-artifact/v1` | Resumable scientific-exploration parameter study artifact, separate from benchmark evidence. |
 | `benchmark-artifact/v1` | Structured performance measurement artifact. |
 | `mwis-batch-verification/v1` | MWIS batch verification report shape. |
 
@@ -173,7 +174,7 @@ See [`SPEC-GOV-004-benchmarking-plan.md`](../governance/SPEC-GOV-004-benchmarkin
 | Phase 11 | Typed observable declarations and observable metadata in manifests and artifacts. |
 | Phase 12 | Implemented effective solver method, adaptive/fixed-step settings, and `dt` metadata. |
 | Phase 14 | Noise model metadata, custom Lindblad declarations, correlated noise, stochastic realization metadata. |
-| Phase 15 | Implemented seed, output-grid, sampling, and `experiment-config/v1` metadata; sweep artifacts remain planned. |
+| Phase 15 | Implemented seed, output-grid, sampling, `experiment-config/v1`, and resumable `sweep-artifact/v1` exploration metadata. |
 | Phase 16 | Optional readout noise and interop/export metadata. |
 | Phase 19 | Visualization figures, report files, and sidecars are derived presentation outputs; no versioned sweep artifact or visualization schema is currently defined. |
 

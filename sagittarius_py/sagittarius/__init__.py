@@ -59,6 +59,17 @@ from .experiment_config import (
     validate_experiment_config,
 )
 
+from .sweep_artifact import (
+    SWEEP_ARTIFACT_SCHEMA_VERSION,
+    SWEEP_ARTIFACT_TYPE,
+    SWEEP_PURPOSE,
+    load_sweep_artifact,
+    make_sweep_artifact,
+    resume_item_ids,
+    save_sweep_artifact,
+    validate_sweep_artifact,
+)
+
 __all__ = [
     "RESULT_ARTIFACT_SCHEMA_VERSION",
     "RESULT_ARTIFACT_TYPE",
@@ -111,6 +122,14 @@ __all__ = [
     "version_info",
     "event_taxonomy",
     "get_event_spec",
+    "SWEEP_ARTIFACT_SCHEMA_VERSION",
+    "SWEEP_ARTIFACT_TYPE",
+    "SWEEP_PURPOSE",
+    "load_sweep_artifact",
+    "make_sweep_artifact",
+    "resume_item_ids",
+    "save_sweep_artifact",
+    "validate_sweep_artifact",
     "EXPERIMENT_CONFIG_ARTIFACT_TYPE",
     "EXPERIMENT_CONFIG_SCHEMA_VERSION",
     "ExperimentConfig",
