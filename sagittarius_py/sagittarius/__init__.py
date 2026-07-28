@@ -49,6 +49,16 @@ from .benchmarking import (
     write_benchmark_artifacts,
 )
 
+from .experiment_config import (
+    EXPERIMENT_CONFIG_ARTIFACT_TYPE,
+    EXPERIMENT_CONFIG_SCHEMA_VERSION,
+    ExperimentConfig,
+    load_experiment_config,
+    run_experiment_config,
+    save_experiment_config,
+    validate_experiment_config,
+)
+
 __all__ = [
     "RESULT_ARTIFACT_SCHEMA_VERSION",
     "RESULT_ARTIFACT_TYPE",
@@ -101,4 +111,11 @@ __all__ = [
     "version_info",
     "event_taxonomy",
     "get_event_spec",
+    "EXPERIMENT_CONFIG_ARTIFACT_TYPE",
+    "EXPERIMENT_CONFIG_SCHEMA_VERSION",
+    "ExperimentConfig",
+    "load_experiment_config",
+    "run_experiment_config",
+    "save_experiment_config",
+    "validate_experiment_config",
 ]

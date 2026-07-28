@@ -43,6 +43,8 @@ Persistent artifacts
 | `Simulation` | Python | Coordinates validation, backend calls, solver execution, diagnostics, and result wrapping. | Main lifecycle object. |
 | `SimulationResult` | Python | In-memory result plus metadata, diagnostics, manifest, save/load helpers. | Writes `result-artifact/v1`, embeds `shared-result/v1`, and exposes final-state readout sampling when a distribution is available. |
 
+| `ExperimentConfig` | Python | Versioned JSON declaration for a reproducible single simulation. | `run_experiment_config()` writes configured result/manifest/sample artifacts and links `run-manifest/v1` to the config SHA-256. |
+
 Pulse and indexing details are defined in [`SPEC-API-001-pulse-and-indexing-contract.md`](../api/SPEC-API-001-pulse-and-indexing-contract.md).
 
 ## Julia Physics Objects
@@ -171,7 +173,7 @@ See [`SPEC-GOV-004-benchmarking-plan.md`](../governance/SPEC-GOV-004-benchmarkin
 | Phase 11 | Typed observable declarations and observable metadata in manifests and artifacts. |
 | Phase 12 | Implemented effective solver method, adaptive/fixed-step settings, and `dt` metadata. |
 | Phase 14 | Noise model metadata, custom Lindblad declarations, correlated noise, stochastic realization metadata. |
-| Phase 15 | Implemented seed and output-grid metadata; planned sampling results, experiment configs, and sweep artifacts. |
+| Phase 15 | Implemented seed, output-grid, sampling, and `experiment-config/v1` metadata; sweep artifacts remain planned. |
 | Phase 16 | Optional readout noise and interop/export metadata. |
 | Phase 19 | Visualization figures, report files, and sidecars are derived presentation outputs; no versioned sweep artifact or visualization schema is currently defined. |
 

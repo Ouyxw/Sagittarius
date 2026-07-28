@@ -38,6 +38,7 @@ RUN_MANIFEST_SCHEMA = {
         "random",
         "readout",
     ],
+    "optional": ["source_config"],
     "sections": {
         "register": ["atom_count", "C6", "atoms", "geometry"],
         "pulse": ["omega", "delta"],
@@ -439,6 +440,23 @@ def validate_run_manifest(manifest: Dict[str, Any]) -> None:
             "Use cataloged event IDs from event_taxonomy() when constructing manifests.",
         )
 
+
+    source_config = manifest.get("source_config")
+    if source_config is not None:
+        if not isinstance(source_config, dict):
+            raise _manifest_schema_error("Run manifest source_config must be a JSON object when present.", "Regenerate the result through run_experiment_config().")
+        required_source_fields = {"schema_version", "sha256", "source_kind", "source_path"}
+        missing_source_fields = sorted(required_source_fields - set(source_config))
+        if missing_source_fields:
+            raise _manifest_schema_error(f"Run manifest source_config is missing fields: {', '.join(missing_source_fields)}.", "Regenerate the result through run_experiment_config().")
+        if source_config["schema_version"] != "experiment-config/v1":
+            raise _manifest_schema_error("Run manifest source_config.schema_version must be 'experiment-config/v1'.", "Use a supported experiment config.")
+        if not isinstance(source_config["sha256"], str) or len(source_config["sha256"]) != 64:
+            raise _manifest_schema_error("Run manifest source_config.sha256 must be a SHA-256 hex string.", "Regenerate the result through run_experiment_config().")
+        if source_config["source_kind"] not in {"file", "mapping"}:
+            raise _manifest_schema_error("Run manifest source_config.source_kind must be 'file' or 'mapping'.", "Regenerate the result through run_experiment_config().")
+        if source_config["source_path"] is not None and not isinstance(source_config["source_path"], str):
+            raise _manifest_schema_error("Run manifest source_config.source_path must be a string or null.", "Regenerate the result through run_experiment_config().")
 
 SHARED_RESULT_SCHEMA = {
     "schema_version": SHARED_RESULT_SCHEMA_VERSION,
