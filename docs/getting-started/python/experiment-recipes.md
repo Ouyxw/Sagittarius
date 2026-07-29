@@ -81,6 +81,20 @@ the most likely final bitstring from the saved readout distribution and the
 exact weight of this tiny enumerated reference instance. The comparison is for
 interpretation of this example only, not an optimization-performance claim.
 
+## State Preparation
+
+Recipes can use a named preparation directly:
+
+```python
+from sagittarius import all_ground_state, single_excitation_state
+
+prepared = all_ground_state(simulation)
+result = simulation.run(prepared, 0.0, 1.0, observables={"population": 0})
+# single_excitation_state(simulation, 0) prepares atom 0 instead.
+```
+
+The saved artifact retains `state-preparation/v1` metadata in its result metadata, diagnostics, and `manifest["initial_state"]["preparation"]`. A requested bitstring that is excluded by a blockade-reduced basis fails with an actionable validation error.
+
 ## Inspecting Output
 
 Every recipe prints paths such as:

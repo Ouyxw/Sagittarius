@@ -3,7 +3,7 @@
 Status: `Current`
 Roadmap: Phase 1, Phase 6, Phase 8, Phase 10, Phase 11, Phase 12, Phase 14, Phase 15
 Version: `data-model/v1`
-Last reviewed: 2026-07-03
+Last reviewed: 2026-07-29
 
 
 This page summarizes the Sagittarius data model across user-facing Python objects, Julia physics objects, runtime diagnostics, manifests, and persistent artifacts. For module boundaries, see [`architecture-overview.md`](architecture-overview.md). For schema design practice, see [`development-sop.md`](development-sop.md).
@@ -40,7 +40,7 @@ Persistent artifacts
 | `Pulse` / `PulseNode` | Python and Julia | Time-dependent pulse declarations. | Includes constants, ramps, Gaussian, Blackman, sinc, sin-squared, and piecewise forms. |
 | `PulseSequence` | Python | User-facing omega/delta pulse container. | Accepts scalar, local vector, dict, callable, and explicit pulse wrapper forms under the pulse contract. |
 | `SolverConfig` | Python | Solver, basis, backend, open-system, and GPU options. | Carries `method`, `adaptive`, `dt`, seed, and output-grid contracts with requested/effective metadata. |
-| `Simulation` | Python | Coordinates validation, backend calls, solver execution, diagnostics, and result wrapping. | Main lifecycle object. |
+| `Simulation` | Python | Coordinates validation, backend calls, solver execution, diagnostics, and result wrapping. | Accepts raw amplitude vectors or `PreparedState` helpers for named computational-basis initial states. |
 | `SimulationResult` | Python | In-memory result plus metadata, diagnostics, manifest, save/load helpers. | Writes `result-artifact/v1`, embeds `shared-result/v1`, and exposes final-state readout sampling when a distribution is available. |
 
 | `ExperimentConfig` | Python | Versioned JSON declaration for a reproducible single simulation. | `run_experiment_config()` writes configured result/manifest/sample artifacts and links `run-manifest/v1` to the config SHA-256. |
@@ -91,7 +91,7 @@ Important distinction:
 | Normalized configuration | Python-validated and canonicalized values. |
 | Effective configuration | What the backend actually used. |
 
-Phase 12 solver fields and Phase 15 seed/output-grid fields are represented through `SolverConfig`, diagnostics, run manifests, and result artifacts. Effective solver metadata records `effective_method`, `effective_adaptive`, and `effective_dt`; effective output metadata records `effective_saveat`. Phase 15 readout metadata records final bitstring distributions, represented basis bitstrings, reduced-basis forbidden-bitstring exclusion, and sampling support.
+Phase 12 solver fields and Phase 15 seed/output-grid fields are represented through `SolverConfig`, diagnostics, run manifests, and result artifacts. Effective solver metadata records `effective_method`, `effective_adaptive`, and `effective_dt`; effective output metadata records `effective_saveat`. Phase 15 readout metadata records final bitstring distributions, represented basis bitstrings, reduced-basis forbidden-bitstring exclusion, and sampling support. Named state helpers record `state-preparation/v1` metadata in result metadata, diagnostics, and `manifest.initial_state.preparation`.
 
 ## Result Object Model
 
@@ -174,7 +174,7 @@ See [`SPEC-GOV-004-benchmarking-plan.md`](../governance/SPEC-GOV-004-benchmarkin
 | Phase 11 | Typed observable declarations and observable metadata in manifests and artifacts. |
 | Phase 12 | Implemented effective solver method, adaptive/fixed-step settings, and `dt` metadata. |
 | Phase 14 | Noise model metadata, custom Lindblad declarations, correlated noise, stochastic realization metadata. |
-| Phase 15 | Implemented seed, output-grid, sampling, `experiment-config/v1`, and resumable `sweep-artifact/v1` exploration metadata. |
+| Phase 15 | Implemented seed, output-grid, sampling, all-ground/bitstring/single-excitation preparation metadata, `experiment-config/v1`, and resumable `sweep-artifact/v1` exploration metadata. |
 | Phase 16 | Optional readout noise and interop/export metadata. |
 | Phase 19 | Visualization figures, report files, and sidecars are derived presentation outputs; no versioned sweep artifact or visualization schema is currently defined. |
 
