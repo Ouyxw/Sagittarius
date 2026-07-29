@@ -13,7 +13,9 @@ Use this page as the installation map. Python and Julia user paths are split int
 | Use `Sagittarius.jl` from an independent Julia project. | [Julia projects](julia/projects.md) |
 | Prepare native Julia runtime and backend execution. | [Julia backend setup](julia/backend-setup.md) |
 | Run quick Python verification examples. | [Python minimal examples](python/minimal-examples.md) |
+| Run reproducible Julia-backed Python workflows that write result artifacts. | [Python experiment recipes](python/experiment-recipes.md) |
 | Run quick Julia-native verification examples. | [Julia minimal examples](julia/minimal-examples.md) |
+| Run a small external-project workflow from an installed Python wheel. | [Wheel-installed Python recipe](python/wheel-experiment-recipe.md) |
 
 ## Current Support Boundary
 

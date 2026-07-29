@@ -38,6 +38,11 @@ sagittarius doctor
 Using `python -m pip` ensures that installation targets the active virtual environment. The expected doctor report identifies `backend_source` as `package_resource`. The default package profile is CPU-first; CUDA remains an explicit experimental backend profile and requires its own setup. Do not use `--break-system-packages` to install into a distribution-managed Python.
 
 ## Local Artifact Status
+## Wheel-Installed Experiment Recipe
+
+For a repository-external, public-API UDG/MWIS workflow that writes result and manifest artifacts, see the [wheel-installed Python recipe](wheel-experiment-recipe.md). Its opt-in smoke test creates a temporary Ubuntu WSL project under `/tmp`, installs a built wheel, and requires `backend_source=package_resource`.
+
+
 
 Local wheel and source-distribution builds now include the embedded Julia backend under `sagittarius/julia/Sagittarius.jl`, including `Project.toml`, `Manifest.toml`, and `src/*.jl`. Packaging tests verify those artifact contents and run an installed-wheel smoke test from outside the repository using the `package_resource` backend source. Editable/source installs continue to prefer the adjacent `source_checkout` backend for development.
 

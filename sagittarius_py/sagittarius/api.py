@@ -38,6 +38,7 @@ RUN_MANIFEST_SCHEMA = {
         "random",
         "readout",
     ],
+    "optional": ["source_config"],
     "sections": {
         "register": ["atom_count", "C6", "atoms", "geometry"],
         "pulse": ["omega", "delta"],
@@ -439,6 +440,23 @@ def validate_run_manifest(manifest: Dict[str, Any]) -> None:
             "Use cataloged event IDs from event_taxonomy() when constructing manifests.",
         )
 
+
+    source_config = manifest.get("source_config")
+    if source_config is not None:
+        if not isinstance(source_config, dict):
+            raise _manifest_schema_error("Run manifest source_config must be a JSON object when present.", "Regenerate the result through run_experiment_config().")
+        required_source_fields = {"schema_version", "sha256", "source_kind", "source_path"}
+        missing_source_fields = sorted(required_source_fields - set(source_config))
+        if missing_source_fields:
+            raise _manifest_schema_error(f"Run manifest source_config is missing fields: {', '.join(missing_source_fields)}.", "Regenerate the result through run_experiment_config().")
+        if source_config["schema_version"] != "experiment-config/v1":
+            raise _manifest_schema_error("Run manifest source_config.schema_version must be 'experiment-config/v1'.", "Use a supported experiment config.")
+        if not isinstance(source_config["sha256"], str) or len(source_config["sha256"]) != 64:
+            raise _manifest_schema_error("Run manifest source_config.sha256 must be a SHA-256 hex string.", "Regenerate the result through run_experiment_config().")
+        if source_config["source_kind"] not in {"file", "mapping"}:
+            raise _manifest_schema_error("Run manifest source_config.source_kind must be 'file' or 'mapping'.", "Regenerate the result through run_experiment_config().")
+        if source_config["source_path"] is not None and not isinstance(source_config["source_path"], str):
+            raise _manifest_schema_error("Run manifest source_config.source_path must be a string or null.", "Regenerate the result through run_experiment_config().")
 
 SHARED_RESULT_SCHEMA = {
     "schema_version": SHARED_RESULT_SCHEMA_VERSION,
@@ -1071,6 +1089,7 @@ def _build_run_manifest(
     effective_saveat: Optional[List[float]] = None,
     effective_solver: Optional[Dict[str, Any]] = None,
     readout: Optional[Dict[str, Any]] = None,
+    state_preparation: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     n_atoms = len(register.atoms)
     return {
@@ -1091,6 +1110,7 @@ def _build_run_manifest(
         "initial_state": {
             "basis_size": int(len(psi0)),
             "norm": float(np.linalg.norm(psi0)),
+            "preparation": _json_compatible(state_preparation),
         },
         "backend_diagnostics": _backend_manifest(diagnostics),
         "versions": metadata,
@@ -1606,6 +1626,7 @@ def _simulation_result_with_manifest(
     final_state: Optional[Any] = None,
     basis: Optional[List[int]] = None,
     trajectories: Optional[Dict[str, np.ndarray]] = None,
+    state_preparation: Optional[Dict[str, Any]] = None,
 ) -> "SimulationResult":
     readout_distribution = None
     distribution_key = None
@@ -1630,6 +1651,12 @@ def _simulation_result_with_manifest(
         }
         diagnostics = dict(diagnostics)
         diagnostics["readout"] = readout
+    if state_preparation is not None:
+        state_preparation = _json_compatible(state_preparation)
+        metadata = dict(metadata)
+        metadata["state_preparation"] = state_preparation
+        diagnostics = dict(diagnostics)
+        diagnostics["state_preparation"] = state_preparation
 
     manifest = _build_run_manifest(
         register=register,
@@ -1646,6 +1673,7 @@ def _simulation_result_with_manifest(
         effective_saveat=effective_saveat,
         effective_solver=effective_solver,
         readout=readout,
+        state_preparation=state_preparation,
     )
     manifest["solver"]["trajectory_storage"] = trajectory_manifest(
         trajectories, data, requested=config.store_trajectories
@@ -2022,6 +2050,9 @@ class Simulation:
             raise SagittariusSolverError(issue) from exc
 
     def _run_impl(self, psi0: np.ndarray, t_start: float, t_end: float, observables: Optional[Dict[str, Any]] = None) -> SimulationResult:
+        state_preparation = psi0.metadata if isinstance(psi0, PreparedState) else None
+        if isinstance(psi0, PreparedState):
+            psi0 = np.asarray(psi0.amplitudes, dtype=np.complex128)
         self.validate_inputs(sample_time=float(t_start), observables=observables)
         seed = _normalize_seed(self.config.seed)
         effective_saveat = _normalize_saveat(self.config.saveat, t_start=float(t_start), t_end=float(t_end))
@@ -2065,6 +2096,8 @@ class Simulation:
             "saveat": _json_compatible(self.config.saveat),
             "effective_saveat": _json_compatible(effective_saveat),
         }
+        if state_preparation is not None:
+            diagnostics["state_preparation"] = _json_compatible(state_preparation)
         diagnostics["register"] = self.register.geometry_summary(blockade_radius=self.config.blockade_radius, include_edges=False)
         
         if len(psi0) != basis_size:
@@ -2186,6 +2219,7 @@ class Simulation:
                         effective_saveat=effective_saveat,
                         effective_solver=effective_solver,
                         trajectories=trajectories,
+                        state_preparation=state_preparation,
                     )
                 log_event("solver_finish", result_type="raw_mcwf", basis_size=basis_size)
                 return result
@@ -2276,6 +2310,7 @@ class Simulation:
                 effective_solver=effective_solver,
                 final_state=final_state,
                 basis=basis,
+                state_preparation=state_preparation,
             )
         
         log_event("solver_finish", result_type="raw", basis_size=basis_size)
@@ -2302,3 +2337,101 @@ def get_basis(register, blockade_radius):
 def load_result(filepath: str) -> SimulationResult:
     """Load a SimulationResult from a file."""
     return SimulationResult.load(filepath)
+
+STATE_PREPARATION_SCHEMA_VERSION = "state-preparation/v1"
+
+
+@dataclass(frozen=True)
+class PreparedState:
+    """A computational-basis initial state with reproducibility metadata.
+
+    Instances are returned by :func:`all_ground_state`, :func:`bitstring_state`,
+    and :func:`single_excitation_state`. They can be passed directly to
+    :meth:`Simulation.run` anywhere an initial-state vector is accepted.
+    """
+
+    amplitudes: np.ndarray
+    metadata: Dict[str, Any]
+
+    def __array__(self, dtype: Any = None, copy: Any = None) -> np.ndarray:
+        array = np.asarray(self.amplitudes, dtype=dtype)
+        return array.copy() if copy else array
+
+    def __len__(self) -> int:
+        return len(self.amplitudes)
+
+    @property
+    def state(self) -> np.ndarray:
+        """The prepared amplitude vector in the selected simulation basis."""
+        return self.amplitudes
+
+
+def _bitstring_label(value: int, atom_count: int) -> str:
+    return "".join("1" if value & (1 << index) else "0" for index in range(atom_count))
+
+
+def _prepared_basis_state(
+    simulation: Simulation,
+    value: Any,
+    *,
+    preparation_type: str,
+    atom_index: Optional[int] = None,
+) -> PreparedState:
+    if not isinstance(simulation, Simulation):
+        raise _validation_error(
+            "VALIDATION_STATE_PREPARATION_SIMULATION",
+            "State preparation requires a Sagittarius Simulation instance.",
+            "Construct Simulation(register, sequence, config) before preparing an initial state.",
+        )
+    atom_count = len(simulation.register.atoms)
+    bitstring = _normalize_bitstring(value, atom_count, context="state_preparation")
+    bitstring_label = _bitstring_label(bitstring, atom_count)
+    if simulation.config.blockade_radius > 0:
+        basis_size = simulation.validate()
+        basis = [int(item) for item in simulation._basis]
+        if bitstring not in basis:
+            raise _validation_error(
+                "VALIDATION_STATE_PREPARATION_FORBIDDEN",
+                f"State preparation bitstring {bitstring_label!r} is forbidden by the reduced basis.",
+                "Choose a represented bitstring or set blockade_radius=0.0.",
+            )
+        basis_index = basis.index(bitstring)
+        basis_mode = "reduced"
+    else:
+        basis_size = 2**atom_count
+        basis_index = bitstring
+        basis_mode = "full"
+    amplitudes = np.zeros(basis_size, dtype=np.complex128)
+    amplitudes[basis_index] = 1.0
+    metadata = {
+        "schema_version": STATE_PREPARATION_SCHEMA_VERSION,
+        "type": preparation_type,
+        "bitstring": bitstring_label,
+        "basis_mode": basis_mode,
+        "basis_size": int(basis_size),
+        "basis_index": int(basis_index),
+        "atom_index": atom_index,
+    }
+    return PreparedState(amplitudes=amplitudes, metadata=metadata)
+
+
+def all_ground_state(simulation: Simulation) -> PreparedState:
+    """Prepare ``|00...0>`` in the simulation's full or reduced basis."""
+    return _prepared_basis_state(simulation, 0, preparation_type="all_ground")
+
+
+def bitstring_state(simulation: Simulation, bitstring: Union[str, int]) -> PreparedState:
+    """Prepare a computational-basis bitstring in ``Register.atoms`` order."""
+    return _prepared_basis_state(simulation, bitstring, preparation_type="bitstring")
+
+
+def single_excitation_state(simulation: Simulation, atom_index: int) -> PreparedState:
+    """Prepare the state with exactly one Rydberg excitation at ``atom_index``."""
+    atom_count = len(simulation.register.atoms)
+    atom_index = _validate_atom_index(atom_index, atom_count, context="state_preparation")
+    return _prepared_basis_state(
+        simulation,
+        1 << atom_index,
+        preparation_type="single_excitation",
+        atom_index=atom_index,
+    )

@@ -14,6 +14,11 @@ from .api import (
     SimulationResult,
     PulseSequence,
     SolverConfig,
+    STATE_PREPARATION_SCHEMA_VERSION,
+    PreparedState,
+    all_ground_state,
+    bitstring_state,
+    single_excitation_state,
     dense_vs_reduced_validation,
     open_system_sanity_checks,
     validate_run_manifest,
@@ -49,6 +54,27 @@ from .benchmarking import (
     write_benchmark_artifacts,
 )
 
+from .experiment_config import (
+    EXPERIMENT_CONFIG_ARTIFACT_TYPE,
+    EXPERIMENT_CONFIG_SCHEMA_VERSION,
+    ExperimentConfig,
+    load_experiment_config,
+    run_experiment_config,
+    save_experiment_config,
+    validate_experiment_config,
+)
+
+from .sweep_artifact import (
+    SWEEP_ARTIFACT_SCHEMA_VERSION,
+    SWEEP_ARTIFACT_TYPE,
+    SWEEP_PURPOSE,
+    load_sweep_artifact,
+    make_sweep_artifact,
+    resume_item_ids,
+    save_sweep_artifact,
+    validate_sweep_artifact,
+)
+
 __all__ = [
     "RESULT_ARTIFACT_SCHEMA_VERSION",
     "RESULT_ARTIFACT_TYPE",
@@ -65,6 +91,11 @@ __all__ = [
     "SimulationResult",
     "PulseSequence",
     "SolverConfig",
+    "STATE_PREPARATION_SCHEMA_VERSION",
+    "PreparedState",
+    "all_ground_state",
+    "bitstring_state",
+    "single_excitation_state",
     "dense_vs_reduced_validation",
     "open_system_sanity_checks",
     "validate_run_manifest",
@@ -101,4 +132,19 @@ __all__ = [
     "version_info",
     "event_taxonomy",
     "get_event_spec",
+    "SWEEP_ARTIFACT_SCHEMA_VERSION",
+    "SWEEP_ARTIFACT_TYPE",
+    "SWEEP_PURPOSE",
+    "load_sweep_artifact",
+    "make_sweep_artifact",
+    "resume_item_ids",
+    "save_sweep_artifact",
+    "validate_sweep_artifact",
+    "EXPERIMENT_CONFIG_ARTIFACT_TYPE",
+    "EXPERIMENT_CONFIG_SCHEMA_VERSION",
+    "ExperimentConfig",
+    "load_experiment_config",
+    "run_experiment_config",
+    "save_experiment_config",
+    "validate_experiment_config",
 ]

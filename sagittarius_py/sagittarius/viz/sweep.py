@@ -14,7 +14,8 @@ All visualizations are marked as EXPLORATORY unless bound to controlled artifact
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from typing import List, Dict, Optional, Tuple, Union, Any
+from pathlib import Path
+from typing import Callable, List, Dict, Mapping, Optional, Tuple, Union, Any
 import warnings
 
 
@@ -819,6 +820,228 @@ def generate_synthetic_sweep_data(
     return sweep_data
 
 
+def resolve_sweep_artifact_path(
+    path: Optional[str],
+    *,
+    artifact_path: Optional[Union[str, Path]] = None,
+) -> Optional[str]:
+    """Resolve an item link relative to the saved sweep artifact when possible.
+
+    The returned path is only a locator; this helper never opens it. Keeping
+    result and run-manifest links separate preserves the sweep artifact's
+    scientific-exploration role and does not make it benchmark evidence.
+    """
+    if path is None:
+        return None
+    candidate = Path(path)
+    if candidate.is_absolute() or artifact_path is None:
+        return str(candidate)
+    return str(Path(artifact_path).parent / candidate)
+
+
+def _sweep_artifact_and_path(
+    artifact_or_path: Union[Mapping[str, Any], str, Path],
+) -> Tuple[Mapping[str, Any], Optional[Path]]:
+    """Validate a sweep artifact and retain its path for relative item links."""
+    from sagittarius.sweep_artifact import load_sweep_artifact, validate_sweep_artifact
+
+    if isinstance(artifact_or_path, (str, Path)):
+        artifact_path = Path(artifact_or_path)
+        return load_sweep_artifact(artifact_path), artifact_path
+    if not isinstance(artifact_or_path, Mapping):
+        raise TypeError(
+            "artifact_or_path must be a sweep-artifact/v1 mapping or JSON path."
+        )
+    validate_sweep_artifact(artifact_or_path)
+    recorded_path = artifact_or_path["resumability"].get("artifact_path")
+    return artifact_or_path, Path(recorded_path) if recorded_path else None
+
+
+def _axis_index(values: List[Any], value: Any, *, axis_name: str, item_id: str) -> int:
+    for index, candidate in enumerate(values):
+        if candidate == value:
+            return index
+    raise ValueError(
+        f"Sweep item {item_id!r} has {axis_name}={value!r}, which is absent "
+        "from the declared axis values."
+    )
+
+
+def _final_metric_value(result: Any, metric: str) -> float:
+    if not hasattr(result, "data") or not isinstance(result.data, Mapping):
+        raise ValueError(
+            "Result loader returned an object without a result data mapping."
+        )
+    if metric not in result.data:
+        raise ValueError(
+            f"Metric {metric!r} is absent from the linked result artifact. "
+            f"Available series: {sorted(result.data)}."
+        )
+    values = np.asarray(result.data[metric], dtype=float)
+    if values.size == 0:
+        raise ValueError(f"Metric {metric!r} is empty in the linked result artifact.")
+    value = float(values.reshape(-1)[-1])
+    if not np.isfinite(value):
+        raise ValueError(f"Metric {metric!r} has a non-finite final value.")
+    return value
+
+
+def extract_sweep_artifact_data(
+    artifact_or_path: Union[Mapping[str, Any], str, Path],
+    metric: Union[str, Callable[[Any], float]],
+    *,
+    x_param: Optional[str] = None,
+    y_param: Optional[str] = None,
+    result_loader: Optional[Callable[[str], Any]] = None,
+) -> Dict[str, Any]:
+    """Extract a two-axis plotting mapping from sweep-artifact/v1.
+
+    Succeeded item results are loaded from their persisted result_path and
+    reduced to a scalar. A string metric selects the final sample of a named
+    result series; a callable receives the loaded result and must return a
+    finite scalar. Failed, pending, and running items are retained in
+    item_statuses and leave their grid cells as NaN. Failed cells also populate
+    failed_runs for the existing plotting helpers.
+
+    Only two-axis artifacts are accepted. This avoids silently projecting a
+    higher-dimensional study and losing scientific context.
+    """
+    artifact, source_path = _sweep_artifact_and_path(artifact_or_path)
+    axes = list(artifact["axes"])
+    if len(axes) != 2:
+        raise ValueError(
+            "Sweep artifact visualization requires exactly two parameter axes; "
+            "select or materialize a two-axis study before plotting."
+        )
+    axis_names = [axis["name"] for axis in axes]
+    x_param = x_param or axis_names[0]
+    y_param = y_param or axis_names[1]
+    if {x_param, y_param} != set(axis_names) or x_param == y_param:
+        raise ValueError(
+            f"x_param and y_param must name the two declared axes: {axis_names}."
+        )
+    axis_by_name = {axis["name"]: axis for axis in axes}
+    x_values = list(axis_by_name[x_param]["values"])
+    y_values = list(axis_by_name[y_param]["values"])
+    try:
+        numeric_x = np.asarray(x_values, dtype=float)
+        numeric_y = np.asarray(y_values, dtype=float)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Sweep heatmaps require numeric axis values.") from exc
+
+    if result_loader is None:
+        from sagittarius import load_result
+        result_loader = load_result
+
+    metric_name = metric if isinstance(metric, str) else getattr(metric, "__name__", "metric")
+    if not isinstance(metric, str) and not callable(metric):
+        raise TypeError("metric must be a result-series name or a callable returning one scalar.")
+
+    values = np.full((len(numeric_y), len(numeric_x)), np.nan, dtype=float)
+    failed_mask = np.zeros(values.shape, dtype=bool)
+    item_ids = np.empty(values.shape, dtype=object)
+    item_ids.fill(None)
+    item_statuses: Dict[str, str] = {}
+    result_paths: Dict[str, Optional[str]] = {}
+    manifest_links: Dict[str, Optional[str]] = {}
+    failure_records: Dict[str, Mapping[str, Any]] = {}
+
+    for item in artifact["items"]:
+        item_id = item["item_id"]
+        x_index = _axis_index(x_values, item["parameters"][x_param], axis_name=x_param, item_id=item_id)
+        y_index = _axis_index(y_values, item["parameters"][y_param], axis_name=y_param, item_id=item_id)
+        if item_ids[y_index, x_index] is not None:
+            raise ValueError(
+                f"Multiple sweep items occupy ({x_param}, {y_param})="
+                f"({item['parameters'][x_param]!r}, {item['parameters'][y_param]!r})."
+            )
+        item_ids[y_index, x_index] = item_id
+        item_statuses[item_id] = item["status"]
+        result_path = resolve_sweep_artifact_path(item["result_path"], artifact_path=source_path)
+        manifest_path = resolve_sweep_artifact_path(item["manifest_path"], artifact_path=source_path)
+        result_paths[item_id] = result_path
+        manifest_links[item_id] = manifest_path
+
+        if item["status"] == "failed":
+            failed_mask[y_index, x_index] = True
+            failure_records[item_id] = dict(item["failure"])
+            continue
+        if item["status"] != "succeeded":
+            continue
+        if result_path is None:  # Defended by sweep-artifact/v1 validation.
+            raise ValueError(f"Succeeded sweep item {item_id!r} has no result_path.")
+        try:
+            result = result_loader(result_path)
+            value = _final_metric_value(result, metric) if isinstance(metric, str) else float(metric(result))
+        except Exception as exc:
+            raise ValueError(
+                f"Could not resolve metric {metric_name!r} for succeeded sweep item "
+                f"{item_id!r} at {result_path!r}: {exc}"
+            ) from exc
+        if not np.isfinite(value):
+            raise ValueError(
+                f"Resolved metric {metric_name!r} for sweep item {item_id!r} is non-finite."
+            )
+        values[y_index, x_index] = value
+
+    return {
+        "parameters": {x_param: numeric_x, y_param: numeric_y},
+        "results": {str(metric_name): values},
+        "failed_runs": failed_mask,
+        "item_ids": item_ids,
+        "item_statuses": item_statuses,
+        "result_paths": result_paths,
+        "manifest_links": manifest_links,
+        "failure_records": failure_records,
+        "resumability": dict(artifact["resumability"]),
+        "source_schema_version": artifact["schema_version"],
+        "source_artifact_path": str(source_path) if source_path is not None else None,
+    }
+
+
+def plot_sweep_artifact_heatmap(
+    artifact_or_path: Union[Mapping[str, Any], str, Path],
+    metric: Union[str, Callable[[Any], float]],
+    *,
+    x_param: Optional[str] = None,
+    y_param: Optional[str] = None,
+    result_loader: Optional[Callable[[str], Any]] = None,
+    ax=None,
+    show_colorbar: bool = True,
+    show_failed_mask: bool = True,
+    title: Optional[str] = None,
+    figsize: Tuple[float, float] = (10, 8),
+    cmap: str = "viridis",
+) -> plt.Axes:
+    """Plot a metric resolved from a persisted scientific sweep artifact.
+
+    This is an exploratory analysis helper. It validates sweep-artifact/v1 and
+    deliberately rejects benchmark-artifact/v1; no performance or verification
+    claim is created by this plot.
+    """
+    data = extract_sweep_artifact_data(
+        artifact_or_path,
+        metric,
+        x_param=x_param,
+        y_param=y_param,
+        result_loader=result_loader,
+    )
+    metric_name = metric if isinstance(metric, str) else getattr(metric, "__name__", "metric")
+    parameter_names = list(data["parameters"])
+    return plot_sweep_heatmap(
+        data,
+        x_param=parameter_names[0],
+        y_param=parameter_names[1],
+        metric=str(metric_name),
+        ax=ax,
+        show_colorbar=show_colorbar,
+        show_failed_mask=show_failed_mask,
+        title=title,
+        figsize=figsize,
+        cmap=cmap,
+    )
+
+
 __all__ = [
     "plot_sweep_heatmap",
     "plot_sweep_line_slice",
@@ -826,4 +1049,7 @@ __all__ = [
     "plot_failed_run_mask",
     "extract_sweep_summary",
     "generate_synthetic_sweep_data",
+    "resolve_sweep_artifact_path",
+    "extract_sweep_artifact_data",
+    "plot_sweep_artifact_heatmap",
 ]

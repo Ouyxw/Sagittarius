@@ -24,7 +24,7 @@ Sagittarius/
 |-- Sagittarius.jl/
 |-- sagittarius_py/
 |-- docs/
-|-- examples/
+|-- workspace/examples/    # Workspace recipes and short examples
 `-- scripts/
 ```
 
@@ -76,12 +76,13 @@ CPU tests do not require an NVIDIA GPU. CUDA tests are opt-in and require a comp
 
 ## User Script Location
 
-For short examples that belong with the repository, create an `examples/` directory at the repository root:
+The repository keeps runnable Phase 15 recipes under `workspace/examples/recipes/`:
 
 ```text
 Sagittarius/
-|-- examples/
-|   `-- rabi_simulation.py
+|-- workspace/examples/
+|   `-- recipes/
+|       `-- rabi.py
 |-- Sagittarius.jl/
 `-- sagittarius_py/
 ```
@@ -89,7 +90,7 @@ Sagittarius/
 Run an example from the repository root:
 
 ```bash
-uv run --project sagittarius_py python examples/rabi_simulation.py
+uv run --project sagittarius_py python workspace/examples/recipes/rabi.py --output-dir artifacts/rabi
 ```
 
 For long-running work, keep the research project outside the Sagittarius repository. See [Python experiment projects](experiment-projects.md).

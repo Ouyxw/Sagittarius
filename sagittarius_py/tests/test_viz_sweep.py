@@ -15,6 +15,7 @@ Tests cover:
 import pytest
 import numpy as np
 import matplotlib.pyplot as plt
+from sagittarius import SimulationResult, make_sweep_artifact, save_sweep_artifact
 from sagittarius.viz.sweep import (
     plot_sweep_heatmap,
     plot_sweep_line_slice,
@@ -23,6 +24,8 @@ from sagittarius.viz.sweep import (
     plot_failed_run_mask,
     extract_sweep_summary,
     generate_synthetic_sweep_data,
+    extract_sweep_artifact_data,
+    plot_sweep_artifact_heatmap,
 )
 
 
@@ -660,3 +663,126 @@ class TestObservablesComparison:
         assert len(ax.get_lines()) == 1
         plt.close(fig)
 
+def _saved_two_axis_sweep(tmp_path):
+    sweep_dir = tmp_path / "sweep"
+    runs_dir = sweep_dir / "runs"
+    runs_dir.mkdir(parents=True)
+    values = {
+        ("omega-1", "delta-negative"): 0.2,
+        ("omega-2", "delta-negative"): 0.4,
+        ("omega-1", "delta-positive"): 0.6,
+    }
+    items = []
+    for omega, omega_id in ((1.0, "omega-1"), (2.0, "omega-2")):
+        for delta, delta_id in ((-1.0, "delta-negative"), (1.0, "delta-positive")):
+            item_id = f"{omega_id}-{delta_id}"
+            if (omega_id, delta_id) not in values:
+                items.append({
+                    "item_id": item_id,
+                    "parameters": {"omega": omega, "delta": delta},
+                    "status": "failed",
+                    "attempts": 1,
+                    "result_path": None,
+                    "manifest_path": None,
+                    "failure": {
+                        "code": "SOLVER_EXECUTION_FAILED",
+                        "message": "synthetic sweep failure",
+                        "remediation": "retry this item",
+                    },
+                })
+                continue
+            result_path = runs_dir / f"{item_id}.result.json"
+            SimulationResult(
+                {"t": [0.0, 1.0], "population": [0.0, values[(omega_id, delta_id)]]}
+            ).save(result_path)
+            items.append({
+                "item_id": item_id,
+                "parameters": {"omega": omega, "delta": delta},
+                "status": "succeeded",
+                "attempts": 1,
+                "result_path": f"runs/{result_path.name}",
+                "manifest_path": f"runs/{item_id}.manifest.json",
+                "failure": None,
+            })
+
+    artifact = make_sweep_artifact(
+        axes=[
+            {"name": "omega", "path": "pulse.omega", "values": [1.0, 2.0]},
+            {"name": "delta", "path": "pulse.delta", "values": [-1.0, 1.0]},
+        ],
+        items=items,
+        base_config={"schema_version": "experiment-config/v1"},
+    )
+    artifact_path = sweep_dir / "scan.sweep.json"
+    save_sweep_artifact(artifact, artifact_path)
+    return artifact_path, runs_dir
+
+
+def test_extract_sweep_artifact_data_resolves_results_failures_and_links(tmp_path):
+    artifact_path, runs_dir = _saved_two_axis_sweep(tmp_path)
+
+    data = extract_sweep_artifact_data(artifact_path, "population")
+
+    np.testing.assert_allclose(
+        data["results"]["population"],
+        [[0.2, 0.4], [0.6, np.nan]],
+        equal_nan=True,
+    )
+    assert data["failed_runs"].tolist() == [[False, False], [False, True]]
+    assert data["item_statuses"]["omega-2-delta-positive"] == "failed"
+    assert data["failure_records"]["omega-2-delta-positive"]["code"] == "SOLVER_EXECUTION_FAILED"
+    assert data["result_paths"]["omega-1-delta-negative"] == str(
+        runs_dir / "omega-1-delta-negative.result.json"
+    )
+    assert data["manifest_links"]["omega-1-delta-negative"] == str(
+        runs_dir / "omega-1-delta-negative.manifest.json"
+    )
+    assert data["resumability"]["pending_item_ids"] == ["omega-2-delta-positive"]
+
+
+def test_plot_sweep_artifact_heatmap_draws_artifact_failures(tmp_path):
+    artifact_path, _ = _saved_two_axis_sweep(tmp_path)
+
+    ax = plot_sweep_artifact_heatmap(
+        artifact_path, "population", show_colorbar=False
+    )
+
+    assert ax.get_xlabel() == "omega"
+    assert ax.get_ylabel() == "delta"
+    assert len(ax.collections) >= 2
+
+
+def test_sweep_artifact_visualization_does_not_initialize_julia(monkeypatch, tmp_path):
+    artifact_path, _ = _saved_two_axis_sweep(tmp_path)
+
+    import sagittarius.api as api
+
+    def unexpected_backend_initialization(*args, **kwargs):
+        raise AssertionError("Visualization unexpectedly initialized Julia")
+
+    monkeypatch.setattr(api, "get_modules", unexpected_backend_initialization)
+    data = extract_sweep_artifact_data(artifact_path, "population")
+    ax = plot_sweep_artifact_heatmap(
+        artifact_path, "population", show_colorbar=False
+    )
+
+    assert data["source_schema_version"] == "sweep-artifact/v1"
+    assert ax is not None
+
+def test_sweep_artifact_visualization_rejects_benchmark_artifacts():
+    from sagittarius import make_benchmark_artifact
+    from sagittarius.runtime import SagittariusValidationError
+
+    benchmark = make_benchmark_artifact(
+        name="not a sweep",
+        description="boundary regression",
+        parameters={"omega": [1.0]},
+        rows=[{"omega": 1.0, "time_s": 0.01}],
+        diagnostics={"requested_backend": "CPU"},
+        run_manifests=[],
+    )
+
+    with pytest.raises(SagittariusValidationError) as excinfo:
+        extract_sweep_artifact_data(benchmark, "population")
+
+    assert excinfo.value.issue.code == "VALIDATION_SWEEP_ARTIFACT_SCHEMA"
