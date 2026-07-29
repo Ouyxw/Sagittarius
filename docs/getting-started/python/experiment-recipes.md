@@ -119,3 +119,36 @@ print(result.data["rydberg_population"][-1])
 The manifest records the actual register, pulse, solver, backend diagnostics,
 versions, output grid, and readout metadata. Keep the result artifact whenever
 the numerical output is used in a report or subsequent analysis.
+
+
+## Visualization Tasks
+
+### Inspect a saved readout artifact
+
+```python
+from sagittarius import load_result
+from sagittarius.viz import plot_bitstring_distribution
+
+result = load_result("../artifacts/rabi/rabi.result.json")
+ax = plot_bitstring_distribution(result, top_k=8, sort_by="probability")
+ax.figure.savefig("../artifacts/rabi/final-bitstrings.png", dpi=150)
+```
+
+This reads the existing result-artifact/v1 envelope and plots its stored final-state distribution; it does not rerun a solver or initialize Julia.
+
+### Check geometry and a pulse before solving
+
+```python
+import numpy as np
+from sagittarius import Register, PulseSequence
+from sagittarius.viz import plot_pulse_waveform, plot_register
+
+register = Register.chain(3, spacing=1.0)
+plot_register(register, blockade_radius=1.2, labels=True)
+ax, omega = plot_pulse_waveform(
+    PulseSequence(omega=1.0), time_grid=np.linspace(0.0, 1.0, 101)
+)
+ax.figure.savefig("preflight-pulse.png", dpi=150)
+```
+
+These pre-solver checks consume Python-side geometry and pulse declarations only. They help inspect intended inputs, but they are not numerical verification or benchmark evidence.

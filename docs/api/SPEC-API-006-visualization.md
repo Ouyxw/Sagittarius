@@ -1,5 +1,11 @@
 # Sagittarius Visualization API Reference
 
+Spec ID: `SPEC-API-006`
+Status: `Mixed`
+Roadmap: Phase 19
+Version: `visualization-api/v1`
+Last reviewed: 2026-07-29
+
 > **Complete API documentation for all visualization functions in `sagittarius.viz` module**
 
 ---
@@ -14,7 +20,7 @@ This is the canonical Phase 19 Python API reference. Plotting helpers are analys
 | 2 | Met | Pulse sampling and plotting support the documented declaration forms and zero-based register ordering; covered by pulse tests. |
 | 3 | Met | `plot_observables` accepts selected series and axes without replacing `SimulationResult.plot`; covered by result tests. |
 | 4 | Met | `plot_population_heatmap` validates compatible population data and atom ordering. |
-| 5 | Partial | `plot_bitstring_distribution` renders readout-capable result data. Dedicated plotting coverage for a `load_result()` artifact round trip is still required. |
+| 5 | Met | `plot_bitstring_distribution` renders readout-capable data loaded through `load_result()`; `test_bitstring_distribution_plot_round_trips_saved_artifact` covers the serialized artifact round trip. |
 | 6 | Met | `plot_shot_histogram` consumes seeded measurement-sample data. |
 | 7 | Met | Basis diagnostics report represented and forbidden bitstrings, with an explicit small-system limit. |
 | 8 | Met | MWIS helpers render node selection, weights, graph edges, and violations for small examples. |
@@ -28,7 +34,7 @@ This is the canonical Phase 19 Python API reference. Plotting helpers are analys
 | 16 | Met | Governed benchmark plots validate `benchmark-artifact/v1`; explicitly named diagnostic-only counterparts accept ordinary mappings and cannot support public performance claims. |
 | 17 | Met | State-vector and density-matrix helpers reject missing, malformed, and unsafe-size inputs. |
 | 18 | Met | Figure export writes optional PNG, SVG, or PDF outputs and provenance sidecars with available artifact, schema, seed, backend, basis, and plot metadata. |
-| 19 | Partial | The visualization suite covers rendering and validation with non-interactive matplotlib in its rendering tests. A dedicated no-unexpected-Julia-initialization regression remains required before Phase 19 can be closed. |
+| 19 | Met | Rendering and validation use non-interactive matplotlib. `test_backend_free_visualizations_do_not_initialize_julia` rejects unexpected backend initialization across loaded-result, register, and supported pulse paths. |
 
 ## Scope and Governance Boundaries
 
