@@ -10,6 +10,10 @@ Status values:
 - `Mixed`: combines implemented behavior with planned or future scope.
 - `Future`: intentionally describes unsupported or future work.
 
+## Documentation Governance Checks
+
+Before accepting release-oriented documentation changes, run `python3 scripts/validate_documentation.py` from the repository root. The offline check validates complete stable-SPEC metadata, matching `status.md` entries and local Markdown link targets. The PR fast-CI workflow runs the same check for documentation, script, and workflow changes.
+
 ## Getting Started
 
 | Spec ID | Document | Purpose | Roadmap link | Status | Update when |

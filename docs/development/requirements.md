@@ -263,7 +263,7 @@ Phase 15 executable recipes may begin after the Phase 13 CPU-first, backend setu
 | **State Preparation Helpers** | Medium | Done | Added `all_ground_state()`, `bitstring_state()`, and `single_excitation_state()` helpers. They validate reduced-basis forbidden bitstrings and preserve `state-preparation/v1` metadata in diagnostics, run manifests, and result artifacts. Uniform superposition remains future work. |
 | **Experiment Config Schema** | Medium | Done | Added validated JSON-only `experiment-config/v1` with register geometry, pulse schedule, solver options, typed observables, readout seed/shot controls, output paths, load/run/save helpers, and SHA-256 source-config links in generated run manifests. |
 | **Parameter Sweep API and Artifacts** | Medium | Done | Added `sweep-artifact/v1` for scientific exploration: explicit parameter axes, per-item values/status/attempts, failure records, result and run-manifest paths, and retryable resume IDs. It is explicitly separate from governed `benchmark-artifact/v1` evidence. |
-| **Documentation Governance Requirements** | Medium | Planned | Treat stable SPEC IDs, metadata headers, `docs/development/status.md`, and Markdown link validation as required documentation maintenance checks for future roadmap phases and public release preparation. |
+| **Documentation Governance Requirements** | Medium | Done | Added offline validation for stable SPEC metadata headers, `docs/development/status.md` registration and local Markdown links. The check runs in PR fast CI and is required for release-oriented documentation changes. |
 
 ### Phase 15 Acceptance Criteria
 

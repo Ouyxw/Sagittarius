@@ -14,6 +14,7 @@ on:
       - ".github/workflows/phase13-*.yml"
       - ".github/actions/phase13-download-candidate/**"
       - "scripts/phase13_candidate_artifact.py"
+      - "scripts/validate_documentation.py"
   push:
     branches:
       - develop/**
@@ -26,6 +27,7 @@ on:
       - ".github/workflows/phase13-*.yml"
       - ".github/actions/phase13-download-candidate/**"
       - "scripts/phase13_candidate_artifact.py"
+      - "scripts/validate_documentation.py"
   workflow_dispatch:
 
 jobs:
@@ -45,6 +47,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Validate documentation governance
+        run: python scripts/validate_documentation.py
+
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -56,6 +61,7 @@ jobs:
         run: >-
           uv run python -m pytest
           tests/test_installation_docs.py
+          tests/test_documentation_governance.py
           tests/test_benchmark_artifacts.py
           tests/test_packaging_artifacts.py::test_python_package_metadata_is_release_ready
           tests/test_packaging_artifacts.py::test_wheel_metadata_contains_release_fields
