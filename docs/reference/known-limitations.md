@@ -37,7 +37,7 @@ Sagittarius 1.0.11 is the current stable research SDK release. This page records
 
 - Phase 19 visualization helpers are analysis tools, not hardware-calibration controls, numerical verification, or independent performance evidence. They require compatible Python-side result data and do not make unavailable observables or manifest fields available. Helpers that consume Python-side register, pulse, result, or saved-artifact data do not initialize Julia; plotting does not make an unavailable backend result usable.
 - Register and geometry views are two-dimensional. Basis and state diagnostics intentionally reject systems above their documented small-system limits rather than attempting unreadable or unsafe plots.
-- `sweep-artifact/v1` supports resumable scientific exploration only. It does not execute parameter combinations, provide parallel scheduling, or constitute governed benchmark/verification evidence.
+- `sweep-artifact/v1` supports resumable scientific exploration only. Phase 19 can resolve a two-axis artifact's persisted result and manifest links for exploratory plots while retaining failed rows and resumability metadata; it does not execute parameter combinations, provide parallel scheduling, or constitute governed benchmark/verification evidence.
 - Figure sidecars and reports preserve available provenance fields, but their classification is descriptive. A `benchmark_evidence` label or an artifact ID does not validate an artifact or authorize a public performance statement.
 - Benchmark plotting functions can render ordinary dictionaries for diagnostic use. Before public use, users must validate and retain `benchmark-artifact/v1` evidence and follow the governance documents linked below.
 

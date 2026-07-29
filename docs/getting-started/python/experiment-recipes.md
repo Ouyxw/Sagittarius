@@ -152,3 +152,24 @@ ax.figure.savefig("preflight-pulse.png", dpi=150)
 ```
 
 These pre-solver checks consume Python-side geometry and pulse declarations only. They help inspect intended inputs, but they are not numerical verification or benchmark evidence.
+
+### Inspect a persisted parameter sweep
+
+```python
+from sagittarius.viz import extract_sweep_artifact_data, plot_sweep_artifact_heatmap
+
+data = extract_sweep_artifact_data(
+    "../artifacts/scan/scan.sweep.json", "population",
+    x_param="omega", y_param="delta",
+)
+print(data["failure_records"])
+print(data["resumability"]["pending_item_ids"])
+
+ax = plot_sweep_artifact_heatmap(
+    "../artifacts/scan/scan.sweep.json", "population",
+    x_param="omega", y_param="delta",
+)
+ax.figure.savefig("../artifacts/scan/population-heatmap.png", dpi=150)
+```
+
+Each succeeded item is loaded from its saved relative or absolute result path. The extracted mapping retains all item statuses, failed-run locations and structured failure records, result and manifest links, and resume IDs. This is a two-numeric-axis exploratory view only: it does not execute missing work, reduce a higher-dimensional sweep implicitly, initialize Julia, or turn a sweep into benchmark or verification evidence.
