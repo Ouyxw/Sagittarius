@@ -1,12 +1,17 @@
 import csv
 import json
 
+import pytest
+
 import sagittarius.benchmarking as benchmarking
 from sagittarius import (
     BENCHMARK_ARTIFACT_SCHEMA_VERSION,
     BENCHMARK_ARTIFACT_TYPE,
+    benchmark_failure_from_exception,
     make_benchmark_artifact,
+    make_benchmark_row,
     markdown_table,
+    validate_benchmark_row,
     write_benchmark_artifacts,
 )
 
@@ -50,6 +55,48 @@ def test_markdown_table_formats_rows():
     assert "| 2 | 0.0123457 |" in table
 
 
+def test_structured_benchmark_row_retains_single_scenario_evidence():
+    row = make_benchmark_row(
+        row_id="physics-smoke-rabi",
+        scenario_id="rabi_n1_cpu_seed_none",
+        family="physics_baselines",
+        tier="smoke",
+        status="passed",
+        stage="artifact",
+        problem={"type": "single_atom_rabi", "seed": None},
+        solver={"method": "Tsit5", "reltol": 1e-9},
+        backend={"requested_backend": "CPU"},
+        observables={"names": ["rydberg_population"], "count": 1, "output_sample_count": 3},
+        metrics={"max_abs_error": 1e-9, "runtime_seconds": 0.1},
+        artifacts={"run_manifest": "rabi.manifest.json", "result_artifact": "rabi.result.json"},
+    )
+
+    validate_benchmark_row(row)
+    assert row["artifacts"]["run_manifest"] == "rabi.manifest.json"
+    assert row["metrics"]["max_abs_error"] == 1e-9
+    assert row["failure"] is None
+
+
+def test_structured_benchmark_row_requires_a_failure_for_nonpassed_status():
+    with pytest.raises(ValueError, match="structured failure"):
+        make_benchmark_row(
+            row_id="physics-smoke-failure",
+            scenario_id="broken",
+            family="physics_baselines",
+            tier="smoke",
+            status="failed",
+            stage="solve",
+            problem={},
+            solver={},
+            backend={},
+            observables={},
+        )
+
+    failure = benchmark_failure_from_exception(ValueError("bad pulse"), stage="validation")
+    assert failure["code"] == "ValueError"
+    assert failure["stage"] == "validation"
+
+
 def test_write_benchmark_artifacts_writes_json_csv_and_markdown(tmp_path):
     paths = write_benchmark_artifacts(
         output_dir=tmp_path,
@@ -61,6 +108,7 @@ def test_write_benchmark_artifacts_writes_json_csv_and_markdown(tmp_path):
         diagnostics={"requested_backend": "CPU", "available": True},
         run_manifests=[{"label": "N=1", "manifest": {"schema_version": "run-manifest/v1"}}],
         columns=["N", "time_s"],
+        benchmark_context={"protocol_version": "benchmark-protocol/v1", "tier": "smoke"},
     )
 
     with open(paths["json"], encoding="utf-8") as fh:
@@ -69,6 +117,7 @@ def test_write_benchmark_artifacts_writes_json_csv_and_markdown(tmp_path):
     assert payload["artifacts"]["csv"] == paths["csv"]
     assert payload["artifacts"]["markdown"] == paths["markdown"]
     assert payload["markdown_table"].startswith("| N | time_s |")
+    assert payload["benchmark_context"]["tier"] == "smoke"
 
     with open(paths["csv"], newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))

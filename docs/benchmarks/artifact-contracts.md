@@ -11,7 +11,7 @@ This page defines the Phase 16 aggregate artifact expectations for benchmark sui
 
 | Artifact | Purpose | Status |
 | :--- | :--- | :--- |
-| `benchmark-artifact/v1` | Generic performance and scaling benchmark rows. | Current where emitted by existing scripts. |
+| `benchmark-artifact/v1` | Generic benchmark rows; the Phase 16 single-scenario profile adds structured case, configuration, metrics, links, and failure fields compatibly. | Current where emitted by existing scripts. |
 | `mwis-batch-verification/v1` | UDG/MWIS batch verification rows and exact-baseline comparison. | Current in project-specific form. |
 | `benchmark-suite-artifact/v1` | Planned aggregate wrapper for Phase 16 family/tier runs. | Planned contract. |
 | `run-manifest/v1` | Durable description of one simulation run. | Current where simulations emit artifacts. |

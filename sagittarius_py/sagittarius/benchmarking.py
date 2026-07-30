@@ -16,6 +16,116 @@ from .runtime import doctor, version_info
 
 BENCHMARK_ARTIFACT_SCHEMA_VERSION = "benchmark-artifact/v1"
 BENCHMARK_ARTIFACT_TYPE = "sagittarius.benchmark"
+BENCHMARK_ROW_STATUSES = frozenset({"passed", "failed", "skipped", "incomplete"})
+BENCHMARK_DISCLOSURE_STATUSES = frozenset({"local_only", "reviewable", "release_grade"})
+
+
+def benchmark_failure_from_exception(
+    exc: BaseException,
+    *,
+    stage: str,
+    deterministic: bool = True,
+) -> Dict[str, Any]:
+    """Normalize an exception into a benchmark-row failure payload."""
+    issue = getattr(exc, "issue", None)
+    if issue is not None:
+        code = getattr(issue, "code", type(exc).__name__)
+        message = getattr(issue, "message", str(exc))
+        remediation = getattr(
+            issue,
+            "remediation",
+            "Inspect the linked diagnostics and retry after correcting the reported condition.",
+        )
+    else:
+        code = type(exc).__name__
+        message = str(exc) or type(exc).__name__
+        remediation = "Inspect the linked diagnostics and retry after correcting the reported condition."
+    return {
+        "stage": stage,
+        "exception_type": type(exc).__name__,
+        "code": str(code),
+        "message": str(message),
+        "remediation": str(remediation),
+        "deterministic": bool(deterministic),
+    }
+
+
+def make_benchmark_row(
+    *,
+    row_id: str,
+    scenario_id: str,
+    family: str,
+    tier: str,
+    status: str,
+    stage: str,
+    problem: Mapping[str, Any],
+    solver: Mapping[str, Any],
+    backend: Mapping[str, Any],
+    observables: Mapping[str, Any],
+    metrics: Optional[Mapping[str, Any]] = None,
+    artifacts: Optional[Mapping[str, Any]] = None,
+    failure: Optional[Mapping[str, Any]] = None,
+    disclosure_status: str = "local_only",
+) -> Dict[str, Any]:
+    """Build one structured Phase 16 row inside ``benchmark-artifact/v1``.
+
+    The existing artifact envelope remains the compatibility boundary. These
+    optional row fields make a single scenario independently auditable while
+    preserving legacy benchmark rows used by older scripts.
+    """
+    row = {
+        "row_id": row_id,
+        "scenario_id": scenario_id,
+        "family": family,
+        "tier": tier,
+        "status": status,
+        "stage": stage,
+        "problem": dict(problem),
+        "solver": dict(solver),
+        "backend": dict(backend),
+        "observables": dict(observables),
+        "metrics": dict(metrics or {}),
+        "artifacts": {
+            "run_manifest": None,
+            "result_artifact": None,
+            **dict(artifacts or {}),
+        },
+        "failure": None if failure is None else dict(failure),
+        "disclosure_status": disclosure_status,
+    }
+    validate_benchmark_row(row)
+    return _json_compatible(row)
+
+
+def validate_benchmark_row(row: Mapping[str, Any]) -> None:
+    """Validate the optional structured-row profile for ``benchmark-artifact/v1``."""
+    required = {
+        "row_id", "scenario_id", "family", "tier", "status", "stage",
+        "problem", "solver", "backend", "observables", "metrics",
+        "artifacts", "failure", "disclosure_status",
+    }
+    missing = sorted(required - set(row))
+    if missing:
+        raise ValueError("Benchmark row is missing required fields: " + ", ".join(missing))
+    for name in ("row_id", "scenario_id", "family", "tier", "stage"):
+        if not isinstance(row[name], str) or not row[name]:
+            raise ValueError(f"Benchmark row field {name!r} must be a non-empty string.")
+    if row["status"] not in BENCHMARK_ROW_STATUSES:
+        raise ValueError("Benchmark row status must be passed, failed, skipped, or incomplete.")
+    if row["disclosure_status"] not in BENCHMARK_DISCLOSURE_STATUSES:
+        raise ValueError("Benchmark row disclosure_status must be local_only, reviewable, or release_grade.")
+    for name in ("problem", "solver", "backend", "observables", "metrics", "artifacts"):
+        if not isinstance(row[name], Mapping):
+            raise ValueError(f"Benchmark row field {name!r} must be a mapping.")
+    if row["status"] == "passed":
+        if row["failure"] is not None:
+            raise ValueError("Passed benchmark rows must have failure=None.")
+    else:
+        if not isinstance(row["failure"], Mapping):
+            raise ValueError("Non-passed benchmark rows require a structured failure mapping.")
+        for name in ("stage", "code", "message", "remediation"):
+            if not isinstance(row["failure"].get(name), str) or not row["failure"][name]:
+                raise ValueError(f"Benchmark failure field {name!r} must be a non-empty string.")
 
 
 def current_memory_usage() -> Dict[str, Any]:
@@ -50,6 +160,7 @@ def make_benchmark_artifact(
     markdown_table: Optional[str] = None,
     csv_path: Optional[str] = None,
     markdown_path: Optional[str] = None,
+    benchmark_context: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     rows_list = [dict(row) for row in rows]
     diagnostics_payload = dict(diagnostics) if diagnostics is not None else doctor(backend=backend, initialize_backend=False)
@@ -80,6 +191,8 @@ def make_benchmark_artifact(
     }
     if markdown_table is not None:
         artifact["markdown_table"] = markdown_table
+    if benchmark_context is not None:
+        artifact["benchmark_context"] = dict(benchmark_context)
     return _json_compatible(artifact)
 
 
@@ -117,6 +230,7 @@ def write_benchmark_artifacts(
     diagnostics: Optional[Mapping[str, Any]] = None,
     run_manifests: Optional[Iterable[Mapping[str, Any]]] = None,
     columns: Optional[List[str]] = None,
+    benchmark_context: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
@@ -152,6 +266,7 @@ def write_benchmark_artifacts(
         markdown_table=table,
         csv_path=str(csv_file),
         markdown_path=str(markdown_file),
+        benchmark_context=benchmark_context,
     )
     json_file.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 

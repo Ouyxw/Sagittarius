@@ -120,7 +120,7 @@ Readout-capable results store `metadata.readout.final_bitstring_probabilities` a
 | `result-artifact/v1` | Persistent `SimulationResult` envelope. |
 | `shared-result/v1` | Language-neutral result payload. |
 | `sweep-artifact/v1` | Resumable scientific-exploration parameter study artifact, separate from benchmark evidence. |
-| `benchmark-artifact/v1` | Structured performance measurement artifact. |
+| `benchmark-artifact/v1` | Structured benchmark measurement artifact; Phase 16 single-scenario rows may carry scenario/configuration, diagnostics, metrics, artifact links, and structured failure context. |
 | `mwis-batch-verification/v1` | MWIS batch verification report shape. |
 
 ## Result Artifact Shape

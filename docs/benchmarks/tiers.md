@@ -35,6 +35,8 @@ Recommended examples:
 - two-atom blockade smoke;
 - tiny UDG/MWIS instance with exact baseline;
 - CUDA doctor and one tiny CPU/CUDA parity row on local GPU hardware.
+Current implementation: `tests/test_performance/benchmark_physics_smoke.py` runs deterministic CPU Rabi and two-atom blockade scenarios, retaining a structured `benchmark-artifact/v1` row for every success or failure.
+
 
 ## Correctness Tier
 

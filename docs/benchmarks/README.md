@@ -23,6 +23,16 @@ These documents complement the governance pages:
 | [`families.md`](families.md) | Benchmark-family protocols for physics, dynamics, open systems, optimization, backend performance, and sweeps. |
 | [`artifact-contracts.md`](artifact-contracts.md) | Required aggregate artifact fields, failure rows, and evidence-retention rules. |
 
+## Implemented CPU smoke
+
+Run the initial Phase 16 physics smoke command from `sagittarius_py`:
+
+```bash
+uv run python tests/test_performance/benchmark_physics_smoke.py --output-dir benchmark-output
+```
+
+It runs deterministic Rabi and blockade cases on CPU, writes `physics_smoke.json` plus CSV/Markdown, and stores one `result-artifact/v1` and one `run-manifest/v1` per successful case. Its runtime values are local diagnostics only.
+
 ## Evidence Levels
 
 | Level | Purpose | Public use |
