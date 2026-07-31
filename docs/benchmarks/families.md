@@ -37,6 +37,8 @@ Required evidence:
 - solver method, tolerances, output grid, and basis mode;
 - run manifest and result artifact path when a simulation artifact is emitted.
 
+Current correctness runner: `tests/test_performance/benchmark_physics_correctness.py` records analytic Rabi and ideal-blockade errors, finite-sweep Landau-Zener final-state error against the stated asymptotic formula, and a static small-chain exact projected dense matrix-exponential comparison. The small-chain check verifies the reduced Hamiltonian and evolution against the projection of the dense Hamiltonian; it does not claim physical equivalence between finite-interaction full-basis and hard-blockade trajectories.
+
 ## Cold-Atom Dynamics
 
 Purpose: exercise realistic neutral-atom array workflows beyond toy baselines.

@@ -52,6 +52,8 @@ Minimum requirements:
 
 Correctness metrics may include max absolute trajectory error, final-state error, trace error, positivity violations, MWIS feasibility, exact objective gap, and reduced-vs-full observable deviation.
 
+Current implementation: `tests/test_performance/benchmark_physics_correctness.py` runs deterministic CPU Rabi, ideal two-atom blockade, Landau-Zener, and small-chain projected dense-vs-reduced cases. It records each reference kind and tolerance in row metrics, retains successful SDK result/manifest artifacts, and writes a durable dense-reference report for the static chain check.
+
 ## Parity Tier
 
 Goal: compare two execution paths under one scenario definition.
