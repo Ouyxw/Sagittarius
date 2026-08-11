@@ -17,6 +17,8 @@ This page defines the Phase 16 aggregate artifact expectations for benchmark sui
 The Phase 16 `optimization_aqc` runner additionally emits structured `benchmark-artifact/v1` rows and one `benchmark-suite-artifact/v1` aggregate per tier. Successful rows retain the deterministic graph/weights and ILP/AQC reference report; failed rows retain the scenario metadata and first-class failure context.
 
 The opt-in CUDA/MWIS protocol emits separate `backend_performance` and `optimization_aqc` parity suites. Its rows retain the initialized CUDA doctor payload, device/driver/CUDA/Julia fields, cold/warm timing, GPU-memory snapshots, CPU/CUDA error, and either an opt-in skip, a CUDA-initialization failure, or a completed reference report.
+
+The solver/path runner retains a measurement repeat index, warmup/repeat policy, representation/method, declared numerical reference gate, and result/manifest links for executed solver paths. The sweep/cluster runner links its checkpoint and final `sweep-artifact/v1`; benchmark aggregates remain governed evidence while the linked sweep envelope remains a resumable scientific-exploration artifact.
 | `benchmark-suite-artifact/v1` | Validated aggregate wrapper for one Phase 16 family/tier run, with retained success, failure, skipped, and incomplete rows. | Current. |
 | `run-manifest/v1` | Durable description of one simulation run. | Current where simulations emit artifacts. |
 | `result-artifact/v1` | Simulation result data, metadata, diagnostics, and shared payload. | Current where result serialization is used. |

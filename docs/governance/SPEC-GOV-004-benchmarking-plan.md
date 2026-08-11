@@ -37,11 +37,11 @@ Benchmarks must not be used to imply general quantum speedup, production-ready G
 | `ablation` | P0 | Full dense, full sparse, reduced matrix-free, reduced sparse, and optional CUDA cached sparse paths. | `benchmark-artifact/v1` from `benchmark_ablation.py`. |
 | `gpu` | P1 | CPU/CUDA timing and observable parity on machines where initialized CUDA diagnostics pass. | `benchmark-artifact/v1` from `benchmark_gpu.py` or opt-in `benchmark_cuda_mwis_protocol.py`, plus backend diagnostics. |
 | `mwis_udg` | P1 | Seeded UDG/MWIS AQC-vs-ILP verification, feasibility, objective value, and runtime. | `mwis-batch-verification/v1` and linked result artifacts. |
-| `solver` | P1 | Solver method, tolerance, adaptive/fixed-step, `dt`, and output-grid sensitivity. | `benchmark-artifact/v1`; depends on Phase 12 and Phase 15 contracts. |
+| `solver` | P1 | Solver method, tolerance, adaptive/fixed-step, `dt`, output-grid sensitivity, and dense/sparse/reduced path gates. | `benchmark-artifact/v1` from `benchmark_solver_performance.py`; depends on Phase 12 and Phase 15 contracts. |
 | `observables` | P1 | Observable type, count, declaration order, and output-grid cost. | `benchmark-artifact/v1` plus observable metadata; depends on Phase 11. |
 | `open_system` | P1 | Lindblad vs MCWF runtime, memory, trajectory count, and convergence behavior. | Benchmark artifacts, run manifests, and convergence notes. |
 | `noise` | P2 | Custom Lindblad, correlated noise, collective decay, and stochastic Hamiltonian ensemble overhead. | Benchmark artifacts with noise metadata; depends on Phase 14 and Phase 15. |
-| `cluster_sweep` | P2 | Parallel parameter sweep throughput, resumability, and artifact aggregation. | `benchmark-artifact/v1` or sweep artifacts; tied to Phase 17. |
+| `cluster_sweep` | P2 | Local ParallelSimulation parameter-map throughput, resumability, and artifact aggregation. | `benchmark-artifact/v1` plus linked `sweep-artifact/v1` from `benchmark_sweep_cluster.py`; multi-node deployment remains tied to Phase 18. |
 
 ## Required Row Metadata
 

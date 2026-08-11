@@ -65,6 +65,22 @@ SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python tests/test_performance/benchmark_cu
 
 The runner first requires `doctor(backend="CUDA", initialize_backend=True)` to pass. Without opt-in it writes skipped rows; an initialized-doctor failure becomes retained failure rows. On success it writes separate CPU/CUDA chain-parity and weighted-MWIS parity artifacts plus suite aggregates, including hardware/runtime versions, cold/warm timing, GPU memory snapshots, parity errors, and MWIS exact-baseline feasibility. These are local diagnostic artifacts, not general GPU or optimization performance claims.
 
+Run repeated CPU solver/path correctness measurements:
+
+```bash
+uv run python tests/test_performance/benchmark_solver_performance.py --output-dir benchmark-output
+```
+
+It emits repeated dense/sparse/reduced path rows, a cached-GPU skip unless independently validated through the CUDA protocol, and Tsit5/Vern9/RK4 trajectory rows against a high-accuracy Tsit5 reference. Each SDK solver row retains result and manifest links; timing remains local diagnostic evidence.
+
+Run the local resumable ParallelSimulation sweep benchmark:
+
+```bash
+uv run python tests/test_performance/benchmark_sweep_cluster.py --output-dir benchmark-output
+```
+
+It records per-worker throughput rows, a `sweep-artifact/v1` checkpoint and final aggregate, per-item result/manifest links, and a benchmark suite aggregate. Use `--resume-from path/to/sweep.json --workers 1` to retry only pending/failed items. This covers local Julia Distributed execution, not multi-node performance.
+
 ## Evidence Levels
 
 | Level | Purpose | Public use |

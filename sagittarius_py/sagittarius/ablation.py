@@ -139,12 +139,15 @@ def benchmark_ablation_modes(
     if full_dim <= max_full_dim:
         full_state = _seeded_state(full_dim, seed)
         full_dense = _dense_hamiltonian_matrix(register, omega, delta)
-        elapsed, _ = _time_repeated_matvec(full_dense, full_state, repeats, warmups)
+        elapsed, dense_result = _time_repeated_matvec(full_dense, full_state, repeats, warmups)
         rows.append(_row(mode="full_dense", status="ok", atom_count=atom_count, full_dim=full_dim, basis_size=full_dim, repeats=repeats, total_time_s=elapsed))
 
         full_sparse = csr_matrix(full_dense)
-        elapsed, _ = _time_repeated_matvec(full_sparse, full_state, repeats, warmups)
+        elapsed, sparse_result = _time_repeated_matvec(full_sparse, full_state, repeats, warmups)
         rows.append(_row(mode="full_sparse", status="ok", atom_count=atom_count, full_dim=full_dim, basis_size=full_dim, repeats=repeats, total_time_s=elapsed))
+        full_reference_error = float(np.max(np.abs(dense_result - sparse_result))) if full_dim else 0.0
+        rows[-2]["reference_error"] = full_reference_error
+        rows[-1]["reference_error"] = full_reference_error
     else:
         reason = f"full_dim {full_dim} exceeds max_full_dim {max_full_dim}"
         rows.append(_row(mode="full_dense", status="skipped", atom_count=atom_count, full_dim=full_dim, basis_size=full_dim, repeats=repeats, reason=reason))
