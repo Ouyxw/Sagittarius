@@ -115,6 +115,8 @@ Initial protocol items:
 - CUDA cached sparse-buffer path;
 - first-run setup cost vs warmed execution cost.
 
+Current CUDA protocol: `tests/test_performance/benchmark_cuda_mwis_protocol.py` is opt-in (`SAGITTARIUS_ENABLE_GPU_TESTS=1`) and calls `doctor(backend="CUDA", initialize_backend=True)` before importing or executing CUDA paths. It emits a small CPU/CUDA chain parity row and a seeded weighted-MWIS CPU/CUDA row with device, driver, CUDA.jl/runtime, and Julia metadata; cold/warm timing; GPU-memory snapshots; parity error; and structured skipped/doctor/runtime failure rows. It is local diagnostic evidence only.
+
 Required evidence:
 
 - backend diagnostics before execution;

@@ -35,7 +35,7 @@ Benchmarks must not be used to imply general quantum speedup, production-ready G
 | :--- | :--- | :--- | :--- |
 | `scaling` | P0 | Reduced-basis CPU scaling across atom count, geometry, basis size, and blockade radius. | `benchmark-artifact/v1` from `benchmark_scaling.py`. |
 | `ablation` | P0 | Full dense, full sparse, reduced matrix-free, reduced sparse, and optional CUDA cached sparse paths. | `benchmark-artifact/v1` from `benchmark_ablation.py`. |
-| `gpu` | P1 | CPU/CUDA timing and observable parity on machines where CUDA diagnostics pass. | `benchmark-artifact/v1` from `benchmark_gpu.py` plus backend diagnostics. |
+| `gpu` | P1 | CPU/CUDA timing and observable parity on machines where initialized CUDA diagnostics pass. | `benchmark-artifact/v1` from `benchmark_gpu.py` or opt-in `benchmark_cuda_mwis_protocol.py`, plus backend diagnostics. |
 | `mwis_udg` | P1 | Seeded UDG/MWIS AQC-vs-ILP verification, feasibility, objective value, and runtime. | `mwis-batch-verification/v1` and linked result artifacts. |
 | `solver` | P1 | Solver method, tolerance, adaptive/fixed-step, `dt`, and output-grid sensitivity. | `benchmark-artifact/v1`; depends on Phase 12 and Phase 15 contracts. |
 | `observables` | P1 | Observable type, count, declaration order, and output-grid cost. | `benchmark-artifact/v1` plus observable metadata; depends on Phase 11. |
@@ -141,4 +141,5 @@ Update this document when:
 - `benchmark-artifact/v1`, `run-manifest/v1`, or `version-info/v1` changes;
 - public performance wording policy changes;
 - GPU, solver, observable, open-system, noise, or sweep behavior changes;
+- a CUDA/MWIS benchmark protocol changes its opt-in gate, doctor criteria, retained hardware fields, parity checks, or failure boundaries;
 - new release or disclosure workflows require different benchmark evidence.

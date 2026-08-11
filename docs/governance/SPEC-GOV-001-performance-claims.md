@@ -46,6 +46,7 @@ The repository scripts that produce claim-ready artifacts are:
 | :--- | :--- | :--- |
 | `sagittarius_py/tests/test_performance/benchmark_scaling.py` | `scaling_results` | Reduced-basis CPU scaling rows. |
 | `sagittarius_py/tests/test_performance/benchmark_gpu.py` | `gpu_results` | CPU vs CUDA timing with observable evaluation. |
+| `sagittarius_py/tests/test_performance/benchmark_cuda_mwis_protocol.py` | `cuda_parity`, `mwis_gpu_parity` | Opt-in, doctor-gated CPU/CUDA and weighted-MWIS parity with local-only disclosure. |
 | `sagittarius_py/tests/test_performance/benchmark_cluster.py` | `cluster_results` | Parallel parameter-sweep timing. |
 | `sagittarius_py/tests/test_performance/benchmark_ablation.py` | `ablation_results` | Hamiltonian execution path timings, with optional CUDA cached sparse timing. |
 | `sagittarius_py/projects/mwis_udg/batch_verify.py` | `mwis-batch-verification/v1` in-memory report | Seeded UDG/MWIS AQC-vs-ILP verification metrics. |
