@@ -49,6 +49,14 @@ uv run python tests/test_performance/benchmark_phase16_validation.py --output-di
 
 It writes `cold_atom_dynamics` and `open_system_dynamics` single-scenario artifacts and matching suite aggregates. Cold-atom rows retain projected-dense reference reports for global-chain, local-addressing, Z2, and 2D cases. Open-system rows retain analytic decay error, Lindblad trace/positivity, seeded MCWF-vs-Lindblad errors, and 100/500-trajectory sensitivity. The evidence is CPU small-system correctness only; it is not a performance, scaling, or hardware claim.
 
+Run the deterministic weighted MWIS/UDG AQC family:
+
+```bash
+uv run python tests/test_performance/benchmark_mwis_aqc.py --output-dir benchmark-output
+```
+
+It emits `smoke`, `correctness`, and bounded `scaling` artifacts with matching suite aggregates. Each scenario retains its seed, graph/weight metadata, schedule, exact PuLP/CBC baseline, feasibility, objective gap, approximation ratio, and final-state optimal-success probability; failed ILP or AQC cases are retained as failure rows. The reported CPU runtime and approximation values validate a bounded implementation, not general optimization performance.
+
 ## Evidence Levels
 
 | Level | Purpose | Public use |

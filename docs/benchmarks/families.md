@@ -93,6 +93,8 @@ Initial protocol items:
 - schedule sensitivity over drive and detuning ramps;
 - final bitstring sampling once Phase 15 readout APIs land.
 
+Current correctness runner: `tests/test_performance/benchmark_mwis_aqc.py` runs deterministic weighted UDG cases across `smoke` (2 nodes), `correctness` (3/4 nodes), and bounded `scaling` (2/4/6 nodes) tiers. Each row retains the seeded edge list, node weights, graph hash, AQC schedule, exact PuLP/CBC objective, feasibility, objective gap, approximation ratio, final-state optimal-solution probability, and a reference report. Per-scenario ILP or solver exceptions remain failed rows. These CPU cases validate the mapping and evidence contract only; their runtime and approximation outputs are not general AQC performance claims.
+
 Required evidence:
 
 - graph seed, geometry, radius, weights, and edge list hash;

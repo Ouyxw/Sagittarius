@@ -13,6 +13,8 @@ This page defines the Phase 16 aggregate artifact expectations for benchmark sui
 | :--- | :--- | :--- |
 | `benchmark-artifact/v1` | Generic benchmark rows; the Phase 16 single-scenario profile adds structured case, configuration, metrics, links, and failure fields compatibly. | Current where emitted by existing scripts. |
 | `mwis-batch-verification/v1` | UDG/MWIS batch verification rows and exact-baseline comparison. | Current in project-specific form. |
+
+The Phase 16 `optimization_aqc` runner additionally emits structured `benchmark-artifact/v1` rows and one `benchmark-suite-artifact/v1` aggregate per tier. Successful rows retain the deterministic graph/weights and ILP/AQC reference report; failed rows retain the scenario metadata and first-class failure context.
 | `benchmark-suite-artifact/v1` | Validated aggregate wrapper for one Phase 16 family/tier run, with retained success, failure, skipped, and incomplete rows. | Current. |
 | `run-manifest/v1` | Durable description of one simulation run. | Current where simulations emit artifacts. |
 | `result-artifact/v1` | Simulation result data, metadata, diagnostics, and shared payload. | Current where result serialization is used. |
