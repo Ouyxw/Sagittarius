@@ -2,6 +2,7 @@ import argparse
 
 import numpy as np
 
+from sagittarius.benchmark_row_contract import structured_benchmark_rows
 from sagittarius import (
     PulseSequence,
     Register,
@@ -41,6 +42,7 @@ def benchmark_ablation(
             print(f"{row['mode']:<28} | skipped | {row['reason']}")
 
     diagnostics = doctor(backend="CUDA" if include_gpu else "CPU", initialize_backend=False)
+    rows = structured_benchmark_rows(rows, family="backend_performance", tier="correctness", problem_defaults={"benchmark": "hamiltonian_ablation", "blockade_radius": blockade_radius}, solver_defaults={"repeats": repeats}, backend_defaults={"requested_backend": "CUDA" if include_gpu else "CPU"}, observables={"names": [], "count": 0, "output_sample_count": 0})
     paths = write_benchmark_artifacts(
         output_dir=output_dir,
         stem="ablation_bench_results",

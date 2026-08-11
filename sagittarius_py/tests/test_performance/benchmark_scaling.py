@@ -2,6 +2,7 @@ import time
 
 import numpy as np
 
+from sagittarius.benchmark_row_contract import structured_benchmark_rows
 from sagittarius import (
     Atom,
     PulseSequence,
@@ -49,6 +50,7 @@ def benchmark_scaling(n_max=16, blockade_radius=5.0, output_dir="."):
             "manifest": res.manifest,
         })
 
+    results = structured_benchmark_rows(results, family="backend_performance", tier="scaling", problem_defaults={"benchmark": "reduced_basis_scaling", "blockade_radius": blockade_radius, "duration": 0.5}, solver_defaults={"blockade_radius": blockade_radius}, backend_defaults={"requested_backend": "CPU", "path": "cpu"}, observables={"names": ["pop0"], "count": 1, "output_sample_count": None})
     paths = write_benchmark_artifacts(
         output_dir=output_dir,
         stem="scaling_results",

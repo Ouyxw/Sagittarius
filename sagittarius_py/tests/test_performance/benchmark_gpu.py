@@ -2,6 +2,7 @@ import time
 
 import numpy as np
 
+from sagittarius.benchmark_row_contract import structured_benchmark_rows
 from sagittarius import (
     Atom,
     PulseSequence,
@@ -77,6 +78,7 @@ def benchmark_gpu(n_range=None, output_dir="."):
             {"label": f"N={n} CUDA", "manifest": gpu_res.manifest},
         ])
 
+    results = structured_benchmark_rows(results, family="backend_performance", tier="parity", problem_defaults={"benchmark": "cpu_cuda_reduced_basis", "blockade_radius": 3.0, "duration": 1.0}, solver_defaults={"blockade_radius": 3.0}, backend_defaults={"requested_backend": "CUDA", "path": "cpu_cuda"}, observables={"names": ["pop0"], "count": 1, "output_sample_count": None})
     paths = write_benchmark_artifacts(
         output_dir=output_dir,
         stem="gpu_bench_results",

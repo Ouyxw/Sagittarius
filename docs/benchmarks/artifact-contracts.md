@@ -18,6 +18,7 @@ This page defines the Phase 16 aggregate artifact expectations for benchmark sui
 | `result-artifact/v1` | Simulation result data, metadata, diagnostics, and shared payload. | Current where result serialization is used. |
 
 Existing scripts may continue emitting `benchmark-artifact/v1`. New Phase 16 family runners should use `write_benchmark_suite_artifact()` to aggregate validated rows in `benchmark-suite-artifact/v1`; existing scripts may continue emitting `benchmark-artifact/v1` directly.
+The existing `benchmark_scaling.py`, `benchmark_gpu.py`, `benchmark_cluster.py`, and `benchmark_ablation.py` runners now emit this structured row profile while retaining their legacy flat metric fields for CSV and plotting compatibility.
 
 ## Aggregate Shape
 
