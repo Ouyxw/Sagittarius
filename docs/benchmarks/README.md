@@ -1,9 +1,9 @@
 # Benchmark Protocols
 
-Status: `Planned contract`
+Status: `Mixed implementation`
 Roadmap: Phase 16
 Version: `benchmark-protocols/v1`
-Last reviewed: 2026-07-02
+Last reviewed: 2026-08-11
 
 This directory defines the Phase 16 benchmark protocols for Sagittarius. It translates the roadmap benchmark suite into runnable tiers, benchmark families, artifact requirements, and evidence-retention rules.
 
@@ -40,6 +40,14 @@ uv run python tests/test_performance/benchmark_physics_correctness.py --output-d
 ```
 
 It checks analytic Rabi and ideal-blockade trajectories, a wide finite-sweep Landau-Zener result against its asymptotic analytic transition probability, and a small static chain against an exact projected dense matrix-exponential reference. It writes a compatible `physics_correctness.json` plus CSV/Markdown and a validated `physics_correctness_suite.json` aggregate with matching CSV/Markdown companions; SDK simulation rows retain result/manifest links and the dense-vs-reduced row retains its reference report. Runtime values remain local diagnostics only.
+
+Run the Phase 16 cold-atom and open-system correctness families:
+
+```bash
+uv run python tests/test_performance/benchmark_phase16_validation.py --output-dir benchmark-output
+```
+
+It writes `cold_atom_dynamics` and `open_system_dynamics` single-scenario artifacts and matching suite aggregates. Cold-atom rows retain projected-dense reference reports for global-chain, local-addressing, Z2, and 2D cases. Open-system rows retain analytic decay error, Lindblad trace/positivity, seeded MCWF-vs-Lindblad errors, and 100/500-trajectory sensitivity. The evidence is CPU small-system correctness only; it is not a performance, scaling, or hardware claim.
 
 ## Evidence Levels
 

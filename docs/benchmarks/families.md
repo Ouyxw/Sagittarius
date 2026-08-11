@@ -1,9 +1,9 @@
 # Benchmark Families
 
-Status: `Planned contract`
+Status: `Mixed implementation`
 Roadmap: Phase 16
 Version: `benchmark-families/v1`
-Last reviewed: 2026-07-02
+Last reviewed: 2026-08-11
 
 This page defines the benchmark-family protocols for Phase 16. A family is a stable group of scenarios with shared correctness gates, metadata, and interpretation rules.
 
@@ -50,6 +50,8 @@ Initial protocol items:
 - Z2 or antiferromagnetic ordering dynamics;
 - 2D array pattern formation with blockade diagnostics.
 
+Current correctness runner: `tests/test_performance/benchmark_phase16_validation.py` emits one row per CPU case: 3-atom global chain, 3-atom vector/dictionary local addressing, 4-atom alternating-detuning Z2 chain, and a 2x2 array. Each uses a small projected dense matrix-exponential reference with absolute tolerance `1e-8`. These rows establish only small-system solver and pulse/geometry correctness, not a physical pattern-formation or scalability claim.
+
 Required evidence:
 
 - atom geometry and atom-ordering metadata;
@@ -68,6 +70,8 @@ Initial protocol items:
 - MCWF-vs-Lindblad agreement as trajectory count increases;
 - decoherence impact on blockade and ordering scenarios;
 - future Phase 14 custom noise and stochastic Hamiltonian scenarios.
+
+Current correctness runner: `tests/test_performance/benchmark_phase16_validation.py` emits fixed-seed (`20260811`) one-atom decay-plus-dephasing rows for 100 and 500 MCWF trajectories. They retain analytic decay expectation, Lindblad trace and positivity errors, MCWF-vs-Lindblad error, and require the 500-trajectory error not to exceed the 100-trajectory error. This is a small-system correctness check; multi-atom decoherence studies and trajectory runtime/memory scaling remain future work.
 
 Required evidence:
 

@@ -30,6 +30,7 @@ Sagittarius 1.0.11 is the current stable research SDK release. This page records
 - Sagittarius models idealized Rydberg neutral-atom analog dynamics. It is not a calibrated hardware control stack.
 - Units and conventions are documented in [`physics/SPEC-PHYS-001-units.md`](../physics/SPEC-PHYS-001-units.md); users are responsible for supplying parameters in a consistent unit system.
 - Open-system Lindblad and MCWF workflows are available, and `open_system_sanity_checks()` covers trace preservation, density-matrix positivity, and MCWF-vs-Lindblad observable agreement for small systems. New open-system assumptions should still be checked against problem-specific reference cases.
+- Phase 16 open-system benchmark coverage is restricted to a one-atom CPU correctness case with local decay/dephasing; it does not establish multi-atom decoherence behavior, trajectory scaling, or hardware performance.
 - Current open-system noise is limited to local Markovian Rydberg decay and pure dephasing. Custom Lindblad channels, correlated dephasing, collective decay, stochastic Hamiltonian noise, time-dependent rates, and readout errors are planned or unsupported; see [`SPEC-PHYS-004-noise-models.md`](../physics/SPEC-PHYS-004-noise-models.md).
 - Reduced-basis simulations should be cross-checked against dense/full-basis evolution for small systems when introducing new physics assumptions.
 
