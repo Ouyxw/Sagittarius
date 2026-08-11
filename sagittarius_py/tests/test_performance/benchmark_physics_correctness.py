@@ -28,6 +28,7 @@ from sagittarius import (
     doctor,
     make_benchmark_row,
     write_benchmark_artifacts,
+    write_benchmark_suite_artifact,
 )
 
 FAMILY = "physics_baselines"
@@ -143,7 +144,20 @@ def benchmark_physics_correctness(output_dir: str | Path = ".", *, scenario_name
             manifests.append(manifest)
         except Exception as exc:
             rows.append(_failed_row(name, scenario, exc, diagnostics, time.perf_counter() - start))
-    return write_benchmark_artifacts(output_dir=output, stem="physics_correctness", name="Phase 16 physics baseline CPU correctness benchmark", description="Analytic Rabi, ideal blockade, and Landau-Zener checks plus a projected dense-vs-reduced chain reference. Runtime is diagnostic only.", parameters={"scenarios": list(scenario_names), "backend": "CPU", "seed_policy": "deterministic/no stochastic seed"}, rows=rows, backend="CPU", diagnostics=diagnostics, run_manifests=manifests, columns=["row_id", "scenario_id", "status", "stage", "metrics", "artifacts", "failure"], benchmark_context={"protocol_version": "benchmark-protocol/v1", "family": FAMILY, "tier": TIER, "command": "uv run python tests/test_performance/benchmark_physics_correctness.py", "working_directory": str(Path.cwd()), "environment_variables": {key: os.environ[key] for key in _ENVIRONMENT_KEYS if key in os.environ}, "warmup_runs": 0, "measured_repeats": 1, "timeout_policy": "No runner timeout; every scenario exception is retained as a failed row.", "failure_policy": "Continue after per-scenario failures and retain structured diagnostics.", "disclosure_status": "local_only"})
+    artifact_paths = write_benchmark_artifacts(output_dir=output, stem="physics_correctness", name="Phase 16 physics baseline CPU correctness benchmark", description="Analytic Rabi, ideal blockade, and Landau-Zener checks plus a projected dense-vs-reduced chain reference. Runtime is diagnostic only.", parameters={"scenarios": list(scenario_names), "backend": "CPU", "seed_policy": "deterministic/no stochastic seed"}, rows=rows, backend="CPU", diagnostics=diagnostics, run_manifests=manifests, columns=["row_id", "scenario_id", "status", "stage", "metrics", "artifacts", "failure"], benchmark_context={"protocol_version": "benchmark-protocol/v1", "family": FAMILY, "tier": TIER, "command": "uv run python tests/test_performance/benchmark_physics_correctness.py", "working_directory": str(Path.cwd()), "environment_variables": {key: os.environ[key] for key in _ENVIRONMENT_KEYS if key in os.environ}, "warmup_runs": 0, "measured_repeats": 1, "timeout_policy": "No runner timeout; every scenario exception is retained as a failed row.", "failure_policy": "Continue after per-scenario failures and retain structured diagnostics.", "disclosure_status": "local_only"})
+    suite_paths = write_benchmark_suite_artifact(
+        output_dir=output,
+        stem="physics_correctness_suite",
+        suite_id="phase16-physics-baselines-correctness",
+        family=FAMILY,
+        tier=TIER,
+        rows=rows,
+        source=artifact_paths["artifact"]["versions"],
+        environment={"doctor": diagnostics},
+        scenario_defaults={"backend": "CPU", "seed_policy": "deterministic/no stochastic seed"},
+    )
+    artifact_paths["suite"] = suite_paths
+    return artifact_paths
 
 
 if __name__ == "__main__":

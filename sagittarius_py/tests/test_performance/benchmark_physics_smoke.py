@@ -28,6 +28,7 @@ from sagittarius import (
     doctor,
     make_benchmark_row,
     write_benchmark_artifacts,
+    write_benchmark_suite_artifact,
 )
 
 _FAMILY = "physics_baselines"
@@ -273,7 +274,7 @@ def benchmark_physics_smoke(
         "failure_policy": "Continue after per-scenario failures and retain structured diagnostics.",
         "disclosure_status": _DISCLOSURE_STATUS,
     }
-    return write_benchmark_artifacts(
+    artifact_paths = write_benchmark_artifacts(
         output_dir=output_path,
         stem="physics_smoke",
         name="Phase 16 physics baseline CPU smoke benchmark",
@@ -286,6 +287,19 @@ def benchmark_physics_smoke(
         columns=["row_id", "scenario_id", "status", "stage", "metrics", "failure"],
         benchmark_context=context,
     )
+    suite_paths = write_benchmark_suite_artifact(
+        output_dir=output_path,
+        stem="physics_smoke_suite",
+        suite_id="phase16-physics-baselines-smoke",
+        family=_FAMILY,
+        tier=_TIER,
+        rows=rows,
+        source=artifact_paths["artifact"]["versions"],
+        environment={"benchmark_context": context, "doctor": diagnostics},
+        scenario_defaults={"backend": "CPU", "seed_policy": "deterministic/no stochastic seed"},
+    )
+    artifact_paths["suite"] = suite_paths
+    return artifact_paths
 
 
 def _parse_args() -> argparse.Namespace:

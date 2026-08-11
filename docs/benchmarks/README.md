@@ -21,7 +21,7 @@ These documents complement the governance pages:
 | [`protocol.md`](protocol.md) | Cross-suite benchmark protocol, execution discipline, and evidence levels. |
 | [`tiers.md`](tiers.md) | Smoke, correctness, parity, scaling, and stress tier definitions. |
 | [`families.md`](families.md) | Benchmark-family protocols for physics, dynamics, open systems, optimization, backend performance, and sweeps. |
-| [`artifact-contracts.md`](artifact-contracts.md) | Required aggregate artifact fields, failure rows, and evidence-retention rules. |
+| [`artifact-contracts.md`](artifact-contracts.md) | Required aggregate artifact fields, failure rows, evidence retention, and the implemented `benchmark-suite-artifact/v1` wrapper. |
 
 ## Implemented CPU smoke
 
@@ -31,7 +31,7 @@ Run the initial Phase 16 physics smoke command from `sagittarius_py`:
 uv run python tests/test_performance/benchmark_physics_smoke.py --output-dir benchmark-output
 ```
 
-It runs deterministic Rabi and blockade cases on CPU, writes `physics_smoke.json` plus CSV/Markdown, and stores one `result-artifact/v1` and one `run-manifest/v1` per successful case. Its runtime values are local diagnostics only.
+It runs deterministic Rabi and blockade cases on CPU, writes a compatible `physics_smoke.json` plus CSV/Markdown and a validated `physics_smoke_suite.json` aggregate with matching CSV/Markdown companions; it stores one `result-artifact/v1` and one `run-manifest/v1` per successful case. Its runtime values are local diagnostics only.
 
 Run the correctness-tier physics baselines separately:
 
@@ -39,7 +39,7 @@ Run the correctness-tier physics baselines separately:
 uv run python tests/test_performance/benchmark_physics_correctness.py --output-dir benchmark-output
 ```
 
-It checks analytic Rabi and ideal-blockade trajectories, a wide finite-sweep Landau-Zener result against its asymptotic analytic transition probability, and a small static chain against an exact projected dense matrix-exponential reference. It writes `physics_correctness.json` plus CSV/Markdown; SDK simulation rows retain result/manifest links and the dense-vs-reduced row retains its reference report. Runtime values remain local diagnostics only.
+It checks analytic Rabi and ideal-blockade trajectories, a wide finite-sweep Landau-Zener result against its asymptotic analytic transition probability, and a small static chain against an exact projected dense matrix-exponential reference. It writes a compatible `physics_correctness.json` plus CSV/Markdown and a validated `physics_correctness_suite.json` aggregate with matching CSV/Markdown companions; SDK simulation rows retain result/manifest links and the dense-vs-reduced row retains its reference report. Runtime values remain local diagnostics only.
 
 ## Evidence Levels
 

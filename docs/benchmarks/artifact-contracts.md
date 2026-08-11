@@ -1,6 +1,6 @@
 # Benchmark Artifact Contracts
 
-Status: `Planned contract`
+Status: `Current`
 Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
 Last reviewed: 2026-07-02
@@ -13,11 +13,11 @@ This page defines the Phase 16 aggregate artifact expectations for benchmark sui
 | :--- | :--- | :--- |
 | `benchmark-artifact/v1` | Generic benchmark rows; the Phase 16 single-scenario profile adds structured case, configuration, metrics, links, and failure fields compatibly. | Current where emitted by existing scripts. |
 | `mwis-batch-verification/v1` | UDG/MWIS batch verification rows and exact-baseline comparison. | Current in project-specific form. |
-| `benchmark-suite-artifact/v1` | Planned aggregate wrapper for Phase 16 family/tier runs. | Planned contract. |
+| `benchmark-suite-artifact/v1` | Validated aggregate wrapper for one Phase 16 family/tier run, with retained success, failure, skipped, and incomplete rows. | Current. |
 | `run-manifest/v1` | Durable description of one simulation run. | Current where simulations emit artifacts. |
 | `result-artifact/v1` | Simulation result data, metadata, diagnostics, and shared payload. | Current where result serialization is used. |
 
-Existing scripts may continue emitting `benchmark-artifact/v1`. New Phase 16 family runners should either reuse that schema directly or wrap multiple artifacts in `benchmark-suite-artifact/v1`.
+Existing scripts may continue emitting `benchmark-artifact/v1`. New Phase 16 family runners should use `write_benchmark_suite_artifact()` to aggregate validated rows in `benchmark-suite-artifact/v1`; existing scripts may continue emitting `benchmark-artifact/v1` directly.
 
 ## Aggregate Shape
 

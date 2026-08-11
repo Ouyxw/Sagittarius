@@ -1,7 +1,7 @@
 # Data Model
 
 Status: `Current`
-Roadmap: Phase 1, Phase 6, Phase 8, Phase 10, Phase 11, Phase 12, Phase 14, Phase 15
+Roadmap: Phase 1, Phase 6, Phase 8, Phase 10, Phase 11, Phase 12, Phase 14, Phase 15, Phase 16
 Version: `data-model/v1`
 Last reviewed: 2026-07-29
 
@@ -120,7 +120,8 @@ Readout-capable results store `metadata.readout.final_bitstring_probabilities` a
 | `result-artifact/v1` | Persistent `SimulationResult` envelope. |
 | `shared-result/v1` | Language-neutral result payload. |
 | `sweep-artifact/v1` | Resumable scientific-exploration parameter study artifact, separate from benchmark evidence. |
-| `benchmark-artifact/v1` | Structured benchmark measurement artifact; Phase 16 single-scenario rows may carry scenario/configuration, diagnostics, metrics, artifact links, and structured failure context. |
+| `benchmark-artifact/v1` | Structured single-scenario benchmark measurement artifact; Phase 16 rows may carry scenario/configuration, diagnostics, metrics, artifact links, and structured failure context. |
+| `benchmark-suite-artifact/v1` | Validated aggregate artifact for one benchmark family/tier, retaining all row statuses and derived summary totals. |
 | `mwis-batch-verification/v1` | MWIS batch verification report shape. |
 
 ## Result Artifact Shape
