@@ -62,6 +62,8 @@ Every row should include:
 - `disclosure_status`: `local_only`, `reviewable`, or `release_grade`.
 
 ## Failure Rows
+The SDK `benchmark_failure_context()` and `make_benchmark_failure_row()` classify timeout, memory exhaustion, CUDA initialization, reference mismatch, ILP, and unexpected execution failures. They retain exception type, failure stage, timeout, process-memory snapshot, optional GPU-memory value, backend probe, and remediation.
+
 
 Failures are part of the benchmark result. A failed scale row is often more useful than silently omitting the case.
 

@@ -59,6 +59,12 @@ from .benchmarking import (
     write_benchmark_artifacts,
 )
 
+from .benchmark_failures import (
+    benchmark_failure_context,
+    classify_benchmark_failure,
+    make_benchmark_failure_row,
+)
+
 from .benchmark_suite import (
     BENCHMARK_SUITE_ARTIFACT_SCHEMA_VERSION,
     BENCHMARK_SUITE_ARTIFACT_TYPE,
@@ -143,6 +149,9 @@ __all__ = [
     "markdown_table",
     "validate_benchmark_row",
     "write_benchmark_artifacts",
+    "benchmark_failure_context",
+    "classify_benchmark_failure",
+    "make_benchmark_failure_row",
     "BENCHMARK_SUITE_ARTIFACT_SCHEMA_VERSION",
     "BENCHMARK_SUITE_ARTIFACT_TYPE",
     "BENCHMARK_SUITE_PROTOCOL_VERSION",
