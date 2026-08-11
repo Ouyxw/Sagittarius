@@ -4,7 +4,7 @@ Spec ID: `SPEC-GOV-001`
 Status: `Policy`
 Roadmap: Phase 10
 Version: `performance-claims-policy/v1`
-Last reviewed: 2026-06-30
+Last reviewed: 2026-08-11
 
 
 Sagittarius performance statements must be tied to reproducible benchmark artifacts. Use this page as the review checklist before publishing README text, reports, plots, release notes, or hardware-facing summaries.
@@ -45,13 +45,14 @@ The repository scripts that produce claim-ready artifacts are:
 | Script | Artifact stem | Scope |
 | :--- | :--- | :--- |
 | `sagittarius_py/tests/test_performance/benchmark_scaling.py` | `scaling_results` | Reduced-basis CPU scaling rows. |
-| `sagittarius_py/tests/test_performance/benchmark_gpu.py` | `gpu_results` | CPU vs CUDA timing with observable evaluation. |
+| `sagittarius_py/tests/test_performance/benchmark_gpu.py` | `gpu_bench_results` | CPU vs CUDA timing with observable evaluation. |
 | `sagittarius_py/tests/test_performance/benchmark_cuda_mwis_protocol.py` | `cuda_parity`, `mwis_gpu_parity` | Opt-in, doctor-gated CPU/CUDA and weighted-MWIS parity with local-only disclosure. |
-| `sagittarius_py/tests/test_performance/benchmark_cluster.py` | `cluster_results` | Parallel parameter-sweep timing. |
-| `sagittarius_py/tests/test_performance/benchmark_ablation.py` | `ablation_results` | Hamiltonian execution path timings, with optional CUDA cached sparse timing. |
+| `sagittarius_py/tests/test_performance/benchmark_cluster.py` | `cluster_bench_results` | Parallel parameter-sweep timing. |
+| `sagittarius_py/tests/test_performance/benchmark_ablation.py` | `ablation_bench_results` | Hamiltonian execution path timings, with optional CUDA cached sparse timing. |
 | `sagittarius_py/tests/test_performance/benchmark_solver_performance.py` | `solver_performance` | Repeated CPU path correctness gates and Tsit5/Vern9/RK4 trajectory comparison. |
 | `sagittarius_py/tests/test_performance/benchmark_sweep_cluster.py` | `sweep_cluster` | Local ParallelSimulation sweep throughput, resumability, and aggregate evidence. |
-| `sagittarius_py/projects/mwis_udg/batch_verify.py` | `mwis-batch-verification/v1` in-memory report | Seeded UDG/MWIS AQC-vs-ILP verification metrics. |
+| `sagittarius_py/tests/test_performance/benchmark_mwis_aqc.py` | `mwis_aqc_smoke`, `mwis_aqc_correctness`, `mwis_aqc_scaling` | Seeded weighted UDG/AQC tiers with exact ILP, feasibility, objective-gap, and optimal-success-probability evidence. |
+| `sagittarius_py/projects/mwis_udg/batch_verify.py` | `mwis-batch-verification/v1` in-memory report | Project-specific seeded AQC-vs-ILP verification helper; it is not a benchmark-artifact writer. |
 
 Generated benchmark JSON files carry `benchmark-artifact/v1`, companion CSV/Markdown tables, runtime/build/backend metadata, process memory usage, and linked run manifests when simulations produce `SimulationResult` objects.
 

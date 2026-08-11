@@ -1,11 +1,13 @@
 # Phase 16 Benchmark Protocol
 
-Status: `Planned contract`
+Status: `Mixed`
 Roadmap: Phase 16
 Version: `benchmark-protocol/v1`
-Last reviewed: 2026-07-02
+Last reviewed: 2026-08-11
 
 This protocol defines how Sagittarius Phase 16 benchmarks should be selected, run, recorded, and interpreted. It is intentionally separate from installation validation. Installation CI proves that the package can be installed and smoke-tested. Benchmark protocols produce scientific, correctness, and performance evidence under explicit configurations.
+
+For concrete commands and expected artifact stems, use the [runnable tier guide](README.md#runnable-tier-guide) and [tier command table](tiers.md#runnable-commands-and-outputs). This protocol remains the execution and evidence-interpretation contract for those runners.
 
 ## Scope
 

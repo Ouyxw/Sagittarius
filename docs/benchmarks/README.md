@@ -1,6 +1,6 @@
 # Benchmark Protocols
 
-Status: `Mixed implementation`
+Status: `Mixed`
 Roadmap: Phase 16
 Version: `benchmark-protocols/v1`
 Last reviewed: 2026-08-11
@@ -80,6 +80,20 @@ uv run python tests/test_performance/benchmark_sweep_cluster.py --output-dir ben
 ```
 
 It records per-worker throughput rows, a `sweep-artifact/v1` checkpoint and final aggregate, per-item result/manifest links, and a benchmark suite aggregate. Use `--resume-from path/to/sweep.json --workers 1` to retry only pending/failed items. This covers local Julia Distributed execution, not multi-node performance.
+
+## Runnable Tier Guide
+
+Run every command in this section from `sagittarius_py`. Unless stated otherwise, each runner writes JSON, CSV, and Markdown companions under `benchmark-output`; suite-capable runners additionally write a `*_suite.json` aggregate that retains passed, failed, skipped, and incomplete rows.
+
+| Tier | Runnable command | Expected output and boundary |
+| :--- | :--- | :--- |
+| Smoke | `uv run python tests/test_performance/benchmark_physics_smoke.py --output-dir benchmark-output` | `physics_smoke` artifacts and `physics_smoke_suite`; deterministic CPU wiring evidence only. |
+| Correctness | `uv run python tests/test_performance/benchmark_physics_correctness.py --output-dir benchmark-output` | `physics_correctness` artifacts and suite; analytic/dense-reference errors and tolerances. |
+| Parity | `SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python tests/test_performance/benchmark_cuda_mwis_protocol.py --output-dir benchmark-output` | `cuda_parity` and `mwis_gpu_parity` artifacts and suites; records opt-in skips or doctor failures when CUDA is unavailable. |
+| Scaling | `uv run python tests/test_performance/benchmark_sweep_cluster.py --output-dir benchmark-output` | `sweep_cluster` artifacts and suite, plus resumable `sweep-artifact/v1` checkpoint/final aggregate; local Distributed evidence only. |
+| Stress | `uv run python tests/test_performance/benchmark_ablation.py --atom-count 12 --repeats 50 --output-dir benchmark-output` | `ablation_bench_results` JSON/CSV/Markdown; retain hardware-bound success and failure rows, with no suite wrapper. |
+
+For additional correctness coverage, run the cold-atom/open-system and MWIS commands below; their outputs are `cold_atom_dynamics`/`open_system_dynamics` and `mwis_aqc_smoke`, `mwis_aqc_correctness`, or `mwis_aqc_scaling`, each with matching suite aggregates.
 
 ## Evidence Levels
 

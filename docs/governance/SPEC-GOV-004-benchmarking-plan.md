@@ -4,7 +4,7 @@ Spec ID: `SPEC-GOV-004`
 Status: `Policy`
 Roadmap: Phase 9, Phase 10, Phase 11, Phase 12, Phase 14, Phase 15, Phase 16, Phase 18
 Version: `benchmarking-plan/v1`
-Last reviewed: 2026-06-30
+Last reviewed: 2026-08-11
 
 
 This document defines the Sagittarius benchmarking plan. It complements [`SPEC-GOV-001-performance-claims.md`](SPEC-GOV-001-performance-claims.md): this page defines what to run and how to organize evidence, while `SPEC-GOV-001` defines how measured performance may be stated publicly.
@@ -36,7 +36,7 @@ Benchmarks must not be used to imply general quantum speedup, production-ready G
 | `scaling` | P0 | Reduced-basis CPU scaling across atom count, geometry, basis size, and blockade radius. | `benchmark-artifact/v1` from `benchmark_scaling.py`. |
 | `ablation` | P0 | Full dense, full sparse, reduced matrix-free, reduced sparse, and optional CUDA cached sparse paths. | `benchmark-artifact/v1` from `benchmark_ablation.py`. |
 | `gpu` | P1 | CPU/CUDA timing and observable parity on machines where initialized CUDA diagnostics pass. | `benchmark-artifact/v1` from `benchmark_gpu.py` or opt-in `benchmark_cuda_mwis_protocol.py`, plus backend diagnostics. |
-| `mwis_udg` | P1 | Seeded UDG/MWIS AQC-vs-ILP verification, feasibility, objective value, and runtime. | `mwis-batch-verification/v1` and linked result artifacts. |
+| `mwis_udg` | P1 | Seeded UDG/MWIS AQC-vs-ILP verification, feasibility, objective value, and runtime. | `benchmark-artifact/v1` and suite aggregates from `benchmark_mwis_aqc.py`; `mwis-batch-verification/v1` remains the project-specific exact-verification helper. |
 | `solver` | P1 | Solver method, tolerance, adaptive/fixed-step, `dt`, output-grid sensitivity, and dense/sparse/reduced path gates. | `benchmark-artifact/v1` from `benchmark_solver_performance.py`; depends on Phase 12 and Phase 15 contracts. |
 | `observables` | P1 | Observable type, count, declaration order, and output-grid cost. | `benchmark-artifact/v1` plus observable metadata; depends on Phase 11. |
 | `open_system` | P1 | Lindblad vs MCWF runtime, memory, trajectory count, and convergence behavior. | Benchmark artifacts, run manifests, and convergence notes. |

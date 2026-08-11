@@ -1,9 +1,9 @@
 # Benchmark Tiers
 
-Status: `Planned contract`
+Status: `Mixed`
 Roadmap: Phase 16
 Version: `benchmark-tiers/v1`
-Last reviewed: 2026-07-02
+Last reviewed: 2026-08-11
 
 Sagittarius benchmarks are grouped by tier so that developers can run the right amount of evidence for the task. Tiers are cumulative in discipline but not always cumulative in cost. A stress-tier run does not replace correctness-tier evidence.
 
@@ -16,6 +16,21 @@ Sagittarius benchmarks are grouped by tier so that developers can run the right 
 | Parity | Compare CPU/CUDA, dense/reduced, Python/Julia, or solver methods. | Minutes to hours depending on backend. | Manual or self-hosted where hardware is needed. |
 | Scaling | Increase size or workload until timeout, memory pressure, or numerical failure. | Hardware dependent. | Manual, release-candidate, or local evidence. |
 | Stress | Hardware-specific limit finding and failure characterization. | Potentially long running. | Manual only. |
+
+## Runnable Commands and Outputs
+
+Run commands from `sagittarius_py`. The following commands implement the tiers above and make the expected evidence location explicit.
+
+| Tier | Command | Output |
+| :--- | :--- | :--- |
+| Smoke | `uv run python tests/test_performance/benchmark_physics_smoke.py --output-dir benchmark-output` | `physics_smoke` single-scenario artifacts and `physics_smoke_suite`. |
+| Correctness | `uv run python tests/test_performance/benchmark_phase16_validation.py --output-dir benchmark-output` | `cold_atom_dynamics` and `open_system_dynamics` artifacts with matching suite aggregates. |
+| Correctness | `uv run python tests/test_performance/benchmark_mwis_aqc.py --tier correctness --output-dir benchmark-output` | `mwis_aqc_correctness` artifacts and suite with deterministic ILP/AQC reference rows. |
+| Parity | `SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python tests/test_performance/benchmark_cuda_mwis_protocol.py --output-dir benchmark-output` | `cuda_parity` and `mwis_gpu_parity` artifacts/suites, including retained skipped or doctor-failure rows. |
+| Scaling | `uv run python tests/test_performance/benchmark_scaling.py` | `scaling_results` JSON/CSV/Markdown in the working directory; no suite wrapper. |
+| Stress | `uv run python tests/test_performance/benchmark_ablation.py --atom-count 12 --repeats 50 --output-dir benchmark-output` | `ablation_bench_results` JSON/CSV/Markdown, including structured failure context where a path cannot run. |
+
+The local, resumable sweep runner is also a scaling evidence path: `uv run python tests/test_performance/benchmark_sweep_cluster.py --output-dir benchmark-output` writes `sweep_cluster` and `sweep_cluster_suite` plus its `sweep-artifact/v1` checkpoint and final aggregate.
 
 ## Smoke Tier
 
