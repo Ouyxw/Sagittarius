@@ -62,10 +62,10 @@ Before accepting release-oriented documentation changes, run `python3 scripts/va
 
 | Spec ID | Document | Purpose | Roadmap link | Status | Update when |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| - | [`benchmarks/README.md`](../benchmarks/README.md) | Phase 16 benchmark protocol index and evidence-level routing. | Phase 16 | Mixed | Benchmark document set, evidence levels, or governance references change. |
-| - | [`benchmarks/protocol.md`](../benchmarks/protocol.md) | Cross-suite benchmark execution protocol, correctness-before-performance rules, and evidence classification. | Phase 16 | Mixed | Benchmark execution stages, pre-run metadata, warmup discipline, or evidence classes change. |
-| - | [`benchmarks/tiers.md`](../benchmarks/tiers.md) | Smoke, correctness, parity, scaling, and stress tier requirements. | Phase 16 | Mixed | Tier definitions, CI policy, local GPU protocol, or scale-limit rules change. |
-| - | [`benchmarks/families.md`](../benchmarks/families.md) | Family-specific benchmark protocols for physics, dynamics, open systems, optimization, backend performance, and sweeps. | Phase 16 | Mixed | Benchmark families, scenario coverage, correctness gates, or required evidence change. |
+| - | [`benchmarks/README.md`](../benchmarks/README.md) | Phase 16 benchmark protocol index and evidence-level routing. | Phase 16 | Current | Benchmark document set, evidence levels, or governance references change. |
+| - | [`benchmarks/protocol.md`](../benchmarks/protocol.md) | Cross-suite benchmark execution protocol, correctness-before-performance rules, and evidence classification. | Phase 16 | Current | Benchmark execution stages, pre-run metadata, warmup discipline, or evidence classes change. |
+| - | [`benchmarks/tiers.md`](../benchmarks/tiers.md) | Smoke, correctness, parity, scaling, and stress tier requirements. | Phase 16 | Current | Tier definitions, CI policy, local GPU protocol, or scale-limit rules change. |
+| - | [`benchmarks/families.md`](../benchmarks/families.md) | Family-specific benchmark protocols for physics, dynamics, open systems, optimization, backend performance, and sweeps. | Phase 16 | Current | Benchmark families, scenario coverage, correctness gates, or required evidence change. |
 | - | [`benchmarks/artifact-contracts.md`](../benchmarks/artifact-contracts.md) | Phase 16 aggregate artifact, row, metric, failure, and evidence-retention expectations. | Phase 16 | Current | Benchmark artifact schemas, metric names, failure rows, or retention rules change. |
 
 ## Development Workflows

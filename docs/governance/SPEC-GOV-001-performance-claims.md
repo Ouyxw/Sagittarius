@@ -4,7 +4,7 @@ Spec ID: `SPEC-GOV-001`
 Status: `Policy`
 Roadmap: Phase 10
 Version: `performance-claims-policy/v1`
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-12
 
 
 Sagittarius performance statements must be tied to reproducible benchmark artifacts. Use this page as the review checklist before publishing README text, reports, plots, release notes, or hardware-facing summaries.
@@ -39,6 +39,8 @@ Use capability wording for unmeasured paths:
 - "MWIS examples are research scaffolding; exact correctness should be checked with `batch_verify.py` or another exact baseline."
 
 ## Current Artifact Sources
+
+The retained [Phase 16 closure archive](../benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md) records local, reviewable execution evidence. It is not release-grade evidence and must not be cited publicly without the disclosure workflow below.
 
 The repository scripts that produce claim-ready artifacts are:
 

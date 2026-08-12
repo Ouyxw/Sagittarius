@@ -146,8 +146,12 @@ def benchmark_ablation_modes(
         elapsed, sparse_result = _time_repeated_matvec(full_sparse, full_state, repeats, warmups)
         rows.append(_row(mode="full_sparse", status="ok", atom_count=atom_count, full_dim=full_dim, basis_size=full_dim, repeats=repeats, total_time_s=elapsed))
         full_reference_error = float(np.max(np.abs(dense_result - sparse_result))) if full_dim else 0.0
-        rows[-2]["reference_error"] = full_reference_error
-        rows[-1]["reference_error"] = full_reference_error
+        full_reference_scale = float(max(np.max(np.abs(dense_result)), np.max(np.abs(sparse_result)), 1.0)) if full_dim else 1.0
+        full_reference_relative_error = full_reference_error / full_reference_scale
+        for row in rows[-2:]:
+            row["reference_error"] = full_reference_error
+            row["reference_scale"] = full_reference_scale
+            row["reference_relative_error"] = full_reference_relative_error
     else:
         reason = f"full_dim {full_dim} exceeds max_full_dim {max_full_dim}"
         rows.append(_row(mode="full_dense", status="skipped", atom_count=atom_count, full_dim=full_dim, basis_size=full_dim, repeats=repeats, reason=reason))

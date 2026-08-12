@@ -27,6 +27,7 @@ from sagittarius.ablation import benchmark_ablation_modes
 FAMILY = "backend_performance"
 TIER = "correctness"
 PATH_ATOL = 1e-10
+FULL_PATH_RTOL = 1e-12
 METHOD_ATOL = 1e-6
 OBSERVABLES = {"names": ["pop0"], "count": 1, "output_sample_count": 9}
 BACKEND = {"requested_backend": "CPU", "path": "cpu"}
@@ -75,15 +76,18 @@ def _path_rows(*, repeat_count: int, ablation_repeats: int) -> list[dict[str, An
                 ))
                 continue
             reference_error = raw.get("reference_error")
-            reference_atol = 1e-7 if raw["mode"] in {"full_dense", "full_sparse"} else PATH_ATOL
-            if reference_error is None or reference_error > reference_atol:
-                rows.append(_failed_row(scenario_id, problem, solver, AssertionError(f"{raw['mode']} reference error {reference_error!r} exceeds {reference_atol}"), stage="validation"))
+            full_path = raw["mode"] in {"full_dense", "full_sparse"}
+            reference_metric = raw.get("reference_relative_error") if full_path else reference_error
+            reference_atol = FULL_PATH_RTOL if full_path else PATH_ATOL
+            metric_name = "reference_relative_error" if full_path else "reference_error"
+            if reference_metric is None or reference_metric > reference_atol:
+                rows.append(_failed_row(scenario_id, problem, solver, AssertionError(f"{raw['mode']} {metric_name} {reference_metric!r} exceeds {reference_atol}"), stage="validation"))
                 continue
             rows.append(make_benchmark_row(
                 row_id=f"{FAMILY}-{TIER}-{scenario_id}", scenario_id=scenario_id,
                 family=FAMILY, tier=TIER, status="passed", stage="validation",
                 problem=problem, solver=solver, backend={"requested_backend": raw["backend"], "path": raw["mode"]}, observables={"names": [], "count": 0, "output_sample_count": 0},
-                metrics={"repeat_index": repeat_index, "reference_error": reference_error, "reference_atol": reference_atol, "total_time_seconds": raw["total_time_s"], "time_per_operation_seconds": raw["time_per_operation_s"], "basis_size": raw["basis_size"], "full_dim": raw["full_dim"]},
+                metrics={"repeat_index": repeat_index, "reference_error": reference_error, "reference_relative_error": raw.get("reference_relative_error"), "reference_gate_metric": metric_name, "reference_gate_value": reference_metric, "reference_atol": reference_atol, "total_time_seconds": raw["total_time_s"], "time_per_operation_seconds": raw["time_per_operation_s"], "basis_size": raw["basis_size"], "full_dim": raw["full_dim"]},
                 disclosure_status="local_only",
             ))
     return rows
@@ -145,7 +149,7 @@ def benchmark_solver_performance(output_dir: str | Path = "benchmark-output", *,
     artifact = write_benchmark_artifacts(
         output_dir=output, stem="solver_performance", name="Phase 16 solver and execution-path correctness benchmark",
         description="Repeated CPU dense/sparse/reduced path checks and Tsit5/Vern9/RK4 trajectory checks. Runtime values are local diagnostics only.",
-        parameters={"reduced_path_reference_atol": PATH_ATOL, "full_path_reference_atol": 1e-7, "method_reference_atol": METHOD_ATOL, "repeat_count": repeat_count, "ablation_repeats": ablation_repeats, "gpu_cache_policy": "reported as skipped unless an opt-in CUDA protocol validates it"},
+        parameters={"reduced_path_reference_atol": PATH_ATOL, "full_path_reference_rtol": FULL_PATH_RTOL, "method_reference_atol": METHOD_ATOL, "repeat_count": repeat_count, "ablation_repeats": ablation_repeats, "gpu_cache_policy": "reported as skipped unless an opt-in CUDA protocol validates it"},
         rows=rows, backend="CPU", diagnostics=diagnostics, run_manifests=manifests,
         columns=["row_id", "scenario_id", "status", "stage", "problem", "solver", "metrics", "artifacts", "failure"],
         benchmark_context={"protocol_version": "benchmark-protocol/v1", "family": FAMILY, "tier": TIER, "warmup_runs": 1, "measured_repeats": repeat_count, "disclosure_status": "local_only"},
@@ -153,7 +157,7 @@ def benchmark_solver_performance(output_dir: str | Path = "benchmark-output", *,
     artifact["suite"] = write_benchmark_suite_artifact(
         output_dir=output, stem="solver_performance_suite", suite_id="phase16-solver-performance-correctness",
         family=FAMILY, tier=TIER, rows=rows, source=artifact["artifact"]["versions"],
-        environment={"doctor": diagnostics}, scenario_defaults={"backend": "CPU", "reduced_path_reference_atol": PATH_ATOL, "full_path_reference_atol": 1e-7, "method_reference_atol": METHOD_ATOL},
+        environment={"doctor": diagnostics}, scenario_defaults={"backend": "CPU", "reduced_path_reference_atol": PATH_ATOL, "full_path_reference_rtol": FULL_PATH_RTOL, "method_reference_atol": METHOD_ATOL},
     )
     return artifact
 

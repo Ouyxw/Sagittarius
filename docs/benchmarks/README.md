@@ -1,11 +1,13 @@
 # Benchmark Protocols
 
-Status: `Mixed`
+Status: `Done`
 Roadmap: Phase 16
 Version: `benchmark-protocols/v1`
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-12
 
 This directory defines the Phase 16 benchmark protocols for Sagittarius. It translates the roadmap benchmark suite into runnable tiers, benchmark families, artifact requirements, and evidence-retention rules.
+
+The initial suite was closed with [retained Phase 16 evidence](evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md); it is reviewable local evidence, not a public performance claim.
 
 These documents complement the governance pages:
 

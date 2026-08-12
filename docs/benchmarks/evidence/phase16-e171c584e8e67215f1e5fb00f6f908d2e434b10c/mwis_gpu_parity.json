@@ -1,0 +1,777 @@
+{
+  "artifact_type": "sagittarius.benchmark",
+  "artifacts": {
+    "csv": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/mwis_gpu_parity.csv",
+    "markdown": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/mwis_gpu_parity.md"
+  },
+  "benchmark_context": {
+    "disclosure_status": "local_only",
+    "failure_policy": "Retain opt-in skips, CUDA doctor failures, and scenario failures as structured rows.",
+    "family": "optimization_aqc",
+    "protocol_version": "benchmark-protocol/v1",
+    "tier": "parity"
+  },
+  "created_at": "2026-08-12T09:41:32.966949+00:00",
+  "description": "Opt-in CPU/CUDA parity evidence. Runtime values are local diagnostics only.",
+  "diagnostics": {
+    "available": true,
+    "backend_maturity": {
+      "AMDGPU": {
+        "notes": "Julia package hook exists, but parity and container tests are not established.",
+        "status": "planned"
+      },
+      "CPU": {
+        "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+        "status": "stable"
+      },
+      "CUDA": {
+        "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+        "status": "experimental"
+      },
+      "METAL": {
+        "notes": "Julia package hook exists, but parity and CI coverage are not established.",
+        "status": "planned"
+      }
+    },
+    "backend_probe": {
+      "abi": {
+        "backend": "CUDA",
+        "driver": {
+          "version": "13.1.0"
+        },
+        "julia": {
+          "version": "1.11.9"
+        },
+        "package_versions": {
+          "CUDA.jl": "6.2.0"
+        },
+        "runtime": {
+          "version": "12.8.0"
+        }
+      },
+      "available": true,
+      "backend": "CUDA",
+      "checks": {
+        "cuda_functional": {
+          "code": "CUDA_DRIVER_RUNTIME_MISMATCH",
+          "message": "CUDA.jl functional runtime check.",
+          "ok": true,
+          "severity": "error"
+        },
+        "cudajl_version_recommended": {
+          "code": null,
+          "message": "CUDA.jl >= 6.2.0 is recommended for CUDA 12.8+/Blackwell workflows.",
+          "ok": true,
+          "severity": "info"
+        },
+        "device_allocation": {
+          "code": "GPU_ALLOCATION_FAILED",
+          "message": "Minimal CUDA array allocation.",
+          "ok": true,
+          "severity": "error"
+        },
+        "device_visible": {
+          "code": "GPU_DEVICE_NOT_FOUND",
+          "message": "CUDA device enumeration.",
+          "ok": true,
+          "severity": "error"
+        },
+        "julia_package_versions": {
+          "code": null,
+          "message": "Collected Julia package versions.",
+          "ok": true,
+          "severity": "info"
+        },
+        "package_loadable": {
+          "code": null,
+          "message": "CUDA.jl loaded.",
+          "ok": true,
+          "severity": "info"
+        },
+        "sparse_backend": {
+          "code": "GPU_SPARSE_BACKEND_UNAVAILABLE",
+          "message": "CUDA sparse backend availability.",
+          "ok": true,
+          "severity": "error"
+        },
+        "sparse_matvec": {
+          "code": null,
+          "message": "CPU sparse matrix-vector multiplication probe.",
+          "ok": true,
+          "severity": "error"
+        }
+      },
+      "devices": [
+        {
+          "compute_capability": "12.0.0",
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 5070 Ti",
+          "total_memory_bytes": "17094475776"
+        }
+      ],
+      "driver": {},
+      "errors": [],
+      "runtime": {
+        "cuda_functional": true,
+        "driver_version": "13.1.0",
+        "runtime_version": "12.8.0"
+      },
+      "schema_version": "backend-probe/v2.1",
+      "versions": {
+        "CUDA": "6.2.0",
+        "CUDA.jl": "6.2.0",
+        "DiffEqCallbacks": "4.18.3",
+        "OrdinaryDiffEq": "7.1.3",
+        "OrdinaryDiffEqLowOrderRK": "2.2.1",
+        "SciMLBase": "3.35.2",
+        "StaticArrays": "1.9.18",
+        "julia": "1.11.9"
+      }
+    },
+    "backend_source": "source_checkout",
+    "capabilities": {
+      "abi": {
+        "backend": "CUDA",
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "591.86"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "driver": {
+          "version": "591.86"
+        },
+        "host": {
+          "julia": {
+            "available": true,
+            "path_env": null,
+            "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+            "sagittarius_julia_version": "1.0.8",
+            "source": "source_checkout",
+            "version": "1.11.9"
+          },
+          "python": {
+            "cache_tag": "cpython-310",
+            "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+            "implementation": "CPython",
+            "libc": {
+              "name": "glibc",
+              "version": "2.35"
+            },
+            "machine": "x86_64",
+            "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+            "processor": "x86_64",
+            "system": "Linux",
+            "version": "3.10.12"
+          }
+        },
+        "maturity": {
+          "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+          "status": "experimental"
+        },
+        "runtime": {
+          "nvcc": {
+            "missing": false,
+            "ok": true,
+            "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+            "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+            "returncode": 0
+          }
+        },
+        "toolchain": {
+          "compatibility": {
+            "blackwell_detected": true,
+            "blackwell_devices": [
+              {
+                "compute_capability": "12.0",
+                "driver_version": "591.86",
+                "memory_total_mib": "16303",
+                "name": "NVIDIA GeForce RTX 5070 Ti"
+              }
+            ],
+            "cuda_12_8_driver_ok": true,
+            "cuda_12_8_min_linux_driver": "570.26",
+            "cuda_12_8_min_windows_driver": "570.65",
+            "driver_version": "591.86"
+          },
+          "devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "nvcc": {
+            "missing": false,
+            "ok": true,
+            "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+            "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+            "returncode": 0
+          },
+          "nvidia_smi": {
+            "missing": false,
+            "ok": true,
+            "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "query_fields": [
+              "name",
+              "driver_version",
+              "memory.total",
+              "compute_cap"
+            ],
+            "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "returncode": 0
+          }
+        }
+      },
+      "backend": "CUDA",
+      "maturity": {
+        "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+        "status": "experimental"
+      },
+      "parity": {
+        "hardware_validated_by_doctor": false,
+        "notes": "doctor(backend='CUDA', initialize_backend=True) checks runtime capability. CPU/GPU numerical parity is validated separately by the opt-in CUDA parity suite.",
+        "status": "opt_in_hardware_parity_suite",
+        "test_entrypoints": [
+          "SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python -m pytest tests/test_gpu_acceleration.py"
+        ]
+      }
+    },
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "gpu": {
+      "compatibility": {
+        "blackwell_detected": true,
+        "blackwell_devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "cuda_12_8_driver_ok": true,
+        "cuda_12_8_min_linux_driver": "570.26",
+        "cuda_12_8_min_windows_driver": "570.65",
+        "driver_version": "591.86"
+      },
+      "devices": [
+        {
+          "compute_capability": "12.0",
+          "driver_version": "591.86",
+          "memory_total_mib": "16303",
+          "name": "NVIDIA GeForce RTX 5070 Ti"
+        }
+      ],
+      "driver": {
+        "version": "591.86"
+      },
+      "nvcc": {
+        "missing": false,
+        "ok": true,
+        "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+        "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+        "returncode": 0
+      },
+      "nvidia_smi": {
+        "missing": false,
+        "ok": true,
+        "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+        "query_fields": [
+          "name",
+          "driver_version",
+          "memory.total",
+          "compute_cap"
+        ],
+        "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+        "returncode": 0
+      }
+    },
+    "issue_details": [],
+    "issues": [],
+    "julia_backend": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": "1.11.9"
+    },
+    "julia_loaded": true,
+    "requested_backend": "CUDA",
+    "runtime": {
+      "abi": {
+        "julia": {
+          "available": true,
+          "path_env": null,
+          "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+          "sagittarius_julia_version": "1.0.8",
+          "source": "source_checkout",
+          "version": "1.11.9"
+        },
+        "python": {
+          "cache_tag": "cpython-310",
+          "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+          "implementation": "CPython",
+          "libc": {
+            "name": "glibc",
+            "version": "2.35"
+          },
+          "machine": "x86_64",
+          "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+          "processor": "x86_64",
+          "system": "Linux",
+          "version": "3.10.12"
+        }
+      },
+      "backend_toolchains": {
+        "AMDGPU": {
+          "rocm_smi": {
+            "missing": true,
+            "ok": false,
+            "output": null,
+            "returncode": null
+          }
+        },
+        "CUDA": {
+          "compatibility": {
+            "blackwell_detected": true,
+            "blackwell_devices": [
+              {
+                "compute_capability": "12.0",
+                "driver_version": "591.86",
+                "memory_total_mib": "16303",
+                "name": "NVIDIA GeForce RTX 5070 Ti"
+              }
+            ],
+            "cuda_12_8_driver_ok": true,
+            "cuda_12_8_min_linux_driver": "570.26",
+            "cuda_12_8_min_windows_driver": "570.65",
+            "driver_version": "591.86"
+          },
+          "devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "nvcc": {
+            "missing": false,
+            "ok": true,
+            "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+            "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+            "returncode": 0
+          },
+          "nvidia_smi": {
+            "missing": false,
+            "ok": true,
+            "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "query_fields": [
+              "name",
+              "driver_version",
+              "memory.total",
+              "compute_cap"
+            ],
+            "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "returncode": 0
+          }
+        },
+        "METAL": {
+          "metal_compiler": {
+            "missing": true,
+            "ok": false,
+            "output": null,
+            "returncode": null
+          }
+        }
+      },
+      "build": {
+        "build_id": null,
+        "build_number": null,
+        "ci": false,
+        "source": {
+          "git_branch": "feature/benchmarking",
+          "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+          "git_commit_short": "e171c58",
+          "git_dirty": true,
+          "root": "/workspaces/Sagittarius"
+        }
+      },
+      "container": {
+        "detected": true,
+        "devcontainer": true,
+        "id": "07f419671ddf",
+        "image": null
+      },
+      "in_container": true,
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": "1.11.9"
+      },
+      "julia_version": "1.11.9",
+      "package_version": "1.0.8",
+      "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+      "python": {
+        "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "packages": {
+          "docplex": "2.32.264",
+          "juliacall": "0.9.35",
+          "juliapkg": "0.1.24",
+          "matplotlib": "3.10.9",
+          "networkx": "3.4.2",
+          "numpy": "2.2.6",
+          "pandas": "2.3.3",
+          "pulp": "3.3.2",
+          "sagittarius-py": "1.0.8",
+          "scipy": "1.15.3",
+          "seaborn": "0.13.2"
+        },
+        "version": "3.10.12"
+      },
+      "python_version": "3.10.12",
+      "sagittarius_julia_version": "1.0.8",
+      "schema_version": "version-info/v1"
+    },
+    "schema_version": "doctor/v2.1"
+  },
+  "hardware": {
+    "backend_devices": [
+      {
+        "compute_capability": "12.0.0",
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 5070 Ti",
+        "total_memory_bytes": "17094475776"
+      }
+    ],
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "gpu": {
+      "compatibility": {
+        "blackwell_detected": true,
+        "blackwell_devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "cuda_12_8_driver_ok": true,
+        "cuda_12_8_min_linux_driver": "570.26",
+        "cuda_12_8_min_windows_driver": "570.65",
+        "driver_version": "591.86"
+      },
+      "devices": [
+        {
+          "compute_capability": "12.0",
+          "driver_version": "591.86",
+          "memory_total_mib": "16303",
+          "name": "NVIDIA GeForce RTX 5070 Ti"
+        }
+      ],
+      "driver": {
+        "version": "591.86"
+      },
+      "nvcc": {
+        "missing": false,
+        "ok": true,
+        "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+        "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+        "returncode": 0
+      },
+      "nvidia_smi": {
+        "missing": false,
+        "ok": true,
+        "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+        "query_fields": [
+          "name",
+          "driver_version",
+          "memory.total",
+          "compute_cap"
+        ],
+        "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+        "returncode": 0
+      }
+    },
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35"
+  },
+  "markdown_table": "| row_id | scenario_id | status | stage | problem | solver | backend | metrics | artifacts | failure |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| optimization_aqc-parity-weighted_udg_n2_seed3_cpu_cuda | weighted_udg_n2_seed3_cpu_cuda | passed | validation | {'problem_type': 'weighted_unit_disk_mwis', 'atom_count': 2, 'instance_seed': 3, 'density': 1.0, 'blockade_radius': 1.0, 'edge_list': [[0, 1]], 'node_weights': [1.4006372326031984, 1.2165634701182368]} | {'solver_type': 'MWIS_AQC', 'reference_solver': 'PuLP_CBC_ILP', 'duration': 0.1, 'warmup_runs': 1, 'measured_repeats': 1} | {'requested_backend': 'CUDA', 'path': 'cpu_cuda_parity', 'devices': [{'name': 'NVIDIA GeForce RTX 5070 Ti', 'total_memory_bytes': '17094475776', 'compute_capability': '12.0.0', 'index': 0}], 'driver_version': '13.1.0', 'cuda_runtime_version': '12.8.0', 'cuda_jl_version': '6.2.0', 'julia_version': '1.11.9'} | {'ilp_status': 'Optimal', 'exact_objective': 1.4006372326031984, 'cuda_feasible': True, 'cuda_objective': 0.0, 'cuda_objective_gap': 1.4006372326031984, 'cpu_cuda_probability_max_abs_error': 0.0, 'parity_atol': 1e-06, 'parity_passed': True, 'cpu_seconds': 0.7924466069998743, 'cuda_cold_start_seconds': 0.7344614880021254, 'cuda_warm_seconds': 0.7177990269992733, 'gpu_memory_before': {'total_bytes': 'missing', 'available_bytes': 'missing', 'used_bytes': 'missing'}, 'gpu_memory_after_cold': {'total_bytes': 'missing', 'available_bytes': 'missing', 'used_bytes': 'missing'}, 'gpu_memory_after_warm': {'total_bytes': 'missing', 'available_bytes': 'missing', 'used_bytes': 'missing'}, 'total_runtime_seconds': 2.984573686000658} | {'run_manifest': None, 'result_artifact': None, 'reference_report': '/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/weighted_udg_n2_seed3_cpu_cuda.reference.json'} | None |",
+  "memory": {
+    "available": true,
+    "max_rss": 3152120,
+    "max_rss_unit": "KiB on Linux, bytes on macOS"
+  },
+  "name": "Phase 16 CUDA optimization_aqc parity protocol",
+  "parameters": {
+    "doctor_initialize_backend": true,
+    "opt_in_environment_variable": "SAGITTARIUS_ENABLE_GPU_TESTS=1"
+  },
+  "run_manifests": [],
+  "schema_version": "benchmark-artifact/v1",
+  "timings": [
+    {
+      "artifacts": {
+        "reference_report": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/weighted_udg_n2_seed3_cpu_cuda.reference.json",
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "cuda_jl_version": "6.2.0",
+        "cuda_runtime_version": "12.8.0",
+        "devices": [
+          {
+            "compute_capability": "12.0.0",
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 5070 Ti",
+            "total_memory_bytes": "17094475776"
+          }
+        ],
+        "driver_version": "13.1.0",
+        "julia_version": "1.11.9",
+        "path": "cpu_cuda_parity",
+        "requested_backend": "CUDA"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "optimization_aqc",
+      "metrics": {
+        "cpu_cuda_probability_max_abs_error": 0.0,
+        "cpu_seconds": 0.7924466069998743,
+        "cuda_cold_start_seconds": 0.7344614880021254,
+        "cuda_feasible": true,
+        "cuda_objective": 0.0,
+        "cuda_objective_gap": 1.4006372326031984,
+        "cuda_warm_seconds": 0.7177990269992733,
+        "exact_objective": 1.4006372326031984,
+        "gpu_memory_after_cold": {
+          "available_bytes": "missing",
+          "total_bytes": "missing",
+          "used_bytes": "missing"
+        },
+        "gpu_memory_after_warm": {
+          "available_bytes": "missing",
+          "total_bytes": "missing",
+          "used_bytes": "missing"
+        },
+        "gpu_memory_before": {
+          "available_bytes": "missing",
+          "total_bytes": "missing",
+          "used_bytes": "missing"
+        },
+        "ilp_status": "Optimal",
+        "parity_atol": 1e-06,
+        "parity_passed": true,
+        "total_runtime_seconds": 2.984573686000658
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "pop0"
+        ],
+        "output_sample_count": null
+      },
+      "problem": {
+        "atom_count": 2,
+        "blockade_radius": 1.0,
+        "density": 1.0,
+        "edge_list": [
+          [
+            0,
+            1
+          ]
+        ],
+        "instance_seed": 3,
+        "node_weights": [
+          1.4006372326031984,
+          1.2165634701182368
+        ],
+        "problem_type": "weighted_unit_disk_mwis"
+      },
+      "row_id": "optimization_aqc-parity-weighted_udg_n2_seed3_cpu_cuda",
+      "scenario_id": "weighted_udg_n2_seed3_cpu_cuda",
+      "solver": {
+        "duration": 0.1,
+        "measured_repeats": 1,
+        "reference_solver": "PuLP_CBC_ILP",
+        "solver_type": "MWIS_AQC",
+        "warmup_runs": 1
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "parity"
+    }
+  ],
+  "versions": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": "1.11.9"
+      },
+      "python": {
+        "cache_tag": "cpython-310",
+        "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.35"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.10.12"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "591.86"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "nvcc": {
+          "missing": false,
+          "ok": true,
+          "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+          "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+          "returncode": 0
+        },
+        "nvidia_smi": {
+          "missing": false,
+          "ok": true,
+          "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "query_fields": [
+            "name",
+            "driver_version",
+            "memory.total",
+            "compute_cap"
+          ],
+          "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "returncode": 0
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+        "git_commit_short": "e171c58",
+        "git_dirty": true,
+        "root": "/workspaces/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "in_container": true,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": "1.11.9"
+    },
+    "julia_version": "1.11.9",
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": {
+      "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.4.2",
+        "numpy": "2.2.6",
+        "pandas": "2.3.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.15.3",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.10.12"
+    },
+    "python_version": "3.10.12",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  }
+}

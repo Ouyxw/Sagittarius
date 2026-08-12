@@ -46,6 +46,22 @@ TIER = "parity"
 OBSERVABLES = {"names": ["pop0"], "count": 1, "output_sample_count": None}
 
 
+def _json_native(value: Any) -> Any:
+    """Normalize Julia bridge mappings before writing benchmark artifacts.
+
+    ``juliacall.DictValue`` exposes ``items()`` but is not a Python
+    ``Mapping``. Artifact writers require JSON-native values, so retain its
+    structured device fields instead of leaking a bridge object into a row.
+    """
+    if isinstance(value, Mapping):
+        return {str(key): _json_native(item) for key, item in value.items()}
+    if hasattr(value, "items"):
+        return {str(key): _json_native(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_native(item) for item in value]
+    return value
+
+
 def _enabled() -> bool:
     return os.environ.get("SAGITTARIUS_ENABLE_GPU_TESTS") == "1"
 
@@ -304,7 +320,7 @@ def benchmark_cuda_mwis_protocol(
         parity_row = _skip_row(family=PARITY_FAMILY, scenario_id="chain_n3_cpu_cuda", problem=parity_problem, solver=parity_solver)
         mwis_row = _skip_row(family=MWIS_FAMILY, scenario_id="weighted_udg_n2_seed3_cpu_cuda", problem=mwis_problem, solver=mwis_solver)
     else:
-        report = doctor_fn(backend="CUDA", initialize_backend=True)
+        report = _json_native(doctor_fn(backend="CUDA", initialize_backend=True))
         if not report.get("available"):
             parity_row = _doctor_failure_row(family=PARITY_FAMILY, scenario_id="chain_n3_cpu_cuda", problem=parity_problem, solver=parity_solver, report=report)
             mwis_row = _doctor_failure_row(family=MWIS_FAMILY, scenario_id="weighted_udg_n2_seed3_cpu_cuda", problem=mwis_problem, solver=mwis_solver, report=report)

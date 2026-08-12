@@ -1,0 +1,117 @@
+{
+  "aqc": {
+    "bitstring": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "feasible": true,
+    "optimal_probability": 8.332554166283286e-06,
+    "solve_seconds": 0.6992912799978512,
+    "weight": 0.0
+  },
+  "exact": {
+    "bitstring": [
+      0,
+      1,
+      0,
+      1,
+      1,
+      1
+    ],
+    "solve_seconds": 0.0029685710032936186,
+    "solver": "PuLP_CBC_ILP",
+    "status": "Optimal",
+    "weight": 4.604437821669677
+  },
+  "graph": {
+    "average_degree": 1.3333333333333333,
+    "edge_count": 4,
+    "edges": [
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ]
+    ],
+    "graph_sha256": "58587bd8c43a59294a7dfb8e0f90c2326e85fb728e63c99246c05a3037ba9798",
+    "nodes": [
+      {
+        "node": 0,
+        "position": [
+          0.8563182995799793,
+          0.6143207529587601
+        ],
+        "weight": 1.0910048640471526
+      },
+      {
+        "node": 1,
+        "position": [
+          2.355696238378823,
+          2.348476824525201
+        ],
+        "weight": 1.051781216790237
+      },
+      {
+        "node": 2,
+        "position": [
+          0.7917051247195884,
+          1.8117888246917322
+        ],
+        "weight": 1.3506478818146206
+      },
+      {
+        "node": 3,
+        "position": [
+          1.2013746661750795,
+          1.3183862810076168
+        ],
+        "weight": 1.3699915721707148
+      },
+      {
+        "node": 4,
+        "position": [
+          1.2021526862914966,
+          2.628720030132044
+        ],
+        "weight": 1.1547295213529636
+      },
+      {
+        "node": 5,
+        "position": [
+          0.306197776574305,
+          0.6935246270850883
+        ],
+        "weight": 1.0279355113557622
+      }
+    ]
+  },
+  "scenario": {
+    "density": 0.8,
+    "duration": 0.15,
+    "n_nodes": 6,
+    "scenario_id": "udg_weighted_n6_seed103",
+    "seed": 103
+  },
+  "schedule": {
+    "delta_end": "2*pi*node_weight",
+    "delta_start": -12.566370614359172,
+    "duration": 0.15,
+    "omega": "sin_squared",
+    "omega_max": 6.283185307179586
+  }
+}

@@ -24,6 +24,21 @@ def _row(paths, family):
     return artifact["timings"][0]
 
 
+def test_cuda_protocol_normalizes_juliacall_style_device_mappings():
+    class JuliaLikeDict:
+        def items(self):
+            return (("name", "test GPU"), ("nested", JuliaLikeDictLeaf()))
+
+    class JuliaLikeDictLeaf:
+        def items(self):
+            return (("index", 0),)
+
+    assert RUNNER._json_native(JuliaLikeDict()) == {
+        "name": "test GPU",
+        "nested": {"index": 0},
+    }
+
+
 def test_cuda_protocol_is_opt_in_and_retains_skipped_rows(tmp_path, monkeypatch):
     monkeypatch.delenv("SAGITTARIUS_ENABLE_GPU_TESTS", raising=False)
     calls = []

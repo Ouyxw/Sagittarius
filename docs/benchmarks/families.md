@@ -1,9 +1,9 @@
 # Benchmark Families
 
-Status: `Mixed implementation`
+Status: `Done`
 Roadmap: Phase 16
 Version: `benchmark-families/v1`
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-12
 
 This page defines the benchmark-family protocols for Phase 16. A family is a stable group of scenarios with shared correctness gates, metadata, and interpretation rules.
 
@@ -117,7 +117,7 @@ Initial protocol items:
 
 Current CUDA protocol: `tests/test_performance/benchmark_cuda_mwis_protocol.py` is opt-in (`SAGITTARIUS_ENABLE_GPU_TESTS=1`) and calls `doctor(backend="CUDA", initialize_backend=True)` before importing or executing CUDA paths. It emits a small CPU/CUDA chain parity row and a seeded weighted-MWIS CPU/CUDA row with device, driver, CUDA.jl/runtime, and Julia metadata; cold/warm timing; GPU-memory snapshots; parity error; and structured skipped/doctor/runtime failure rows. It is local diagnostic evidence only.
 
-Current solver/path protocol: `tests/test_performance/benchmark_solver_performance.py` repeats full dense, full sparse, reduced matrix-free, and reduced sparse matvec paths; it records a skipped cached-GPU row until the opt-in CUDA protocol validates that backend. Full-path repeated matvec comparison uses a `1e-7` numerical gate; reduced paths use `1e-10`. Tsit5, Vern9, and fixed-step RK4 trajectories use a high-accuracy Tsit5 trajectory reference with a `1e-6` gate and retain result/manifest links.
+Current solver/path protocol: `tests/test_performance/benchmark_solver_performance.py` repeats full dense, full sparse, reduced matrix-free, and reduced sparse matvec paths; it records a skipped cached-GPU row until the opt-in CUDA protocol validates that backend. Full-path repeated matvec comparison uses a `1e-12` relative-error gate with its absolute error and scale retained; reduced paths use `1e-10` absolute error. Tsit5, Vern9, and fixed-step RK4 trajectories use a high-accuracy Tsit5 trajectory reference with a `1e-6` gate and retain result/manifest links.
 
 Required evidence:
 

@@ -4,7 +4,7 @@ Spec ID: `SPEC-GOV-002`
 Status: `Policy`
 Roadmap: Phase 10
 Version: `disclosure-control-policy/v1`
-Last reviewed: 2026-06-30
+Last reviewed: 2026-08-12
 
 
 This tracker records planned and completed public disclosures that may affect Sagittarius patent strategy, performance claims, or prior-art positioning. It is an engineering control document, not legal advice. Use it before publishing release notes, benchmark reports, papers, talks, blog posts, demo videos, public repositories, or hardware-demo materials.
@@ -28,6 +28,7 @@ Every planned disclosure should record:
 | ID | Status | Planned public date | Actual public date | Type | Owner | Public target | Scope | Evidence / artifacts | Review notes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | DISC-0001 | Template | YYYY-MM-DD | TBD | Benchmark report | TBD | TBD | Example: CUDA ablation report for specific hardware/configuration. | `benchmark-artifact/v1` path, `version-info/v1`, run manifests. | Complete performance and prior-art review before publication. |
+| DISC-0002 | Draft | N/A (internal closure) | TBD | Phase closure evidence | Sagittarius maintainers | Internal repository archive | Phase 16 benchmark closure on commit `e171c58`; all rows remain `local_only`. | `docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/`; benchmark, suite, manifest, result, and reference artifacts. | No public release, README claim, report, or hardware conclusion is authorized. Complete governance and prior-art review before any external use. |
 
 Status values:
 

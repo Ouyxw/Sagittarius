@@ -1,0 +1,23 @@
+{
+  "atol": 1e-08,
+  "atom_count": 4,
+  "basis": [
+    0,
+    1,
+    2,
+    4,
+    5,
+    8,
+    9,
+    10
+  ],
+  "blockade_radius": 0.6,
+  "duration": 0.4,
+  "full_basis_size": 16,
+  "max_hamiltonian_error": 0.0,
+  "max_state_error": 0.0,
+  "ok": true,
+  "reduced_basis_pruning_ratio": 0.5,
+  "reduced_basis_size": 8,
+  "schema_version": "dense-vs-reduced-validation/v1"
+}

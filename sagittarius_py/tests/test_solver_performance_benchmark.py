@@ -28,7 +28,7 @@ def test_solver_performance_runner_retains_repeated_correctness_rows(tmp_path):
     assert suite["summary"]["total_rows"] == len(rows)
     for scenario_id in ("path-full_dense-repeat-0", "path-full_sparse-repeat-0", "path-reduced_matrix_free-repeat-0", "path-reduced_sparse-repeat-0"):
         row = by_scenario[scenario_id]
-        assert row["metrics"]["reference_error"] <= row["metrics"]["reference_atol"]
+        assert row["metrics"]["reference_gate_value"] <= row["metrics"]["reference_atol"]
     assert by_scenario["path-reduced_sparse_gpu_cached-repeat-0"]["status"] == "skipped"
     for method in ("tsit5", "vern9", "rk4"):
         row = by_scenario[f"solver-{method}-repeat-0"]

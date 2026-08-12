@@ -1,0 +1,1497 @@
+{
+  "artifact_type": "benchmark.suite",
+  "artifacts": {
+    "csv": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver_performance_suite.csv",
+    "json": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver_performance_suite.json",
+    "markdown": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver_performance_suite.md"
+  },
+  "diagnostics": [],
+  "environment": {
+    "doctor": {
+      "available": true,
+      "backend_maturity": {
+        "AMDGPU": {
+          "notes": "Julia package hook exists, but parity and container tests are not established.",
+          "status": "planned"
+        },
+        "CPU": {
+          "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+          "status": "stable"
+        },
+        "CUDA": {
+          "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+          "status": "experimental"
+        },
+        "METAL": {
+          "notes": "Julia package hook exists, but parity and CI coverage are not established.",
+          "status": "planned"
+        }
+      },
+      "backend_probe": {
+        "abi": {},
+        "available": true,
+        "backend": "CPU",
+        "checks": {
+          "julia_package_versions": {
+            "code": null,
+            "message": "Collected Julia package versions.",
+            "ok": true,
+            "severity": "info"
+          },
+          "sparse_matvec": {
+            "code": null,
+            "message": "CPU sparse matrix-vector multiplication probe.",
+            "ok": true,
+            "severity": "error"
+          }
+        },
+        "devices": [],
+        "driver": {},
+        "errors": [],
+        "runtime": {},
+        "schema_version": "backend-probe/v2.1",
+        "versions": {
+          "CUDA": "6.2.0",
+          "DiffEqCallbacks": "4.18.3",
+          "OrdinaryDiffEq": "7.1.3",
+          "OrdinaryDiffEqLowOrderRK": "2.2.1",
+          "SciMLBase": "3.35.2",
+          "StaticArrays": "1.9.18",
+          "julia": "1.11.9"
+        }
+      },
+      "backend_source": "source_checkout",
+      "capabilities": {
+        "abi": {
+          "backend": "CPU",
+          "compatibility": {},
+          "host": {
+            "julia": {
+              "available": true,
+              "path_env": null,
+              "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+              "sagittarius_julia_version": "1.0.8",
+              "source": "source_checkout",
+              "version": "1.11.9"
+            },
+            "python": {
+              "cache_tag": "cpython-310",
+              "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+              "implementation": "CPython",
+              "libc": {
+                "name": "glibc",
+                "version": "2.35"
+              },
+              "machine": "x86_64",
+              "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+              "processor": "x86_64",
+              "system": "Linux",
+              "version": "3.10.12"
+            }
+          },
+          "maturity": {
+            "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+            "status": "stable"
+          },
+          "toolchain": {}
+        },
+        "backend": "CPU",
+        "maturity": {
+          "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+          "status": "stable"
+        },
+        "parity": {
+          "hardware_validated_by_doctor": false,
+          "notes": "CPU execution is covered by the regular Python/Julia test suite; doctor() is a capability probe, not a numerical parity test.",
+          "status": "regular_test_suite",
+          "test_entrypoints": [
+            "sagittarius_py/tests/"
+          ]
+        }
+      },
+      "container": {
+        "detected": true,
+        "devcontainer": true,
+        "id": "07f419671ddf",
+        "image": null
+      },
+      "gpu": {},
+      "issue_details": [],
+      "issues": [],
+      "julia_backend": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": "1.11.9"
+      },
+      "julia_loaded": true,
+      "requested_backend": "CPU",
+      "runtime": {
+        "abi": {
+          "julia": {
+            "available": true,
+            "path_env": null,
+            "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+            "sagittarius_julia_version": "1.0.8",
+            "source": "source_checkout",
+            "version": "1.11.9"
+          },
+          "python": {
+            "cache_tag": "cpython-310",
+            "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+            "implementation": "CPython",
+            "libc": {
+              "name": "glibc",
+              "version": "2.35"
+            },
+            "machine": "x86_64",
+            "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+            "processor": "x86_64",
+            "system": "Linux",
+            "version": "3.10.12"
+          }
+        },
+        "backend_toolchains": {
+          "AMDGPU": {
+            "rocm_smi": {
+              "missing": true,
+              "ok": false,
+              "output": null,
+              "returncode": null
+            }
+          },
+          "CUDA": {
+            "compatibility": {
+              "blackwell_detected": true,
+              "blackwell_devices": [
+                {
+                  "compute_capability": "12.0",
+                  "driver_version": "591.86",
+                  "memory_total_mib": "16303",
+                  "name": "NVIDIA GeForce RTX 5070 Ti"
+                }
+              ],
+              "cuda_12_8_driver_ok": true,
+              "cuda_12_8_min_linux_driver": "570.26",
+              "cuda_12_8_min_windows_driver": "570.65",
+              "driver_version": "591.86"
+            },
+            "devices": [
+              {
+                "compute_capability": "12.0",
+                "driver_version": "591.86",
+                "memory_total_mib": "16303",
+                "name": "NVIDIA GeForce RTX 5070 Ti"
+              }
+            ],
+            "nvcc": {
+              "missing": false,
+              "ok": true,
+              "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+              "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+              "returncode": 0
+            },
+            "nvidia_smi": {
+              "missing": false,
+              "ok": true,
+              "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+              "query_fields": [
+                "name",
+                "driver_version",
+                "memory.total",
+                "compute_cap"
+              ],
+              "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+              "returncode": 0
+            }
+          },
+          "METAL": {
+            "metal_compiler": {
+              "missing": true,
+              "ok": false,
+              "output": null,
+              "returncode": null
+            }
+          }
+        },
+        "build": {
+          "build_id": null,
+          "build_number": null,
+          "ci": false,
+          "source": {
+            "git_branch": "feature/benchmarking",
+            "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+            "git_commit_short": "e171c58",
+            "git_dirty": true,
+            "root": "/workspaces/Sagittarius"
+          }
+        },
+        "container": {
+          "detected": true,
+          "devcontainer": true,
+          "id": "07f419671ddf",
+          "image": null
+        },
+        "in_container": true,
+        "julia": {
+          "available": true,
+          "path_env": null,
+          "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+          "sagittarius_julia_version": "1.0.8",
+          "source": "source_checkout",
+          "version": "1.11.9"
+        },
+        "julia_version": "1.11.9",
+        "package_version": "1.0.8",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+        "python": {
+          "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+          "implementation": "CPython",
+          "packages": {
+            "docplex": "2.32.264",
+            "juliacall": "0.9.35",
+            "juliapkg": "0.1.24",
+            "matplotlib": "3.10.9",
+            "networkx": "3.4.2",
+            "numpy": "2.2.6",
+            "pandas": "2.3.3",
+            "pulp": "3.3.2",
+            "sagittarius-py": "1.0.8",
+            "scipy": "1.15.3",
+            "seaborn": "0.13.2"
+          },
+          "version": "3.10.12"
+        },
+        "python_version": "3.10.12",
+        "sagittarius_julia_version": "1.0.8",
+        "schema_version": "version-info/v1"
+      },
+      "schema_version": "doctor/v2.1"
+    }
+  },
+  "family": "backend_performance",
+  "generated_at": "2026-08-12T09:53:26.577422+00:00",
+  "protocol_version": "benchmark-protocol/v1",
+  "rows": [
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "full_dense",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "basis_size": 16,
+        "full_dim": 16,
+        "reference_atol": 1e-12,
+        "reference_error": 1.0,
+        "reference_gate_metric": "reference_relative_error",
+        "reference_gate_value": 3.0136266959224844e-17,
+        "reference_relative_error": 3.0136266959224844e-17,
+        "repeat_index": 0,
+        "time_per_operation_seconds": 8.308001270052046e-07,
+        "total_time_seconds": 4.154000635026023e-06
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-full_dense-repeat-0",
+      "scenario_id": "path-full_dense-repeat-0",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "full_dense",
+        "representation": "full dense matrix",
+        "warmup_runs": 1
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "full_sparse",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "basis_size": 16,
+        "full_dim": 16,
+        "reference_atol": 1e-12,
+        "reference_error": 1.0,
+        "reference_gate_metric": "reference_relative_error",
+        "reference_gate_value": 3.0136266959224844e-17,
+        "reference_relative_error": 3.0136266959224844e-17,
+        "repeat_index": 0,
+        "time_per_operation_seconds": 2.837000647559762e-06,
+        "total_time_seconds": 1.418500323779881e-05
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-full_sparse-repeat-0",
+      "scenario_id": "path-full_sparse-repeat-0",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "full_sparse",
+        "representation": "full sparse CSR matrix",
+        "warmup_runs": 1
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "reduced_matrix_free",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "basis_size": 8,
+        "full_dim": 16,
+        "reference_atol": 1e-10,
+        "reference_error": 0.0,
+        "reference_gate_metric": "reference_error",
+        "reference_gate_value": 0.0,
+        "reference_relative_error": null,
+        "repeat_index": 0,
+        "time_per_operation_seconds": 1.1176599946338683e-05,
+        "total_time_seconds": 5.588299973169342e-05
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-reduced_matrix_free-repeat-0",
+      "scenario_id": "path-reduced_matrix_free-repeat-0",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "reduced_matrix_free",
+        "representation": "blockade-reduced matrix-free operator",
+        "warmup_runs": 1
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "reduced_sparse",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "basis_size": 8,
+        "full_dim": 16,
+        "reference_atol": 1e-10,
+        "reference_error": 0.0,
+        "reference_gate_metric": "reference_error",
+        "reference_gate_value": 0.0,
+        "reference_relative_error": null,
+        "repeat_index": 0,
+        "time_per_operation_seconds": 2.4192006094381215e-06,
+        "total_time_seconds": 1.2096003047190607e-05
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-reduced_sparse-repeat-0",
+      "scenario_id": "path-reduced_sparse-repeat-0",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "reduced_sparse",
+        "representation": "blockade-reduced sparse CSR matrix",
+        "warmup_runs": 1
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "reduced_sparse_gpu_cached",
+        "requested_backend": "CUDA"
+      },
+      "disclosure_status": "local_only",
+      "failure": {
+        "code": "BENCHMARK_PATH_UNAVAILABLE",
+        "message": "set include_gpu=True and provide a working CUDA backend",
+        "remediation": "Enable the documented backend only after its doctor checks pass.",
+        "stage": "setup"
+      },
+      "family": "backend_performance",
+      "metrics": {
+        "repeat_index": 0
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-reduced_sparse_gpu_cached-repeat-0",
+      "scenario_id": "path-reduced_sparse_gpu_cached-repeat-0",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "reduced_sparse_gpu_cached",
+        "representation": "blockade-reduced cached sparse matrix",
+        "warmup_runs": 1
+      },
+      "stage": "setup",
+      "status": "skipped",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "full_dense",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "basis_size": 16,
+        "full_dim": 16,
+        "reference_atol": 1e-12,
+        "reference_error": 6.0,
+        "reference_gate_metric": "reference_relative_error",
+        "reference_gate_value": 3.300002169844065e-16,
+        "reference_relative_error": 3.300002169844065e-16,
+        "repeat_index": 1,
+        "time_per_operation_seconds": 7.303999154828488e-07,
+        "total_time_seconds": 3.6519995774142444e-06
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-full_dense-repeat-1",
+      "scenario_id": "path-full_dense-repeat-1",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "full_dense",
+        "representation": "full dense matrix",
+        "warmup_runs": 1
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "full_sparse",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "basis_size": 16,
+        "full_dim": 16,
+        "reference_atol": 1e-12,
+        "reference_error": 6.0,
+        "reference_gate_metric": "reference_relative_error",
+        "reference_gate_value": 3.300002169844065e-16,
+        "reference_relative_error": 3.300002169844065e-16,
+        "repeat_index": 1,
+        "time_per_operation_seconds": 2.4941997253336013e-06,
+        "total_time_seconds": 1.2470998626668006e-05
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-full_sparse-repeat-1",
+      "scenario_id": "path-full_sparse-repeat-1",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "full_sparse",
+        "representation": "full sparse CSR matrix",
+        "warmup_runs": 1
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "reduced_matrix_free",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "basis_size": 8,
+        "full_dim": 16,
+        "reference_atol": 1e-10,
+        "reference_error": 0.0,
+        "reference_gate_metric": "reference_error",
+        "reference_gate_value": 0.0,
+        "reference_relative_error": null,
+        "repeat_index": 1,
+        "time_per_operation_seconds": 1.1224399349885061e-05,
+        "total_time_seconds": 5.612199674942531e-05
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-reduced_matrix_free-repeat-1",
+      "scenario_id": "path-reduced_matrix_free-repeat-1",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "reduced_matrix_free",
+        "representation": "blockade-reduced matrix-free operator",
+        "warmup_runs": 1
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "reduced_sparse",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "basis_size": 8,
+        "full_dim": 16,
+        "reference_atol": 1e-10,
+        "reference_error": 0.0,
+        "reference_gate_metric": "reference_error",
+        "reference_gate_value": 0.0,
+        "reference_relative_error": null,
+        "repeat_index": 1,
+        "time_per_operation_seconds": 2.5024004571605473e-06,
+        "total_time_seconds": 1.2512002285802737e-05
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-reduced_sparse-repeat-1",
+      "scenario_id": "path-reduced_sparse-repeat-1",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "reduced_sparse",
+        "representation": "blockade-reduced sparse CSR matrix",
+        "warmup_runs": 1
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "reduced_sparse_gpu_cached",
+        "requested_backend": "CUDA"
+      },
+      "disclosure_status": "local_only",
+      "failure": {
+        "code": "BENCHMARK_PATH_UNAVAILABLE",
+        "message": "set include_gpu=True and provide a working CUDA backend",
+        "remediation": "Enable the documented backend only after its doctor checks pass.",
+        "stage": "setup"
+      },
+      "family": "backend_performance",
+      "metrics": {
+        "repeat_index": 1
+      },
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "C6": 10.0,
+        "atom_count": 4,
+        "benchmark": "hamiltonian_execution_path",
+        "blockade_radius": 0.8,
+        "spacing": 0.6
+      },
+      "row_id": "backend_performance-correctness-path-reduced_sparse_gpu_cached-repeat-1",
+      "scenario_id": "path-reduced_sparse_gpu_cached-repeat-1",
+      "solver": {
+        "measured_repeats": 5,
+        "path_mode": "reduced_sparse_gpu_cached",
+        "representation": "blockade-reduced cached sparse matrix",
+        "warmup_runs": 1
+      },
+      "stage": "setup",
+      "status": "skipped",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "reference_result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver_reference_tsit5.result.json",
+        "result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-tsit5-repeat-0.result.json",
+        "run_manifest": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-tsit5-repeat-0.manifest.json"
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "effective_solver": {
+          "abstol": 1e-09,
+          "adaptive": true,
+          "basis_size": 5,
+          "dt": null,
+          "effective_adaptive": true,
+          "effective_dt": null,
+          "effective_method": "Tsit5",
+          "effective_saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "full_basis_size": 8,
+          "reduced_basis_pruning_ratio": 0.375,
+          "reltol": 1e-09,
+          "saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "seed": null,
+          "solver_method": "Tsit5",
+          "use_gpu": false,
+          "use_mc": false
+        },
+        "max_abs_error": 4.482785670445466e-14,
+        "reference_atol": 1e-06,
+        "reference_method": "Tsit5",
+        "repeat_index": 0,
+        "runtime_seconds": 0.8318496399951982
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "pop0"
+        ],
+        "output_sample_count": 9
+      },
+      "problem": {
+        "atom_count": 3,
+        "benchmark": "solver_method_trajectory",
+        "blockade_radius": 0.6,
+        "duration": 0.3,
+        "output_grid": [
+          0.0,
+          0.0375,
+          0.075,
+          0.11249999999999999,
+          0.15,
+          0.1875,
+          0.22499999999999998,
+          0.2625,
+          0.3
+        ]
+      },
+      "row_id": "backend_performance-correctness-solver-tsit5-repeat-0",
+      "scenario_id": "solver-tsit5-repeat-0",
+      "solver": {
+        "abstol": 1e-09,
+        "adaptive": true,
+        "dt": null,
+        "measured_repeats": 1,
+        "method": "Tsit5",
+        "reltol": 1e-09,
+        "warmup_runs": 0
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "reference_result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver_reference_tsit5.result.json",
+        "result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-tsit5-repeat-1.result.json",
+        "run_manifest": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-tsit5-repeat-1.manifest.json"
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "effective_solver": {
+          "abstol": 1e-09,
+          "adaptive": true,
+          "basis_size": 5,
+          "dt": null,
+          "effective_adaptive": true,
+          "effective_dt": null,
+          "effective_method": "Tsit5",
+          "effective_saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "full_basis_size": 8,
+          "reduced_basis_pruning_ratio": 0.375,
+          "reltol": 1e-09,
+          "saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "seed": null,
+          "solver_method": "Tsit5",
+          "use_gpu": false,
+          "use_mc": false
+        },
+        "max_abs_error": 4.482785670445466e-14,
+        "reference_atol": 1e-06,
+        "reference_method": "Tsit5",
+        "repeat_index": 1,
+        "runtime_seconds": 0.8398035770005663
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "pop0"
+        ],
+        "output_sample_count": 9
+      },
+      "problem": {
+        "atom_count": 3,
+        "benchmark": "solver_method_trajectory",
+        "blockade_radius": 0.6,
+        "duration": 0.3,
+        "output_grid": [
+          0.0,
+          0.0375,
+          0.075,
+          0.11249999999999999,
+          0.15,
+          0.1875,
+          0.22499999999999998,
+          0.2625,
+          0.3
+        ]
+      },
+      "row_id": "backend_performance-correctness-solver-tsit5-repeat-1",
+      "scenario_id": "solver-tsit5-repeat-1",
+      "solver": {
+        "abstol": 1e-09,
+        "adaptive": true,
+        "dt": null,
+        "measured_repeats": 1,
+        "method": "Tsit5",
+        "reltol": 1e-09,
+        "warmup_runs": 0
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "reference_result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver_reference_tsit5.result.json",
+        "result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-vern9-repeat-0.result.json",
+        "run_manifest": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-vern9-repeat-0.manifest.json"
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "effective_solver": {
+          "abstol": 1e-09,
+          "adaptive": true,
+          "basis_size": 5,
+          "dt": null,
+          "effective_adaptive": true,
+          "effective_dt": null,
+          "effective_method": "Vern9",
+          "effective_saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "full_basis_size": 8,
+          "reduced_basis_pruning_ratio": 0.375,
+          "reltol": 1e-09,
+          "saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "seed": null,
+          "solver_method": "Vern9",
+          "use_gpu": false,
+          "use_mc": false
+        },
+        "max_abs_error": 7.984823739703995e-15,
+        "reference_atol": 1e-06,
+        "reference_method": "Tsit5",
+        "repeat_index": 0,
+        "runtime_seconds": 1.0537035230008769
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "pop0"
+        ],
+        "output_sample_count": 9
+      },
+      "problem": {
+        "atom_count": 3,
+        "benchmark": "solver_method_trajectory",
+        "blockade_radius": 0.6,
+        "duration": 0.3,
+        "output_grid": [
+          0.0,
+          0.0375,
+          0.075,
+          0.11249999999999999,
+          0.15,
+          0.1875,
+          0.22499999999999998,
+          0.2625,
+          0.3
+        ]
+      },
+      "row_id": "backend_performance-correctness-solver-vern9-repeat-0",
+      "scenario_id": "solver-vern9-repeat-0",
+      "solver": {
+        "abstol": 1e-09,
+        "adaptive": true,
+        "dt": null,
+        "measured_repeats": 1,
+        "method": "Vern9",
+        "reltol": 1e-09,
+        "warmup_runs": 0
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "reference_result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver_reference_tsit5.result.json",
+        "result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-vern9-repeat-1.result.json",
+        "run_manifest": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-vern9-repeat-1.manifest.json"
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "effective_solver": {
+          "abstol": 1e-09,
+          "adaptive": true,
+          "basis_size": 5,
+          "dt": null,
+          "effective_adaptive": true,
+          "effective_dt": null,
+          "effective_method": "Vern9",
+          "effective_saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "full_basis_size": 8,
+          "reduced_basis_pruning_ratio": 0.375,
+          "reltol": 1e-09,
+          "saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "seed": null,
+          "solver_method": "Vern9",
+          "use_gpu": false,
+          "use_mc": false
+        },
+        "max_abs_error": 7.984823739703995e-15,
+        "reference_atol": 1e-06,
+        "reference_method": "Tsit5",
+        "repeat_index": 1,
+        "runtime_seconds": 0.9970876430015778
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "pop0"
+        ],
+        "output_sample_count": 9
+      },
+      "problem": {
+        "atom_count": 3,
+        "benchmark": "solver_method_trajectory",
+        "blockade_radius": 0.6,
+        "duration": 0.3,
+        "output_grid": [
+          0.0,
+          0.0375,
+          0.075,
+          0.11249999999999999,
+          0.15,
+          0.1875,
+          0.22499999999999998,
+          0.2625,
+          0.3
+        ]
+      },
+      "row_id": "backend_performance-correctness-solver-vern9-repeat-1",
+      "scenario_id": "solver-vern9-repeat-1",
+      "solver": {
+        "abstol": 1e-09,
+        "adaptive": true,
+        "dt": null,
+        "measured_repeats": 1,
+        "method": "Vern9",
+        "reltol": 1e-09,
+        "warmup_runs": 0
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "reference_result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver_reference_tsit5.result.json",
+        "result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-rk4-repeat-0.result.json",
+        "run_manifest": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-rk4-repeat-0.manifest.json"
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "effective_solver": {
+          "abstol": 1e-08,
+          "adaptive": false,
+          "basis_size": 5,
+          "dt": 0.001,
+          "effective_adaptive": false,
+          "effective_dt": 0.001,
+          "effective_method": "RK4",
+          "effective_saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "full_basis_size": 8,
+          "reduced_basis_pruning_ratio": 0.375,
+          "reltol": 1e-08,
+          "saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "seed": null,
+          "solver_method": "RK4",
+          "use_gpu": false,
+          "use_mc": false
+        },
+        "max_abs_error": 7.380706289195071e-15,
+        "reference_atol": 1e-06,
+        "reference_method": "Tsit5",
+        "repeat_index": 0,
+        "runtime_seconds": 0.9395915089990012
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "pop0"
+        ],
+        "output_sample_count": 9
+      },
+      "problem": {
+        "atom_count": 3,
+        "benchmark": "solver_method_trajectory",
+        "blockade_radius": 0.6,
+        "duration": 0.3,
+        "output_grid": [
+          0.0,
+          0.0375,
+          0.075,
+          0.11249999999999999,
+          0.15,
+          0.1875,
+          0.22499999999999998,
+          0.2625,
+          0.3
+        ]
+      },
+      "row_id": "backend_performance-correctness-solver-rk4-repeat-0",
+      "scenario_id": "solver-rk4-repeat-0",
+      "solver": {
+        "abstol": 1e-08,
+        "adaptive": false,
+        "dt": 0.001,
+        "measured_repeats": 1,
+        "method": "RK4",
+        "reltol": 1e-08,
+        "warmup_runs": 0
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "reference_result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver_reference_tsit5.result.json",
+        "result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-rk4-repeat-1.result.json",
+        "run_manifest": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/solver-rk4-repeat-1.manifest.json"
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "backend_performance",
+      "metrics": {
+        "effective_solver": {
+          "abstol": 1e-08,
+          "adaptive": false,
+          "basis_size": 5,
+          "dt": 0.001,
+          "effective_adaptive": false,
+          "effective_dt": 0.001,
+          "effective_method": "RK4",
+          "effective_saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "full_basis_size": 8,
+          "reduced_basis_pruning_ratio": 0.375,
+          "reltol": 1e-08,
+          "saveat": [
+            0.0,
+            0.0375,
+            0.075,
+            0.11249999999999999,
+            0.15,
+            0.1875,
+            0.22499999999999998,
+            0.2625,
+            0.3
+          ],
+          "seed": null,
+          "solver_method": "RK4",
+          "use_gpu": false,
+          "use_mc": false
+        },
+        "max_abs_error": 7.380706289195071e-15,
+        "reference_atol": 1e-06,
+        "reference_method": "Tsit5",
+        "repeat_index": 1,
+        "runtime_seconds": 0.6915912569966167
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "pop0"
+        ],
+        "output_sample_count": 9
+      },
+      "problem": {
+        "atom_count": 3,
+        "benchmark": "solver_method_trajectory",
+        "blockade_radius": 0.6,
+        "duration": 0.3,
+        "output_grid": [
+          0.0,
+          0.0375,
+          0.075,
+          0.11249999999999999,
+          0.15,
+          0.1875,
+          0.22499999999999998,
+          0.2625,
+          0.3
+        ]
+      },
+      "row_id": "backend_performance-correctness-solver-rk4-repeat-1",
+      "scenario_id": "solver-rk4-repeat-1",
+      "solver": {
+        "abstol": 1e-08,
+        "adaptive": false,
+        "dt": 0.001,
+        "measured_repeats": 1,
+        "method": "RK4",
+        "reltol": 1e-08,
+        "warmup_runs": 0
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    }
+  ],
+  "scenario_defaults": {
+    "backend": "CPU",
+    "full_path_reference_rtol": 1e-12,
+    "method_reference_atol": 1e-06,
+    "reduced_path_reference_atol": 1e-10
+  },
+  "schema_version": "benchmark-suite-artifact/v1",
+  "source": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": "1.11.9"
+      },
+      "python": {
+        "cache_tag": "cpython-310",
+        "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.35"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.10.12"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "591.86"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "nvcc": {
+          "missing": false,
+          "ok": true,
+          "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+          "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+          "returncode": 0
+        },
+        "nvidia_smi": {
+          "missing": false,
+          "ok": true,
+          "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "query_fields": [
+            "name",
+            "driver_version",
+            "memory.total",
+            "compute_cap"
+          ],
+          "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "returncode": 0
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+        "git_commit_short": "e171c58",
+        "git_dirty": true,
+        "root": "/workspaces/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "in_container": true,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": "1.11.9"
+    },
+    "julia_version": "1.11.9",
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": {
+      "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.4.2",
+        "numpy": "2.2.6",
+        "pandas": "2.3.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.15.3",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.10.12"
+    },
+    "python_version": "3.10.12",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  },
+  "suite_id": "phase16-solver-performance-correctness",
+  "summary": {
+    "completed_count": 14,
+    "failed_count": 0,
+    "incomplete_count": 0,
+    "pass_rate_completed": 1.0,
+    "passed_count": 14,
+    "skipped_count": 2,
+    "status_counts": {
+      "failed": 0,
+      "incomplete": 0,
+      "passed": 14,
+      "skipped": 2
+    },
+    "total_rows": 16
+  },
+  "tier": "correctness"
+}

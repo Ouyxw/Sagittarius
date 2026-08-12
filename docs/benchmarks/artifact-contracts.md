@@ -3,7 +3,7 @@
 Status: `Current`
 Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-12
 
 This page defines the Phase 16 aggregate artifact expectations for benchmark suites. It does not replace existing `benchmark-artifact/v1`, `run-manifest/v1`, `result-artifact/v1`, `shared-result/v1`, or `version-info/v1` contracts. It defines how benchmark-family artifacts should use and link those contracts.
 
@@ -115,6 +115,8 @@ Recommended performance metrics:
 - `jobs_per_second`.
 
 ## Evidence Retention
+
+The retained [Phase 16 closure archive](evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md) demonstrates the required directory layout and remains local/reviewable evidence unless separately promoted.
 
 For reviewable or release-grade evidence, retain:
 

@@ -44,6 +44,8 @@ def test_benchmark_ablation_modes_records_cpu_paths_and_gpu_skip():
     assert set(by_mode) == {item["mode"] for item in ABLATION_BENCHMARK_MODES}
     assert by_mode["full_dense"]["status"] == "ok"
     assert by_mode["full_sparse"]["status"] == "ok"
+    assert by_mode["full_dense"]["reference_relative_error"] < 1e-12
+    assert by_mode["full_sparse"]["reference_relative_error"] < 1e-12
     assert by_mode["reduced_matrix_free"]["status"] == "ok"
     assert by_mode["reduced_sparse"]["status"] == "ok"
     assert by_mode["reduced_sparse_gpu_cached"]["status"] == "skipped"

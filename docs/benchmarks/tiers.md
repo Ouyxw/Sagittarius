@@ -1,9 +1,9 @@
 # Benchmark Tiers
 
-Status: `Mixed`
+Status: `Done`
 Roadmap: Phase 16
 Version: `benchmark-tiers/v1`
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-12
 
 Sagittarius benchmarks are grouped by tier so that developers can run the right amount of evidence for the task. Tiers are cumulative in discipline but not always cumulative in cost. A stress-tier run does not replace correctness-tier evidence.
 
