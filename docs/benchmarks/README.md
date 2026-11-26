@@ -1,15 +1,19 @@
 # Benchmark Protocols
 
-Status: `Done`
+Status: `Mixed`
 Roadmap: Phase 16
 Version: `benchmark-protocols/v1`
-Last reviewed: 2026-08-12
+Last reviewed: 2026-11-26
 
 This directory defines the Phase 16 benchmark protocols for Sagittarius. It translates the roadmap benchmark suite into runnable tiers, benchmark families, artifact requirements, and evidence-retention rules.
 
 The initial suite was closed with [retained Phase 16 evidence](evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md); it is reviewable local evidence, not a public performance claim.
 
-`Done` here refers to the initial protocol suite. The full ongoing GOV-004 plan remains partially complete; see the [Phase 16 suite alignment matrix](../development/requirements.md#phase-16-alignment-with-spec-gov-004-benchmark-suites) and [cross-cutting requirements](../development/requirements.md#phase-16-alignment-with-spec-gov-004-cross-cutting-requirements) for per-suite status, remaining acceptance evidence, and Phase 14/18 dependencies.
+The initial protocol suite is done. `Mixed` reflects the implemented initial suite and planned full-plan extensions; see the [Phase 16 suite alignment matrix](../development/requirements.md#phase-16-alignment-with-spec-gov-004-benchmark-suites) and [cross-cutting requirements](../development/requirements.md#phase-16-alignment-with-spec-gov-004-cross-cutting-requirements) for per-suite status, remaining acceptance evidence, and Phase 14/18 dependencies.
+
+The [P0–P1 implementation plan v2](plans/v2.md) defines the seven-suite matrices, references, delivery batches and evidence gates. Scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate basis/resource limits. These are planned campaign targets; existing retained measurements and CUDA maturity remain unchanged. P2 noise/cluster work remains outside that plan.
+
+The protocol, tier, family and artifact documents each contain parallel `Benchmarking V1` and `Benchmarking V2` parts. V1 preserves the full original content and its commands/evidence wording; V2 uses the same chapter organization for plan v2 acceptance work. The V1 metadata and future-scope statements belong to that initial baseline; current planned targets are described in V2 and the implementation plan.
 
 These documents complement the governance pages:
 
@@ -22,10 +26,11 @@ These documents complement the governance pages:
 
 | Document | Purpose |
 | :--- | :--- |
-| [`protocol.md`](protocol.md) | Cross-suite benchmark protocol, execution discipline, and evidence levels. |
-| [`tiers.md`](tiers.md) | Smoke, correctness, parity, scaling, and stress tier definitions. |
-| [`families.md`](families.md) | Benchmark-family protocols for physics, dynamics, open systems, optimization, backend performance, and sweeps. |
-| [`artifact-contracts.md`](artifact-contracts.md) | Required aggregate artifact fields, failure rows, evidence retention, and the implemented `benchmark-suite-artifact/v1` wrapper. |
+| [`protocol.md`](protocol.md) | Parallel [V1](protocol.md#benchmarking-v1)/[V2](protocol.md#benchmarking-v2) execution stages, pre-run records, measurement rules, correctness and evidence levels. |
+| [`tiers.md`](tiers.md) | Parallel [V1](tiers.md#benchmarking-v1)/[V2](tiers.md#benchmarking-v2) tier summaries, command/output boundaries, and smoke/correctness/parity/scaling/stress requirements. |
+| [`families.md`](families.md) | Parallel [V1](families.md#benchmarking-v1)/[V2](families.md#benchmarking-v2) family summaries and physics/dynamics/open-system/optimization/backend/sweep protocols. |
+| [`artifact-contracts.md`](artifact-contracts.md) | Parallel [V1](artifact-contracts.md#benchmarking-v1)/[V2](artifact-contracts.md#benchmarking-v2) artifact types, aggregate/row contracts, failures, metrics, retention and compatibility. |
+| [`plans/v2.md`](plans/v2.md) | Planned P0–P1 implementation, matrices through declared 20-atom targets, numerical/statistical gates, resource policy and delivery/acceptance evidence. |
 
 ## Implemented CPU smoke
 
@@ -88,6 +93,8 @@ It records per-worker throughput rows, a `sweep-artifact/v1` checkpoint and fina
 ## Runnable Tier Guide
 
 Run every command in this section from `sagittarius_py`. Unless stated otherwise, each runner writes JSON, CSV, and Markdown companions under `benchmark-output`; suite-capable runners additionally write a `*_suite.json` aggregate that retains passed, failed, skipped, and incomplete rows.
+
+This guide lists existing commands only. Planned measurement flags, the observable/open-system performance runners and new artifact stems are tracked in [plan v2](plans/v2.md); add their runnable examples after implementation and smoke verification.
 
 | Tier | Runnable command | Expected output and boundary |
 | :--- | :--- | :--- |

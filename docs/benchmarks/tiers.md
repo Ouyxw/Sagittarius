@@ -1,5 +1,14 @@
 # Benchmark Tiers
 
+Status: `Mixed`
+Roadmap: Phase 16
+Version: `benchmark-tiers/v1`
+Last reviewed: 2026-11-26
+
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 remains planned until its implementation and retained evidence pass acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+
+## Benchmarking V1
+
 Status: `Done`
 Roadmap: Phase 16
 Version: `benchmark-tiers/v1`
@@ -7,7 +16,7 @@ Last reviewed: 2026-08-12
 
 Sagittarius benchmarks are grouped by tier so that developers can run the right amount of evidence for the task. Tiers are cumulative in discipline but not always cumulative in cost. A stress-tier run does not replace correctness-tier evidence.
 
-## Tier Summary
+### Tier Summary
 
 | Tier | Purpose | Expected cost | Default CI policy |
 | :--- | :--- | :--- | :--- |
@@ -17,7 +26,7 @@ Sagittarius benchmarks are grouped by tier so that developers can run the right 
 | Scaling | Increase size or workload until timeout, memory pressure, or numerical failure. | Hardware dependent. | Manual, release-candidate, or local evidence. |
 | Stress | Hardware-specific limit finding and failure characterization. | Potentially long running. | Manual only. |
 
-## Runnable Commands and Outputs
+### Runnable Commands and Outputs
 
 Run commands from `sagittarius_py`. The following commands implement the tiers above and make the expected evidence location explicit.
 
@@ -32,7 +41,7 @@ Run commands from `sagittarius_py`. The following commands implement the tiers a
 
 The local, resumable sweep runner is also a scaling evidence path: `uv run python tests/test_performance/benchmark_sweep_cluster.py --output-dir benchmark-output` writes `sweep_cluster` and `sweep_cluster_suite` plus its `sweep-artifact/v1` checkpoint and final aggregate.
 
-## Smoke Tier
+### Smoke Tier
 
 Goal: prove the benchmark command, scenario selection, diagnostics, and artifact writing path work.
 
@@ -53,7 +62,7 @@ Recommended examples:
 Current implementation: `tests/test_performance/benchmark_physics_smoke.py` runs deterministic CPU Rabi and two-atom blockade scenarios, retaining a structured `benchmark-artifact/v1` row for every success or failure.
 
 
-## Correctness Tier
+### Correctness Tier
 
 Goal: establish that the scenario has a trustworthy reference before runtime or scaling is interpreted.
 
@@ -69,7 +78,7 @@ Correctness metrics may include max absolute trajectory error, final-state error
 
 Current implementation: `tests/test_performance/benchmark_physics_correctness.py` runs deterministic CPU Rabi, ideal two-atom blockade, Landau-Zener, and small-chain projected dense-vs-reduced cases. It records each reference kind and tolerance in row metrics, retains successful SDK result/manifest artifacts, and writes a durable dense-reference report for the static chain check.
 
-## Parity Tier
+### Parity Tier
 
 Goal: compare two execution paths under one scenario definition.
 
@@ -90,7 +99,7 @@ Minimum requirements:
 - both paths' diagnostics and effective configuration;
 - bounded interpretation when parity does not imply equivalence for all systems.
 
-## Scaling Tier
+### Scaling Tier
 
 Goal: characterize how runtime, memory, basis size, and failure modes change as workload increases.
 
@@ -113,7 +122,7 @@ Minimum requirements:
 - rows for timeout, out-of-memory, numerical failure, backend initialization failure, and validation failure;
 - no claim that a failure-free subset is the scale limit unless failed rows are also reported.
 
-## Stress Tier
+### Stress Tier
 
 Goal: find practical local limits and diagnose boundary behavior on a specific machine.
 
@@ -129,3 +138,106 @@ Minimum requirements:
 - no cross-machine comparison without governance review.
 
 A local RTX 5070 Ti can be used for Sagittarius CUDA benchmark development when `doctor(backend="CUDA")` passes, but artifact wording must say exactly that device and environment produced the result.
+
+## Benchmarking V2
+
+Status: `Planned contract`
+
+This generation applies the same five tiers to [plan v2](plans/v2.md). It distinguishes planned runner work from verified executable commands and keeps the initial V1 evidence complete. Long campaigns remain manual, RC or self-hosted work.
+
+<a id="v2-tier-summary"></a>
+
+### Tier Summary
+
+| Tier | V2 purpose | Expected cost | CI policy |
+| :--- | :--- | :--- | :--- |
+| Smoke | Verify each changed runner, configuration, artifact and controlled failure path. | Bounded small CPU cases. | Appropriate PR smoke only. |
+| Correctness | Analytic/dense/exact, basis/index/order, solver and local-noise reference gates. | Small reference fixtures. | CPU regression where bounded; broader checks manual. |
+| Parity | Matched CPU/CUDA, Python/Julia, representation/method and MCWF/Lindblad checks. | Scenario dependent. | CUDA opt-in on actual initialized hardware. |
+| Scaling | Frozen size/geometry/radius/grid/count/trajectory axes and independent measurements. | Resource dependent, targets through N=20 where declared. | Manual/RC; every declared row retained. |
+| Stress | Representation/hardware resource and numerical failure boundaries. | Potentially long running. | Manual only with explicit stop policy. |
+
+<a id="v2-runnable-commands-and-outputs"></a>
+
+### Runnable Commands and Outputs
+
+The runnable V1 commands above remain the current guide. The entries below describe implementation work and output targets, not new executable CLI examples. Add full V2 commands only after the corresponding runner/flags and smoke evidence exist.
+
+| Suite | Existing or planned entry point | V2 outputs and readiness |
+| :--- | :--- | :--- |
+| Scaling | Existing `benchmark_scaling.py` needs CLI/matrix/repeat/resource work. | Preserve `scaling_results`; planned `scaling_results_suite`. Current command uses its fixed default scan. |
+| Ablation | Existing `benchmark_ablation.py` and helper need independent measurements and numerical/resource gates. | Preserve `ablation_bench_results`; optional suite. Existing `--repeats` counts batch operations. |
+| GPU | Existing `benchmark_gpu.py` adopts doctor/opt-in discipline from `benchmark_cuda_mwis_protocol.py`. | Preserve `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`; planned scan aggregate and repeated matched measurements. |
+| MWIS/UDG | Existing `benchmark_mwis_aqc.py` and adapter need expanded matrix/provenance. | Preserve initial tier outputs; planned `mwis_aqc_performance` and suite. |
+| Solver | Existing `benchmark_solver_performance.py` needs sensitivity and timer work. | Preserve correctness outputs; planned `solver_sensitivity` and suite. |
+| Observables | Planned `benchmark_observables.py`. | Planned `observable_performance` and suite; runner/flags not implemented. |
+| Open-system | Planned `benchmark_open_system_performance.py`. | Planned `open_system_performance` and suite; preserve existing one-atom correctness runner. |
+
+All V2 performance commands eventually expose or retain frozen scenarios, output location, warmup/independent-repeat policy and numerical resource limits. Do not assume a shared flag exists on current scripts. Public examples must retain source-checkout execution and GPU opt-in requirements.
+
+<a id="v2-smoke-tier"></a>
+
+### Smoke Tier
+
+Goal: verify the implemented V2 entry point and evidence path before expensive campaigns.
+
+Minimum requirements:
+
+- One small deterministic CPU scenario per changed runner with a retained config/command and numerical sanity gate.
+- Valid JSON/CSV/Markdown, aggregate where implemented, actual result/manifest/reference links and reload validation.
+- Controlled skip, numerical failure and supervisor timeout/crash checks with retained context.
+- Warmup/measurement count and timer-boundary checks; no exact wall-clock assertions or speedup requirements.
+
+CUDA setup/parity smoke is separate and requires `SAGITTARIUS_ENABLE_GPU_TESTS=1` plus successful initialized doctor. Passing CPU smoke does not close hardware evidence.
+
+<a id="v2-correctness-tier"></a>
+
+### Correctness Tier
+
+Goal: establish frozen accuracy/reference gates before performance summaries qualify.
+
+Use small analytic Rabi/blockade/decay, projected-dense scaling/ablation, exact-MWIS with small brute force, independent observable values/order, solver sensitivity and coherent/driven dephasing references. Retain requested/effective settings, stable shared times, error metric/tolerance, finite-value results and applicable Python/Julia golden logs. Pilot-confirm thresholds before campaign freeze; preserve mismatches as failed rows.
+
+Numerical targets and exact fixtures are defined per suite in [plan v2](plans/v2.md). Independent references, solver refinement, statistical uncertainty and physical approximation errors have separate meanings. Under-resolved solver cases remain visible but cannot rank performance at an unmet accuracy target.
+
+<a id="v2-parity-tier"></a>
+
+### Parity Tier
+
+Goal: compare execution paths under the same declared scenario and compatible accuracy.
+
+- CPU/CUDA: identical basis/input/precision, pulse, solver/output/observable policy; warm both paths, synchronize GPU and retain per-size trajectory parity.
+- Full/projected/reduced and dense/sparse: verify the intended operator/state mapping and disclose approximation/dimension differences.
+- Python/Julia: preserve atom/bitstring ordering, addressing, effective solver and serialized metadata.
+- Solver methods: compare shared output times and verified references; use legal adaptive Tsit5/Vern9 or fixed RK4 settings.
+- MCWF/Lindblad: use declared multi-seed uncertainty and common times; more trajectories need not improve every seed monotonically.
+
+Retain both paths' diagnostics, results/manifests/reference reports and unavailable combinations. CPU matvec and CUDA ODE solve are separate workloads and cannot yield a parity-based speedup.
+
+<a id="v2-scaling-tier"></a>
+
+### Scaling Tier
+
+Goal: execute the declared performance matrices with repeatable measurement and retained resource boundaries.
+
+| Suite/axis | Target coverage |
+| :--- | :--- |
+| Scaling atoms/geometry/radius | N=2,4,6,8,12,16,20; chains/declared rectangles; Rb/a=1.1,1.5,2.1. |
+| MWIS instances | N=2,4,6,8,10,12,16,20; five frozen weighted instances per size; independent AQC/ILP repeats. |
+| Open-system | N=1,2,4,6,8,10,12,16,20; separate Lindblad/MCWF resource limits; 100/500/1000 trajectories. |
+| GPU/reduced ablation | Bounded N=20 extensions with per-size CPU/CUDA gates or reduced-path references as applicable. |
+| Solver/observable cost | Declared tolerance/step/grid and type/count/order matrices; 21/101/501 output points. |
+
+Freeze the scenario list, exact replay inputs/hash, reference/statistical policy, limits and stop conditions. Use two warmups and at least five independent eligible measurements by default; retain all raw rows and statistic membership. Separate setup/solve/serialization, process-lifetime peaks and GPU snapshots. Preflight D, D^2 and dense intermediate allocations and preserve all budget exclusions/attempted failures.
+
+Do not expand every axis into an unbounded Cartesian product; use plan-defined anchor scans and selected combinations. Record lower measured limits and large-case reference gaps. A skipped N=20 row documents an unexecuted target and leaves successful coverage open.
+
+<a id="v2-stress-tier"></a>
+
+### Stress Tier
+
+Goal: characterize practical representation/hardware limits with retained failure evidence.
+
+Declare timeout, memory budget, stop condition, retry policy and process/device ownership before execution. Keep backend initialization, first-solve and warmed timing distinct, with attributable hardware/runtime/container/commit metadata. A parent supervisor records timeout/OOM/crash outcomes even if the child cannot write its final artifact.
+
+Full dense/sparse construction, Lindblad D-by-D storage, reduced paths and MCWF each have their own budget. Do not attempt allocations already known to exceed it. Preserve raw failures and partial data; a failure-free subset is not a complete scale-limit result. Stress work does not replace small correctness gates, the declared performance campaign or public governance review. P2 advanced cluster/noise work stays outside this V2 plan.

@@ -49,6 +49,8 @@ This plan is ongoing policy, not a completed Phase 16 checklist. The [Phase 16 s
 
 The [initial Phase 16 archive](../benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md) closes bounded small-system and local execution verification. It does not close all nine suites, a release-candidate P0 campaign, or public performance review. Noise benchmarking depends on Phase 14 model extensions; advanced cluster deployment and physics-solver sweep coverage remain tied to Phase 18. Completed API or artifact infrastructure is distinct from completed performance measurements.
 
+The [P0–P1 implementation plan v2](../benchmarks/plans/v2.md) defines the seven-suite implementation batches, frozen measurement discipline and numerical/statistical acceptance targets. Its scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate representation/basis resource limits. These targets are planned measurements, not retained coverage or new backend capability claims. Keep runner implementation, campaign execution and evidence review as separate milestones; resource exclusions and missing references remain visible. This policy's existing suite priorities, artifact schema meanings and recurring release gates continue to apply. P2 noise/cluster scope remains outside that implementation plan.
+
 ## Required Row Metadata
 
 Every benchmark row should record enough context to reproduce or audit the measurement:
@@ -150,3 +152,4 @@ Update this document when:
 - a CUDA/MWIS benchmark protocol changes its opt-in gate, doctor criteria, retained hardware fields, parity checks, or failure boundaries;
 - new release or disclosure workflows require different benchmark evidence.
 - suite implementation or retained-evidence status changes; update the Phase 16 alignment matrices and the benchmark protocol index at the same time.
+- P0–P1 campaign targets or measurement/acceptance scope change; reconcile the implementation plan, alignment matrices, benchmark protocol/family/tier/artifact documents and documentation status index without advancing evidence status before retained runs exist.

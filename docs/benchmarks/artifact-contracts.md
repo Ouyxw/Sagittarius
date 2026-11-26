@@ -1,5 +1,14 @@
 # Benchmark Artifact Contracts
 
+Status: `Mixed`
+Roadmap: Phase 16
+Version: `benchmark-artifact-contracts/v1`
+Last reviewed: 2026-11-26
+
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 remains planned until its implementation and retained evidence pass acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+
+## Benchmarking V1
+
 Status: `Current`
 Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
@@ -7,7 +16,7 @@ Last reviewed: 2026-08-12
 
 This page defines the Phase 16 aggregate artifact expectations for benchmark suites. It does not replace existing `benchmark-artifact/v1`, `run-manifest/v1`, `result-artifact/v1`, `shared-result/v1`, or `version-info/v1` contracts. It defines how benchmark-family artifacts should use and link those contracts.
 
-## Artifact Types
+### Artifact Types
 
 | Artifact | Purpose | Status |
 | :--- | :--- | :--- |
@@ -26,7 +35,7 @@ The solver/path runner retains a measurement repeat index, warmup/repeat policy,
 Existing scripts may continue emitting `benchmark-artifact/v1`. New Phase 16 family runners should use `write_benchmark_suite_artifact()` to aggregate validated rows in `benchmark-suite-artifact/v1`; existing scripts may continue emitting `benchmark-artifact/v1` directly.
 The existing `benchmark_scaling.py`, `benchmark_gpu.py`, `benchmark_cluster.py`, and `benchmark_ablation.py` runners now emit this structured row profile while retaining their legacy flat metric fields for CSV and plotting compatibility.
 
-## Aggregate Shape
+### Aggregate Shape
 
 A `benchmark-suite-artifact/v1` document should use this top-level shape:
 
@@ -48,7 +57,7 @@ A `benchmark-suite-artifact/v1` document should use this top-level shape:
 }
 ```
 
-## Required Row Fields
+### Required Row Fields
 
 Every row should include:
 
@@ -67,7 +76,7 @@ Every row should include:
 - `failure`: structured failure object when `status` is not `passed`;
 - `disclosure_status`: `local_only`, `reviewable`, or `release_grade`.
 
-## Failure Rows
+### Failure Rows
 The SDK `benchmark_failure_context()` and `make_benchmark_failure_row()` classify timeout, memory exhaustion, CUDA initialization, reference mismatch, ILP, and unexpected execution failures. They retain exception type, failure stage, timeout, process-memory snapshot, optional GPU-memory value, backend probe, and remediation.
 
 
@@ -84,7 +93,7 @@ Failure rows should include:
 - whether retry is expected to be deterministic;
 - whether the failure invalidates only one row or the whole suite.
 
-## Metrics
+### Metrics
 
 Recommended correctness metrics:
 
@@ -114,7 +123,7 @@ Recommended performance metrics:
 - `trajectories_per_second`;
 - `jobs_per_second`.
 
-## Evidence Retention
+### Evidence Retention
 
 The retained [Phase 16 closure archive](evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md) demonstrates the required directory layout and remains local/reviewable evidence unless separately promoted.
 
@@ -131,6 +140,118 @@ For reviewable or release-grade evidence, retain:
 
 Local exploratory artifacts can be retained outside the repository, but any public or release-candidate evidence should be stored in a durable artifact location and referenced by path or URL in the review record.
 
-## Compatibility Rules
+### Compatibility Rules
 
 Compatible changes may add optional fields or new metric names. Incompatible changes require a new schema version when they remove required fields, rename existing metric semantics, change status meanings, or alter how linked artifacts are resolved.
+
+## Benchmarking V2
+
+Status: `Planned contract`
+
+This generation defines the artifact work for the seven P0–P1 suites in [plan v2](plans/v2.md#artifact-and-compatibility-work). Its acceptance targets become executable contracts only when writers, validators, readers and tests are implemented together. The existing schema names and field responsibilities remain authoritative.
+
+<a id="v2-artifact-types"></a>
+
+### Artifact Types
+
+| Artifact | V2 purpose | Implementation boundary |
+| :--- | :--- | :--- |
+| `benchmark-artifact/v1` | Retain independent measurements, references, configuration and failure context. | Extend existing structured rows compatibly and preserve flat metric meanings. |
+| `benchmark-suite-artifact/v1` | Aggregate declared family/tier scenarios and their passed, failed, skipped and incomplete rows. | Add validated campaign summaries without hiding unexecuted targets. |
+| `mwis-batch-verification/v1` | Existing exact-verification helper where applicable. | A timed-out incumbent is not an exact optimum. |
+| `run-manifest/v1` | Actual executed simulation configuration and requested/effective settings. | Pure matvec work has benchmark inputs/reference reports rather than fabricated simulation manifests. |
+| `result-artifact/v1` | Saved simulation results with metadata, diagnostics, manifest and shared payload. | Add actual AQC result provenance through the existing adapter boundary. |
+
+Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Planned additions include `scaling_results_suite`, optional ablation/GPU aggregates, and `mwis_aqc_performance`, `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
+
+<a id="v2-aggregate-shape"></a>
+
+### Aggregate Shape
+
+Use the existing validated `benchmark-suite-artifact/v1` envelope:
+
+```json
+{
+  "schema_version": "benchmark-suite-artifact/v1",
+  "artifact_type": "benchmark.suite",
+  "suite_id": "phase16-scaling-performance",
+  "family": "backend_performance",
+  "tier": "scaling",
+  "protocol_version": "benchmark-protocol/v1",
+  "generated_at": "2026-11-26T00:00:00Z",
+  "source": {},
+  "environment": {},
+  "scenario_defaults": {},
+  "rows": [],
+  "summary": {},
+  "diagnostics": []
+}
+```
+
+This illustrates the envelope, not completed evidence. Retain per-repeat rows and the ordered campaign configuration. Finalize compatible placement of measurement summaries with validators: each summary must identify its input rows, statistic convention, eligible counts and unavailable values. Do not reinterpret existing deterministic summary fields. A configuration hash links to retained replay inputs rather than replacing them.
+
+<a id="v2-required-row-fields"></a>
+
+### Required Row Fields
+
+Keep the V1 row fields and meanings. Implement the following campaign evidence in compatible fields or linked reports; these are planned retention requirements, not new mandatory fields for historical artifacts.
+
+| Existing surface | V2 evidence |
+| :--- | :--- |
+| `row_id`, `scenario_id`, `family`, `tier` | Stable scenario/config identity, measurement identity and family/tier mapping. |
+| `status`, `stage`, `failure` | Actual lifecycle outcome, failed gate, supervisor diagnostics and partial measurements. |
+| `problem` | Exact register/graph/weights, pulses, initial state, basis dimension, pruning and configuration link/hash. |
+| `solver` | Requested/effective method, tolerances, adaptive/dt, explicit output grid, seeds/trajectory settings where applicable. |
+| `backend` | Actual implementation/workload, precision, threads, device/container/doctor and runtime versions. |
+| `observables` | Actual ordered declarations, parameters, count and output samples. |
+| `metrics` | Independent repeat index, warmup designation, batch operation count, timer scope, reference/error gate and applicable statistical/memory measures. |
+| `artifacts` | Actual result/manifest, reference/config, convergence report, summary input rows and companion links. |
+| `disclosure_status` | Existing classification only; promotion requires evidence and governance review. |
+
+Keep `data`, `metadata`, `diagnostics`, `manifest` and `shared_result` responsibilities separate. Record requested, completed and eligible counts; retain missing metrics with reasons. For MWIS, retain ILP solver/version/limits/termination/optimality and incumbent/bound where exposed. Compute exact-gap, ratio and optimal-state probability only with a proven exact reference. For MCWF, retain execution mode and statistical seed-set identity separately from timing repeats.
+
+<a id="v2-failure-rows"></a>
+
+### Failure Rows
+
+Use existing failure helpers and status meanings. The parent supervisor must preserve timeout/OOM/child-crash evidence even when a worker cannot finish writing an artifact. Keep collected metrics, scenario identity, limits, stage/code, exception, probe, remediation and relevant result/reference links.
+
+- Preflight budget exclusions and disabled optional paths are skipped with context.
+- Attempted solver, reference, backend or validation failures are failed.
+- Interrupted campaigns or insufficient-repeat evidence are incomplete.
+- All failed and excluded targets remain in the declared matrix; resource exclusion does not establish successful scale coverage.
+
+Retain numerical failures and failed exact-reference attempts alongside valid AQC outcomes. A poor feasible objective is a measurement, while feasibility, mapping and numerical gates are recorded separately. Do not drop inconvenient rows to complete a suite.
+
+<a id="v2-metrics"></a>
+
+### Metrics
+
+Use existing correctness metrics and add compatible measures only with documented definitions. Pilot-confirm and freeze numerical targets before the campaign: scaling/observable deterministic error initially 1e-8, full matvec relative error 1e-12, reduced matvec absolute error 1e-10, GPU parity/solver trajectory error 1e-6, and local-noise analytic/trace error 1e-6 with minimum density eigenvalue >=-1e-7. Each suite retains reference scope and limitations; stochastic checks use separately declared uncertainty criteria.
+
+| Measurement | Definition and provenance |
+| :--- | :--- |
+| Repeated runtime | At least five independent eligible executions after two separate warmups by default; median/min/max/p25/p75, quantile convention, input row IDs and requested/completed/eligible counts. |
+| Matvec runtime | Batch duration and per-operation duration; 50 operations per repeat by default. Batch count is separate from independent repeat count. |
+| Setup/execution phases | Initialization/JIT, basis/operator construction, first/warm solve, collection, post-processing and serialization as actually measured. SDK and kernel timings have distinct scopes. |
+| Memory | Value, source/normalized units, method, baseline, process/device and phase scope. Process-lifetime peak and GPU snapshots are distinct measures. |
+| MWIS results | Feasibility/objective, proven exact reference, gap/ratio/optimal-state probability where available, separately timed AQC and ILP work. |
+| Open-system statistics | MCWF/Lindblad errors, multi-seed uncertainty, actual completed trajectories and trajectories/sec; raw retention cost measured separately. |
+
+Exclude warmups from summaries, preserve invalid rows, and retain slow valid repeats. Do not pool different workloads, sizes, precisions or statistical populations. Missing GPU peaks remain unavailable rather than inferred from before/after snapshots. Ratios require matched workload and accuracy; CPU matvec/CUDA solve ratios are invalid.
+
+<a id="v2-evidence-retention"></a>
+
+### Evidence Retention
+
+Archive the frozen ordered scenarios, required/optional scope, exact replay inputs/hash, reference/statistical criteria, limits/stop policy, commands and working directory; source identity, environment/thread settings and initialized diagnostics; raw measurements and failures; JSON/CSV/Markdown and aggregates; actual result/manifests, numerical references, convergence reports and test logs; and a checksum inventory.
+
+Link the durable archive in the requirements matrices before advancing evidence status. Track runner implementation, campaign execution and reviewed acceptance separately. Scaling, MWIS/UDG and open-system N=20 targets require actual eligible execution for successful coverage; budget exclusions and large-case reference gaps remain visible. The initial archive remains V1 local evidence. Figures retain source artifact links and do not replace artifact validation or disclosure review.
+
+<a id="v2-compatibility-rules"></a>
+
+### Compatibility Rules
+
+Benchmarking V2 is an execution/documentation generation, not a new artifact schema. Preserve `benchmark-artifact/v1`, `benchmark-suite-artifact/v1`, `run-manifest/v1`, `result-artifact/v1`, `shared-result/v1`, `version-info/v1`, `doctor/v2.1` and `event-taxonomy/v1` semantics. Add optional measurement fields compatibly; changes to required fields or meanings need coordinated version/reader/writer/validator/test/docs decisions.
+
+Keep original V1 artifact stems, flat metric meanings and archives readable. Label the revised fixed-input matvec workload and never pool it with historical H^k*psi batches. A stored `release_grade` classification does not validate evidence or approve public wording. Apply GOV-001/GOV-002 and applicable prior-art review before public use.
