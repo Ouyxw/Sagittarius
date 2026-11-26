@@ -4,7 +4,7 @@ Spec ID: `SPEC-GOV-004`
 Status: `Policy`
 Roadmap: Phase 9, Phase 10, Phase 11, Phase 12, Phase 14, Phase 15, Phase 16, Phase 18
 Version: `benchmarking-plan/v1`
-Last reviewed: 2026-08-11
+Last reviewed: 2026-11-26
 
 
 This document defines the Sagittarius benchmarking plan. It complements [`SPEC-GOV-001-performance-claims.md`](SPEC-GOV-001-performance-claims.md): this page defines what to run and how to organize evidence, while `SPEC-GOV-001` defines how measured performance may be stated publicly.
@@ -42,6 +42,12 @@ Benchmarks must not be used to imply general quantum speedup, production-ready G
 | `open_system` | P1 | Lindblad vs MCWF runtime, memory, trajectory count, and convergence behavior. | Benchmark artifacts, run manifests, and convergence notes. |
 | `noise` | P2 | Custom Lindblad, correlated noise, collective decay, and stochastic Hamiltonian ensemble overhead. | Benchmark artifacts with noise metadata; depends on Phase 14 and Phase 15. |
 | `cluster_sweep` | P2 | Local ParallelSimulation parameter-map throughput, resumability, and artifact aggregation. | `benchmark-artifact/v1` plus linked `sweep-artifact/v1` from `benchmark_sweep_cluster.py`; multi-node deployment remains tied to Phase 18. |
+
+## Implementation and Evidence Tracking
+
+This plan is ongoing policy, not a completed Phase 16 checklist. The [Phase 16 suite alignment matrix](../development/requirements.md#phase-16-alignment-with-spec-gov-004-benchmark-suites) maps all nine suites above, in the same order and with the same priorities, to implemented runners, retained evidence, remaining scope, dependencies, and acceptance conditions. The [cross-cutting alignment matrix](../development/requirements.md#phase-16-alignment-with-spec-gov-004-cross-cutting-requirements) tracks metadata, measurement discipline, correctness gates, reporting, release cadence, and maintenance. Keep implementation status in those matrices; this document remains the policy authority.
+
+The [initial Phase 16 archive](../benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md) closes bounded small-system and local execution verification. It does not close all nine suites, a release-candidate P0 campaign, or public performance review. Noise benchmarking depends on Phase 14 model extensions; advanced cluster deployment and physics-solver sweep coverage remain tied to Phase 18. Completed API or artifact infrastructure is distinct from completed performance measurements.
 
 ## Required Row Metadata
 
@@ -126,12 +132,12 @@ For public reports, create or update a disclosure row in [`SPEC-GOV-002-disclosu
 
 - Phase 9 provides scientific verification and baseline benchmark scripts.
 - Phase 10 provides performance-claim governance, disclosure control, prior-art notes, and known limitations.
-- Phase 11 should add observable metadata to benchmark rows and manifests.
-- Phase 12 should add effective solver configuration and solver-sensitivity benchmarks.
-- Phase 14 should add theory-noise benchmark scenarios and noise metadata.
-- Phase 15 should add seed and output-grid reproducibility for MCWF, sampling, stochastic noise, and benchmark scripts.
-- Phase 16 defines application benchmark protocols and artifact expectations.
-- Phase 18 should add cluster and advanced deployment benchmarks without weakening artifact or disclosure requirements.
+- Phase 11 provides supported observable APIs and metadata; dedicated observable-cost measurements remain tracked in the Phase 16 alignment matrix.
+- Phase 12 provides effective solver configuration; initial solver-method reference checks exist, while broader sensitivity measurements remain tracked in Phase 16.
+- Phase 14 model extensions remain planned and are prerequisites for the corresponding theory-noise benchmark scenarios and metadata.
+- Phase 15 provides implemented seed/output-grid reproducibility contracts for supported workflows; benchmark adoption and future stochastic-noise coverage must be tracked separately from API availability.
+- Phase 16 defines application benchmark protocols and artifact expectations, with a closed initial local suite and a partially complete full-plan alignment matrix.
+- Phase 18 remains future work for cluster and advanced deployment benchmarks, including physics-solver sweep coverage, without weakening artifact or disclosure requirements.
 
 ## Maintenance Triggers
 
@@ -143,3 +149,4 @@ Update this document when:
 - GPU, solver, observable, open-system, noise, or sweep behavior changes;
 - a CUDA/MWIS benchmark protocol changes its opt-in gate, doctor criteria, retained hardware fields, parity checks, or failure boundaries;
 - new release or disclosure workflows require different benchmark evidence.
+- suite implementation or retained-evidence status changes; update the Phase 16 alignment matrices and the benchmark protocol index at the same time.

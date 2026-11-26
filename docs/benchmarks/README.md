@@ -9,6 +9,8 @@ This directory defines the Phase 16 benchmark protocols for Sagittarius. It tran
 
 The initial suite was closed with [retained Phase 16 evidence](evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md); it is reviewable local evidence, not a public performance claim.
 
+`Done` here refers to the initial protocol suite. The full ongoing GOV-004 plan remains partially complete; see the [Phase 16 suite alignment matrix](../development/requirements.md#phase-16-alignment-with-spec-gov-004-benchmark-suites) and [cross-cutting requirements](../development/requirements.md#phase-16-alignment-with-spec-gov-004-cross-cutting-requirements) for per-suite status, remaining acceptance evidence, and Phase 14/18 dependencies.
+
 These documents complement the governance pages:
 
 - [`SPEC-GOV-004-benchmarking-plan.md`](../governance/SPEC-GOV-004-benchmarking-plan.md) defines benchmark governance, release cadence, and required correctness gates.
