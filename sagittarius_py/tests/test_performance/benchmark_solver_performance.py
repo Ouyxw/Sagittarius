@@ -60,7 +60,7 @@ def _path_rows(*, repeat_count: int, ablation_repeats: int) -> list[dict[str, An
     for repeat_index in range(repeat_count):
         raw_rows, _ = benchmark_ablation_modes(
             register, sequence, blockade_radius=0.8, repeats=ablation_repeats,
-            warmups=1, seed=20260811 + repeat_index, include_gpu=False,
+            warmups=1, repeat_count=1, seed=20260811 + repeat_index, include_gpu=False,
         )
         for raw in raw_rows:
             scenario_id = f"path-{raw['mode']}-repeat-{repeat_index}"
@@ -87,7 +87,7 @@ def _path_rows(*, repeat_count: int, ablation_repeats: int) -> list[dict[str, An
                 row_id=f"{FAMILY}-{TIER}-{scenario_id}", scenario_id=scenario_id,
                 family=FAMILY, tier=TIER, status="passed", stage="validation",
                 problem=problem, solver=solver, backend={"requested_backend": raw["backend"], "path": raw["mode"]}, observables={"names": [], "count": 0, "output_sample_count": 0},
-                metrics={"repeat_index": repeat_index, "reference_error": reference_error, "reference_relative_error": raw.get("reference_relative_error"), "reference_gate_metric": metric_name, "reference_gate_value": reference_metric, "reference_atol": reference_atol, "total_time_seconds": raw["total_time_s"], "time_per_operation_seconds": raw["time_per_operation_s"], "basis_size": raw["basis_size"], "full_dim": raw["full_dim"]},
+                metrics={"repeat_index": repeat_index, "reference_error": reference_error, "reference_relative_error": raw.get("reference_relative_error"), "reference_gate_metric": metric_name, "reference_gate_value": reference_metric, "reference_atol": reference_atol, "total_time_seconds": raw["total_time_s"], "time_per_operation_seconds": raw["time_per_operation_s"], "basis_size": raw["basis_size"], "full_dim": raw["full_dim"], "workload_version": raw["workload_version"], "operation_count": ablation_repeats},
                 disclosure_status="local_only",
             ))
     return rows

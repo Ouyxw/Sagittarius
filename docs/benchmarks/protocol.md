@@ -3,9 +3,9 @@
 Status: `Mixed`
 Roadmap: Phase 16
 Version: `benchmark-protocol/v1`
-Last reviewed: 2026-11-26
+Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling implementation and evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling and ablation implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -103,8 +103,10 @@ Status: `Mixed`
 
 Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-11-26/README.md): 42 scenarios and 210 eligible repeats, including all six N=20 geometry/radius configurations. This is bounded local numerical/software evidence; other suite targets and release/public-use gates remain separate.
 
+Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
-This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It defines campaign acceptance discipline; scaling now implements the frozen matrix, supervised child processes, references and repeated measurements. Other runners still need the specified work. GOV-004 remains the policy authority. Benchmarking V2 does not rename artifact schemas or reclassify the initial archive.
+
+This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It defines campaign acceptance discipline; scaling and ablation implement frozen matrices, supervised child processes, references and repeated measurements. P1 runners still need the specified work. GOV-004 remains the policy authority. Benchmarking V2 does not rename artifact schemas or reclassify the initial archive.
 
 <a id="v2-scope"></a>
 
@@ -143,6 +145,15 @@ Plan defaults and matrix values require a retained freeze record before measurem
 ### Warmup and Measurement Rules
 
 Scaling implements the [measurement boundaries](plans/v2.md#implemented-measurement-boundaries), including single-thread child execution, reset states, separate doctor/basis/first-solve/warmup timing, eligible repeats, sampled RSS limits and partial checkpoints. Its SDK timer includes operator construction, collection and manifest generation. Reference checks and artifact writes happen after timing.
+
+Ablation implements [fixed-input matvec boundaries](plans/v2.md#p0-ablation).
+Its Python/NumPy/SciPy batch timer excludes construction/reference work and
+output validation/writes; operator construction is separate and sparse paths
+retain dense intermediates. Independent full/projected dense checks apply at
+N<=8; larger cases use analytic transition-action references. Saved arrays,
+per-repeat gates, source/config identity and companion reports are audited.
+Optional CUDA SDK solves use a separate timer scope and remain diagnostic
+without matched GPU-suite parity. No matvec/solve ratio is supported.
 
 Use two warmups and at least five independent measured executions per frozen scenario/path by default. The default matvec batch is 50 operations, independently recorded; preserve legacy `repeats` semantics when adding controls. Reset initial state and fixed seeded input for every execution. V2 matvec uses fixed normalized H*psi input rather than growing H^k*psi and carries a distinct workload label.
 

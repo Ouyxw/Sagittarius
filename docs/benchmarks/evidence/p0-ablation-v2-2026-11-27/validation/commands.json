@@ -1,0 +1,16 @@
+{
+  "working_directory": "/home/oyxw/Sagittarius/sagittarius_py",
+  "environment": "source retained validation/environment.sh; initial CPU doctor failures and writable-depot/CondaPkg Null remediation retained",
+  "validation_01": "uv run pytest tests/test_ablation_benchmarks.py tests/test_benchmark_artifacts.py tests/test_benchmark_suite_artifact.py tests/test_solver_performance_benchmark.py tests/test_cross_language_golden.py tests/test_benchmark_documentation_consistency.py -q",
+  "validation_01_result": "33 passed; no skips",
+  "validation_02": "uv run pytest tests/test_serialization.py tests/test_solver_configuration.py tests/test_benchmark_row_contract.py tests/test_benchmark_failures.py tests/test_benchmark_suite_public_api.py tests/test_scaling_benchmark.py -q",
+  "validation_02_result": "53 passed; no skips",
+  "pilot_01": "uv run python tests/test_performance/benchmark_ablation.py --sizes 4 8 --repeats 3 --repeat-count 1 --warmups 1 --output-dir benchmark-output/ablation-v2-pilot-01",
+  "pilot_02": "uv run python tests/test_performance/benchmark_ablation.py --sizes 4 8 --repeats 3 --repeat-count 1 --warmups 1 --output-dir benchmark-output/ablation-v2-pilot-02",
+  "campaign": "uv run python tests/test_performance/benchmark_ablation.py --sizes 4 8 12 16 20 --repeats 50 --repeat-count 5 --warmups 2 --memory-limit-mb 9216 --timeout-seconds 600 --output-dir benchmark-output/p0-ablation-v2-2026-11-27",
+  "audit": ".venv/bin/python ../scripts/audit_ablation_campaign.py benchmark-output/p0-ablation-v2-2026-11-27",
+  "documentation": "python3 scripts/validate_documentation.py (repository root)",
+  "diff": "git diff --check; manual scope review and four V1 chapter equality checks",
+  "evidence_level": "local_only; automated audit, shared workstation, no public/release/CUDA claim",
+  "final_documentation_consistency": "uv run pytest tests/test_benchmark_documentation_consistency.py -q; 2 passed (recheck after final docs reconciliation)"
+}

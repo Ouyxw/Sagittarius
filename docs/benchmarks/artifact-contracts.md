@@ -3,9 +3,9 @@
 Status: `Mixed`
 Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
-Last reviewed: 2026-11-26
+Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling implementation and evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling and ablation implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -150,6 +150,8 @@ Status: `Mixed`
 
 Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-11-26/README.md): 42 scenarios and 210 eligible repeats, including all six N=20 geometry/radius configurations. This is bounded local numerical/software evidence; other suite targets and release/public-use gates remain separate.
 
+Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
+
 
 This generation defines the artifact work for the seven P0–P1 suites in [plan v2](plans/v2.md#artifact-and-compatibility-work). Scaling implements its compatible extensions with structured rows, suite validation, audit tooling and regression tests; other acceptance targets become executable contracts when their writers, readers and tests land together. The existing schema names and field responsibilities remain authoritative.
 
@@ -165,7 +167,27 @@ This generation defines the artifact work for the seven P0–P1 suites in [plan 
 | `run-manifest/v1` | Actual executed simulation configuration and requested/effective settings. | Pure matvec work has benchmark inputs/reference reports rather than fabricated simulation manifests. |
 | `result-artifact/v1` | Saved simulation results with metadata, diagnostics, manifest and shared payload. | Add actual AQC result provenance through the existing adapter boundary. |
 
-Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Planned additions include optional ablation/GPU aggregates, and `mwis_aqc_performance`, `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
+Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Ablation writes `ablation_bench_results_suite` and `ablation_repeats.json`. Planned additions include optional GPU aggregates, and `mwis_aqc_performance`, `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
+
+Ablation retains one aggregate row per size/path and a validated structured row
+per measured batch in `ablation_repeats.json`. `metrics.measurements` retains
+operation count, runtime, per-operation time, eligibility, reference errors,
+finite/scale checks and saved `output_array` links. `reference_arrays` stores
+basis/input/independent expected H*psi in NPZ; pure matvec rows do not invent
+simulation manifests. Statistics identify eligible repeat row IDs, counts and
+linear type-7 quantiles. `total_time_s`/`time_per_operation_s` remain first-batch
+metrics; `median_batch_time_s` is the independent-repeat median. Construction,
+first-operation, reference, warmup and doctor timings have distinct names.
+
+`fixed-normalized-input-matvec/v2` identifies the revised fixed-input workload;
+historical H^k*psi timing remains a separate workload. Frozen `campaign.json`,
+per-path configs/checkpoints, exact implementation snapshots/hash inventory,
+doctor/runtime projects and coverage support replay. `audit_ablation_campaign.py`
+checks saved CPU outputs, configuration/statistics membership and companion
+contracts, including after relocation. A required numerical gate or reference
+failure excludes the repeat; a slow valid repeat is retained. Optional CUDA
+solve rows carry their own manifests and scope, remain incomplete without
+matched GPU-suite parity and never produce CPU-matvec/CUDA-solve ratios.
 
 <a id="v2-aggregate-shape"></a>
 

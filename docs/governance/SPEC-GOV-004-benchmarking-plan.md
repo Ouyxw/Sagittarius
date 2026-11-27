@@ -4,7 +4,7 @@ Spec ID: `SPEC-GOV-004`
 Status: `Policy`
 Roadmap: Phase 9, Phase 10, Phase 11, Phase 12, Phase 14, Phase 15, Phase 16, Phase 18
 Version: `benchmarking-plan/v1`
-Last reviewed: 2026-11-26
+Last reviewed: 2026-11-27
 
 
 This document defines the Sagittarius benchmarking plan. It complements [`SPEC-GOV-001-performance-claims.md`](SPEC-GOV-001-performance-claims.md): this page defines what to run and how to organize evidence, while `SPEC-GOV-001` defines how measured performance may be stated publicly.
@@ -49,9 +49,16 @@ This plan is ongoing policy, not a completed Phase 16 checklist. The [Phase 16 s
 
 The [initial Phase 16 archive](../benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md) closes bounded small-system and local execution verification. It does not close all nine suites, a release-candidate P0 campaign, or public performance review. Noise benchmarking depends on Phase 14 model extensions; advanced cluster deployment and physics-solver sweep coverage remain tied to Phase 18. Completed API or artifact infrastructure is distinct from completed performance measurements.
 
-The [P0–P1 implementation plan v2](../benchmarks/plans/v2.md) defines the seven-suite implementation batches, frozen measurement discipline and numerical/statistical acceptance targets. Its scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate representation/basis resource limits. The scaling runner implements its matrix and measurement controls; retained campaign acceptance is tracked in the requirements matrix. Other expanded targets remain planned measurements. Runner support alone does not establish retained coverage or a backend capability claim. Keep runner implementation, campaign execution and evidence review as separate milestones; resource exclusions and missing references remain visible. This policy's existing suite priorities, artifact schema meanings and recurring release gates continue to apply. P2 noise/cluster scope remains outside that implementation plan.
+The [P0–P1 implementation plan v2](../benchmarks/plans/v2.md) defines the seven-suite implementation batches, frozen measurement discipline and numerical/statistical acceptance targets. Its scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate representation/basis resource limits. The scaling and ablation runners implement their matrices and measurement controls; retained campaign acceptance is tracked in the requirements matrix. Other expanded targets remain planned measurements. Runner support alone does not establish retained coverage or a backend capability claim. Keep runner implementation, campaign execution and evidence review as separate milestones; resource exclusions and missing references remain visible. This policy's existing suite priorities, artifact schema meanings and recurring release gates continue to apply. P2 noise/cluster scope remains outside that implementation plan.
 
-The [2026-11-26 local scaling archive](../benchmarks/evidence/p0-scaling-v2-2026-11-26/README.md) retains all 42 v2 scaling scenarios and an automated acceptance audit. Its same-method large-case references, shared-workstation timing and local-only evidence classification remain explicit. This closes the bounded local scaling campaign, not recurring RC, ablation, independent disclosure review or public performance approval.
+The [2026-11-26 local scaling archive](../benchmarks/evidence/p0-scaling-v2-2026-11-26/README.md) retains all 42 v2 scaling scenarios and an automated acceptance audit. Its same-method large-case references, shared-workstation timing and local-only evidence classification remain explicit. This closes the bounded local scaling campaign, not recurring RC, other-suite acceptance, independent disclosure review or public performance approval.
+
+The [2026-11-27 local ablation archive](../benchmarks/evidence/p0-ablation-v2-2026-11-27/README.md)
+retains all 16 targeted CPU paths, 80 independently measured batches and an
+accepted saved-output/configuration/statistics audit. Four full-dimension
+exclusions and five optional CUDA skips are retained. Python matvecs and CUDA
+ODE solves remain different workloads; this CPU completion establishes no
+CUDA parity, physical approximation validation, recurring RC or public-use approval.
 
 ## Required Row Metadata
 

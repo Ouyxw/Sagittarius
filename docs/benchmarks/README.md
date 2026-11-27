@@ -3,7 +3,7 @@
 Status: `Mixed`
 Roadmap: Phase 16
 Version: `benchmark-protocols/v1`
-Last reviewed: 2026-11-26
+Last reviewed: 2026-11-27
 
 This directory defines the Phase 16 benchmark protocols for Sagittarius. It translates the roadmap benchmark suite into runnable tiers, benchmark families, artifact requirements, and evidence-retention rules.
 
@@ -13,7 +13,7 @@ The initial protocol suite is done. `Mixed` reflects the implemented initial sui
 
 The [P0–P1 implementation plan v2](plans/v2.md) defines the seven-suite matrices, references, delivery batches and evidence gates. Scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate basis/resource limits. These are planned campaign targets; existing retained measurements and CUDA maturity remain unchanged. P2 noise/cluster work remains outside that plan.
 
-The protocol, tier, family and artifact documents each contain parallel `Benchmarking V1` and `Benchmarking V2` parts. V1 preserves the full original content and its commands/evidence wording; V2 uses the same chapter organization for plan v2 acceptance work. The V1 metadata and future-scope statements belong to that initial baseline; V2 and the implementation plan track current scaling support and remaining suite targets.
+The protocol, tier, family and artifact documents each contain parallel `Benchmarking V1` and `Benchmarking V2` parts. V1 preserves the full original content and its commands/evidence wording; V2 uses the same chapter organization for plan v2 acceptance work. The V1 metadata and future-scope statements belong to that initial baseline; V2 and the implementation plan track current scaling/ablation support and remaining suite targets.
 
 These documents complement the governance pages:
 
@@ -24,6 +24,8 @@ These documents complement the governance pages:
 
 
 Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-11-26/README.md): 42 scenarios and 210 eligible repeats, including all six N=20 geometry/radius configurations. This is bounded local numerical/software evidence; other suite targets and release/public-use gates remain separate.
+
+Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
 ## Documents
 
@@ -97,7 +99,7 @@ It records per-worker throughput rows, a `sweep-artifact/v1` checkpoint and fina
 
 Run every command in this section from `sagittarius_py`. Unless stated otherwise, each runner writes JSON, CSV, and Markdown companions under `benchmark-output`; suite-capable runners additionally write a `*_suite.json` aggregate that retains passed, failed, skipped, and incomplete rows.
 
-The [V2 scaling CLI](tiers.md#v2-runnable-commands-and-outputs) now provides the 42-scenario matrix, references, independent repeats, resource supervision and suite companions. This guide lists existing commands only. Remaining planned measurement flags, the observable/open-system performance runners and new artifact stems are tracked in [plan v2](plans/v2.md); add their runnable examples after implementation and smoke verification.
+The [V2 scaling and ablation CLIs](tiers.md#v2-runnable-commands-and-outputs) provide frozen CPU matrices, references, independent repeats, resource supervision and suite companions. Ablation retains fixed-input batch semantics, saved numerical outputs and an acceptance audit; CUDA ODE remains separate diagnostic scope. This guide lists existing commands only. Remaining planned measurement flags, the observable/open-system performance runners and new artifact stems are tracked in [plan v2](plans/v2.md); add their runnable examples after implementation and smoke verification.
 
 | Tier | Runnable command | Expected output and boundary |
 | :--- | :--- | :--- |
@@ -105,7 +107,7 @@ The [V2 scaling CLI](tiers.md#v2-runnable-commands-and-outputs) now provides the
 | Correctness | `uv run python tests/test_performance/benchmark_physics_correctness.py --output-dir benchmark-output` | `physics_correctness` artifacts and suite; analytic/dense-reference errors and tolerances. |
 | Parity | `SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python tests/test_performance/benchmark_cuda_mwis_protocol.py --output-dir benchmark-output` | `cuda_parity` and `mwis_gpu_parity` artifacts and suites; records opt-in skips or doctor failures when CUDA is unavailable. |
 | Scaling | `uv run python tests/test_performance/benchmark_sweep_cluster.py --output-dir benchmark-output` | `sweep_cluster` artifacts and suite, plus resumable `sweep-artifact/v1` checkpoint/final aggregate; local Distributed evidence only. |
-| Stress | `uv run python tests/test_performance/benchmark_ablation.py --atom-count 12 --repeats 50 --output-dir benchmark-output` | `ablation_bench_results` JSON/CSV/Markdown; retain hardware-bound success and failure rows, with no suite wrapper. |
+| Stress | `uv run python tests/test_performance/benchmark_ablation.py --atom-count 12 --repeats 50 --output-dir benchmark-output/ablation-n12` | `ablation_bench_results` and `ablation_bench_results_suite` JSON/CSV/Markdown plus per-repeat/config/reference outputs. |
 
 For additional correctness coverage, run the cold-atom/open-system and MWIS commands below; their outputs are `cold_atom_dynamics`/`open_system_dynamics` and `mwis_aqc_smoke`, `mwis_aqc_correctness`, or `mwis_aqc_scaling`, each with matching suite aggregates.
 

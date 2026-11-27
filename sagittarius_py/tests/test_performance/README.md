@@ -21,8 +21,8 @@ This directory contains scripts for profiling and benchmarking the Sagittarius n
 
 ### 4. `benchmark_ablation.py`
 - **Goal**: Compare Hamiltonian execution path representations.
-- **Metric**: Time per repeated matvec for full dense, full sparse, reduced matrix-free, and reduced sparse CPU paths; optional CUDA cached sparse solve timing.
-- **GPU Gate**: Pass `--include-gpu` only on a machine where CUDA diagnostics pass.
+- **Metric**: Fixed normalized H*psi batch and per-operation time for four Python CPU paths, with separate construction and independent-repeat statistics. CLI defaults to N=4,8,12,16,20; full paths above dimension 4096 are excluded. `--repeats` remains operations per batch; `--repeat-count` is independent batches. Optional CUDA cached ODE solves are separate diagnostic timings.
+- **GPU Gate**: Requires `--include-gpu`, `SAGITTARIUS_ENABLE_GPU_TESTS=1` and initialized CUDA diagnostics. GPU-suite matched parity is needed for qualified solve comparisons.
 
 ## Execution
 ```bash
@@ -30,7 +30,7 @@ cd sagittarius_py/tests/test_performance
 uv run python benchmark_scaling.py
 uv run python benchmark_gpu.py
 uv run python benchmark_cluster.py
-uv run python benchmark_ablation.py
+uv run python benchmark_ablation.py --output-dir benchmark-output/ablation-v2
 ```
 
 ## Output

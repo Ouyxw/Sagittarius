@@ -1,0 +1,26 @@
+row_id,mode,status,workload,atom_count,full_dim,basis_size,repeats,total_time_s,time_per_operation_s,median_batch_time_s,reference_error,reference_relative_error,max_rss,max_rss_unit
+chain-n4-full_dense,full_dense,passed,matvec,4,16,16,50,1.7192011000588536e-05,3.4384022001177073e-07,1.7162994481623173e-05,0.0,0.0,924648,"KiB on Linux, bytes on macOS"
+chain-n4-full_sparse,full_sparse,passed,matvec,4,16,16,50,0.00012328801676630974,2.465760335326195e-06,0.00012328801676630974,2.5476231888929306e-16,7.641717629511329e-17,919504,"KiB on Linux, bytes on macOS"
+chain-n4-reduced_matrix_free,reduced_matrix_free,passed,matvec,4,16,8,50,0.0004334230034146458,8.668460068292916e-06,0.0004534000181593001,4.444278938805073e-16,1.3472199014750692e-16,923732,"KiB on Linux, bytes on macOS"
+chain-n4-reduced_sparse,reduced_sparse,passed,matvec,4,16,8,50,0.00010711897630244493,2.142379526048899e-06,0.00012064099428243935,4.444278938805073e-16,1.3472199014750692e-16,923548,"KiB on Linux, bytes on macOS"
+chain-n4-reduced_sparse_gpu_cached,reduced_sparse_gpu_cached,skipped,ode_solve,4,16,8,,,,,,,,
+chain-n8-full_dense,full_dense,passed,matvec,8,256,256,50,0.0005028460000175983,1.0056920000351966e-05,0.0004972030001226813,0.0,0.0,930352,"KiB on Linux, bytes on macOS"
+chain-n8-full_sparse,full_sparse,passed,matvec,8,256,256,50,0.00020581501303240657,4.116300260648131e-06,0.00020581501303240657,2.482534153247273e-16,1.3784093878890252e-16,940956,"KiB on Linux, bytes on macOS"
+chain-n8-reduced_matrix_free,reduced_matrix_free,passed,matvec,8,256,55,50,0.005146106006577611,0.00010292212013155222,0.005219092010520399,4.577566798522237e-16,1.9612509960906562e-16,924876,"KiB on Linux, bytes on macOS"
+chain-n8-reduced_sparse,reduced_sparse,passed,matvec,8,256,55,50,0.0001267740153707564,2.535480307415128e-06,0.0001267740153707564,4.577566798522237e-16,1.9612509960906562e-16,940084,"KiB on Linux, bytes on macOS"
+chain-n8-reduced_sparse_gpu_cached,reduced_sparse_gpu_cached,skipped,ode_solve,8,256,55,,,,,,,,
+chain-n12-full_dense,full_dense,passed,matvec,12,4096,4096,50,0.2288890689960681,0.004577781379921362,0.2093370409857016,2.2887833992611187e-16,2.2887833992611187e-16,1013060,"KiB on Linux, bytes on macOS"
+chain-n12-full_sparse,full_sparse,passed,matvec,12,4096,4096,50,0.002104712009895593,4.209424019791186e-05,0.0019779540016315877,2.3714374201337736e-16,2.3714374201337736e-16,1022332,"KiB on Linux, bytes on macOS"
+chain-n12-reduced_matrix_free,reduced_matrix_free,passed,matvec,12,4096,377,50,0.05771174299297854,0.0011542348598595708,0.05771174299297854,2.482534153247273e-16,2.4263650282272366e-16,924500,"KiB on Linux, bytes on macOS"
+chain-n12-reduced_sparse,reduced_sparse,passed,matvec,12,4096,377,50,0.00024173298152163625,4.834659630432725e-06,0.00022863000049255788,2.482534153247273e-16,2.4263650282272366e-16,921980,"KiB on Linux, bytes on macOS"
+chain-n12-reduced_sparse_gpu_cached,reduced_sparse_gpu_cached,skipped,ode_solve,12,4096,377,,,,,,,,
+chain-n16-full_dense,full_dense,skipped,matvec,16,65536,65536,,,,,,,,
+chain-n16-full_sparse,full_sparse,skipped,matvec,16,65536,65536,,,,,,,,
+chain-n16-reduced_matrix_free,reduced_matrix_free,passed,matvec,16,65536,2584,50,0.581941732991254,0.011638834659825079,0.5808861890109256,1.2412670766236366e-16,1.2412670766236366e-16,938584,"KiB on Linux, bytes on macOS"
+chain-n16-reduced_sparse,reduced_sparse,passed,matvec,16,65536,2584,50,0.0010489469859749079,2.0978939719498158e-05,0.0010489469859749079,1.2412670766236366e-16,1.2412670766236366e-16,967524,"KiB on Linux, bytes on macOS"
+chain-n16-reduced_sparse_gpu_cached,reduced_sparse_gpu_cached,skipped,ode_solve,16,65536,2584,,,,,,,,
+chain-n20-full_dense,full_dense,skipped,matvec,20,1048576,1048576,,,,,,,,
+chain-n20-full_sparse,full_sparse,skipped,matvec,20,1048576,1048576,,,,,,,,
+chain-n20-reduced_matrix_free,reduced_matrix_free,passed,matvec,20,1048576,17711,50,5.563404093991267,0.11126808187982533,5.501702087989543,8.326672684688674e-17,8.326672684688674e-17,964936,"KiB on Linux, bytes on macOS"
+chain-n20-reduced_sparse,reduced_sparse,passed,matvec,20,1048576,17711,50,0.008495718007907271,0.00016991436015814543,0.008495718007907271,8.326672684688674e-17,8.326672684688674e-17,1394248,"KiB on Linux, bytes on macOS"
+chain-n20-reduced_sparse_gpu_cached,reduced_sparse_gpu_cached,skipped,ode_solve,20,1048576,17711,,,,,,,,
