@@ -11,9 +11,9 @@ The initial suite was closed with [retained Phase 16 evidence](evidence/phase16-
 
 The initial protocol suite is done. `Mixed` reflects the implemented initial suite and planned full-plan extensions; see the [Phase 16 suite alignment matrix](../development/requirements.md#phase-16-alignment-with-spec-gov-004-benchmark-suites) and [cross-cutting requirements](../development/requirements.md#phase-16-alignment-with-spec-gov-004-cross-cutting-requirements) for per-suite status, remaining acceptance evidence, and Phase 14/18 dependencies.
 
-The [P0–P1 implementation plan v2](plans/v2.md) defines the seven-suite matrices, references, delivery batches and evidence gates. Scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate basis/resource limits. Scaling and the bounded GPU matrix have retained N=20 measurements; MWIS/UDG and open-system extensions remain planned. CUDA remains experimental. P2 noise/cluster work remains outside that plan.
+The [P0–P1 implementation plan v2](plans/v2.md) defines the seven-suite matrices, references, delivery batches and evidence gates. Scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate basis/resource limits. Scaling and the bounded GPU matrix have retained N=20 measurements; The 40-instance MWIS/UDG campaign also retains N=20 measurements; open-system extensions remain planned. CUDA remains experimental. P2 noise/cluster work remains outside that plan.
 
-The protocol, tier, family and artifact documents each contain parallel `Benchmarking V1` and `Benchmarking V2` parts. V1 preserves the full original content and its commands/evidence wording; V2 uses the same chapter organization for plan v2 acceptance work. The V1 metadata and future-scope statements belong to that initial baseline; V2 and the implementation plan track current scaling/ablation/GPU support and remaining suite targets.
+The protocol, tier, family and artifact documents each contain parallel `Benchmarking V1` and `Benchmarking V2` parts. V1 preserves the full original content and its commands/evidence wording; V2 uses the same chapter organization for plan v2 acceptance work. The V1 metadata and future-scope statements belong to that initial baseline; V2 and the implementation plan track current scaling/ablation/GPU/MWIS support and remaining suite targets.
 
 These documents complement the governance pages:
 
@@ -31,6 +31,8 @@ CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-
 
 The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
 
+The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
+
 ## Documents
 
 | Document | Purpose |
@@ -39,7 +41,7 @@ The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes t
 | [`tiers.md`](tiers.md) | Parallel [V1](tiers.md#benchmarking-v1)/[V2](tiers.md#benchmarking-v2) tier summaries, command/output boundaries, and smoke/correctness/parity/scaling/stress requirements. |
 | [`families.md`](families.md) | Parallel [V1](families.md#benchmarking-v1)/[V2](families.md#benchmarking-v2) family summaries and physics/dynamics/open-system/optimization/backend/sweep protocols. |
 | [`artifact-contracts.md`](artifact-contracts.md) | Parallel [V1](artifact-contracts.md#benchmarking-v1)/[V2](artifact-contracts.md#benchmarking-v2) artifact types, aggregate/row contracts, failures, metrics, retention and compatibility. |
-| [`plans/v2.md`](plans/v2.md) | P0–P1 plan, implemented scaling/ablation/GPU matrices and controls, remaining targets, numerical/statistical gates, resource policy and delivery/acceptance evidence. |
+| [`plans/v2.md`](plans/v2.md) | P0–P1 plan, implemented scaling/ablation/GPU/MWIS matrices and controls, remaining targets, numerical/statistical gates, resource policy and delivery/acceptance evidence. |
 | [`reports/p0-runtime-statistics-2026-11-27.md`](reports/p0-runtime-statistics-2026-11-27.md) | Complete derived timing distributions for 42 scaling scenarios, 16 CPU ablation paths and five matched CPU/CUDA ODE cases; raw-source links, exclusions and local-only interpretation. |
 
 All seven P0–P1 suites have explicit [runtime reporting requirements](plans/v2.md#runtime-reporting-requirements-for-all-seven-suites)
@@ -47,7 +49,7 @@ and suite-specific timer/output definitions. Default performance evidence uses
 two warmups and at least five independent measurements, with median/min/max/
 p25/p75, counts and raw membership. Scaling and ablation already retain these
 statistics; the linked report recomputes and presents them without modifying
-original archives or rerunning simulations. GPU distributions are retained in its own campaign. Other expanded P1 statistical outputs
+original archives or rerunning simulations. GPU distributions are retained in its own campaign. MWIS also retains separate per-graph AQC/ILP distributions. Other expanded P1 statistical outputs
 remain planned; correctness-only tests need no separate performance campaign.
 
 ## Implemented CPU smoke

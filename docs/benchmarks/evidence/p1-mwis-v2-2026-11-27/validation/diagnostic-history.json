@@ -1,0 +1,28 @@
+[
+  {
+    "attempt": "pilot-01",
+    "scope": "N=2 seed101; one warmup/one repeat",
+    "outcome": "all three AQC/ILP calls passed their gates, max numerical error 1.0936000438555027e-9; pilot incomplete; normalized readout only, before raw norm observable"
+  },
+  {
+    "attempt": "pilot-02",
+    "scope": "N=8 and largest N=20 D=53760, seed103; one warmup/one repeat",
+    "outcome": "both paths completed; pilot incomplete; numerical/model reference preflight before adding raw norm observable"
+  },
+  {
+    "attempt": "initial MWIS regression",
+    "outcome": "2 failed, 15 passed: legacy no-observable Simulation.run returns Julia ODESolution, not SimulationResult",
+    "retention": "mwis-tests-initial-failure.log",
+    "resolution": "preserved raw solve_full probabilities; new solve_result explicitly collects an observable to return the actual SDK result"
+  },
+  {
+    "attempt": "pilot-03",
+    "scope": "N=2 and N=20 seed103; pop0/Z0 plus final probabilities; one warmup/one repeat",
+    "outcome": "6 AQC and 6 ILP results audited; max numerical error 8.41542979745924e-9; raw norm error at N20 8.676439344768028e-9; both pilot rows correctly incomplete"
+  },
+  {
+    "attempt": "final MWIS regressions",
+    "outcome": "17 passed, no skips; additional 49 backend/golden/artifact checks passed; stopped-timer/NaN gates and memory diagnostic code checked",
+    "scope": "pilots and failed regression output are not pooled with final campaign timings"
+  }
+]

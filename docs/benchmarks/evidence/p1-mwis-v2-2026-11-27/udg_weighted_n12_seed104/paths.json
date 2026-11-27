@@ -1,0 +1,994 @@
+{
+  "aqc": {
+    "checkpoint": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/checkpoint.json",
+    "config": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/config.json",
+    "state": {
+      "complete": true,
+      "doctor": {
+        "available": true,
+        "backend_maturity": {
+          "AMDGPU": {
+            "notes": "Julia package hook exists, but parity and container tests are not established.",
+            "status": "planned"
+          },
+          "CPU": {
+            "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+            "status": "stable"
+          },
+          "CUDA": {
+            "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+            "status": "experimental"
+          },
+          "METAL": {
+            "notes": "Julia package hook exists, but parity and CI coverage are not established.",
+            "status": "planned"
+          }
+        },
+        "backend_probe": {
+          "abi": {},
+          "available": true,
+          "backend": "CPU",
+          "checks": {
+            "julia_package_versions": {
+              "code": null,
+              "message": "Collected Julia package versions.",
+              "ok": true,
+              "severity": "info"
+            },
+            "sparse_matvec": {
+              "code": null,
+              "message": "CPU sparse matrix-vector multiplication probe.",
+              "ok": true,
+              "severity": "error"
+            }
+          },
+          "devices": [],
+          "driver": {},
+          "errors": [],
+          "runtime": {},
+          "schema_version": "backend-probe/v2.1",
+          "versions": {
+            "CUDA": "6.2.0",
+            "DiffEqCallbacks": "4.19.6",
+            "OrdinaryDiffEq": "7.8.1",
+            "OrdinaryDiffEqLowOrderRK": "2.2.6",
+            "SciMLBase": "3.58.0",
+            "StaticArrays": "1.9.25",
+            "julia": "1.13.4"
+          }
+        },
+        "backend_source": "source_checkout",
+        "capabilities": {
+          "abi": {
+            "backend": "CPU",
+            "compatibility": {},
+            "host": {
+              "julia": {
+                "available": true,
+                "path_env": null,
+                "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+                "sagittarius_julia_version": "1.0.8",
+                "source": "source_checkout",
+                "version": "1.13.4"
+              },
+              "python": {
+                "cache_tag": "cpython-311",
+                "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+                "implementation": "CPython",
+                "libc": {
+                  "name": "glibc",
+                  "version": "2.39"
+                },
+                "machine": "x86_64",
+                "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+                "processor": "x86_64",
+                "system": "Linux",
+                "version": "3.11.15"
+              }
+            },
+            "maturity": {
+              "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+              "status": "stable"
+            },
+            "toolchain": {}
+          },
+          "backend": "CPU",
+          "maturity": {
+            "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+            "status": "stable"
+          },
+          "parity": {
+            "hardware_validated_by_doctor": false,
+            "notes": "CPU execution is covered by the regular Python/Julia test suite; doctor() is a capability probe, not a numerical parity test.",
+            "status": "regular_test_suite",
+            "test_entrypoints": [
+              "sagittarius_py/tests/"
+            ]
+          }
+        },
+        "container": {
+          "detected": false,
+          "devcontainer": false,
+          "id": null,
+          "image": null
+        },
+        "gpu": {},
+        "issue_details": [],
+        "issues": [],
+        "julia_backend": {
+          "available": true,
+          "path_env": null,
+          "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+          "sagittarius_julia_version": "1.0.8",
+          "source": "source_checkout",
+          "version": "1.13.4"
+        },
+        "julia_loaded": true,
+        "requested_backend": "CPU",
+        "runtime": {
+          "abi": {
+            "julia": {
+              "available": true,
+              "path_env": null,
+              "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+              "sagittarius_julia_version": "1.0.8",
+              "source": "source_checkout",
+              "version": "1.13.4"
+            },
+            "python": {
+              "cache_tag": "cpython-311",
+              "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+              "implementation": "CPython",
+              "libc": {
+                "name": "glibc",
+                "version": "2.39"
+              },
+              "machine": "x86_64",
+              "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+              "processor": "x86_64",
+              "system": "Linux",
+              "version": "3.11.15"
+            }
+          },
+          "backend_toolchains": {
+            "AMDGPU": {
+              "rocm_smi": {
+                "missing": true,
+                "ok": false,
+                "output": null,
+                "returncode": null
+              }
+            },
+            "CUDA": {
+              "compatibility": {
+                "blackwell_detected": false,
+                "blackwell_devices": [],
+                "cuda_12_8_driver_ok": null,
+                "cuda_12_8_min_linux_driver": "570.26",
+                "cuda_12_8_min_windows_driver": "570.65",
+                "driver_version": null
+              },
+              "devices": [
+                {
+                  "compute_capability": null,
+                  "driver_version": null,
+                  "memory_total_mib": null,
+                  "name": "Failed to initialize NVML: GPU access blocked by the operating system"
+                },
+                {
+                  "compute_capability": null,
+                  "driver_version": null,
+                  "memory_total_mib": null,
+                  "name": "Failed to properly shut down NVML: GPU access blocked by the operating system"
+                }
+              ],
+              "nvcc": {
+                "missing": true,
+                "ok": false,
+                "output": null,
+                "returncode": null
+              },
+              "nvidia_smi": {
+                "fallback": {
+                  "missing": false,
+                  "ok": false,
+                  "output": "Failed to initialize NVML: GPU access blocked by the operating system",
+                  "raw_output": "Failed to initialize NVML: GPU access blocked by the operating system\nFailed to properly shut down NVML: GPU access blocked by the operating system",
+                  "returncode": 255
+                },
+                "missing": false,
+                "ok": false,
+                "output": "Failed to initialize NVML: GPU access blocked by the operating system",
+                "raw_output": "Failed to initialize NVML: GPU access blocked by the operating system\nFailed to properly shut down NVML: GPU access blocked by the operating system",
+                "returncode": 255
+              }
+            },
+            "METAL": {
+              "metal_compiler": {
+                "missing": true,
+                "ok": false,
+                "output": null,
+                "returncode": null
+              }
+            }
+          },
+          "build": {
+            "build_id": null,
+            "build_number": null,
+            "ci": false,
+            "source": {
+              "git_branch": "feature/benchmarking",
+              "git_commit": "58dfd10bc7d97ebefd7b78342eec695d0f55b770",
+              "git_commit_short": "58dfd10",
+              "git_dirty": true,
+              "root": "/home/oyxw/Sagittarius"
+            }
+          },
+          "container": {
+            "detected": false,
+            "devcontainer": false,
+            "id": null,
+            "image": null
+          },
+          "in_container": false,
+          "julia": {
+            "available": true,
+            "path_env": null,
+            "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+            "sagittarius_julia_version": "1.0.8",
+            "source": "source_checkout",
+            "version": "1.13.4"
+          },
+          "julia_version": "1.13.4",
+          "package_version": "1.0.8",
+          "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+          "python": {
+            "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+            "implementation": "CPython",
+            "packages": {
+              "docplex": "2.32.264",
+              "juliacall": "0.9.35",
+              "juliapkg": "0.1.24",
+              "matplotlib": "3.10.9",
+              "networkx": "3.6.1",
+              "numpy": "2.4.6",
+              "pandas": "3.0.3",
+              "pulp": "3.3.2",
+              "sagittarius-py": "1.0.8",
+              "scipy": "1.17.1",
+              "seaborn": "0.13.2"
+            },
+            "version": "3.11.15"
+          },
+          "python_version": "3.11.15",
+          "sagittarius_julia_version": "1.0.8",
+          "schema_version": "version-info/v1"
+        },
+        "schema_version": "doctor/v2.1"
+      },
+      "initialization_seconds": 5.924646250990918,
+      "memory": {
+        "method": "/proc/PID/status",
+        "peak_bytes": 1129730048,
+        "reason": null,
+        "rss_bytes": 1129730048,
+        "source_unit": "kB (1024 bytes)"
+      },
+      "memory_baseline": {
+        "method": "/proc/PID/status",
+        "peak_bytes": 960057344,
+        "reason": null,
+        "rss_bytes": 960057344,
+        "source_unit": "kB (1024 bytes)"
+      },
+      "path": "aqc",
+      "records": [
+        {
+          "artifacts": {
+            "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/first-0.result.json",
+            "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/first-0.manifest.json"
+          },
+          "candidate_bitstring": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "eligible": true,
+          "gate": {
+            "finite": true,
+            "numerical_max_abs_error": 2.0164583336423902e-09,
+            "passed": true,
+            "probability_norm_error": 0.0,
+            "raw_state_norm_error": 2.0082915330732476e-09
+          },
+          "operation_count": 1,
+          "phase": "first",
+          "postprocessing_seconds": 0.0009120040049310774,
+          "repeat_index": 0,
+          "row_id": "udg_weighted_n12_seed104-aqc-first-0",
+          "runtime_seconds": 4.835151777981082,
+          "serialization_seconds": 0.003422529000090435
+        },
+        {
+          "artifacts": {
+            "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/warmup-0.result.json",
+            "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/warmup-0.manifest.json"
+          },
+          "candidate_bitstring": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "eligible": true,
+          "gate": {
+            "finite": true,
+            "numerical_max_abs_error": 2.0164583336423902e-09,
+            "passed": true,
+            "probability_norm_error": 0.0,
+            "raw_state_norm_error": 2.0082915330732476e-09
+          },
+          "operation_count": 1,
+          "phase": "warmup",
+          "postprocessing_seconds": 0.0008966750174295157,
+          "repeat_index": 0,
+          "row_id": "udg_weighted_n12_seed104-aqc-warmup-0",
+          "runtime_seconds": 2.173778061987832,
+          "serialization_seconds": 0.0032567110029049218
+        },
+        {
+          "artifacts": {
+            "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/warmup-1.result.json",
+            "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/warmup-1.manifest.json"
+          },
+          "candidate_bitstring": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "eligible": true,
+          "gate": {
+            "finite": true,
+            "numerical_max_abs_error": 2.0164583336423902e-09,
+            "passed": true,
+            "probability_norm_error": 0.0,
+            "raw_state_norm_error": 2.0082915330732476e-09
+          },
+          "operation_count": 1,
+          "phase": "warmup",
+          "postprocessing_seconds": 0.0008557910041417927,
+          "repeat_index": 1,
+          "row_id": "udg_weighted_n12_seed104-aqc-warmup-1",
+          "runtime_seconds": 2.0155333479924593,
+          "serialization_seconds": 0.003294283989816904
+        },
+        {
+          "artifacts": {
+            "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-0.result.json",
+            "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-0.manifest.json"
+          },
+          "candidate_bitstring": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "eligible": true,
+          "gate": {
+            "finite": true,
+            "numerical_max_abs_error": 2.0164583336423902e-09,
+            "passed": true,
+            "probability_norm_error": 0.0,
+            "raw_state_norm_error": 2.0082915330732476e-09
+          },
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 0.0008349139825440943,
+          "repeat_index": 0,
+          "row_id": "udg_weighted_n12_seed104-aqc-measured-0",
+          "runtime_seconds": 2.1121855909877922,
+          "serialization_seconds": 0.0035881070070900023
+        },
+        {
+          "artifacts": {
+            "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-1.result.json",
+            "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-1.manifest.json"
+          },
+          "candidate_bitstring": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "eligible": true,
+          "gate": {
+            "finite": true,
+            "numerical_max_abs_error": 2.0164583336423902e-09,
+            "passed": true,
+            "probability_norm_error": 0.0,
+            "raw_state_norm_error": 2.0082915330732476e-09
+          },
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 0.0008475630020257086,
+          "repeat_index": 1,
+          "row_id": "udg_weighted_n12_seed104-aqc-measured-1",
+          "runtime_seconds": 2.065918195003178,
+          "serialization_seconds": 0.0032790540135465562
+        },
+        {
+          "artifacts": {
+            "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-2.result.json",
+            "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-2.manifest.json"
+          },
+          "candidate_bitstring": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "eligible": true,
+          "gate": {
+            "finite": true,
+            "numerical_max_abs_error": 2.0164583336423902e-09,
+            "passed": true,
+            "probability_norm_error": 0.0,
+            "raw_state_norm_error": 2.0082915330732476e-09
+          },
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 0.0008239290036726743,
+          "repeat_index": 2,
+          "row_id": "udg_weighted_n12_seed104-aqc-measured-2",
+          "runtime_seconds": 2.2426610229886137,
+          "serialization_seconds": 0.0032220639986917377
+        },
+        {
+          "artifacts": {
+            "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-3.result.json",
+            "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-3.manifest.json"
+          },
+          "candidate_bitstring": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "eligible": true,
+          "gate": {
+            "finite": true,
+            "numerical_max_abs_error": 2.0164583336423902e-09,
+            "passed": true,
+            "probability_norm_error": 0.0,
+            "raw_state_norm_error": 2.0082915330732476e-09
+          },
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 0.0008078399987425655,
+          "repeat_index": 3,
+          "row_id": "udg_weighted_n12_seed104-aqc-measured-3",
+          "runtime_seconds": 2.1092178160033654,
+          "serialization_seconds": 0.0032760640024207532
+        },
+        {
+          "artifacts": {
+            "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-4.result.json",
+            "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/measured-4.manifest.json"
+          },
+          "candidate_bitstring": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "eligible": true,
+          "gate": {
+            "finite": true,
+            "numerical_max_abs_error": 2.0164583336423902e-09,
+            "passed": true,
+            "probability_norm_error": 0.0,
+            "raw_state_norm_error": 2.0082915330732476e-09
+          },
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 0.0008122030121739954,
+          "repeat_index": 4,
+          "row_id": "udg_weighted_n12_seed104-aqc-measured-4",
+          "runtime_seconds": 2.111493403004715,
+          "serialization_seconds": 0.003272536996519193
+        }
+      ],
+      "reference": {
+        "arrays": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/aqc/independent-reference.npz",
+        "atol": 1e-14,
+        "coarse_atol": 1e-12,
+        "coarse_rtol": 1e-10,
+        "limitations": "Independent verification of the executed reduced model, not finite-interaction/full-space physical equivalence.",
+        "method": "SciPy DOP853; independently enumerated sparse Hamiltonian",
+        "nfev": 548,
+        "rtol": 1e-12,
+        "stability_atol": 1e-09,
+        "stability_error": 2.1554216744767984e-12
+      },
+      "reference_seconds": 0.1383435140014626,
+      "runtime_context": {
+        "environment": {
+          "JULIA_DEPOT_PATH": "/tmp/ablation-julia-depot:/home/oyxw/.julia",
+          "JULIA_NUM_THREADS": "1",
+          "JULIA_PROJECT": null,
+          "MKL_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "PYTHON_JULIACALL_BINDIR": "/home/oyxw/.julia/juliaup/julia-1.13.4+0.x64.linux.gnu/bin",
+          "PYTHON_JULIACALL_EXE": "/home/oyxw/.julia/juliaup/julia-1.13.4+0.x64.linux.gnu/bin/julia",
+          "PYTHON_JULIACALL_PROJECT": "/home/oyxw/Sagittarius/sagittarius_py/.venv/julia_cuda_env",
+          "PYTHON_JULIAPKG_PROJECT": null
+        },
+        "python_blas": {
+          "providers": [
+            {
+              "effective_threads": 1,
+              "library": "/home/oyxw/.julia/juliaup/julia-1.13.4+0.x64.linux.gnu/lib/julia/libopenblas64_.0.3.30.so",
+              "symbol": "openblas_get_num_threads64_"
+            },
+            {
+              "effective_threads": 1,
+              "library": "/home/oyxw/Sagittarius/sagittarius_py/.venv/lib/python3.11/site-packages/numpy.libs/libscipy_openblas64_-32a4b2a6.so",
+              "symbol": "scipy_openblas_get_num_threads64_"
+            }
+          ],
+          "unavailable_reason": null
+        },
+        "threads": {
+          "blas": 1,
+          "blas_config": "LBTConfig([ILP64] libopenblas64_.so)",
+          "julia": 1
+        }
+      },
+      "runtime_files": {
+        "Manifest.toml": "e4c2a109054a2b19580273946be24c56a765c8094342bf2f50019e1ddd4cb002",
+        "Project.toml": "86f0f5855c58c1705d187e075aecf194f50beff0e24162fd28b217caa00ef799"
+      },
+      "setup_seconds": 0.7337035549862776,
+      "stage": "validation"
+    },
+    "supervision": {
+      "memory_limit_bytes": 4294967296,
+      "method": "/proc/PID/status VmHWM, sampled every 50 ms",
+      "reason": null,
+      "returncode": 0,
+      "sampled_peak_bytes": 1129803776,
+      "scope": "one scenario process including initialization, references and serialization",
+      "timeout_seconds": 600.0,
+      "wall_seconds": 26.78424292500131
+    }
+  },
+  "ilp": {
+    "checkpoint": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/checkpoint.json",
+    "config": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/config.json",
+    "state": {
+      "complete": true,
+      "enumerated_optimum": 7.581738950850834,
+      "memory": {
+        "method": "/proc/PID/status",
+        "peak_bytes": 59154432,
+        "reason": null,
+        "rss_bytes": 52404224,
+        "source_unit": "kB (1024 bytes)"
+      },
+      "memory_baseline": {
+        "method": "/proc/PID/status",
+        "peak_bytes": 52142080,
+        "reason": null,
+        "rss_bytes": 52142080,
+        "source_unit": "kB (1024 bytes)"
+      },
+      "memory_scope": "Python ILP worker lifetime; CBC subprocess peak unavailable (not included in Python HWM or RSS polling).",
+      "path": "ilp",
+      "records": [
+        {
+          "artifacts": {
+            "reference_report": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/first-0.reference.json",
+            "solver_log": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/first-0.cbc.log"
+          },
+          "eligible": true,
+          "model_construction_seconds": 0.000404368998715654,
+          "operation_count": 1,
+          "phase": "first",
+          "postprocessing_seconds": 0.00012401799904182553,
+          "reference": {
+            "best_bound": null,
+            "bound_source": "Unavailable: PuLP interface does not expose CBC best bound and log has none.",
+            "candidate_bitstring": [
+              0,
+              1,
+              0,
+              1,
+              1,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "exact_objective": 7.581738950850834,
+            "incumbent_objective": 7.581738950850834,
+            "problem_status": "Optimal",
+            "proven_optimal": true,
+            "solution_status": "Optimal Solution Found",
+            "termination": "optimal"
+          },
+          "repeat_index": 0,
+          "row_id": "udg_weighted_n12_seed104-ilp-first-0",
+          "runtime_seconds": 0.0037868880026508123,
+          "serialization_seconds": 6.48600107524544e-05
+        },
+        {
+          "artifacts": {
+            "reference_report": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/warmup-0.reference.json",
+            "solver_log": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/warmup-0.cbc.log"
+          },
+          "eligible": true,
+          "model_construction_seconds": 0.00016714699449948967,
+          "operation_count": 1,
+          "phase": "warmup",
+          "postprocessing_seconds": 3.4702999982982874e-05,
+          "reference": {
+            "best_bound": null,
+            "bound_source": "Unavailable: PuLP interface does not expose CBC best bound and log has none.",
+            "candidate_bitstring": [
+              0,
+              1,
+              0,
+              1,
+              1,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "exact_objective": 7.581738950850834,
+            "incumbent_objective": 7.581738950850834,
+            "problem_status": "Optimal",
+            "proven_optimal": true,
+            "solution_status": "Optimal Solution Found",
+            "termination": "optimal"
+          },
+          "repeat_index": 0,
+          "row_id": "udg_weighted_n12_seed104-ilp-warmup-0",
+          "runtime_seconds": 0.0032022289815358818,
+          "serialization_seconds": 6.125497748143971e-05
+        },
+        {
+          "artifacts": {
+            "reference_report": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/warmup-1.reference.json",
+            "solver_log": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/warmup-1.cbc.log"
+          },
+          "eligible": true,
+          "model_construction_seconds": 0.00015086497296579182,
+          "operation_count": 1,
+          "phase": "warmup",
+          "postprocessing_seconds": 3.7717982195317745e-05,
+          "reference": {
+            "best_bound": null,
+            "bound_source": "Unavailable: PuLP interface does not expose CBC best bound and log has none.",
+            "candidate_bitstring": [
+              0,
+              1,
+              0,
+              1,
+              1,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "exact_objective": 7.581738950850834,
+            "incumbent_objective": 7.581738950850834,
+            "problem_status": "Optimal",
+            "proven_optimal": true,
+            "solution_status": "Optimal Solution Found",
+            "termination": "optimal"
+          },
+          "repeat_index": 1,
+          "row_id": "udg_weighted_n12_seed104-ilp-warmup-1",
+          "runtime_seconds": 0.0031711649789940566,
+          "serialization_seconds": 6.178801413625479e-05
+        },
+        {
+          "artifacts": {
+            "reference_report": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-0.reference.json",
+            "solver_log": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-0.cbc.log"
+          },
+          "eligible": true,
+          "model_construction_seconds": 0.0001630720216780901,
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 3.368098987266421e-05,
+          "reference": {
+            "best_bound": null,
+            "bound_source": "Unavailable: PuLP interface does not expose CBC best bound and log has none.",
+            "candidate_bitstring": [
+              0,
+              1,
+              0,
+              1,
+              1,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "exact_objective": 7.581738950850834,
+            "incumbent_objective": 7.581738950850834,
+            "problem_status": "Optimal",
+            "proven_optimal": true,
+            "solution_status": "Optimal Solution Found",
+            "termination": "optimal"
+          },
+          "repeat_index": 0,
+          "row_id": "udg_weighted_n12_seed104-ilp-measured-0",
+          "runtime_seconds": 0.0031605940021108836,
+          "serialization_seconds": 6.609599222429097e-05
+        },
+        {
+          "artifacts": {
+            "reference_report": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-1.reference.json",
+            "solver_log": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-1.cbc.log"
+          },
+          "eligible": true,
+          "model_construction_seconds": 0.000150656996993348,
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 3.053699037991464e-05,
+          "reference": {
+            "best_bound": null,
+            "bound_source": "Unavailable: PuLP interface does not expose CBC best bound and log has none.",
+            "candidate_bitstring": [
+              0,
+              1,
+              0,
+              1,
+              1,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "exact_objective": 7.581738950850834,
+            "incumbent_objective": 7.581738950850834,
+            "problem_status": "Optimal",
+            "proven_optimal": true,
+            "solution_status": "Optimal Solution Found",
+            "termination": "optimal"
+          },
+          "repeat_index": 1,
+          "row_id": "udg_weighted_n12_seed104-ilp-measured-1",
+          "runtime_seconds": 0.0030056760006118566,
+          "serialization_seconds": 4.911900032311678e-05
+        },
+        {
+          "artifacts": {
+            "reference_report": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-2.reference.json",
+            "solver_log": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-2.cbc.log"
+          },
+          "eligible": true,
+          "model_construction_seconds": 0.000140791991725564,
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 2.9768008971586823e-05,
+          "reference": {
+            "best_bound": null,
+            "bound_source": "Unavailable: PuLP interface does not expose CBC best bound and log has none.",
+            "candidate_bitstring": [
+              0,
+              1,
+              0,
+              1,
+              1,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "exact_objective": 7.581738950850834,
+            "incumbent_objective": 7.581738950850834,
+            "problem_status": "Optimal",
+            "proven_optimal": true,
+            "solution_status": "Optimal Solution Found",
+            "termination": "optimal"
+          },
+          "repeat_index": 2,
+          "row_id": "udg_weighted_n12_seed104-ilp-measured-2",
+          "runtime_seconds": 0.0030321569938678294,
+          "serialization_seconds": 5.898301606066525e-05
+        },
+        {
+          "artifacts": {
+            "reference_report": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-3.reference.json",
+            "solver_log": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-3.cbc.log"
+          },
+          "eligible": true,
+          "model_construction_seconds": 0.00019489499391056597,
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 3.8923986721783876e-05,
+          "reference": {
+            "best_bound": null,
+            "bound_source": "Unavailable: PuLP interface does not expose CBC best bound and log has none.",
+            "candidate_bitstring": [
+              0,
+              1,
+              0,
+              1,
+              1,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "exact_objective": 7.581738950850834,
+            "incumbent_objective": 7.581738950850834,
+            "problem_status": "Optimal",
+            "proven_optimal": true,
+            "solution_status": "Optimal Solution Found",
+            "termination": "optimal"
+          },
+          "repeat_index": 3,
+          "row_id": "udg_weighted_n12_seed104-ilp-measured-3",
+          "runtime_seconds": 0.003209467977285385,
+          "serialization_seconds": 6.120000034570694e-05
+        },
+        {
+          "artifacts": {
+            "reference_report": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-4.reference.json",
+            "solver_log": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27/udg_weighted_n12_seed104/ilp/measured-4.cbc.log"
+          },
+          "eligible": true,
+          "model_construction_seconds": 0.00014998597907833755,
+          "operation_count": 1,
+          "phase": "measured",
+          "postprocessing_seconds": 3.2979005482047796e-05,
+          "reference": {
+            "best_bound": null,
+            "bound_source": "Unavailable: PuLP interface does not expose CBC best bound and log has none.",
+            "candidate_bitstring": [
+              0,
+              1,
+              0,
+              1,
+              1,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "exact_objective": 7.581738950850834,
+            "incumbent_objective": 7.581738950850834,
+            "problem_status": "Optimal",
+            "proven_optimal": true,
+            "solution_status": "Optimal Solution Found",
+            "termination": "optimal"
+          },
+          "repeat_index": 4,
+          "row_id": "udg_weighted_n12_seed104-ilp-measured-4",
+          "runtime_seconds": 0.0031739599944557995,
+          "serialization_seconds": 7.866899250075221e-05
+        }
+      ],
+      "solver": {
+        "binary": "/home/oyxw/Sagittarius/sagittarius_py/.venv/lib/python3.11/site-packages/pulp/apis/../solverdir/cbc/linux/i64/cbc",
+        "binary_sha256": "2e17077752aa52b06385ad248c9e90bb4f1ce34038c34c94e1012ca6adea5cc7",
+        "gap_abs": 0.0,
+        "gap_rel": 0.0,
+        "name": "PuLP/CBC",
+        "pulp_version": "3.3.2",
+        "random_seed": 1234,
+        "threads": 1,
+        "time_limit_seconds": 30.0,
+        "version_output": "Welcome to the CBC MILP Solver \nVersion: 2.10.3 \nBuild Date: Dec 15 2019 \n\ncommand line - /home/oyxw/Sagittarius/sagittarius_py/.venv/lib/python3.11/site-packages/pulp/apis/../solverdir/cbc/linux/i64/cbc -version (default strategy 1)\nNo match for version - ? for list of commands\nCoinSolver takes input from arguments ( - switches to stdin)\nEnter ? for list of commands or help\nCoin:Total time (CPU seconds):       0.00   (Wallclock seconds):       0.00\n\n",
+        "warm_start": false
+      },
+      "stage": "validation"
+    },
+    "supervision": {
+      "memory_limit_bytes": 4294967296,
+      "method": "/proc/PID/status VmHWM, sampled every 50 ms",
+      "reason": null,
+      "returncode": 0,
+      "sampled_peak_bytes": 59154432,
+      "scope": "one scenario process including initialization, references and serialization",
+      "timeout_seconds": 600.0,
+      "wall_seconds": 0.2046568359946832
+    }
+  }
+}

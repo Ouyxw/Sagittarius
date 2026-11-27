@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation and GPU implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU and MWIS implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -161,6 +161,8 @@ This generation defines the artifact work for the seven P0–P1 suites in [plan 
 
 The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
 
+The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
+
 ### Artifact Types
 
 | Artifact | V2 purpose | Implementation boundary |
@@ -171,7 +173,7 @@ The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes t
 | `run-manifest/v1` | Actual executed simulation configuration and requested/effective settings. | Pure matvec work has benchmark inputs/reference reports rather than fabricated simulation manifests. |
 | `result-artifact/v1` | Saved simulation results with metadata, diagnostics, manifest and shared payload. | Add actual AQC result provenance through the existing adapter boundary. |
 
-Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Ablation writes `ablation_bench_results_suite` and `ablation_repeats.json`. GPU writes `gpu_bench_results_suite` and `gpu_repeats.json`. Planned additions include `mwis_aqc_performance`, `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
+Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Ablation writes `ablation_bench_results_suite` and `ablation_repeats.json`. GPU writes `gpu_bench_results_suite` and `gpu_repeats.json`. MWIS writes `mwis_aqc_performance`, `mwis_aqc_performance_suite` and `mwis_repeats.json`. Planned additions include `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
 
 Ablation retains one aggregate row per size/path and a validated structured row
 per measured batch in `ablation_repeats.json`. `metrics.measurements` retains
@@ -225,6 +227,28 @@ single measurements; raw checkpoints retain elapsed times even on write failure.
 frozen configs/source/runtime hashes, pair order, statistics and every companion
 value without initializing either backend. These are compatible optional
 extensions under existing schemas, not new required historical fields.
+
+MWIS performance rows are frozen instances, never pools across seeds or sizes.
+`metrics.paths.aqc` and `.ilp` retain their actual checkpoints, configuration,
+supervision and per-call phase/ID/time/eligibility/artifacts. Separate
+`metrics.statistics.aqc`/`.ilp` retain requested/completed/eligible counts,
+exact member IDs and type-7 median/min/max/p25/p75; stopped calls remain raw
+diagnostics and unproven ILP calls cannot qualify as time to an exact optimum.
+Generation/setup, per-call model construction, post-processing, serialization and
+independent-reference costs carry their actual measurement counts and scopes.
+AQC outputs link real result/manifest sets; ILP links native logs and reference
+reports rather than fabricated simulation manifests. Normalized final readout
+is distinct from raw norm checked through Z0+2n0; full wavefunction history is
+not retained by this performance tier. `quality_by_aqc_row_id` records the
+candidate weight/feasibility, proven exact optimum, gap, approximation ratio and
+mass over every optimal graph-feasible basis state. Unproven optimality leaves
+exact metrics null with reasons, even if PuLP labels a time-limited incumbent
+problem `Optimal`; solution status and native logs are retained separately.
+Worker baseline/HWM includes initialization/reference/writes; the ILP Python
+process memory excludes native CBC, whose peak is explicitly unavailable.
+The [MWIS boundaries](plans/v2.md#implemented-mwisudg-measurement-boundaries)
+and `scripts/audit_mwis_campaign.py` define recomputation and failure semantics.
+Existing smoke/correctness/scaling IDs/stems and all schema names remain intact.
 
 ### Aggregate Shape
 

@@ -1,0 +1,66 @@
+F.F..............                                                        [100%]
+=================================== FAILURES ===================================
+________ test_default_aqc_adapter_returns_a_feasible_small_udg_solution ________
+
+    def test_default_aqc_adapter_returns_a_feasible_small_udg_solution():
+>       report = verify_mwis_batch(
+            n_instances=1,
+            n_nodes=2,
+            densities=(1.0,),
+            seed=3,
+            duration=0.1,
+        )
+
+sagittarius_py/tests/test_mwis_aqc_adapter.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sagittarius_py/projects/mwis_udg/batch_verify.py:224: in verify_mwis_batch
+    aqc_raw, probabilities, basis = _run_solver(
+sagittarius_py/projects/mwis_udg/batch_verify.py:177: in _run_solver
+    bitstring, probabilities, basis = solver.solve_full(config=config, duration=duration)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sagittarius_py/projects/mwis_udg/mwis_solver.py:59: in solve_full
+    return self.decode_result(self.solve_result(config=config, duration=duration))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sagittarius_py/projects/mwis_udg/mwis_solver.py:74: in decode_result
+    distribution = result.final_bitstring_distribution()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Julia:
+retcode: Success
+Interpolation: specialized 4th order "free" interpolation
+t: 25-element Vector{Float64}:
+ 0.0
+... + 0.0011601566138255417im, 0.010375999667060716 - 0.15512451056553228im, 0.023365801336445443 - 0.15381661768831187im]
+k = 'final_bitstring_distribution'
+
+    def __getattr__(self, k):
+        if k.startswith("__") and k.endswith("__"):
+            raise AttributeError(k)
+        else:
+>           return self._jl_callmethod($(pyjl_methodnum(pyjlany_getattr)), k)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: Julia: FieldError: type ODESolution has no field `final_bitstring_distribution`, available fields: `u`, `u_analytic`, `errors`, `t`, `k`, `discretes`, `prob`, `alg`, `interp`, `dense`, `tslocation`, `stats`, `alg_choice`, `retcode`, `resid`, `original`, `saved_subsystem`, `global_error`
+
+../.julia/packages/PythonCall/5WGSP/src/JlWrap/any.jl:250: AttributeError
+____________ test_mwis_aqc_family_emits_seeded_exact_reference_rows ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-oyxw/pytest-46/test_mwis_aqc_family_emits_see0')
+
+    def test_mwis_aqc_family_emits_seeded_exact_reference_rows(tmp_path):
+        paths_by_tier = RUNNER.benchmark_mwis_aqc(tmp_path)
+    
+        for tier, paths in paths_by_tier.items():
+            artifact = json.loads(Path(paths["json"]).read_text(encoding="utf-8"))
+            suite = json.loads(Path(paths["suite"]["json"]).read_text(encoding="utf-8"))
+            rows = artifact["timings"]
+            assert rows
+>           assert suite["summary"]["passed_count"] == len(rows)
+E           AssertionError: assert 0 == 1
+E            +  where 1 = len([{'artifacts': {'reference_report': '/tmp/pytest-of-oyxw/pytest-46/test_mwis_aqc_family_emits_see0/udg_weighted_n2_see...ut', ...}, 'code': 'BENCHMARK_EXECUTION_FAILED', 'deterministic': True, 'exception_type': 'AttributeError', ...}, ...}])
+
+sagittarius_py/tests/test_mwis_aqc_benchmark.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED sagittarius_py/tests/test_mwis_aqc_adapter.py::test_default_aqc_adapter_returns_a_feasible_small_udg_solution
+FAILED sagittarius_py/tests/test_mwis_aqc_benchmark.py::test_mwis_aqc_family_emits_seeded_exact_reference_rows
+2 failed, 15 passed in 43.10s

@@ -242,8 +242,12 @@ def benchmark_mwis_aqc_tier(
     output_dir: str | Path = ".",
     *,
     solver_factory: Callable[..., Any] = MWIS_AQC,
+    performance_options: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run one deterministic MWIS/UDG tier and retain every scenario row."""
+    if tier == "performance":
+        from sagittarius.mwis_benchmark import benchmark_mwis_performance
+        return benchmark_mwis_performance(output_dir, **dict(performance_options or {}))
     if tier not in TIER_SCENARIOS:
         raise ValueError(f"Unknown MWIS benchmark tier {tier!r}.")
     output = Path(output_dir)
@@ -290,10 +294,11 @@ def benchmark_mwis_aqc(
     *,
     tiers: Iterable[str] = tuple(TIER_SCENARIOS),
     solver_factory: Callable[..., Any] = MWIS_AQC,
+    performance_options: Mapping[str, Any] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Run smoke, correctness, and bounded scaling tiers."""
     return {
-        tier: benchmark_mwis_aqc_tier(tier, output_dir, solver_factory=solver_factory)
+        tier: benchmark_mwis_aqc_tier(tier, output_dir, solver_factory=solver_factory, performance_options=performance_options)
         for tier in tiers
     }
 
@@ -301,8 +306,17 @@ def benchmark_mwis_aqc(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Phase 16 deterministic weighted MWIS/UDG benchmarks.")
     parser.add_argument("--output-dir", default="benchmark-output")
-    parser.add_argument("--tier", choices=sorted(TIER_SCENARIOS), action="append", dest="tiers")
+    parser.add_argument("--tier", choices=sorted([*TIER_SCENARIOS, "performance"]), action="append", dest="tiers")
+    parser.add_argument("--sizes", type=int, nargs="+", default=[2, 4, 6, 8, 10, 12, 16, 20])
+    parser.add_argument("--seeds", type=int, nargs="+", default=[101, 102, 103, 104, 105])
+    parser.add_argument("--repeat-count", type=int, default=5)
+    parser.add_argument("--warmups", type=int, default=2)
+    parser.add_argument("--timeout-seconds", type=float, default=600.)
+    parser.add_argument("--memory-limit-mb", type=float, default=4096.)
+    parser.add_argument("--ilp-time-limit", type=float, default=30.)
+    parser.add_argument("--numerical-atol", type=float, default=1e-6)
     arguments = parser.parse_args()
-    results = benchmark_mwis_aqc(arguments.output_dir, tiers=tuple(arguments.tiers or TIER_SCENARIOS))
+    options = {key: getattr(arguments, key) for key in ("sizes", "seeds", "repeat_count", "warmups", "timeout_seconds", "memory_limit_mb", "ilp_time_limit", "numerical_atol")}
+    results = benchmark_mwis_aqc(arguments.output_dir, tiers=tuple(arguments.tiers or TIER_SCENARIOS), performance_options=options)
     for tier, paths in results.items():
         print(f"MWIS/AQC {tier} benchmark complete. Results saved to {paths['json']}")

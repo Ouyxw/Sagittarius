@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-tiers/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation and GPU implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU and MWIS implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -156,6 +156,8 @@ This generation applies the same five tiers to [plan v2](plans/v2.md). It distin
 
 The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
 
+The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
+
 ### Tier Summary
 
 | Tier | V2 purpose | Expected cost | CI policy |
@@ -170,14 +172,14 @@ The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes t
 
 ### Runnable Commands and Outputs
 
-The V1 commands are retained as historical baseline. Scaling and ablation now have V2 CLI support; other entries below remain implementation targets until their runners and smoke evidence exist.
+The V1 commands are retained as historical baseline. Scaling, ablation, GPU and MWIS/UDG now have V2 CLI support; other entries below remain implementation targets until their runners and smoke evidence exist.
 
 | Suite | Existing or planned entry point | V2 outputs and readiness |
 | :--- | :--- | :--- |
 | Scaling | Implemented `benchmark_scaling.py` CLI; positional Python function retained. | `scaling_results` and `scaling_results_suite` JSON/CSV/Markdown; `scaling_repeats.json`, campaign/checkpoints and coverage. |
 | Ablation | Implemented `benchmark_ablation.py` CLI; single-N positional function retained. | `ablation_bench_results` and `_suite` JSON/CSV/Markdown, `ablation_repeats.json`, frozen configs/checkpoints, saved numerical arrays and coverage/audit. `--repeats` counts operations; `--repeat-count` counts independent batches. |
 | GPU | Existing `benchmark_gpu.py` adopts doctor/opt-in discipline from `benchmark_cuda_mwis_protocol.py`. | Preserve `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`; implemented `gpu_bench_results_suite`, `gpu_repeats.json`, separate backend processes and repeated matched measurements. |
-| MWIS/UDG | Existing `benchmark_mwis_aqc.py` and adapter need expanded matrix/provenance. | Preserve initial tier outputs; planned `mwis_aqc_performance` and suite. |
+| MWIS/UDG | Implemented `benchmark_mwis_aqc.py --tier performance`; legacy tiers preserved. | `mwis_aqc_performance` and `_suite` JSON/CSV/Markdown, `mwis_repeats.json`, raw paths, saved AQC results/manifests, independent references, CBC logs/status and audit. |
 | Solver | Existing `benchmark_solver_performance.py` needs sensitivity and timer work. | Preserve correctness outputs; planned `solver_sensitivity` and suite. |
 | Observables | Planned `benchmark_observables.py`. | Planned `observable_performance` and suite; runner/flags not implemented. |
 | Open-system | Planned `benchmark_open_system_performance.py`. | Planned `open_system_performance` and suite; preserve existing one-atom correctness runner. |
@@ -282,6 +284,26 @@ No CUDA fallback or insufficient-repeat ratio qualifies. Memory snapshots
 are distinct from GPU peaks; ratios characterize this shared host and SDK
 boundary only. The small `benchmark_cuda_mwis_protocol.py` retains its
 `cuda_parity`/`mwis_gpu_parity` stems while sharing these measurement helpers.
+
+The MWIS/UDG performance CLI was smoke-verified at N=2,8,20 (largest pilot
+D=53760). From a prepared source/editable CPU environment in `sagittarius_py`:
+
+```bash
+uv run --no-sync python tests/test_performance/benchmark_mwis_aqc.py --tier performance \
+  --sizes 2 4 6 8 10 12 16 20 --seeds 101 102 103 104 105 \
+  --warmups 2 --repeat-count 5 --timeout-seconds 600 --memory-limit-mb 4096 \
+  --ilp-time-limit 30 --numerical-atol 1e-6 \
+  --output-dir benchmark-output/p1-mwis-v2-2026-11-27
+.venv/bin/python ../scripts/audit_mwis_campaign.py benchmark-output/p1-mwis-v2-2026-11-27
+```
+
+Run the performance tier separately from the legacy tiers in a new output directory. Five frozen graphs are five workloads; each graph
+has its own AQC/ILP distributions. Short pilots remain incomplete. Nonoptimal
+incumbents/timeouts retain diagnostics and AQC results; unproven exact quality
+metrics remain unavailable. The graph hash, actual D, native solver guarantees,
+CPU worker memory scope and independent numerical gates qualify the evidence.
+CBC subprocess peak remains unavailable; no AQC/ILP speedup is derived. Running
+without `--tier performance` preserves the initial three tiers and filenames.
 
 All V2 performance commands eventually expose or retain frozen scenarios, output location, warmup/independent-repeat policy and numerical resource limits. Do not assume a shared flag exists on current scripts. Public examples must retain source-checkout execution and GPU opt-in requirements.
 

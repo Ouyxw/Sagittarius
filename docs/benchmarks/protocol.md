@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-protocol/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation and GPU implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU and MWIS implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -114,6 +114,8 @@ This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It de
 
 The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
 
+The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
+
 ### Scope
 
 Cover the two P0 suites (`scaling`, `ablation`) and five P1 suites (`gpu`, `mwis_udg`, `solver`, `observables`, `open_system`). Scaling, MWIS/UDG and open-system target N=20 with representation-specific resource limits; GPU uses a bounded chain scan through N=20. Other axes cover geometry/radius, solver tolerance/step/grid, observable type/count/order and trajectory count.
@@ -176,6 +178,19 @@ eligible measurements per backend and two warmups qualify the ratio of CPU and
 CUDA runtime medians; a failed/incomplete scenario reports a missing-data reason.
 The [implemented GPU boundaries](plans/v2.md#implemented-gpu-measurement-boundaries)
 define the anchor, resource limits, memory scope and saved-evidence audit.
+
+The MWIS performance tier freezes five graphs per target size and runs separate
+AQC/ILP workers for each. Each path retains first/two-warmup/five-measurement
+records; graph generation and setup/model construction, post-processing and
+serialization are separately timed. AQC's SDK boundary includes construction,
+collection and manifest; CBC invocation includes model-file writes, subprocess
+startup/IPC and solution parsing. Independent DOP853/refinement and exhaustive
+graph objectives gate results. Both PuLP problem and solution status must prove
+optimality before exact objective-quality metrics are available; native logs
+preserve time limits, incumbents and available bounds. Low-quality feasible AQC
+outputs stay visible. ILP worker RSS excludes native CBC; peak CBC memory is
+unavailable. No timing ratio between methods with different guarantees is derived.
+See the [implemented MWIS boundaries](plans/v2.md#implemented-mwisudg-measurement-boundaries).
 
 Use two warmups and at least five independent measured executions per frozen scenario/path by default. The default matvec batch is 50 operations, independently recorded; preserve legacy `repeats` semantics when adding controls. Reset initial state and fixed seeded input for every execution. V2 matvec uses fixed normalized H*psi input rather than growing H^k*psi and carries a distinct workload label.
 
