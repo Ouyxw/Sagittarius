@@ -1,0 +1,80 @@
+{
+  "artifact_type": "sagittarius.experiment_sweep",
+  "axes": [
+    {
+      "name": "omega",
+      "path": "pulse.omega",
+      "values": [
+        0.1,
+        0.2,
+        0.3,
+        0.4
+      ]
+    }
+  ],
+  "base_config": {
+    "benchmark": "phase16_parallel_parameter_sweep",
+    "kernel": "omega^2 + 0.5"
+  },
+  "created_at": "2026-08-12T09:32:06.349547+00:00",
+  "items": [
+    {
+      "attempts": 1,
+      "failure": null,
+      "item_id": "omega-0p100",
+      "manifest_path": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/omega-0p100.parallel-manifest.json",
+      "parameters": {
+        "omega": 0.1
+      },
+      "result_path": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/omega-0p100.parallel-result.json",
+      "status": "succeeded"
+    },
+    {
+      "attempts": 1,
+      "failure": null,
+      "item_id": "omega-0p200",
+      "manifest_path": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/omega-0p200.parallel-manifest.json",
+      "parameters": {
+        "omega": 0.2
+      },
+      "result_path": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/omega-0p200.parallel-result.json",
+      "status": "succeeded"
+    },
+    {
+      "attempts": 1,
+      "failure": null,
+      "item_id": "omega-0p300",
+      "manifest_path": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/omega-0p300.parallel-manifest.json",
+      "parameters": {
+        "omega": 0.3
+      },
+      "result_path": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/omega-0p300.parallel-result.json",
+      "status": "succeeded"
+    },
+    {
+      "attempts": 1,
+      "failure": null,
+      "item_id": "omega-0p400",
+      "manifest_path": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/omega-0p400.parallel-manifest.json",
+      "parameters": {
+        "omega": 0.4
+      },
+      "result_path": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/omega-0p400.parallel-result.json",
+      "status": "succeeded"
+    }
+  ],
+  "purpose": "scientific_exploration",
+  "resumability": {
+    "artifact_path": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/parallel-sweep-workers-1.sweep.json",
+    "completed_item_ids": [
+      "omega-0p100",
+      "omega-0p200",
+      "omega-0p300",
+      "omega-0p400"
+    ],
+    "pending_item_ids": [],
+    "resume_policy": "retry_pending_running_and_failed",
+    "schema_version": "sweep-resume/v1"
+  },
+  "schema_version": "sweep-artifact/v1"
+}

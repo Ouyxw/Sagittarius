@@ -1,0 +1,6 @@
+{
+  "effective_workers": 2,
+  "kernel": "omega^2 + 0.5",
+  "requested_workers": 2,
+  "schema_version": "parallel-sweep-manifest/v1"
+}

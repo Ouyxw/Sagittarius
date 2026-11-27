@@ -1,0 +1,17 @@
+{
+  "contract_audit_passed": true,
+  "full_v2_matrix_passed": false,
+  "scenario_count": 39,
+  "checked_results": 312,
+  "measured_count": 195,
+  "eligible_measured_count": 190,
+  "max_abs_error": 1.6501632661980459e-06,
+  "raw_norm_error": 3.742790406491281e-07,
+  "status_counts": {
+    "failed": 1,
+    "incomplete": 0,
+    "passed": 38,
+    "skipped": 0
+  },
+  "classification": "local_only; software/numerical verification, not scientific validation or release/public approval"
+}

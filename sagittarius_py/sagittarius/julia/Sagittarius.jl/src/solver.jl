@@ -52,6 +52,12 @@ function _state_probability(state, idx::Int)
 end
 
 function _diagonal_expectation(state, N_atoms::Integer, basis, value_func)
+    # Diagonal observables accumulate on the host in the same basis order.
+    # Transfer once per diagonal expectation, rather than copying the complete device
+    # vector separately for every component in _state_probability.
+    if _is_cuda_vector(state)
+        state = Array(state)
+    end
     total = 0.0
     if isnothing(basis)
         for bitstring in 0:(2^N_atoms - 1)

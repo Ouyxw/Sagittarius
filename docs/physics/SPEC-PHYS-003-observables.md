@@ -4,7 +4,7 @@ Spec ID: `SPEC-PHYS-003`
 Status: `Mixed`
 Roadmap: Phase 11
 Version: `observable-physics/v1`
-Last reviewed: 2026-06-30
+Last reviewed: 2026-11-27
 
 
 Observables are quantities read out from the simulated quantum state during or after time evolution. The Hamiltonian determines how the state evolves; observables determine what physical information is extracted from that state.
@@ -85,6 +85,14 @@ Typical uses:
 - distinguish genuine correlations from large single-site populations;
 - diagnose blockade-induced anticorrelation;
 - study ordering or clustering tendencies in many-body dynamics.
+
+For the current MCWF implementation, the connected-correlation callback is
+applied to each normalized trajectory before averaging. That mean of connected
+correlations generally differs from the connected correlation of the ensemble.
+For example, equal classical trajectories in `|00>` and `|11>` each have zero
+connected correlation, while their ensemble has C=1/4. Construct the ensemble
+quantity above from retained pair/population ensemble series when needed; see
+[the API state rules](../api/SPEC-API-004-observable-library.md#basis-and-state-rules).
 
 ## Blockade violation
 

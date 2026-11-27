@@ -1,0 +1,65 @@
+{
+  "aqc": {
+    "bitstring": [
+      0,
+      0
+    ],
+    "feasible": true,
+    "optimal_probability": 0.024201828350392716,
+    "solve_seconds": 9.087484692001453,
+    "weight": 0.0
+  },
+  "exact": {
+    "bitstring": [
+      1,
+      0
+    ],
+    "solve_seconds": 0.02375174199914909,
+    "solver": "PuLP_CBC_ILP",
+    "status": "Optimal",
+    "weight": 1.4006372326031984
+  },
+  "graph": {
+    "average_degree": 1.0,
+    "edge_count": 1,
+    "edges": [
+      [
+        0,
+        1
+      ]
+    ],
+    "graph_sha256": "4e44e11169bab4cc447b86341c79865e1453eeea29cc20ddab2055fe13e614d8",
+    "nodes": [
+      {
+        "node": 0,
+        "position": [
+          0.12112621378047365,
+          0.3349006301406475
+        ],
+        "weight": 1.4006372326031984
+      },
+      {
+        "node": 1,
+        "position": [
+          0.8233014469009639,
+          0.13311800246413752
+        ],
+        "weight": 1.2165634701182368
+      }
+    ]
+  },
+  "scenario": {
+    "density": 1.0,
+    "duration": 0.1,
+    "n_nodes": 2,
+    "scenario_id": "udg_weighted_n2_seed3",
+    "seed": 3
+  },
+  "schedule": {
+    "delta_end": "2*pi*node_weight",
+    "delta_start": -12.566370614359172,
+    "duration": 0.1,
+    "omega": "sin_squared",
+    "omega_max": 6.283185307179586
+  }
+}

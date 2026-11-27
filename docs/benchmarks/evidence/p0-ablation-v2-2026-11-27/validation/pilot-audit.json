@@ -1,0 +1,16 @@
+{
+  "all_target_cpu_paths_passed": false,
+  "checked_cpu_outputs": 8,
+  "classification": "local_only; software/numerical audit, not independent governance review or physical validation",
+  "contract_audit_passed": true,
+  "max_absolute_error": 4.577566798522237e-16,
+  "max_relative_error": 1.9612509960906562e-16,
+  "required_small_cpu_passed": false,
+  "scenario_count": 10,
+  "status_counts": {
+    "failed": 0,
+    "incomplete": 8,
+    "passed": 0,
+    "skipped": 2
+  }
+}

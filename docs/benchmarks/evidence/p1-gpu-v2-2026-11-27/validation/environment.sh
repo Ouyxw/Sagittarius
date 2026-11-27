@@ -1,0 +1,13 @@
+export UV_CACHE_DIR=/tmp/sagittarius-uv-cache
+export JULIA_CONDAPKG_BACKEND=Null
+export JULIA_PYTHONCALL_EXE=/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python
+export JULIA_DEPOT_PATH=/tmp/ablation-julia-depot:/home/oyxw/.julia
+export PYTHON_JULIACALL_EXE=/home/oyxw/.julia/juliaup/julia-1.13.4+0.x64.linux.gnu/bin/julia
+export PYTHON_JULIACALL_BINDIR=/home/oyxw/.julia/juliaup/julia-1.13.4+0.x64.linux.gnu/bin
+export PYTHON_JULIACALL_PROJECT=/home/oyxw/Sagittarius/sagittarius_py/.venv/julia_env
+export JULIA_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export PYTHON_JULIACALL_PROJECT=/home/oyxw/Sagittarius/sagittarius_py/.venv/julia_cuda_env
+export SAGITTARIUS_ENABLE_GPU_TESTS=1

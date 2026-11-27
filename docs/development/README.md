@@ -1,0 +1,39 @@
+# Development Workflows
+
+This directory contains reusable development-process templates for Sagittarius contributors and AI agents. These documents are operational workflow aids, not system architecture references or public capability claims.
+
+Use these templates together with:
+
+- [`SOP.md`](SOP.md) for scientific computing lifecycle principles;
+- [`../../AGENTS.md`](../../AGENTS.md) for repository-level AI agent instructions;
+- [`../reference/development-sop.md`](../reference/development-sop.md) for logging, diagnostics, artifact, manifest, benchmark, and claim contracts;
+- [Requirements](requirements.md) for roadmap phase scope and acceptance criteria;
+- [Documentation status](status.md) for maintenance triggers;
+- [PyPI publication runbook](pypi-publication.md) for internal release operations;
+- [Containerization](containerization.md) for experimental CUDA devcontainer setup.
+
+## Documentation Governance
+
+Run `python3 scripts/validate_documentation.py` from the repository root before accepting release-oriented documentation changes. The check requires complete metadata for every stable `Spec ID`, verifies that each specification is registered with the correct path in [`status.md`](status.md), and resolves local Markdown links. It deliberately does not fetch external URLs.
+
+## Templates
+
+- [Agent workflow template](agent-workflow-template.md): reusable workflow for feature, development, release, benchmark, and documentation branches.
+- [Prompt context standards](prompt-context.md): bilingual prompt templates for starting, resuming, implementing, reviewing, and closing AI-assisted branch work.
+
+## Usage
+
+Branch owners may copy the customization block from the template into a pull request, issue, or branch-local planning document. For long-running branches, use a branch-local file such as `docs/development/branches/<branch-name>.md` and decide before merge whether to delete it, retain it, or extract durable content into formal docs or the PR description. Tailor the required context, tests, artifacts, and handoff requirements for the specific branch without removing the baseline scientific correctness, reproducibility, documentation, and evidence gates.
+
+Development workflow docs may include English and Chinese versions of templates when that improves reuse across contributors. Keep the technical requirements aligned between language versions.
+
+## Retained Development Records
+
+Files under `branches/` are retained implementation and validation records. The
+[main/dev merge record](branches/main-dev-merge-2026-11-27.md) documents the
+integration of the released baseline and subsequent development work.
+Files under `agent_memories/` are historical release handoffs; their branch,
+version, approval and next-step statements describe their recorded dates and do
+not authorize current operations. Formal specs and current release evidence
+remain authoritative. These records are separate from the public user-guide
+navigation and are excluded from Python distributions.

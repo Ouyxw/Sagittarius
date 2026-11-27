@@ -1,5 +1,11 @@
 # Sagittarius Visualization API Reference
 
+Spec ID: `SPEC-API-006`
+Status: `Current`
+Roadmap: Phase 19
+Version: `visualization-api/v1`
+Last reviewed: 2026-07-29
+
 > **Complete API documentation for all visualization functions in `sagittarius.viz` module**
 
 ---
@@ -14,7 +20,7 @@ This is the canonical Phase 19 Python API reference. Plotting helpers are analys
 | 2 | Met | Pulse sampling and plotting support the documented declaration forms and zero-based register ordering; covered by pulse tests. |
 | 3 | Met | `plot_observables` accepts selected series and axes without replacing `SimulationResult.plot`; covered by result tests. |
 | 4 | Met | `plot_population_heatmap` validates compatible population data and atom ordering. |
-| 5 | Partial | `plot_bitstring_distribution` renders readout-capable result data. Dedicated plotting coverage for a `load_result()` artifact round trip is still required. |
+| 5 | Met | `plot_bitstring_distribution` renders readout-capable data loaded through `load_result()`; `test_bitstring_distribution_plot_round_trips_saved_artifact` covers the serialized artifact round trip. |
 | 6 | Met | `plot_shot_histogram` consumes seeded measurement-sample data. |
 | 7 | Met | Basis diagnostics report represented and forbidden bitstrings, with an explicit small-system limit. |
 | 8 | Met | MWIS helpers render node selection, weights, graph edges, and violations for small examples. |
@@ -24,17 +30,17 @@ This is the canonical Phase 19 Python API reference. Plotting helpers are analys
 | 12 | Met | Correlation helpers validate compatible observables and raise actionable errors when data is absent. |
 | 13 | Met | Spatial snapshot and frame helpers preserve positions, values, and time metadata. |
 | 14 | Met | Open-system diagnostic views require the appropriate trace, positivity, comparison, or trajectory data. |
-| 15 | Partial | Sweep plots preserve axes, failed-run masks, and caller-supplied manifest links, but no stable user-facing sweep artifact schema exists. |
+| 15 | Met | `extract_sweep_artifact_data` and `plot_sweep_artifact_heatmap` validate `sweep-artifact/v1`, resolve saved result paths, and preserve axes, item status, failure records, result paths, manifest links, and resumability. `test_extract_sweep_artifact_data_resolves_results_failures_and_links` covers the round trip. |
 | 16 | Met | Governed benchmark plots validate `benchmark-artifact/v1`; explicitly named diagnostic-only counterparts accept ordinary mappings and cannot support public performance claims. |
 | 17 | Met | State-vector and density-matrix helpers reject missing, malformed, and unsafe-size inputs. |
 | 18 | Met | Figure export writes optional PNG, SVG, or PDF outputs and provenance sidecars with available artifact, schema, seed, backend, basis, and plot metadata. |
-| 19 | Partial | The visualization suite covers rendering and validation with non-interactive matplotlib in its rendering tests. A dedicated no-unexpected-Julia-initialization regression remains required before Phase 19 can be closed. |
+| 19 | Met | Rendering and validation use non-interactive matplotlib. `test_backend_free_visualizations_do_not_initialize_julia` rejects unexpected backend initialization across loaded-result, register, and supported pulse paths. |
 
 ## Scope and Governance Boundaries
 
 - Visualization is backend-free only for helpers that consume Python data already available to the caller. A visualization helper neither initializes nor validates a simulation backend.
 - Export sidecars and report classifications are descriptive metadata, not new artifact schemas and not independent evidence validation.
-- Sweep helpers accept an in-memory mapping. They are not a substitute for a versioned sweep artifact, failure-row contract, or manifest resolver.
+- Legacy sweep helpers accept in-memory mappings. `extract_sweep_artifact_data` and `plot_sweep_artifact_heatmap` additionally consume validated `sweep-artifact/v1` mappings or JSON paths, resolve relative result/manifest links, and preserve failure and resumability metadata; they accept exactly two numeric axes and remain exploratory.
 - Public `plot_runtime_scaling`, `plot_memory_scaling`, `plot_solver_comparison`, `plot_success_failure_summary`, `plot_cpu_gpu_error_comparison`, and `save_mwis_benchmark_figure` accept only a validated `benchmark-artifact/v1` envelope or JSON path. Their `plot_diagnostic_*` and `save_diagnostic_mwis_figure` counterparts accept ordinary mappings, are diagnostic-only, and must not support public performance claims. Public performance claims require retained governed artifacts with hardware, solver, backend, version, correctness, and failure metadata; diagnostic-only outputs are not public performance evidence.
 
 ## 📋 Quick Reference Card
@@ -381,13 +387,48 @@ plot_observables(result, ax=ax, linewidth=3.0, title="Custom Title")
 
 ## 🔍 Sweep Visualization APIs
 
+### `extract_sweep_artifact_data()`
+
+**Module**: `sagittarius.viz.sweep`
+
+**Purpose**: Validate a persisted `sweep-artifact/v1` mapping or JSON path and produce a reusable two-axis plotting mapping. Succeeded items are resolved through their saved `result_path`; failed, pending, and running items remain explicit rather than being dropped.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `artifact_or_path` | mapping or path | Validated sweep artifact or its JSON path. Relative item links resolve from the artifact location. |
+| `metric` | `str` or callable | A result-series name, reduced to its final finite sample, or a callable returning one finite scalar from a loaded result. |
+| `x_param`, `y_param` | `str` | Optional names for the two declared numeric axes. |
+| `result_loader` | callable | Optional result loader; defaults to `load_result()`. |
+
+The returned mapping contains `parameters`, the requested metric grid, `failed_runs`, `item_ids`, `item_statuses`, `failure_records`, `result_paths`, `manifest_links`, and `resumability`. It is an in-memory analysis value, not a new artifact schema. Artifacts with other than two numeric axes fail clearly rather than being silently projected.
+
+### `plot_sweep_artifact_heatmap()`
+
+**Module**: `sagittarius.viz.sweep`
+
+**Purpose**: Resolve and plot one metric from `sweep-artifact/v1`, overlaying failed items while retaining result/manifest links in the extracted mapping. It accepts the same axis, loader, and styling options as `plot_sweep_heatmap()`.
+
+```python
+from sagittarius.viz import plot_sweep_artifact_heatmap
+
+ax = plot_sweep_artifact_heatmap(
+    "artifacts/scan.sweep.json",
+    "population",
+    x_param="omega",
+    y_param="delta",
+)
+ax.figure.savefig("artifacts/scan-population.png", dpi=150)
+```
+
+This only loads stored `result-artifact/v1` data and does not initialize Julia. It validates and accepts `sweep-artifact/v1` only; use governed benchmark plotting APIs and retained `benchmark-artifact/v1` evidence for performance or verification claims.
+
 ### `plot_sweep_heatmap()`
 
 **Module**: `sagittarius.viz.sweep`
 
 **Purpose**: Plot 2D parameter sweep heatmap with failed run overlay and artifact links.
 
-⚠️ **NOTE**: Currently uses synthetic data as user-facing sweep artifacts are not yet implemented (Phase 19).
+For persisted studies, use `extract_sweep_artifact_data()` or `plot_sweep_artifact_heatmap()`; this legacy helper continues to plot in-memory sweep mappings.
 
 #### Parameters
 
@@ -721,7 +762,7 @@ trajectories = result.trajectories  # np.ndarray, shape (n_traj, n_times)
 
 ## Canonical Public Export Catalog
 
-`__all__` is the public import contract for `sagittarius.viz`. It currently contains 63 exports: the original 56 visualization, extraction, export, reporting, sweep, and diagnostic helpers, plus seven governed benchmark/MWIS interfaces introduced to preserve artifact governance. All plots return a matplotlib `Axes` unless noted; helpers accepting `ax` draw into that axes. Exact signatures and validation are in the referenced runtime docstrings.
+`__all__` is the public import contract for `sagittarius.viz`. It currently contains 66 exports: 59 visualization, extraction, export, reporting, sweep, and diagnostic helpers, plus seven governed benchmark/MWIS interfaces introduced to preserve artifact governance. All plots return a matplotlib `Axes` unless noted; helpers accepting `ax` draw into that axes. Exact signatures and validation are in the referenced runtime docstrings.
 
 | Export | Module | Accepted input / contract | Result and boundary |
 | :--- | :--- | :--- | :--- |
@@ -774,7 +815,10 @@ trajectories = result.trajectories  # np.ndarray, shape (n_traj, n_times)
 | `export_from_result` | `export` | Result, plot/export settings | Result-driven figure export and sidecar. |
 | `ReportGenerator` | `report` | Report configuration and result/figure inputs | Report builder object; output is descriptive. |
 | `generate_quick_report` | `report` | Result/figure inputs and output path | Writes report and returns its path. |
-| `plot_sweep_heatmap` | `sweep` | In-memory sweep mapping | 2D sweep plot; no sweep artifact schema. |
+| `resolve_sweep_artifact_path` | `sweep` | Item link and optional artifact path | Resolves relative result/manifest locators without opening them. |
+| `extract_sweep_artifact_data` | `sweep` | Validated `sweep-artifact/v1` mapping or JSON path plus metric | Resolves two-axis result grids while retaining status, failures, paths, links, and resumability. |
+| `plot_sweep_artifact_heatmap` | `sweep` | Validated `sweep-artifact/v1` mapping or JSON path plus metric | Exploratory two-axis heatmap with failed-run overlay. |
+| `plot_sweep_heatmap` | `sweep` | In-memory sweep mapping | Legacy 2D sweep plot. |
 | `plot_sweep_line_slice` | `sweep` | In-memory sweep mapping and fixed/varying parameters | 1D sweep slice. |
 | `plot_final_observable_map` | `sweep` | In-memory sweep mapping and observable | Final-observable map. |
 | `plot_observables_comparison` | `sweep` | In-memory sweep mapping and observables | Multi-observable comparison. |

@@ -1,0 +1,24 @@
+{
+  "accurate_control_count": 9,
+  "checked_results": 312,
+  "classification": "local_only; software/numerical verification, not scientific validation or release/public approval",
+  "contract_audit_passed": true,
+  "eligible_measured_count": 190,
+  "full_v2_matrix_passed": false,
+  "local_characterization_accepted": true,
+  "max_abs_error": 1.6501632661980459e-06,
+  "measured_count": 195,
+  "performance_scope": "Eligible configurations/calls only; under-resolved times remain diagnostics",
+  "policy_sha256": "84ea6a467b71507b30317f3c6fed32b66ea29f0cc2cae85c3d0d03e8839f705e",
+  "raw_norm_error": 3.742790406491281e-07,
+  "scenario_count": 39,
+  "status_counts": {
+    "failed": 1,
+    "incomplete": 0,
+    "passed": 38,
+    "skipped": 0
+  },
+  "under_resolved_scenarios": [
+    "ramp-rk4-s100-g101"
+  ]
+}

@@ -1,0 +1,6 @@
+mode,status,backend,workload,representation,atom_count,full_dim,basis_size,repeats,duration_s,total_time_s,time_per_operation_s,reference_error,max_rss,max_rss_unit,reason
+full_dense,passed,{'requested_backend': 'CUDA'},matvec,full dense matrix,12,4096,4096,50,,0.0672472700025537,0.001344945400051074,1.883883544297429e+66,153468,"KiB on Linux, bytes on macOS",
+full_sparse,passed,{'requested_backend': 'CUDA'},matvec,full sparse CSR matrix,12,4096,4096,50,,0.002112205998855643,4.224411997711286e-05,1.883883544297429e+66,155888,"KiB on Linux, bytes on macOS",
+reduced_matrix_free,passed,{'requested_backend': 'CUDA'},matvec,blockade-reduced matrix-free operator,12,4096,377,50,,0.07224248899728991,0.0014448497799457983,0.0,155888,"KiB on Linux, bytes on macOS",
+reduced_sparse,passed,{'requested_backend': 'CUDA'},matvec,blockade-reduced sparse CSR matrix,12,4096,377,50,,0.00024478599516442046,4.895719903288409e-06,0.0,157684,"KiB on Linux, bytes on macOS",
+reduced_sparse_gpu_cached,passed,{'requested_backend': 'CUDA'},ode_solve,blockade-reduced cached sparse matrix,12,4096,377,1,0.2,31.99019698999473,31.99019698999473,,3285936,"KiB on Linux, bytes on macOS",

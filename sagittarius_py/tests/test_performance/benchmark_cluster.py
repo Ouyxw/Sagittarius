@@ -2,6 +2,7 @@ import time
 
 import numpy as np
 
+from sagittarius.benchmark_row_contract import structured_benchmark_rows
 from sagittarius import ParallelSimulation, current_memory_usage, write_benchmark_artifacts
 from juliacall import Main as jl
 
@@ -41,6 +42,7 @@ def benchmark_cluster(output_dir="."):
             "max_rss_unit": memory["max_rss_unit"],
         })
 
+    results = structured_benchmark_rows(results, family="sweep_cluster_execution", tier="scaling", problem_defaults={"benchmark": "cluster_rabi_sweep"}, solver_defaults={"method": "run_single_sim"}, backend_defaults={"requested_backend": "CPU", "path": "parallel"}, observables={"names": [], "count": 0, "output_sample_count": 0})
     paths = write_benchmark_artifacts(
         output_dir=output_dir,
         stem="cluster_bench_results",

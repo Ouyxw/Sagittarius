@@ -1,0 +1,15 @@
+{
+  "contract_audit_passed": true,
+  "all_p1_mwis_passed": false,
+  "scenario_count": 2,
+  "checked_aqc_results": 6,
+  "checked_ilp_references": 6,
+  "maximum_numerical_error": 8.41542979745924e-09,
+  "status_counts": {
+    "failed": 0,
+    "incomplete": 2,
+    "passed": 0,
+    "skipped": 0
+  },
+  "classification": "local_only; reduced-model numerical/software verification, not scientific validation or optimization advantage"
+}

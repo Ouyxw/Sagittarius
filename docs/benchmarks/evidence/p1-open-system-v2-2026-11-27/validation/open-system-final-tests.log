@@ -1,0 +1,140 @@
+..........................F............................................. [ 87%]
+..........                                                               [100%]
+=================================== FAILURES ===================================
+_______________ test_real_small_density_storage_audit_corruption _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-oyxw/pytest-6/test_real_small_density_storag0')
+
+    @pytest.mark.requires_julia_backend
+    def test_real_small_density_storage_audit_corruption(tmp_path):
+        ids=[scenario(1,reduced=False,fixture="coherence",model="dephasing",kind="correctness")["scenario_id"],scenario(2,"mcwf",store=True)["scenario_id"]]
+        paths=benchmark_open_system(tmp_path,scenario_ids=ids)
+        assert all(r["status"]=="passed" for r in paths["artifact"]["timings"]),[r["failure"] for r in paths["artifact"]["timings"]]
+        report=AUDIT.audit(tmp_path)
+        assert report["checked_results"]==14 and report["density_controls"]==2
+        import sagittarius.runtime as runtime
+        original=runtime.get_julia
+        try:
+            runtime.get_julia=lambda: (_ for _ in ()).throw(AssertionError("audit initialized Julia"))
+            assert AUDIT.audit(tmp_path)==report
+        finally: runtime.get_julia=original
+        for name,mutate,match in [
+            ("open_system_performance.csv",lambda t:t.replace("passed","failed",1),"CSV mismatch"),
+            ("open_system_performance.md",lambda t:t+"bad","Markdown mismatch"),
+            ("convergence.json",lambda t:t.replace('"pooled_trajectories": 2500','"pooled_trajectories": 1'),"Convergence report mismatch"),
+            (ids[1]+"/measured-0.manifest.json",lambda t:t.replace('"seed": 20260811','"seed": 0'),"Standalone manifest"),
+        ]:
+            p=tmp_path/name; before=p.read_text(); p.write_text(mutate(before))
+            with pytest.raises((ValueError,AssertionError),match=match): AUDIT.audit(tmp_path)
+            p.write_text(before)
+        p=tmp_path/ids[0]/"density-validation.npz"; before=p.read_bytes(); saved=dict(np.load(p)); saved["density"][:,0,1]=0
+        np.savez_compressed(p,**saved)
+>       with pytest.raises((ValueError,AssertionError),match="Trace/positivity/hermiticity|Density/coherence"): AUDIT.audit(tmp_path)
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_open_system_benchmark.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/tmp/pytest-of-oyxw/pytest-6/test_real_small_density_storag0')
+
+    def audit(directory):
+        directory=Path(directory).resolve()
+        def read(name): return json.loads((directory/name).read_text())
+        campaign=read("campaign.json"); cfg=campaign["settings"]
+        def resolve(value):
+            path=Path(value)
+            if path.is_absolute(): path=path.relative_to(campaign["output_dir"])
+            target=(directory/path).resolve()
+            if not target.is_relative_to(directory) or not target.is_file(): raise ValueError("Missing/outside retained evidence: "+str(target))
+            return target
+        frozen={k:campaign[k] for k in ("scenarios","settings","source_sha256")}
+        if hashlib.sha256(json.dumps(frozen,sort_keys=True).encode()).hexdigest()!=campaign["config_sha256"] or campaign["workload_version"]!=WORKLOAD_VERSION: raise ValueError("Frozen configuration/workload mismatch")
+        expected={s["scenario_id"]:s for s in scenarios(cfg["tier"])}
+        if not campaign["scenarios"] or len({s["scenario_id"] for s in campaign["scenarios"]})!=len(campaign["scenarios"]) or any(expected.get(s["scenario_id"])!=s for s in campaign["scenarios"]): raise ValueError("Unexpected matrix/configuration")
+        for name,digest in campaign["source_sha256"].items():
+            if hashlib.sha256(resolve("source/"+name).read_bytes()).hexdigest()!=digest: raise ValueError("Frozen source hash mismatch")
+        artifact=read("open_system_performance.json")
+        if artifact.get("schema_version")!="benchmark-artifact/v1" or artifact.get("artifact_type")!="sagittarius.benchmark": raise ValueError("Benchmark artifact envelope mismatch")
+        suite=load_benchmark_suite_artifact(directory/"open_system_performance_suite.json"); rows=suite["rows"]
+        if artifact["timings"]!=rows or artifact["parameters"]!=campaign or [r["scenario_id"] for r in rows]!=[s["scenario_id"] for s in campaign["scenarios"]]: raise ValueError("Artifact/suite/campaign mismatch")
+        raw=[]; checked=density_count=sensitivity_count=0; maximum_density_error=0.; maximum_trace=0.; minimum_eigenvalue=0.
+        for s,row in zip(campaign["scenarios"],rows):
+            validate_benchmark_row(row); state=row["metrics"]["state"]
+            child=json.loads(resolve(row["artifacts"]["config"]).read_text())
+            if child!={"scenario":s,"settings":cfg,"source_root":campaign["source_root"],"source_sha256":campaign["source_sha256"]}: raise ValueError("Child config mismatch")
+            if row["artifacts"]["checkpoint"] and json.loads(resolve(row["artifacts"]["checkpoint"]).read_text())!=state: raise ValueError("Checkpoint mismatch")
+            exclusion=resource_exclusion(s,cfg)
+            if (row["status"]=="skipped") != bool(exclusion): raise ValueError("Resource exclusion mismatch")
+            rebuilt=make_row(s,cfg,state,row["metrics"]["supervision"],exclusion); rebuilt["artifacts"]=row["artifacts"]
+            if rebuilt!=row: raise ValueError("Statistics/count/membership/status mismatch")
+            records=state.get("records",[])
+            if row["status"]=="passed":
+                if not state.get("complete") or [(r["phase"],r["repeat_index"],r["seed"]) for r in records]!=record_plan(s,cfg): raise ValueError("Missing declared calls")
+                supervision=row["metrics"]["supervision"]
+                if supervision["reason"] is not None or supervision["returncode"]!=0: raise ValueError("Unsuccessful worker passed")
+                if state["memory"]["peak_bytes"] is None or state["memory_baseline"]["rss_bytes"] is None: raise ValueError("Missing attributable memory")
+            ref=None
+            if state.get("reference") and (directory/s["scenario_id"]/"reference.npz").exists():
+                if state["reference"]!=read(s["scenario_id"]+"/reference.json"): raise ValueError("Reference report mismatch")
+                ref=dict(np.load(directory/s["scenario_id"]/"reference.npz",allow_pickle=False)); replay,description=reference(s,cfg["reference_stability_atol"])
+                if description["independent"]!=state["reference"]["independent"] or description["type"]!=state["reference"]["type"] or description["stable"]!=state["reference"]["stable"]: raise ValueError("Reference scope mismatch")
+                if description["stability_error"] is not None and not np.isclose(description["stability_error"],state["reference"]["stability_error"],rtol=1e-4,atol=1e-11): raise ValueError("Reference stability mismatch")
+                if any(ref[k].shape!=replay[k].shape or not np.allclose(ref[k],replay[k],rtol=1e-10,atol=1e-11) for k in replay): raise ValueError("Independent saved reference mismatch")
+                if state["reference_values"]!=ref["values"].tolist(): raise ValueError("Reference values mismatch")
+                if state["initial_state_sha256"]!=hashlib.sha256(initial_state(s).tobytes()).hexdigest(): raise ValueError("Initial state identity mismatch")
+                if not state["doctor"]["available"] or not state["doctor"]["backend_probe"]["available"] or any(state["runtime_context"]["threads"][k]!=1 for k in ("julia","blas")): raise ValueError("Initialized doctor/effective threads mismatch")
+                if set(state["runtime_files"])!={"Project.toml","Manifest.toml"}: raise ValueError("Missing runtime dependency identity")
+                for name,digest in state["runtime_files"].items():
+                    if hashlib.sha256(resolve(s["scenario_id"]+"/"+name).read_bytes()).hexdigest()!=digest: raise ValueError("Runtime hash mismatch")
+                density=state["density_validation"]
+                if density.get("arrays"):
+                    saved=dict(np.load(resolve(density["arrays"]),allow_pickle=False)); matrices=saved["density"]
+                    expected_options={**executed_options(s,None,tighter=True),"use_mc":False,"store_trajectories":False}
+                    if density["options"]!=expected_options or density["basis"]!=basis(s): raise ValueError("Raw density configuration/basis mismatch")
+                    initial=initial_state(s)
+>                   if not np.allclose(matrices[0],np.outer(initial,initial.conj()),rtol=0,atol=1e-12): raise ValueError("Raw density initial state mismatch")
+                                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   ValueError: Raw density initial state mismatch
+
+../scripts/audit_open_system_campaign.py:75: ValueError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-oyxw/pytest-6/test_real_small_density_storag0')
+
+    @pytest.mark.requires_julia_backend
+    def test_real_small_density_storage_audit_corruption(tmp_path):
+        ids=[scenario(1,reduced=False,fixture="coherence",model="dephasing",kind="correctness")["scenario_id"],scenario(2,"mcwf",store=True)["scenario_id"]]
+        paths=benchmark_open_system(tmp_path,scenario_ids=ids)
+        assert all(r["status"]=="passed" for r in paths["artifact"]["timings"]),[r["failure"] for r in paths["artifact"]["timings"]]
+        report=AUDIT.audit(tmp_path)
+        assert report["checked_results"]==14 and report["density_controls"]==2
+        import sagittarius.runtime as runtime
+        original=runtime.get_julia
+        try:
+            runtime.get_julia=lambda: (_ for _ in ()).throw(AssertionError("audit initialized Julia"))
+            assert AUDIT.audit(tmp_path)==report
+        finally: runtime.get_julia=original
+        for name,mutate,match in [
+            ("open_system_performance.csv",lambda t:t.replace("passed","failed",1),"CSV mismatch"),
+            ("open_system_performance.md",lambda t:t+"bad","Markdown mismatch"),
+            ("convergence.json",lambda t:t.replace('"pooled_trajectories": 2500','"pooled_trajectories": 1'),"Convergence report mismatch"),
+            (ids[1]+"/measured-0.manifest.json",lambda t:t.replace('"seed": 20260811','"seed": 0'),"Standalone manifest"),
+        ]:
+            p=tmp_path/name; before=p.read_text(); p.write_text(mutate(before))
+            with pytest.raises((ValueError,AssertionError),match=match): AUDIT.audit(tmp_path)
+            p.write_text(before)
+        p=tmp_path/ids[0]/"density-validation.npz"; before=p.read_bytes(); saved=dict(np.load(p)); saved["density"][:,0,1]=0
+        np.savez_compressed(p,**saved)
+>       with pytest.raises((ValueError,AssertionError),match="Trace/positivity/hermiticity|Density/coherence"): AUDIT.audit(tmp_path)
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'Trace/positivity/hermiticity|Density/coherence'
+E         Actual message: 'Raw density initial state mismatch'
+
+tests/test_open_system_benchmark.py:132: AssertionError
+----------------------------- Captured stdout call -----------------------------
+performance-n2-reduced-chain-combined-scalar-mcwf-k500-raw: passed
+correctness-n1-full-coherence-dephasing-scalar-lindblad: passed
+=========================== short test summary info ============================
+FAILED tests/test_open_system_benchmark.py::test_real_small_density_storage_audit_corruption
+1 failed, 81 passed in 80.97s (0:01:20)

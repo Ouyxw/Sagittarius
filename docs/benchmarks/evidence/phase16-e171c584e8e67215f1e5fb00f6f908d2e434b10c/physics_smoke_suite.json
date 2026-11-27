@@ -1,0 +1,673 @@
+{
+  "artifact_type": "benchmark.suite",
+  "artifacts": {
+    "csv": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/physics_smoke_suite.csv",
+    "json": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/physics_smoke_suite.json",
+    "markdown": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/physics_smoke_suite.md"
+  },
+  "diagnostics": [],
+  "environment": {
+    "benchmark_context": {
+      "command": "uv run python tests/test_performance/benchmark_physics_smoke.py",
+      "disclosure_status": "local_only",
+      "environment_variables": {
+        "JULIA_NUM_THREADS": "auto"
+      },
+      "failure_policy": "Continue after per-scenario failures and retain structured diagnostics.",
+      "family": "physics_baselines",
+      "measured_repeats": 1,
+      "protocol_version": "benchmark-protocol/v1",
+      "tier": "smoke",
+      "timeout_policy": "No runner timeout; every scenario exception is retained as a failed row.",
+      "warmup_runs": 0,
+      "working_directory": "/workspaces/Sagittarius/sagittarius_py"
+    },
+    "doctor": {
+      "available": true,
+      "backend_maturity": {
+        "AMDGPU": {
+          "notes": "Julia package hook exists, but parity and container tests are not established.",
+          "status": "planned"
+        },
+        "CPU": {
+          "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+          "status": "stable"
+        },
+        "CUDA": {
+          "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+          "status": "experimental"
+        },
+        "METAL": {
+          "notes": "Julia package hook exists, but parity and CI coverage are not established.",
+          "status": "planned"
+        }
+      },
+      "backend_probe": {
+        "abi": {},
+        "available": true,
+        "backend": "CPU",
+        "checks": {
+          "julia_package_versions": {
+            "code": null,
+            "message": "Collected Julia package versions.",
+            "ok": true,
+            "severity": "info"
+          },
+          "sparse_matvec": {
+            "code": null,
+            "message": "CPU sparse matrix-vector multiplication probe.",
+            "ok": true,
+            "severity": "error"
+          }
+        },
+        "devices": [],
+        "driver": {},
+        "errors": [],
+        "runtime": {},
+        "schema_version": "backend-probe/v2.1",
+        "versions": {
+          "CUDA": "6.2.0",
+          "DiffEqCallbacks": "4.18.3",
+          "OrdinaryDiffEq": "7.1.3",
+          "OrdinaryDiffEqLowOrderRK": "2.2.1",
+          "SciMLBase": "3.35.2",
+          "StaticArrays": "1.9.18",
+          "julia": "1.11.9"
+        }
+      },
+      "backend_source": "source_checkout",
+      "capabilities": {
+        "abi": {
+          "backend": "CPU",
+          "compatibility": {},
+          "host": {
+            "julia": {
+              "available": true,
+              "path_env": null,
+              "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+              "sagittarius_julia_version": "1.0.8",
+              "source": "source_checkout",
+              "version": "1.11.9"
+            },
+            "python": {
+              "cache_tag": "cpython-310",
+              "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+              "implementation": "CPython",
+              "libc": {
+                "name": "glibc",
+                "version": "2.35"
+              },
+              "machine": "x86_64",
+              "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+              "processor": "x86_64",
+              "system": "Linux",
+              "version": "3.10.12"
+            }
+          },
+          "maturity": {
+            "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+            "status": "stable"
+          },
+          "toolchain": {}
+        },
+        "backend": "CPU",
+        "maturity": {
+          "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+          "status": "stable"
+        },
+        "parity": {
+          "hardware_validated_by_doctor": false,
+          "notes": "CPU execution is covered by the regular Python/Julia test suite; doctor() is a capability probe, not a numerical parity test.",
+          "status": "regular_test_suite",
+          "test_entrypoints": [
+            "sagittarius_py/tests/"
+          ]
+        }
+      },
+      "container": {
+        "detected": true,
+        "devcontainer": true,
+        "id": "07f419671ddf",
+        "image": null
+      },
+      "gpu": {},
+      "issue_details": [],
+      "issues": [],
+      "julia_backend": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": "1.11.9"
+      },
+      "julia_loaded": true,
+      "requested_backend": "CPU",
+      "runtime": {
+        "abi": {
+          "julia": {
+            "available": true,
+            "path_env": null,
+            "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+            "sagittarius_julia_version": "1.0.8",
+            "source": "source_checkout",
+            "version": "1.11.9"
+          },
+          "python": {
+            "cache_tag": "cpython-310",
+            "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+            "implementation": "CPython",
+            "libc": {
+              "name": "glibc",
+              "version": "2.35"
+            },
+            "machine": "x86_64",
+            "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+            "processor": "x86_64",
+            "system": "Linux",
+            "version": "3.10.12"
+          }
+        },
+        "backend_toolchains": {
+          "AMDGPU": {
+            "rocm_smi": {
+              "missing": true,
+              "ok": false,
+              "output": null,
+              "returncode": null
+            }
+          },
+          "CUDA": {
+            "compatibility": {
+              "blackwell_detected": true,
+              "blackwell_devices": [
+                {
+                  "compute_capability": "12.0",
+                  "driver_version": "591.86",
+                  "memory_total_mib": "16303",
+                  "name": "NVIDIA GeForce RTX 5070 Ti"
+                }
+              ],
+              "cuda_12_8_driver_ok": true,
+              "cuda_12_8_min_linux_driver": "570.26",
+              "cuda_12_8_min_windows_driver": "570.65",
+              "driver_version": "591.86"
+            },
+            "devices": [
+              {
+                "compute_capability": "12.0",
+                "driver_version": "591.86",
+                "memory_total_mib": "16303",
+                "name": "NVIDIA GeForce RTX 5070 Ti"
+              }
+            ],
+            "nvcc": {
+              "missing": false,
+              "ok": true,
+              "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+              "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+              "returncode": 0
+            },
+            "nvidia_smi": {
+              "missing": false,
+              "ok": true,
+              "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+              "query_fields": [
+                "name",
+                "driver_version",
+                "memory.total",
+                "compute_cap"
+              ],
+              "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+              "returncode": 0
+            }
+          },
+          "METAL": {
+            "metal_compiler": {
+              "missing": true,
+              "ok": false,
+              "output": null,
+              "returncode": null
+            }
+          }
+        },
+        "build": {
+          "build_id": null,
+          "build_number": null,
+          "ci": false,
+          "source": {
+            "git_branch": "feature/benchmarking",
+            "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+            "git_commit_short": "e171c58",
+            "git_dirty": false,
+            "root": "/workspaces/Sagittarius"
+          }
+        },
+        "container": {
+          "detected": true,
+          "devcontainer": true,
+          "id": "07f419671ddf",
+          "image": null
+        },
+        "in_container": true,
+        "julia": {
+          "available": true,
+          "path_env": null,
+          "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+          "sagittarius_julia_version": "1.0.8",
+          "source": "source_checkout",
+          "version": "1.11.9"
+        },
+        "julia_version": "1.11.9",
+        "package_version": "1.0.8",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+        "python": {
+          "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+          "implementation": "CPython",
+          "packages": {
+            "docplex": "2.32.264",
+            "juliacall": "0.9.35",
+            "juliapkg": "0.1.24",
+            "matplotlib": "3.10.9",
+            "networkx": "3.4.2",
+            "numpy": "2.2.6",
+            "pandas": "2.3.3",
+            "pulp": "3.3.2",
+            "sagittarius-py": "1.0.8",
+            "scipy": "1.15.3",
+            "seaborn": "0.13.2"
+          },
+          "version": "3.10.12"
+        },
+        "python_version": "3.10.12",
+        "sagittarius_julia_version": "1.0.8",
+        "schema_version": "version-info/v1"
+      },
+      "schema_version": "doctor/v2.1"
+    }
+  },
+  "family": "physics_baselines",
+  "generated_at": "2026-08-12T09:30:19.664420+00:00",
+  "protocol_version": "benchmark-protocol/v1",
+  "rows": [
+    {
+      "artifacts": {
+        "result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/physics_smoke_results/rabi_n1_cpu_seed_none.result.json",
+        "run_manifest": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/physics_smoke_results/rabi_n1_cpu_seed_none.manifest.json"
+      },
+      "backend": {
+        "backend_probe": {
+          "abi": {},
+          "available": true,
+          "backend": "CPU",
+          "checks": {
+            "julia_package_versions": {
+              "code": null,
+              "message": "Collected Julia package versions.",
+              "ok": true,
+              "severity": "info"
+            },
+            "sparse_matvec": {
+              "code": null,
+              "message": "CPU sparse matrix-vector multiplication probe.",
+              "ok": true,
+              "severity": "error"
+            }
+          },
+          "devices": [],
+          "driver": {},
+          "errors": [],
+          "runtime": {},
+          "schema_version": "backend-probe/v2.1",
+          "versions": {
+            "CUDA": "6.2.0",
+            "DiffEqCallbacks": "4.18.3",
+            "OrdinaryDiffEq": "7.1.3",
+            "OrdinaryDiffEqLowOrderRK": "2.2.1",
+            "SciMLBase": "3.35.2",
+            "StaticArrays": "1.9.18",
+            "julia": "1.11.9"
+          }
+        },
+        "doctor_available": true,
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "physics_baselines",
+      "metrics": {
+        "max_abs_error": 5.5180082725314605e-11,
+        "process_peak_memory_mb": 945.56640625,
+        "reference": "analytic_rabi_population",
+        "runtime_seconds": 4.122816687999148
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "rydberg_population"
+        ],
+        "output_sample_count": 3
+      },
+      "problem": {
+        "atom_count": 1,
+        "delta": 0.0,
+        "duration": 1.0,
+        "geometry": "single_atom",
+        "omega": 6.283185307179586,
+        "seed": null,
+        "type": "single_atom_rabi"
+      },
+      "row_id": "physics-smoke-rabi",
+      "scenario_id": "rabi_n1_cpu_seed_none",
+      "solver": {
+        "abstol": 1e-09,
+        "adaptive": true,
+        "dt": null,
+        "effective": {
+          "abstol": 1e-09,
+          "adaptive": true,
+          "basis_size": 2,
+          "dt": null,
+          "effective_adaptive": true,
+          "effective_dt": null,
+          "effective_method": "Tsit5",
+          "effective_saveat": [
+            0.0,
+            0.5,
+            1.0
+          ],
+          "full_basis_size": 2,
+          "reduced_basis_pruning_ratio": 0.0,
+          "reltol": 1e-09,
+          "saveat": [
+            0.0,
+            0.5,
+            1.0
+          ],
+          "seed": null,
+          "solver_method": "Tsit5",
+          "use_gpu": false,
+          "use_mc": false
+        },
+        "method": "Tsit5",
+        "reltol": 1e-09,
+        "saveat": [
+          0.0,
+          0.5,
+          1.0
+        ]
+      },
+      "stage": "artifact",
+      "status": "passed",
+      "tier": "smoke"
+    },
+    {
+      "artifacts": {
+        "result_artifact": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/physics_smoke_results/blockade_n2_reduced_cpu_seed_none.result.json",
+        "run_manifest": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/physics_smoke_results/blockade_n2_reduced_cpu_seed_none.manifest.json"
+      },
+      "backend": {
+        "backend_probe": {
+          "abi": {},
+          "available": true,
+          "backend": "CPU",
+          "checks": {
+            "julia_package_versions": {
+              "code": null,
+              "message": "Collected Julia package versions.",
+              "ok": true,
+              "severity": "info"
+            },
+            "sparse_matvec": {
+              "code": null,
+              "message": "CPU sparse matrix-vector multiplication probe.",
+              "ok": true,
+              "severity": "error"
+            }
+          },
+          "devices": [],
+          "driver": {},
+          "errors": [],
+          "runtime": {},
+          "schema_version": "backend-probe/v2.1",
+          "versions": {
+            "CUDA": "6.2.0",
+            "DiffEqCallbacks": "4.18.3",
+            "OrdinaryDiffEq": "7.1.3",
+            "OrdinaryDiffEqLowOrderRK": "2.2.1",
+            "SciMLBase": "3.35.2",
+            "StaticArrays": "1.9.18",
+            "julia": "1.11.9"
+          }
+        },
+        "doctor_available": true,
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "physics_baselines",
+      "metrics": {
+        "max_abs_error": 0.0,
+        "process_peak_memory_mb": 952.34765625,
+        "reference": "reduced_basis_forbids_bitstring_11",
+        "runtime_seconds": 0.9819431610012543
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "double_excitation"
+        ],
+        "output_sample_count": 3
+      },
+      "problem": {
+        "C6": 100.0,
+        "atom_count": 2,
+        "blockade_radius": 1.5,
+        "duration": 0.5,
+        "geometry": "chain",
+        "seed": null,
+        "spacing": 1.0,
+        "type": "two_atom_rydberg_blockade"
+      },
+      "row_id": "physics-smoke-blockade",
+      "scenario_id": "blockade_n2_reduced_cpu_seed_none",
+      "solver": {
+        "abstol": 1e-09,
+        "adaptive": true,
+        "dt": null,
+        "effective": {
+          "abstol": 1e-09,
+          "adaptive": true,
+          "basis_size": 3,
+          "dt": null,
+          "effective_adaptive": true,
+          "effective_dt": null,
+          "effective_method": "Tsit5",
+          "effective_saveat": [
+            0.0,
+            0.25,
+            0.5
+          ],
+          "full_basis_size": 4,
+          "reduced_basis_pruning_ratio": 0.25,
+          "reltol": 1e-09,
+          "saveat": 3,
+          "seed": null,
+          "solver_method": "Tsit5",
+          "use_gpu": false,
+          "use_mc": false
+        },
+        "method": "Tsit5",
+        "reltol": 1e-09,
+        "saveat": 3
+      },
+      "stage": "artifact",
+      "status": "passed",
+      "tier": "smoke"
+    }
+  ],
+  "scenario_defaults": {
+    "backend": "CPU",
+    "seed_policy": "deterministic/no stochastic seed"
+  },
+  "schema_version": "benchmark-suite-artifact/v1",
+  "source": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": "1.11.9"
+      },
+      "python": {
+        "cache_tag": "cpython-310",
+        "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.35"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.10.12"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "591.86"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "nvcc": {
+          "missing": false,
+          "ok": true,
+          "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+          "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+          "returncode": 0
+        },
+        "nvidia_smi": {
+          "missing": false,
+          "ok": true,
+          "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "query_fields": [
+            "name",
+            "driver_version",
+            "memory.total",
+            "compute_cap"
+          ],
+          "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "returncode": 0
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+        "git_commit_short": "e171c58",
+        "git_dirty": true,
+        "root": "/workspaces/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "in_container": true,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": "1.11.9"
+    },
+    "julia_version": "1.11.9",
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": {
+      "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.4.2",
+        "numpy": "2.2.6",
+        "pandas": "2.3.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.15.3",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.10.12"
+    },
+    "python_version": "3.10.12",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  },
+  "suite_id": "phase16-physics-baselines-smoke",
+  "summary": {
+    "completed_count": 2,
+    "failed_count": 0,
+    "incomplete_count": 0,
+    "pass_rate_completed": 1.0,
+    "passed_count": 2,
+    "skipped_count": 0,
+    "status_counts": {
+      "failed": 0,
+      "incomplete": 0,
+      "passed": 2,
+      "skipped": 0
+    },
+    "total_rows": 2
+  },
+  "tier": "smoke"
+}

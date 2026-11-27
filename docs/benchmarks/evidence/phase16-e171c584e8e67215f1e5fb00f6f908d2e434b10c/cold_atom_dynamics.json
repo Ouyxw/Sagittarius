@@ -1,0 +1,609 @@
+{
+  "artifact_type": "sagittarius.benchmark",
+  "artifacts": {
+    "csv": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/cold_atom_dynamics.csv",
+    "markdown": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/cold_atom_dynamics.md"
+  },
+  "created_at": "2026-08-12T09:30:45.315681+00:00",
+  "description": "Small chain, local-addressing, Z2, and 2D cases against projected dense references.",
+  "diagnostics": {
+    "available": true,
+    "backend_maturity": {
+      "AMDGPU": {
+        "notes": "Julia package hook exists, but parity and container tests are not established.",
+        "status": "planned"
+      },
+      "CPU": {
+        "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+        "status": "stable"
+      },
+      "CUDA": {
+        "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+        "status": "experimental"
+      },
+      "METAL": {
+        "notes": "Julia package hook exists, but parity and CI coverage are not established.",
+        "status": "planned"
+      }
+    },
+    "backend_probe": null,
+    "backend_source": "source_checkout",
+    "capabilities": {
+      "abi": {
+        "backend": "CPU",
+        "compatibility": {},
+        "host": {
+          "julia": {
+            "available": true,
+            "path_env": null,
+            "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+            "sagittarius_julia_version": "1.0.8",
+            "source": "source_checkout",
+            "version": null
+          },
+          "python": {
+            "cache_tag": "cpython-310",
+            "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+            "implementation": "CPython",
+            "libc": {
+              "name": "glibc",
+              "version": "2.35"
+            },
+            "machine": "x86_64",
+            "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+            "processor": "x86_64",
+            "system": "Linux",
+            "version": "3.10.12"
+          }
+        },
+        "maturity": {
+          "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+          "status": "stable"
+        },
+        "toolchain": {}
+      },
+      "backend": "CPU",
+      "maturity": {
+        "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+        "status": "stable"
+      },
+      "parity": {
+        "hardware_validated_by_doctor": false,
+        "notes": "CPU execution is covered by the regular Python/Julia test suite; doctor() is a capability probe, not a numerical parity test.",
+        "status": "regular_test_suite",
+        "test_entrypoints": [
+          "sagittarius_py/tests/"
+        ]
+      }
+    },
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "gpu": {},
+    "issue_details": [],
+    "issues": [],
+    "julia_backend": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": null
+    },
+    "requested_backend": "CPU",
+    "runtime": {
+      "abi": {
+        "julia": {
+          "available": true,
+          "path_env": null,
+          "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+          "sagittarius_julia_version": "1.0.8",
+          "source": "source_checkout",
+          "version": null
+        },
+        "python": {
+          "cache_tag": "cpython-310",
+          "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+          "implementation": "CPython",
+          "libc": {
+            "name": "glibc",
+            "version": "2.35"
+          },
+          "machine": "x86_64",
+          "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+          "processor": "x86_64",
+          "system": "Linux",
+          "version": "3.10.12"
+        }
+      },
+      "backend_toolchains": {
+        "AMDGPU": {
+          "rocm_smi": {
+            "missing": true,
+            "ok": false,
+            "output": null,
+            "returncode": null
+          }
+        },
+        "CUDA": {
+          "compatibility": {
+            "blackwell_detected": true,
+            "blackwell_devices": [
+              {
+                "compute_capability": "12.0",
+                "driver_version": "591.86",
+                "memory_total_mib": "16303",
+                "name": "NVIDIA GeForce RTX 5070 Ti"
+              }
+            ],
+            "cuda_12_8_driver_ok": true,
+            "cuda_12_8_min_linux_driver": "570.26",
+            "cuda_12_8_min_windows_driver": "570.65",
+            "driver_version": "591.86"
+          },
+          "devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "nvcc": {
+            "missing": false,
+            "ok": true,
+            "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+            "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+            "returncode": 0
+          },
+          "nvidia_smi": {
+            "missing": false,
+            "ok": true,
+            "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "query_fields": [
+              "name",
+              "driver_version",
+              "memory.total",
+              "compute_cap"
+            ],
+            "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "returncode": 0
+          }
+        },
+        "METAL": {
+          "metal_compiler": {
+            "missing": true,
+            "ok": false,
+            "output": null,
+            "returncode": null
+          }
+        }
+      },
+      "build": {
+        "build_id": null,
+        "build_number": null,
+        "ci": false,
+        "source": {
+          "git_branch": "feature/benchmarking",
+          "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+          "git_commit_short": "e171c58",
+          "git_dirty": true,
+          "root": "/workspaces/Sagittarius"
+        }
+      },
+      "container": {
+        "detected": true,
+        "devcontainer": true,
+        "id": "07f419671ddf",
+        "image": null
+      },
+      "in_container": true,
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": null
+      },
+      "julia_version": null,
+      "package_version": "1.0.8",
+      "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+      "python": {
+        "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "packages": {
+          "docplex": "2.32.264",
+          "juliacall": "0.9.35",
+          "juliapkg": "0.1.24",
+          "matplotlib": "3.10.9",
+          "networkx": "3.4.2",
+          "numpy": "2.2.6",
+          "pandas": "2.3.3",
+          "pulp": "3.3.2",
+          "sagittarius-py": "1.0.8",
+          "scipy": "1.15.3",
+          "seaborn": "0.13.2"
+        },
+        "version": "3.10.12"
+      },
+      "python_version": "3.10.12",
+      "sagittarius_julia_version": "1.0.8",
+      "schema_version": "version-info/v1"
+    },
+    "schema_version": "doctor/v2.1"
+  },
+  "hardware": {
+    "backend_devices": [],
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "gpu": {},
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35"
+  },
+  "markdown_table": "| scenario_id | status | metrics | artifacts | failure |\n| --- | --- | --- | --- | --- |\n| chain_global_n3 | passed | {'reference_kind': 'projected_dense_matrix_exponential', 'reference_tolerance': 1e-08, 'max_hamiltonian_error': 0.0, 'max_state_error': 0.0, 'basis_size': 5} | {'run_manifest': None, 'result_artifact': None, 'reference_report': '/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/chain_global_n3.dense-vs-reduced.json'} | None |\n| local_addressing_n3 | passed | {'reference_kind': 'projected_dense_matrix_exponential', 'reference_tolerance': 1e-08, 'max_hamiltonian_error': 0.0, 'max_state_error': 0.0, 'basis_size': 5} | {'run_manifest': None, 'result_artifact': None, 'reference_report': '/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/local_addressing_n3.dense-vs-reduced.json'} | None |\n| z2_chain_n4 | passed | {'reference_kind': 'projected_dense_matrix_exponential', 'reference_tolerance': 1e-08, 'max_hamiltonian_error': 0.0, 'max_state_error': 0.0, 'basis_size': 8} | {'run_manifest': None, 'result_artifact': None, 'reference_report': '/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/z2_chain_n4.dense-vs-reduced.json'} | None |\n| square_2x2_n4 | passed | {'reference_kind': 'projected_dense_matrix_exponential', 'reference_tolerance': 1e-08, 'max_hamiltonian_error': 0.0, 'max_state_error': 0.0, 'basis_size': 7} | {'run_manifest': None, 'result_artifact': None, 'reference_report': '/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/square_2x2_n4.dense-vs-reduced.json'} | None |",
+  "memory": {
+    "available": true,
+    "max_rss": 63136,
+    "max_rss_unit": "KiB on Linux, bytes on macOS"
+  },
+  "name": "Phase 16 cold-atom dynamics correctness",
+  "parameters": {
+    "reference_tolerance": 1e-08
+  },
+  "run_manifests": [],
+  "schema_version": "benchmark-artifact/v1",
+  "timings": [
+    {
+      "artifacts": {
+        "reference_report": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/chain_global_n3.dense-vs-reduced.json",
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "cold_atom_dynamics",
+      "metrics": {
+        "basis_size": 5,
+        "max_hamiltonian_error": 0.0,
+        "max_state_error": 0.0,
+        "reference_kind": "projected_dense_matrix_exponential",
+        "reference_tolerance": 1e-08
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "total_rydberg_population"
+        ],
+        "output_sample_count": 5
+      },
+      "problem": {
+        "atom_count": 3,
+        "blockade_radius": 0.6,
+        "geometry": {
+          "axis": "x",
+          "kind": "chain",
+          "n": 3,
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "spacing": 0.5
+        }
+      },
+      "row_id": "cold_atom_dynamics-chain_global_n3",
+      "scenario_id": "chain_global_n3",
+      "solver": {
+        "reference": "projected_dense_vs_reduced"
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "reference_report": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/local_addressing_n3.dense-vs-reduced.json",
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "cold_atom_dynamics",
+      "metrics": {
+        "basis_size": 5,
+        "max_hamiltonian_error": 0.0,
+        "max_state_error": 0.0,
+        "reference_kind": "projected_dense_matrix_exponential",
+        "reference_tolerance": 1e-08
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "total_rydberg_population"
+        ],
+        "output_sample_count": 5
+      },
+      "problem": {
+        "atom_count": 3,
+        "blockade_radius": 0.6,
+        "geometry": {
+          "axis": "x",
+          "kind": "chain",
+          "n": 3,
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "spacing": 0.5
+        }
+      },
+      "row_id": "cold_atom_dynamics-local_addressing_n3",
+      "scenario_id": "local_addressing_n3",
+      "solver": {
+        "reference": "projected_dense_vs_reduced"
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "reference_report": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/z2_chain_n4.dense-vs-reduced.json",
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "cold_atom_dynamics",
+      "metrics": {
+        "basis_size": 8,
+        "max_hamiltonian_error": 0.0,
+        "max_state_error": 0.0,
+        "reference_kind": "projected_dense_matrix_exponential",
+        "reference_tolerance": 1e-08
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "total_rydberg_population"
+        ],
+        "output_sample_count": 5
+      },
+      "problem": {
+        "atom_count": 4,
+        "blockade_radius": 0.6,
+        "geometry": {
+          "axis": "x",
+          "kind": "chain",
+          "n": 4,
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "spacing": 0.5
+        }
+      },
+      "row_id": "cold_atom_dynamics-z2_chain_n4",
+      "scenario_id": "z2_chain_n4",
+      "solver": {
+        "reference": "projected_dense_vs_reduced"
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    },
+    {
+      "artifacts": {
+        "reference_report": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/square_2x2_n4.dense-vs-reduced.json",
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "backend": {
+        "path": "cpu",
+        "requested_backend": "CPU"
+      },
+      "disclosure_status": "local_only",
+      "failure": null,
+      "family": "cold_atom_dynamics",
+      "metrics": {
+        "basis_size": 7,
+        "max_hamiltonian_error": 0.0,
+        "max_state_error": 0.0,
+        "reference_kind": "projected_dense_matrix_exponential",
+        "reference_tolerance": 1e-08
+      },
+      "observables": {
+        "count": 1,
+        "names": [
+          "total_rydberg_population"
+        ],
+        "output_sample_count": 5
+      },
+      "problem": {
+        "atom_count": 4,
+        "blockade_radius": 0.6,
+        "geometry": {
+          "cols": 2,
+          "kind": "square_lattice",
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "plane": "xy",
+          "rows": 2,
+          "spacing": 0.5
+        }
+      },
+      "row_id": "cold_atom_dynamics-square_2x2_n4",
+      "scenario_id": "square_2x2_n4",
+      "solver": {
+        "reference": "projected_dense_vs_reduced"
+      },
+      "stage": "validation",
+      "status": "passed",
+      "tier": "correctness"
+    }
+  ],
+  "versions": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": null
+      },
+      "python": {
+        "cache_tag": "cpython-310",
+        "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.35"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.10.12"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "591.86"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "nvcc": {
+          "missing": false,
+          "ok": true,
+          "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+          "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+          "returncode": 0
+        },
+        "nvidia_smi": {
+          "missing": false,
+          "ok": true,
+          "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "query_fields": [
+            "name",
+            "driver_version",
+            "memory.total",
+            "compute_cap"
+          ],
+          "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "returncode": 0
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+        "git_commit_short": "e171c58",
+        "git_dirty": true,
+        "root": "/workspaces/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "in_container": true,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": null
+    },
+    "julia_version": null,
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": {
+      "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.4.2",
+        "numpy": "2.2.6",
+        "pandas": "2.3.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.15.3",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.10.12"
+    },
+    "python_version": "3.10.12",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  }
+}

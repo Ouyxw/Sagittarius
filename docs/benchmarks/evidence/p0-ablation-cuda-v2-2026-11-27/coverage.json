@@ -1,0 +1,29 @@
+{
+  "all_target_cpu_paths_passed": false,
+  "all_target_cuda_paths_passed": true,
+  "classification": "local_only",
+  "declared_rows_accounted": true,
+  "missing_successful_cpu_paths": [
+    "chain-n12-full_dense",
+    "chain-n12-full_sparse",
+    "chain-n12-reduced_matrix_free",
+    "chain-n12-reduced_sparse",
+    "chain-n16-reduced_matrix_free",
+    "chain-n16-reduced_sparse",
+    "chain-n20-reduced_matrix_free",
+    "chain-n20-reduced_sparse",
+    "chain-n4-full_dense",
+    "chain-n4-full_sparse",
+    "chain-n4-reduced_matrix_free",
+    "chain-n4-reduced_sparse",
+    "chain-n8-full_dense",
+    "chain-n8-full_sparse",
+    "chain-n8-reduced_matrix_free",
+    "chain-n8-reduced_sparse"
+  ],
+  "optional_cuda_status": "matched CPU ODE trajectory checks; no performance ratio; skipped/failed rows leave CUDA coverage open",
+  "required_small_cpu_passed": false,
+  "successful_n20_paths": [
+    "chain-n20-reduced_sparse_gpu_cached"
+  ]
+}

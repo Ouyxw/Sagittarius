@@ -1,0 +1,2515 @@
+{
+  "classification": "local_only; software/numerical evidence, no public performance or physical approximation claims",
+  "command": [
+    "tests/test_performance/benchmark_ablation.py",
+    "--sizes",
+    "4",
+    "8",
+    "12",
+    "16",
+    "20",
+    "--repeats",
+    "50",
+    "--repeat-count",
+    "5",
+    "--warmups",
+    "2",
+    "--memory-limit-mb",
+    "9216",
+    "--timeout-seconds",
+    "600",
+    "--output-dir",
+    "benchmark-output/p0-ablation-v2-2026-11-27"
+  ],
+  "config_sha256": "ac2fc7c2fc4df7d35088c6ee273a435e6979f69b96efbd414b8a6b6fc401a44a",
+  "cwd": "/home/oyxw/Sagittarius/sagittarius_py",
+  "frozen_at": "2026-11-27T01:30:55.284389+00:00",
+  "hardware": {
+    "cpu_model": "Intel(R) Core(TM) i7-14700KF",
+    "physical_memory_bytes": 16637784064
+  },
+  "include_gpu": false,
+  "output_dir": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p0-ablation-v2-2026-11-27",
+  "plan_version": "benchmark-implementation-plan/v2",
+  "protocol_version": "benchmark-protocol/v1",
+  "python_executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+  "repeat_count": 5,
+  "repeats": 50,
+  "scenarios": [
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 16,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2147542220,
+      "full_dim": 16,
+      "geometry": "chain",
+      "mode": "full_dense",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 8,
+      "representation": "full dense matrix",
+      "required": true,
+      "scenario_id": "chain-n4-full_dense",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 16,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2147542220,
+      "full_dim": 16,
+      "geometry": "chain",
+      "mode": "full_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 8,
+      "representation": "full sparse CSR matrix",
+      "required": true,
+      "scenario_id": "chain-n4-full_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 8,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2147526656,
+      "full_dim": 16,
+      "geometry": "chain",
+      "mode": "reduced_matrix_free",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.5,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 8,
+      "representation": "blockade-reduced matrix-free operator",
+      "required": true,
+      "scenario_id": "chain-n4-reduced_matrix_free",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 8,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2147527987,
+      "full_dim": 16,
+      "geometry": "chain",
+      "mode": "reduced_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.5,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 8,
+      "representation": "blockade-reduced sparse CSR matrix",
+      "required": true,
+      "scenario_id": "chain-n4-reduced_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 8,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2147526656,
+      "full_dim": 16,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.5,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 8,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n4-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 256,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2157825228,
+      "full_dim": 256,
+      "geometry": "chain",
+      "mode": "full_dense",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 55,
+      "representation": "full dense matrix",
+      "required": true,
+      "scenario_id": "chain-n8-full_dense",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 256,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2157825228,
+      "full_dim": 256,
+      "geometry": "chain",
+      "mode": "full_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 55,
+      "representation": "full sparse CSR matrix",
+      "required": true,
+      "scenario_id": "chain-n8-full_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 55,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2155998976,
+      "full_dim": 256,
+      "geometry": "chain",
+      "mode": "reduced_matrix_free",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.78515625,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 55,
+      "representation": "blockade-reduced matrix-free operator",
+      "required": true,
+      "scenario_id": "chain-n8-reduced_matrix_free",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 55,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2156061896,
+      "full_dim": 256,
+      "geometry": "chain",
+      "mode": "reduced_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.78515625,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 55,
+      "representation": "blockade-reduced sparse CSR matrix",
+      "required": true,
+      "scenario_id": "chain-n8-reduced_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 55,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2155998976,
+      "full_dim": 256,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.78515625,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 55,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n8-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 4096,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2510081228,
+      "full_dim": 4096,
+      "geometry": "chain",
+      "mode": "full_dense",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 377,
+      "representation": "full dense matrix",
+      "required": true,
+      "scenario_id": "chain-n12-full_dense",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 4096,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2510081228,
+      "full_dim": 4096,
+      "geometry": "chain",
+      "mode": "full_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 377,
+      "representation": "full sparse CSR matrix",
+      "required": true,
+      "scenario_id": "chain-n12-full_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 377,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2148738304,
+      "full_dim": 4096,
+      "geometry": "chain",
+      "mode": "reduced_matrix_free",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.907958984375,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 377,
+      "representation": "blockade-reduced matrix-free operator",
+      "required": true,
+      "scenario_id": "chain-n12-reduced_matrix_free",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 377,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2151694587,
+      "full_dim": 4096,
+      "geometry": "chain",
+      "mode": "reduced_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.907958984375,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 377,
+      "representation": "blockade-reduced sparse CSR matrix",
+      "required": true,
+      "scenario_id": "chain-n12-reduced_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 377,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2148738304,
+      "full_dim": 4096,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.907958984375,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 377,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n12-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 65536,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 91768016076,
+      "full_dim": 65536,
+      "geometry": "chain",
+      "mode": "full_dense",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 2584,
+      "representation": "full dense matrix",
+      "required": false,
+      "scenario_id": "chain-n16-full_dense",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 65536,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 91768016076,
+      "full_dim": 65536,
+      "geometry": "chain",
+      "mode": "full_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 2584,
+      "representation": "full sparse CSR matrix",
+      "required": false,
+      "scenario_id": "chain-n16-full_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 2584,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2158729216,
+      "full_dim": 65536,
+      "geometry": "chain",
+      "mode": "reduced_matrix_free",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9605712890625,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 2584,
+      "representation": "blockade-reduced matrix-free operator",
+      "required": false,
+      "scenario_id": "chain-n16-reduced_matrix_free",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 2584,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2297611980,
+      "full_dim": 65536,
+      "geometry": "chain",
+      "mode": "reduced_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9605712890625,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 2584,
+      "representation": "blockade-reduced sparse CSR matrix",
+      "required": false,
+      "scenario_id": "chain-n16-reduced_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 2584,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2158729216,
+      "full_dim": 65536,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9605712890625,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 2584,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n16-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 1048576,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          34.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          38.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 22877626485964,
+      "full_dim": 1048576,
+      "geometry": "chain",
+      "mode": "full_dense",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 17711,
+      "representation": "full dense matrix",
+      "required": false,
+      "scenario_id": "chain-n20-full_dense",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "full",
+      "basis_size": 1048576,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          34.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          38.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 22877626485964,
+      "full_dim": 1048576,
+      "geometry": "chain",
+      "mode": "full_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 17711,
+      "representation": "full sparse CSR matrix",
+      "required": false,
+      "scenario_id": "chain-n20-full_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 17711,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          34.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          38.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2242697984,
+      "full_dim": 1048576,
+      "geometry": "chain",
+      "mode": "reduced_matrix_free",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9831094741821289,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 17711,
+      "representation": "blockade-reduced matrix-free operator",
+      "required": false,
+      "scenario_id": "chain-n20-reduced_matrix_free",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CPU",
+      "basis": "blockade_reduced",
+      "basis_size": 17711,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          34.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          38.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 8767232020,
+      "full_dim": 1048576,
+      "geometry": "chain",
+      "mode": "reduced_sparse",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9831094741821289,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 17711,
+      "representation": "blockade-reduced sparse CSR matrix",
+      "required": false,
+      "scenario_id": "chain-n20-reduced_sparse",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "matvec"
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 17711,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          34.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          38.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2242697984,
+      "full_dim": 1048576,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9831094741821289,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 17711,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n20-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    }
+  ],
+  "settings": {
+    "gpu_opt_in": false,
+    "measurement": {
+      "full_rtol": 1e-12,
+      "gpu_duration": 0.2,
+      "include_gpu": false,
+      "max_full_dim": 4096,
+      "memory_limit_mb": 9216.0,
+      "reduced_atol": 1e-10,
+      "repeat_count": 5,
+      "repeats": 50,
+      "seed": 1234,
+      "warmups": 2
+    },
+    "memory_limit_bytes": 9663676416,
+    "timeout_seconds": 600.0
+  },
+  "source": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": null
+      },
+      "python": {
+        "cache_tag": "cpython-311",
+        "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.39"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.11.15"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": false,
+          "blackwell_devices": [],
+          "cuda_12_8_driver_ok": null,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": null
+        },
+        "devices": [
+          {
+            "compute_capability": null,
+            "driver_version": null,
+            "memory_total_mib": null,
+            "name": "Failed to initialize NVML: GPU access blocked by the operating system"
+          },
+          {
+            "compute_capability": null,
+            "driver_version": null,
+            "memory_total_mib": null,
+            "name": "Failed to properly shut down NVML: GPU access blocked by the operating system"
+          }
+        ],
+        "nvcc": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        },
+        "nvidia_smi": {
+          "fallback": {
+            "missing": false,
+            "ok": false,
+            "output": "Failed to initialize NVML: GPU access blocked by the operating system",
+            "raw_output": "Failed to initialize NVML: GPU access blocked by the operating system\nFailed to properly shut down NVML: GPU access blocked by the operating system",
+            "returncode": 255
+          },
+          "missing": false,
+          "ok": false,
+          "output": "Failed to initialize NVML: GPU access blocked by the operating system",
+          "raw_output": "Failed to initialize NVML: GPU access blocked by the operating system\nFailed to properly shut down NVML: GPU access blocked by the operating system",
+          "returncode": 255
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "d4f4cea0c255d984246f12014d3b906bdc6e722f",
+        "git_commit_short": "d4f4cea",
+        "git_dirty": true,
+        "root": "/home/oyxw/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": false,
+      "devcontainer": false,
+      "id": null,
+      "image": null
+    },
+    "in_container": false,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": null
+    },
+    "julia_version": null,
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": {
+      "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.6.1",
+        "numpy": "2.4.6",
+        "pandas": "3.0.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.17.1",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.11.15"
+    },
+    "python_version": "3.11.15",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  },
+  "source_file_sha256": {
+    "ablation.py": "84dab43899c92f170f222291c46e7c55b57bfa405942a5bac490bc811a9c2ef5",
+    "ablation_benchmark.py": "bfe658516ffaa8ed4115bb0e8ba14eee02d37510c2497e71265c3a0070e19136",
+    "api.py": "cf19e5374c883f0c2d45b0283a41922a85744f13fbf976dfb3029522c8207c83",
+    "benchmark_failures.py": "ac05b2ffc6b6f9cc1fb7efe8147947b66c4e1b7d5340498e240a0e5616cdf421",
+    "benchmark_measurement.py": "7eb88b5fa8ced710e64d1952bf4d72b09a53ff7a4e9f7ab907bfd07b1bc702bd",
+    "benchmark_suite.py": "370759e72d545881814fc9548376d60a03a09ab9b5fa0076e46dbf05c8317197",
+    "benchmarking.py": "af7d7d91dfe15d8a2a9f0565059baea1309bddde1366aa31ec1e56e0d88fd04b",
+    "runtime.py": "1c01231f6909b61f379de5958a5d1c20acef89d179525c67d7c0bb657a0781d7",
+    "scaling_benchmark.py": "c54e983e58051eec26e27dc661eb0c5cc3f67900f3e175cb311c35ec81b49e8e"
+  },
+  "stop_policy": "continue, preserve all declared paths and partial measurements",
+  "thread_environment": {
+    "JULIA_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "workload_version": "fixed-normalized-input-matvec/v2"
+}

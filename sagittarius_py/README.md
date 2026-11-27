@@ -107,7 +107,7 @@ result = sim.run(psi0, 0.0, 0.5, observables={"pop_atom_0": 0})
 print(result.to_pandas().tail())
 ```
 
-For a reduced basis, set `SolverConfig(blockade_radius=...)` and allocate the initial state using the size returned by `sim.validate()`. See the [Python minimal examples](docs/getting-started/python/minimal-examples.md) for complete full- and reduced-basis workflows.
+For a reduced basis, set `SolverConfig(blockade_radius=...)` and allocate the initial state using the size returned by `sim.validate()`. See the [Python minimal examples](docs/getting-started/python/minimal-examples.md) for complete full- and reduced-basis workflows, or the [Python experiment recipes](docs/getting-started/python/experiment-recipes.md) for artifact-producing Rabi, blockade, sweep, decay, and small UDG/MWIS workflows.
 
 Solver selection is explicit through `SolverConfig(method=...)`. The default is adaptive `Tsit5`; `Vern9` is available for higher-accuracy adaptive checks; fixed-step `RK4` requires `SolverConfig(method="RK4", adaptive=False, dt=...)`. Run manifests record both requested and effective solver settings.
 
@@ -166,6 +166,8 @@ CPU tests do not require CUDA. GPU tests are opt-in and require a working backen
 - [Installation overview](docs/getting-started/installation.md)
 - [Python minimal examples](docs/getting-started/python/minimal-examples.md)
 - [Julia minimal examples](docs/getting-started/julia/minimal-examples.md)
+- [Python experiment recipes](docs/getting-started/python/experiment-recipes.md)
+- [Wheel-installed Python recipe](docs/getting-started/python/wheel-experiment-recipe.md)
 - [Physical units and parameter selection](docs/physics/SPEC-PHYS-001-units.md)
 - [Python/Julia parity contract](docs/api/SPEC-API-002-python-julia-parity.md)
 - [Solver configuration](docs/api/SPEC-API-005-solver-configuration.md)

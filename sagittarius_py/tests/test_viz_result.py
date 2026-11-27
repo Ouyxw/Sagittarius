@@ -13,11 +13,14 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from sagittarius import Atom, PulseSequence, Register, SimulationResult, load_result
 from sagittarius.viz import (
     plot_observables,
     plot_bitstring_distribution,
     plot_shot_histogram,
-    plot_population_heatmap
+    plot_population_heatmap,
+    plot_register,
+    plot_pulse_waveform,
 )
 
 
@@ -532,3 +535,44 @@ def test_all_visualization_types_together(output_dir, mock_observables_result,
     plt.close()
     
     assert os.path.exists(save_path)
+
+
+def _readout_result_for_artifact():
+    return SimulationResult(
+        {"t": [0.0, 1.0], "population": [0.0, 1.0]},
+        metadata={
+            "readout": {
+                "schema_version": "readout-metadata/v1",
+                "final_bitstring_probabilities": {"00": 0.25, "01": 0.75},
+            }
+        },
+    )
+
+
+def test_bitstring_distribution_plot_round_trips_saved_artifact(tmp_path):
+    artifact_path = tmp_path / "readout-result.json"
+    _readout_result_for_artifact().save(str(artifact_path))
+
+    loaded = load_result(str(artifact_path))
+    ax = plot_bitstring_distribution(loaded, sort_by="bitstring")
+
+    assert loaded.final_bitstring_distribution() == {"00": 0.25, "01": 0.75}
+    assert [label.get_text() for label in ax.get_xticklabels()] == ["00", "01"]
+    assert [bar.get_height() for bar in ax.patches] == [0.25, 0.75]
+
+
+def test_backend_free_visualizations_do_not_initialize_julia(monkeypatch, tmp_path):
+    import sagittarius.api as api
+
+    def fail_backend_initialization():
+        raise AssertionError("Visualization unexpectedly initialized the Julia backend.")
+
+    monkeypatch.setattr(api, "get_modules", fail_backend_initialization)
+    artifact_path = tmp_path / "readout-result.json"
+    _readout_result_for_artifact().save(str(artifact_path))
+    loaded = load_result(str(artifact_path))
+
+    plot_bitstring_distribution(loaded)
+    plot_observables(loaded)
+    plot_register(Register([Atom(0.0, 0.0), Atom(1.0, 0.0)]))
+    plot_pulse_waveform(PulseSequence(omega=1.0), time_grid=np.linspace(0.0, 1.0, 3))

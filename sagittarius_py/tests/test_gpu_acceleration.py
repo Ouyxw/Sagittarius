@@ -1,14 +1,12 @@
 import dataclasses
 
 import numpy as np
-import pytest
 
 from sagittarius import (
     Atom,
     Pulse,
     PulseSequence,
     Register,
-    SagittariusSolverError,
     Simulation,
     SolverConfig,
     validate_run_manifest,
@@ -42,15 +40,11 @@ def _run_parity_case(register, sequence, config, psi0, t_end, observables):
         observables=observables,
     )
 
-    try:
-        gpu_result = Simulation(register, sequence, gpu_config).run(
-            psi0,
-            0.0,
-            t_end,
-            observables=observables,
-        )
-    except SagittariusSolverError as exc:
-        pytest.skip(f"CUDA solver unavailable in this runtime: {exc.issue.code}")
+    # conftest already requires initialized CUDA diagnostics. Solver failures
+    # after that gate are regressions, including fresh-process lazy imports.
+    gpu_result = Simulation(register, sequence, gpu_config).run(
+        psi0, 0.0, t_end, observables=observables,
+    )
 
     validate_run_manifest(cpu_result.manifest)
     validate_run_manifest(gpu_result.manifest)
@@ -119,3 +113,19 @@ def test_gpu_vs_cpu_reduced_basis_parity_with_seeded_state():
         0.5,
         {"a1": 1, "a3": 3},
     )
+
+
+def test_gpu_diagonal_observables_match_cpu_at_shared_times():
+    register = Register.chain(4, spacing=2., C6=100.)
+    sequence = PulseSequence(omega=1.2, delta=-.1)
+    config = SolverConfig(reltol=1e-8, abstol=1e-10, saveat=np.linspace(0., .2, 11).tolist())
+    observables = {
+        'pop0': 0,
+        'total': {'type': 'total_rydberg_population'},
+        'pair': {'type': 'pair_correlation', 'atoms': [0, 2]},
+        'connected': {'type': 'connected_pair_correlation', 'atoms': [0, 2]},
+        'z': {'type': 'pauli_z', 'atom': 1},
+        'zz': {'type': 'pauli_zz', 'atoms': [0, 2]},
+        'parity': {'type': 'parity', 'atoms': [0, 1, 2]},
+    }
+    _run_parity_case(register, sequence, config, _normalized_random_state(16, 90211), .2, observables)

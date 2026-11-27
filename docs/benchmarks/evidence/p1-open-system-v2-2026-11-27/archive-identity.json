@@ -1,0 +1,22 @@
+{
+  "assembled_filename": "open-system-v2-2026-11-27-campaign.tar.xz",
+  "parts": [
+    {
+      "filename": "campaign.tar.xz.part-00",
+      "sha256": "b616845f99f7a2cb405fa9ab05a960a3e2f0e0d782f186e3100eaf4c8f8046df",
+      "size_bytes": 94371840
+    },
+    {
+      "filename": "campaign.tar.xz.part-01",
+      "sha256": "90eef744a96da724d508e03fa67590ceec1965707de6644b811e42f1e963481e",
+      "size_bytes": 94371840
+    },
+    {
+      "filename": "campaign.tar.xz.part-02",
+      "sha256": "95b4e0b5abd984c8b6e7d09219696a6cf07e2319a109ce40094718ad0b3d9e7b",
+      "size_bytes": 15995192
+    }
+  ],
+  "sha256": "c4964bcd595559b94275f84d4e45e36d57774c2745665c315ab699dd0e53a7be",
+  "size_bytes": 204738872
+}

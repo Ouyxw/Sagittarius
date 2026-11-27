@@ -1,0 +1,5 @@
+chain-n4-reduced_sparse_gpu_cached D=8: passed
+chain-n8-reduced_sparse_gpu_cached D=55: passed
+chain-n12-reduced_sparse_gpu_cached D=377: passed
+chain-n16-reduced_sparse_gpu_cached D=2584: passed
+chain-n20-reduced_sparse_gpu_cached D=17711: passed

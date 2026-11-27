@@ -1,0 +1,13 @@
+{
+  "proven_ilp_calls": 320,
+  "runtime_identity_count": 1,
+  "cbc_binary_identity_count": 1,
+  "all_report_fields_verified": true,
+  "scenario_count": 40,
+  "eligible_measured_calls": {
+    "aqc": 200,
+    "ilp": 200
+  },
+  "maximum_numerical_error": 8.41542979745924e-09,
+  "maximum_raw_state_norm_error": 8.676439344768028e-09
+}

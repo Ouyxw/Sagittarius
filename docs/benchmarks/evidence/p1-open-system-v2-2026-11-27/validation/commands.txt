@@ -1,0 +1,88 @@
+Working directory: /home/oyxw/Sagittarius/sagittarius_py
+Baseline: feature/benchmarking@3efa732, initial clean worktree.
+Source/editable SDK; UV_CACHE_DIR=/tmp/sagittarius-open-uv redirects uv's cache.
+Julia execution uses existing user cache, with sandbox escalation for its logs.
+
+Initial pilots (all retained, including incomplete/failed startup/source-freeze cases):
+uv run python tests/test_performance/benchmark_open_system_performance.py --output-dir /tmp/open-system-pilot-01 --scenario performance-n1-full-decay-decay-scalar-lindblad --scenario performance-n1-full-driven-dephasing-scalar-mcwf-k500 --scenario correctness-n1-full-coherence-dephasing-scalar-lindblad --warmups 0 --repeat-count 1
+pilot-01: source-snapshot CLI filename error before campaign freeze; implementation corrected.
+pilot-02: same arguments/new directory; initialized doctor failed on read-only Julia manifest_usage log.
+pilot-03: same arguments/new directory with cache access; decay incomplete, coherence passed, MCWF manifest seed-location mismatch corrected.
+uv run python tests/test_performance/benchmark_open_system_performance.py --output-dir /tmp/open-system-pilot-04 --scenario performance-n1-full-driven-dephasing-scalar-mcwf-k500 --scenario performance-n20-reduced-chain-combined-scalar-mcwf-k100 --scenario performance-n2-reduced-chain-combined-scalar-mcwf-k500-raw --warmups 0 --repeat-count 1
+pilot-04: old Rb8.4/D2745 N20 execution passes gates with short repeat status; later workers reject changed validation source during development.
+uv run python tests/test_performance/benchmark_open_system_performance.py --output-dir /tmp/open-system-pilot-05 --scenario performance-n20-reduced-chain-combined-scalar-mcwf-k1000 --scenario performance-n12-reduced-chain-combined-scalar-lindblad --scenario performance-n1-full-driven-dephasing-scalar-lindblad --warmups 0 --repeat-count 1
+pilot-05: Rb12.4/D907; intentionally short repeats; no performance campaign acceptance from pilots.
+
+uv run pytest tests/test_open_system_benchmark.py -m 'not requires_julia_backend' -q
+uv run pytest tests/test_open_system_benchmark.py tests/test_open_system_sanity.py tests/test_cross_language_golden.py -m requires_julia_backend -q
+backend-tests-01: retained initial source-freeze rejection during validation-file development.
+uv run pytest tests/test_open_system_benchmark.py tests/test_open_system_sanity.py tests/test_cross_language_golden.py tests/test_mc_trajectories.py tests/test_solver_configuration.py -q
+uv run pytest tests/test_benchmark_documentation_consistency.py tests/test_documentation_governance.py tests/test_benchmark_artifacts.py tests/test_benchmark_row_contract.py tests/test_benchmark_suite_artifact.py tests/test_benchmark_failures.py tests/test_serialization.py -q
+
+Final frozen validation/campaign/audit commands appended below as executed.
+
+Final regression (same command as backend+contracts above plus legacy fixture):
+uv run pytest tests/test_open_system_benchmark.py tests/test_open_system_sanity.py tests/test_cross_language_golden.py tests/test_mc_trajectories.py tests/test_solver_configuration.py tests/test_phase16_validation_benchmarks.py tests/test_benchmark_documentation_consistency.py tests/test_documentation_governance.py tests/test_benchmark_artifacts.py tests/test_benchmark_row_contract.py tests/test_benchmark_suite_artifact.py tests/test_benchmark_failures.py tests/test_serialization.py -q
+Result: 81 passed, one test-message regex failure: new initial-state audit correctly rejects corruption earlier than the previous positivity/coherence check. No numerical failure.
+uv run pytest tests/test_open_system_benchmark.py -q
+Result after updating regex and numeric audit comparison: 28 passed.
+uv run pytest tests/test_open_system_benchmark.py -q
+Final frozen runner result after explicit reporting-column additions: 28 passed; no skips. Together these cover all 82 unique targeted tests.
+
+uv run python tests/test_performance/benchmark_open_system_performance.py --tier all --output-dir /tmp/open-system-v2-final-2026-11-27 --warmups 2 --repeat-count 5 --timeout-seconds 1800 --memory-limit-mb 4096 --max-density-dimension 256 --max-state-dimension 1024
+
+uv run pytest tests/test_open_system_cross_path_audit.py -q
+Result: five backend-free matching/uncertainty/corruption checks passed.
+Direct cross-path review preflight (saved progress, no backend): 30 configurations,
+420 individual/tighter comparisons and 30 pooled checks pass. Final full review
+will use scripts/accept_open_system_campaign.py, which also reruns the base audit.
+Measurement sources remain frozen; review source/test hashes are retained separately.
+
+Full campaign result: 99 rows, 85 passed, 14 preflight resource exclusions,
+375/375 eligible measurements; no failed or incomplete final rows.
+
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 UV_CACHE_DIR=/tmp/sagittarius-open-uv uv run python ../scripts/accept_open_system_campaign.py /tmp/open-system-v2-final-2026-11-27
+Original accepted=true. Base audit: 916 regular results, 63 tighter results,
+67 raw density controls. Direct review: 54 matching configurations, 708 individual/
+tighter comparisons and 54 pooled checks pass; nine unavailable density references
+are preserved. Full-matrix all-success remains false due to 14 exclusions.
+
+uv run pytest tests/test_open_system_cross_path_audit.py -m requires_julia_backend -q
+Result: one real per-atom reduced-noise/cross-review integration passed, five
+unit checks intentionally deselected (already separately passed). No skips.
+All 88 distinct targeted tests are covered by retained passing runs.
+
+uv run python /tmp/verify_open_source.py
+Result: all 23 frozen measurement source files match; all 979 manifests agree on
+source and Python packages; one runtime Project/Manifest identity, Julia1.13.4.
+
+python3 /tmp/retain_open_campaign.py
+Retains raw data/source/runtime/review source/test hashes, commands and internal
+checksums; xz -T1 -9 compression. Archives over95MiB split into90MiB parts with
+whole-archive identity. Original short/failed pilots are archived separately.
+
+python3 /tmp/relocate_open_campaign.py
+Reassembled all three archive parts and verified the complete archive hash.
+Extracted /tmp/open-system-relocated-2026-11-27/open-system-v2-final-2026-11-27;
+all 2779 internal SHA256 checks pass. The original /tmp measurement tree was
+renamed away during the fresh backend-free acceptance run, then restored.
+Relocated accepted=true and the complete original/relocated reports are identical.
+The exact Python retention/relocation utilities and all logs are retained here.
+
+Final documentation generation: python3 /tmp/finalize_open_docs.py
+Final source-checkout checks: python3 scripts/validate_documentation.py;
+uv run pytest tests/test_benchmark_documentation_consistency.py tests/test_documentation_governance.py -q;
+git diff --check; exact V1-body comparisons; outer SHA256SUMS verification.
+
+Final results: documentation governance/link checker passed; five documentation
+regressions passed; git diff scope/check passed. All four V1 document bodies are
+byte-identical to baseline. All 23 measurement and two review source hashes match
+handoff. Existing core SDK/Julia/schema files and the legacy one-atom runner are
+unchanged; HEAD remains3efa732 (no commit created).
+
+Outer inventory: SHA256SUMS covers every retained outer evidence file except
+itself. Verification command: sha256sum -c SHA256SUMS. A first shell invocation
+used a wrong relative working-directory prefix before writing the inventory;
+corrected absolute-root generation and complete verification pass. Full verification
+output is in /tmp/open-system-outer-checksums.log; the durable inventory supports
+repeat checks.

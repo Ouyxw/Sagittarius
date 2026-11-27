@@ -1,0 +1,8 @@
+{
+  "classification": "local_only; software/numerical verification, not physical validation or public/release approval",
+  "correctness_matrix_passed": true,
+  "full_matrix_passed": true,
+  "missing_successful_scenarios": [],
+  "performance_matrix_passed": true,
+  "selected_campaign_passed": true
+}

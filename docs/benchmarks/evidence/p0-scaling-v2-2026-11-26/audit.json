@@ -1,0 +1,12 @@
+{
+  "checked_measured_result_manifest_pairs": 210,
+  "classification": "local_only; automated contract/numerical evidence audit, no independent governance review",
+  "contract_audit_passed": true,
+  "failed_repeats_with_unavailable_artifacts": [],
+  "full_v2_matrix_passed": true,
+  "max_hamiltonian_error": 4.336808689942018e-19,
+  "max_observable_error": 1.5280641196824263e-09,
+  "missing_successful_scenarios": [],
+  "passed_scenarios": 42,
+  "scenario_count": 42
+}

@@ -2,6 +2,12 @@
 
 This directory contains the public Sagittarius installation guides, API contracts, and physics documentation.
 
+The current source tree includes unreleased development beyond PyPI 1.0.11.
+Source API and recipe documentation may therefore describe features absent from
+that published package. See the [package installation guide](getting-started/python/package-installation.md)
+and [1.0.11 release notes](development/release-notes-1.0.11.md) for the released
+installation path and release scope.
+
 ## Start Here
 
 - [Installation overview](getting-started/installation.md)

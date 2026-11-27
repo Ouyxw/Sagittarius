@@ -4,7 +4,7 @@ Spec ID: `SPEC-PHYS-004`
 Status: `Planned contract`
 Roadmap: Phase 14
 Version: `noise-models/v1-draft`
-Last reviewed: 2026-06-30
+Last reviewed: 2026-11-27
 
 
 This document defines Sagittarius' current theory-oriented open-system noise model and the planned extension path. It does not define a full experimental readout, hardware calibration, or device-control noise model.
@@ -108,12 +108,12 @@ Random jumps apply the selected `L_k`, and observables are averaged over `n_traj
 
 Current limitations:
 
-- there is no stable user-facing seed contract yet;
-- observable output uses an internal fixed grid for MCWF observable averaging;
-- convergence should be checked by increasing `n_trajectories`;
+- `SolverConfig.seed` records requested/effective seeds under the implemented Phase 15 contract; an explicit seed selects serial ensemble execution, while `None` selects the threaded ensemble algorithm;
+- explicit `saveat` controls the common observable grid; the backend default grid applies when it is omitted;
+- convergence should be checked with retained independent seeds and increasing `n_trajectories`; an individual seed's error need not decrease monotonically;
 - GPU open-system parity is not a mature public claim.
 
-Phase 15 is expected to add seed and output-grid contracts that make MCWF and stochastic ensembles more reproducible.
+Seed and normalized output-grid metadata follow the implemented [solver configuration contract](../api/SPEC-API-005-solver-configuration.md). Raw trajectory export is opt-in with `store_trajectories=True`; it is a separate storage workload, and disabling export does not eliminate internal trajectory/ODE allocations. Custom and correlated noise extensions remain planned Phase 14 scope.
 
 ## Reduced-Basis Behavior
 

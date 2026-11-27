@@ -90,6 +90,9 @@ from sagittarius.viz.sweep import (
     plot_failed_run_mask,
     extract_sweep_summary,
     generate_synthetic_sweep_data,
+    resolve_sweep_artifact_path,
+    extract_sweep_artifact_data,
+    plot_sweep_artifact_heatmap,
 )
 
 __all__ = [
@@ -155,6 +158,9 @@ __all__ = [
     "plot_failed_run_mask",
     "extract_sweep_summary",
     "generate_synthetic_sweep_data",
+    "resolve_sweep_artifact_path",
+    "extract_sweep_artifact_data",
+    "plot_sweep_artifact_heatmap",
 ]
 
 from sagittarius.viz.benchmark_governed import (

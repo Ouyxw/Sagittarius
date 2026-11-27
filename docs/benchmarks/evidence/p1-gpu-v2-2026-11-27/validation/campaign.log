@@ -1,0 +1,8 @@
+chain_n2_cpu_cuda D=3: passed
+chain_n4_cpu_cuda D=8: passed
+chain_n8_cpu_cuda D=55: passed
+chain_n12_cpu_cuda D=377: passed
+chain_n16_cpu_cuda D=2584: passed
+chain_n20_cpu_cuda D=17711: passed
+lattice_2x2_cpu_cuda D=7: passed
+weighted_udg_n2_seed3_cpu_cuda D=3: passed

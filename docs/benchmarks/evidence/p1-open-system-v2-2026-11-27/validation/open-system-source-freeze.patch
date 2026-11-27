@@ -1,0 +1,345 @@
+diff --git a/docs/benchmarks/README.md b/docs/benchmarks/README.md
+index a91f328..b5a687f 100644
+--- a/docs/benchmarks/README.md
++++ b/docs/benchmarks/README.md
+@@ -11,7 +11,7 @@ The initial suite was closed with [retained Phase 16 evidence](evidence/phase16-
+ 
+ The initial protocol suite is done. `Mixed` reflects the implemented initial suite and planned full-plan extensions; see the [Phase 16 suite alignment matrix](../development/requirements.md#phase-16-alignment-with-spec-gov-004-benchmark-suites) and [cross-cutting requirements](../development/requirements.md#phase-16-alignment-with-spec-gov-004-cross-cutting-requirements) for per-suite status, remaining acceptance evidence, and Phase 14/18 dependencies.
+ 
+-The [P0–P1 implementation plan v2](plans/v2.md) defines the seven-suite matrices, references, delivery batches and evidence gates. Scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate basis/resource limits. Scaling and the bounded GPU matrix have retained N=20 measurements; The 40-instance MWIS/UDG campaign also retains N=20 measurements; open-system extensions remain planned. CUDA remains experimental. P2 noise/cluster work remains outside that plan.
++The [P0–P1 implementation plan v2](plans/v2.md) defines the seven-suite matrices, references, delivery batches and evidence gates. Scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate basis/resource limits. Scaling and the bounded GPU matrix have retained N=20 measurements; The 40-instance MWIS/UDG campaign also retains N=20 measurements; open-system now implements a resource-guarded local-noise matrix and offline audit. CUDA remains experimental. P2 noise/cluster work remains outside that plan.
+ 
+ The protocol, tier, family and artifact documents each contain parallel `Benchmarking V1` and `Benchmarking V2` parts. V1 preserves the full original content and its commands/evidence wording; V2 uses the same chapter organization for plan v2 acceptance work. The V1 metadata and future-scope statements belong to that initial baseline; V2 and the implementation plan track current scaling/ablation/GPU/MWIS support and remaining suite targets.
+ 
+@@ -53,8 +53,7 @@ and suite-specific timer/output definitions. Default performance evidence uses
+ two warmups and at least five independent measurements, with median/min/max/
+ p25/p75, counts and raw membership. Scaling and ablation already retain these
+ statistics; the linked report recomputes and presents them without modifying
+-original archives or rerunning simulations. GPU distributions are retained in its own campaign. MWIS also retains separate per-graph AQC/ILP distributions. Solver now retains its per-configuration sensitivity distributions. The observable suite now implements its collection distributions and correctness controls; expanded open-system statistical outputs
+-remain planned; correctness-only tests need no separate performance campaign.
++original archives or rerunning simulations. GPU distributions are retained in its own campaign. MWIS also retains separate per-graph AQC/ILP distributions. Solver now retains its per-configuration sensitivity distributions. Observable and open-system suites now implement their per-configuration distributions, reference controls and sampling reports; correctness-only tests need no separate performance campaign.
+ 
+ ## Implemented CPU smoke
+ 
+@@ -128,7 +127,7 @@ It records per-worker throughput rows, a `sweep-artifact/v1` checkpoint and fina
+ 
+ Run every command in this section from `sagittarius_py`. Unless stated otherwise, each runner writes JSON, CSV, and Markdown companions under `benchmark-output`; suite-capable runners additionally write a `*_suite.json` aggregate that retains passed, failed, skipped, and incomplete rows.
+ 
+-The [V2 scaling and ablation CLIs](tiers.md#v2-runnable-commands-and-outputs) provide frozen CPU matrices, references, independent repeats, resource supervision and suite companions. Ablation retains fixed-input batch semantics, saved numerical outputs and an acceptance audit; CUDA ODE remains separate diagnostic scope. This guide lists existing commands only. Remaining planned measurement flags, the observable/open-system performance runners and new artifact stems are tracked in [plan v2](plans/v2.md); add their runnable examples after implementation and smoke verification.
++The [V2 scaling and ablation CLIs](tiers.md#v2-runnable-commands-and-outputs) provide frozen CPU matrices, references, independent repeats, resource supervision and suite companions. Ablation retains fixed-input batch semantics, saved numerical outputs and an acceptance audit; CUDA ODE remains separate diagnostic scope. This guide lists existing commands only. The seven implemented runners, measurement controls and evidence milestones are tracked in [plan v2](plans/v2.md) and the [V2 command guide](tiers.md#v2-runnable-commands-and-outputs).
+ 
+ | Tier | Runnable command | Expected output and boundary |
+ | :--- | :--- | :--- |
+diff --git a/docs/benchmarks/artifact-contracts.md b/docs/benchmarks/artifact-contracts.md
+index 5dc385f..d6e2893 100644
+--- a/docs/benchmarks/artifact-contracts.md
++++ b/docs/benchmarks/artifact-contracts.md
+@@ -177,7 +177,7 @@ The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.
+ | `run-manifest/v1` | Actual executed simulation configuration and requested/effective settings. | Pure matvec work has benchmark inputs/reference reports rather than fabricated simulation manifests. |
+ | `result-artifact/v1` | Saved simulation results with metadata, diagnostics, manifest and shared payload. | Add actual AQC result provenance through the existing adapter boundary. |
+ 
+-Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Ablation writes `ablation_bench_results_suite` and `ablation_repeats.json`. GPU writes `gpu_bench_results_suite` and `gpu_repeats.json`. MWIS writes `mwis_aqc_performance`, `mwis_aqc_performance_suite` and `mwis_repeats.json`. Planned additions include `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
++Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Ablation writes `ablation_bench_results_suite` and `ablation_repeats.json`. GPU writes `gpu_bench_results_suite` and `gpu_repeats.json`. MWIS writes `mwis_aqc_performance`, `mwis_aqc_performance_suite` and `mwis_repeats.json`. Solver, observables and open-system now write `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates and linked repeat/reference records. Historical stems and required schema meanings remain unchanged.
+ 
+ Ablation retains one aggregate row per size/path and a validated structured row
+ per measured batch in `ablation_repeats.json`. `metrics.measurements` retains
+@@ -422,3 +422,19 @@ worker memory, real result/manifest/reference links and matching companions are
+ recomputable by the backend-free audit. Correctness-only rows retain unavailable
+ runtime statistics with reasons, and MCWF raw samples keep their own storage
+ policy. Existing schema names and unsupported observable/backend scope remain.
++
++
++Open-system additionally retains `metrics.throughput_statistics` (per-repeat
++completed trajectories divided by seconds, summarized separately from runtime),
++`metrics.convergence`, five-seed raw membership and `convergence.json` with
++pooled absolute bounds and cross-count comparisons. Lindblad trajectory count/
++throughput are unavailable with reasons. `store_trajectories=False` costs and the
++one opt-in raw-storage workload have separate identities. Raw density histories,
++analytic/dense arrays and tighter controls are linked outside SDK timing;
++large interacting reference gaps are explicit. Requested/effective counts and
++seeds come from actual manifests; completion inference from successful ensemble
++return is labeled. The audit replays deterministic/stochastic/density checks,
++statistics, source/runtime hashes and all companions after relocation without
++Julia. `coverage.json` distinguishes every declared row accounted for, successful
++N=20 reduced MCWF coverage and still-excluded full/density scopes. These are
++optional compatible benchmark extensions, not new required historical fields.
+diff --git a/docs/benchmarks/families.md b/docs/benchmarks/families.md
+index 13280e2..4d0c2c3 100644
+--- a/docs/benchmarks/families.md
++++ b/docs/benchmarks/families.md
+@@ -238,7 +238,7 @@ Use existing one-atom excited-state decay on [0,2], a coherent/driven dephasing
+ 
+ Require multi-seed MCWF/Lindblad checks at shared times where tractable, with frozen uncertainty/multiplicity criteria. Do not generalize V1's fixed-seed sensitivity wording into a per-seed monotonic rule. At larger N retain tighter-solver/trajectory checks, analytic special-case controls and interacting-reference gaps. Preflight D and D^2 including temporary/output memory; a budget-excluded N=20 Lindblad row leaves that scope open.
+ 
+-The new performance runner is planned; preserve the existing one-atom correctness runner. Default raw trajectory storage off and measure opt-in retention separately. Keep actual serial/threaded execution mode, requested/effective seeds/counts, rates, memory, throughput, failures and result/manifests. P2 custom/correlated/collective/stochastic noise remains dependent on Phase 14 and outside V2's P0–P1 scope.
++The implemented `benchmark_open_system_performance.py` freezes 89 cost configurations and ten correctness controls; preserve the existing one-atom runner/archive. The chain uses Rb=12.4 um (D=907 at N=20), with separate 256-density/1024-state dimension and memory/time budgets; see plan v2 for exclusions and exact reference scope. Default raw trajectory storage off and measure opt-in retention separately. Keep actual serial/threaded execution mode, requested/effective seeds/counts, rates, memory, throughput, failures and result/manifests. P2 custom/correlated/collective/stochastic noise remains dependent on Phase 14 and outside V2's P0–P1 scope.
+ 
+ <a id="v2-optimizationaqc"></a>
+ 
+diff --git a/docs/benchmarks/plans/v2.md b/docs/benchmarks/plans/v2.md
+index b077f91..f82c21f 100644
+--- a/docs/benchmarks/plans/v2.md
++++ b/docs/benchmarks/plans/v2.md
+@@ -9,7 +9,7 @@ Last reviewed: 2026-11-27
+ 
+ This plan specifies implementation work and acceptance evidence for the two P0 and five P1 suites in [SPEC-GOV-004](../../governance/SPEC-GOV-004-benchmarking-plan.md). The [requirements suite matrix](../../development/requirements.md#phase-16-alignment-with-spec-gov-004-benchmark-suites) remains the implementation/evidence status index. GOV-004 remains the policy authority. This document version is an implementation-plan revision, not a new artifact schema or public API version.
+ 
+-Scaling, ablation, GPU scanning, MWIS/UDG, solver sensitivity, observable collection and shared measurement support are implemented; campaign evidence is tracked below. Other work remains planned unless explicitly described as existing. Writing this plan closes no measurement or release gate. Preserve the [initial Phase 16 archive](../evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md), its commands, and its local evidence classification. P2 noise/cluster implementation, Phase 14 model extensions, and Phase 18 deployment work are outside this plan.
++Scaling, ablation, GPU scanning, MWIS/UDG, solver sensitivity, observable collection, local-noise open-system measurement and shared measurement support are implemented; campaign evidence is tracked below. Other work remains planned unless explicitly described as existing. Writing this plan closes no measurement or release gate. Preserve the [initial Phase 16 archive](../evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md), its commands, and its local evidence classification. P2 noise/cluster implementation, Phase 14 model extensions, and Phase 18 deployment work are outside this plan.
+ 
+ Agreed scale targets are **20 atoms for P0 scaling and P1 MWIS/UDG and open-system campaigns**. GPU scanning also targets a bounded chain series through 20. Full dense, full sparse construction, and Lindblad execution retain separate resource limits. Report atom count and actual basis dimension together; a 20-atom reduced scenario establishes evidence only for that geometry, radius, and configuration.
+ 
+@@ -21,7 +21,7 @@ Agreed scale targets are **20 atoms for P0 scaling and P1 MWIS/UDG and open-syst
+ | `mwis_udg` | P1 | Seeded 2–6-node weighted UDG and PuLP/CBC reference rows. | Implemented frozen 40-instance matrix through N=20, independent AQC/ILP repeats, exact-status and objective/probability gates, real result provenance and saved-evidence audit. Campaign acceptance is tracked below. |
+ | `solver` | P1 | Tsit5/Vern9/RK4 reference checks and CPU path gates retained. | Implemented 39-configuration tolerance/step/grid/scenario matrix, isolated SDK timing, independent stable references, repeats, supervised memory and saved-evidence audit. |
+ | `observables` | P1 | Existing ten diagonal types and metadata unchanged. | Implemented 52 cost configurations and 12 full/reduced state-path fixtures, independent references, declaration-order round trips, repeats and audit. |
+-| `open_system` | P1 | One-atom decay/dephasing, fixed-seed 100/500-trajectory checks. | Local-noise Lindblad/MCWF campaign through N=20 with bounded references, multi-seed convergence and resource evidence. |
++| `open_system` | P1 | Original one-atom decay/dephasing fixture preserved. | Implemented guarded full/reduced local-noise Lindblad/MCWF matrix, independent small density references, five-seed convergence, repeated timing/throughput, separate raw storage and offline audit. Campaign acceptance is tracked below. |
+ 
+ ## Shared measurement implementation
+ 
+@@ -31,7 +31,7 @@ Reuse `benchmarking.py`, `benchmark_row_contract.py`, `benchmark_failures.py`, a
+ 
+ Before measurement, retain a campaign record with an ordered scenario list, config hash, exact commands/working directory, protocol/plan versions, timeout and memory limits, stop policy, reference type and tolerances, seed lists, and required/optional scenario classification. Record physical units, register coordinates/order, C6, pulse parameters, initial state, basis/radius, solver, output times, observables, precision, CPU/BLAS/Julia threads, backend/device, container, versions, commit and dirty state. Hashing identifies a configuration; replay also requires its retained values.
+ 
+-The following are campaign defaults. Scaling, ablation, GPU, MWIS, solver and observables implement the applicable timing, solver/grid and resource controls documented below; flags for the expanded open-system suite remain planned until its runner lands. Freeze final values before measurement and record deviations and reasons.
++The following are campaign defaults. All seven suites implement the applicable timing, solver/grid and resource controls documented below. Freeze final values before measurement and record deviations and reasons.
+ 
+ | Setting | Plan default | Interpretation |
+ | :--- | :--- | :--- |
+@@ -751,7 +751,7 @@ cost/convergence, recurring RC and public-use approval remain separate.
+ 
+ ## P1 open-system
+ 
+-Preserve `benchmark_phase16_validation.py` and its archived one-atom fixture. Add the planned `benchmark_open_system_performance.py` and `open_system_performance` artifact/suite. Limit this campaign to implemented local Markovian decay/dephasing; custom/correlated/collective/stochastic noise belongs to P2 with Phase 14 dependencies.
++Preserve `benchmark_phase16_validation.py` and its archived one-atom fixture. The implemented `benchmark_open_system_performance.py` writes `open_system_performance` artifacts/suites. Limit this campaign to implemented local Markovian decay/dephasing; custom/correlated/collective/stochastic noise belongs to P2 with Phase 14 dependencies.
+ 
+ | Axis | Initial coverage |
+ | :--- | :--- |
+@@ -791,13 +791,79 @@ accuracy/uncertainty and reference scope. Measure optional raw-trajectory storag
+ as a separate workload. Analytic/dense references, trace/positivity checks and
+ external convergence analysis/writes stay outside primary execution timing.
+ 
++### Implemented open-system matrix and boundaries
++
++`open_system_benchmark` freezes **89 performance configurations and ten
++correctness controls**. For each N=1,2,4,6,8,10,12,16,20 and full/reduced basis,
++the combined-noise chain has Lindblad and MCWF at 100/500/1000 trajectories.
++Four one-atom performance controls use excited decay and driven dephasing;
++twelve two-atom full/reduced per-atom-rate controls cover decay, dephasing and
++combined noise with Lindblad/500-trajectory MCWF. One separate two-atom
++500-trajectory workload retains raw samples. Nine reduced target-size analytic
++MCWF decay controls and one raw-density coherence control are correctness only.
++This is a bounded one-axis design, not all combinations of every axis.
++
++The chain uses a=4 um, Rb=12.4 um (three-site exclusion), C6=100
++rad*um^6/us, omega=2*pi rad/us, delta=.3 rad/us, all-ground state and T=.05 us.
++The reduced N=20 dimension is D=907; this radius/geometry is distinct from the
++scaling/observable campaigns. Rates are gamma=.5/us and gamma_phi=.125/us;
++unused rates are zero. Per-atom rates multiply decay by 1+i/2 and dephasing by
++1+i/3. Decay/coherence controls use H=0 and T=2 us; the driven one-atom control
++uses omega=2*pi, delta=0 and T=2 us. Excited endpoints are used where the basis
++permits both; the reduced N=2/4 decay controls excite atom zero only. The coherence
++control starts (|g>+|r>)/sqrt(2). Tsit5 adaptive uses 1e-8/1e-10 tolerances,
++dt=None and 101 explicit times. All declarations, states, units and basis order
++are retained. The observable set is populations at distinct sites 0,N//2,N-1,
++total occupation and endpoint pair (N>1); only linear observables enter these
++ensemble comparisons.
++
++Independent NumPy/SciPy dense master equations at D<=64 use DOP853 1e-11/1e-13
++and 1e-12/1e-14 refinement with stability <=1e-9. Analytic excited decay and
++coherence exp[-(gamma+gamma_phi)t/2] inspect populations and off-diagonal density
++entries. Separate tighter SDK Lindblad histories at all 101 times check density
++error <=1e-6, trace/Hermiticity <=1e-6 and eigenvalues >=-1e-7. These raw states,
++references and eigendecompositions stay outside primary timing. Larger permitted
++Lindblad rows use tighter same-method histories; larger interacting MCWF rows
++use a saved tighter same-seed solve. Their independent interacting-reference gap
++remains explicit even when the sensitivity/statistical gates pass.
++
++Timing fixes seed20260811 and retains first + two warmups + five independent
++reset-state calls. Five separate calls at seeds20260811–20260815 measure sampling
++variability. Two-sided Hoeffding absolute bounds use alpha=1e-6 and a conservative
++union over the entire frozen matrix, observables, times and 32 call/comparison
++slots per configuration. Widths are one for site/pair and N for total occupation.
++Pooled five-seed bounds use 5*K trajectories; cross-count pooled comparisons use
++the sum of both bounds. A stochastic sensitivity reference contributes its own
++K-trajectory uncertainty. Sample standard errors are descriptive; no per-seed
++monotonic-error, relative-precision or general convergence-rate gate is asserted.
++
++Fresh Linux workers have default 1800s timeout, 4096MiB sampled RSS, Lindblad
++D<=256 and MCWF D<=1024 validation/time budgets. Preflight includes 2GiB JIT,
++D-squared histories/temporaries for Lindblad, MCWF history/workspace, sparse
++mapping/jumps and ensemble outputs. Explicit fixed seeds select EnsembleSerial;
++Julia/BLAS/OpenMP/MKL threads are one. MCWF throughput is completed trajectories
++per individual runtime, then summarized independently; completion is inferred
++from successful SDK ensemble return and manifest count, since no public progress
++counter is exposed. Raw storage has its own workload. Internal solver histories
++and ensemble outputs still allocate when raw trajectory export is disabled.
++Process-lifetime HWM includes references and writes; sampled RSS is no hard cap.
++
++`open_system_repeats.json`, `convergence.json`, `coverage.json`, real results and
++manifests, raw density/reference arrays, source/runtime hashes, worker checkpoints
++and matching JSON/CSV/Markdown companions support backend-free original/relocated
++audits. Eligible measured members alone enter type-7 runtime and throughput
++statistics. All exclusions, attempted failures and incomplete evidence persist.
++Bounded campaign acceptance accounts for excluded rows separately from successful
++coverage; full N=20 Lindblad remains open. No scientific validation, GPU, recurring
++RC or public performance approval follows.
++
+ ## Artifact and compatibility work
+ 
+ Follow [Benchmarking V2 artifact contracts](../artifact-contracts.md#benchmarking-v2), which use the same chapter organization as the complete V1 baseline. Keep `benchmark-artifact/v1`, `benchmark-suite-artifact/v1`, `run-manifest/v1`, `result-artifact/v1`, `shared-result/v1`, `version-info/v1`, `doctor/v2.1`, and `event-taxonomy/v1` meanings intact. Planned metrics and campaign metadata are compatible optional extensions until implemented and validated. Changes to required fields or meanings require coordinated schema/version/reader/writer/test/docs decisions.
+ 
+ Per-repeat rows need stable scenario/config identity, implementation/workload, repeat index, warmup designation, batch operation count where applicable, eligible status, reference gate and result links. Summaries need the exact input row IDs, counts, statistic definitions and missing-data reasons. Keep simulation data, metadata, diagnostics and manifests separate; do not fabricate simulation manifests for pure matvec work. A matvec row links its benchmark configuration and reference report instead.
+ 
+-Preserve legacy flat fields and existing stems. Scaling and ablation implement the applicable repeat, memory, setup and provenance fields described above. GPU implements separate setup/first/repeated solve records, memory, ratios and audit. MWIS implements per-instance AQC/ILP phase/repeat distributions, exact termination, independent numerical and quality gates, real result provenance and audit. Solver implements per-configuration first/warm/measured SDK calls, stable independent references, raw norm/trajectory gates, error-versus-runtime companions and saved-evidence audit. Observables implements typed declaration/order/value controls, state-path references, per-configuration collection distributions and audit. Other runner additions remain planned: scenario-specific setup/solve/collection timing, independent repeat summaries, normalized memory provenance, exact-reference termination/bounds, and statistical convergence reports. Figures consume retained validated source artifacts and keep source links; figures do not replace evidence or disclosure review.
++Preserve legacy flat fields and existing stems. Scaling and ablation implement the applicable repeat, memory, setup and provenance fields described above. GPU implements separate setup/first/repeated solve records, memory, ratios and audit. MWIS implements per-instance AQC/ILP phase/repeat distributions, exact termination, independent numerical and quality gates, real result provenance and audit. Solver implements per-configuration first/warm/measured SDK calls, stable independent references, raw norm/trajectory gates, error-versus-runtime companions and saved-evidence audit. Observables implements typed declaration/order/value controls, state-path references, per-configuration collection distributions and audit. Open-system implements per-configuration runtime/throughput, raw density and analytic/dense gates, bounded five-seed convergence, resource exclusions and saved-evidence audit. Figures consume retained validated source artifacts and keep source links; figures do not replace evidence or disclosure review.
+ 
+ ## Delivery order and verification
+ 
+@@ -823,4 +889,4 @@ For each RC, rerun and archive both P0 suites with verified companions. For hard
+ 
+ Retain a durable archive with campaign configuration/command record, environment and doctor payloads, source identity, original failed rows/logs, per-repeat and aggregate artifacts, reference reports, result/manifests, test evidence and a checksum inventory. Record the archive path in the requirements matrices before advancing evidence status.
+ 
+-When scope, measurement rules, runners, artifacts or evidence status changes, update this plan, the [benchmark index](../README.md), the Benchmarking V2 sections of [protocol](../protocol.md#benchmarking-v2), [families](../families.md#benchmarking-v2), [tiers](../tiers.md#benchmarking-v2) and [artifact contracts](../artifact-contracts.md#benchmarking-v2), requirements alignment matrices, GOV-004 and [documentation status](../../development/status.md) together as applicable. Preserve each reference document's complete V1 baseline and parallel chapter organization. Update [known limitations](../../reference/known-limitations.md) only with the corresponding support/evidence change. Existing 2–6-node MWIS and one-atom open-system evidence limits remain current until replacement evidence is retained.
++When scope, measurement rules, runners, artifacts or evidence status changes, update this plan, the [benchmark index](../README.md), the Benchmarking V2 sections of [protocol](../protocol.md#benchmarking-v2), [families](../families.md#benchmarking-v2), [tiers](../tiers.md#benchmarking-v2) and [artifact contracts](../artifact-contracts.md#benchmarking-v2), requirements alignment matrices, GOV-004 and [documentation status](../../development/status.md) together as applicable. Preserve each reference document's complete V1 baseline and parallel chapter organization. Update [known limitations](../../reference/known-limitations.md) only with the corresponding support/evidence change. Historical MWIS and one-atom open-system archives remain immutable; replacement evidence and its bounded limitations are tracked separately.
+diff --git a/docs/benchmarks/protocol.md b/docs/benchmarks/protocol.md
+index 94b4c49..f5ea1c2 100644
+--- a/docs/benchmarks/protocol.md
++++ b/docs/benchmarks/protocol.md
+@@ -108,7 +108,7 @@ Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README
+ CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; this ablation-only archive is separate from the P1 GPU matrix below, recurring RC and public-use gates.
+ 
+ 
+-This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It defines campaign acceptance discipline; scaling and ablation implement frozen matrices, supervised child processes, references and repeated measurements. GPU, MWIS and solver runners also implement their matrices and measurement controls; observables also implements its matrix and state-path controls; the expanded open-system cost/convergence runner remains planned. GOV-004 remains the policy authority. Benchmarking V2 does not rename artifact schemas or reclassify the initial archive.
++This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It defines campaign acceptance discipline; scaling and ablation implement frozen matrices, supervised child processes, references and repeated measurements. GPU, MWIS and solver runners also implement their matrices and measurement controls; observables also implements its matrix and state-path controls; open-system implements bounded local-noise costs, five-seed checks and a saved-evidence audit. GOV-004 remains the policy authority. Benchmarking V2 does not rename artifact schemas or reclassify the initial archive.
+ 
+ <a id="v2-scope"></a>
+ 
+diff --git a/docs/benchmarks/tiers.md b/docs/benchmarks/tiers.md
+index 06eb81e..4577fa0 100644
+--- a/docs/benchmarks/tiers.md
++++ b/docs/benchmarks/tiers.md
+@@ -176,7 +176,7 @@ The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.
+ 
+ ### Runnable Commands and Outputs
+ 
+-The V1 commands are retained as historical baseline. Scaling, ablation, GPU, MWIS/UDG, solver and observables now have V2 CLI support; other entries below remain implementation targets until their runners and smoke evidence exist.
++The V1 commands are retained as historical baseline. All seven P0/P1 suites now have V2 CLI support. Retained smoke/campaign evidence and representation-specific exclusions determine actual coverage.
+ 
+ | Suite | Existing or planned entry point | V2 outputs and readiness |
+ | :--- | :--- | :--- |
+@@ -186,7 +186,7 @@ The V1 commands are retained as historical baseline. Scaling, ablation, GPU, MWI
+ | MWIS/UDG | Implemented `benchmark_mwis_aqc.py --tier performance`; legacy tiers preserved. | `mwis_aqc_performance` and `_suite` JSON/CSV/Markdown, `mwis_repeats.json`, raw paths, saved AQC results/manifests, independent references, CBC logs/status and audit. |
+ | Solver | Implemented `benchmark_solver_performance.py --tier sensitivity`; default correctness fixtures/stems retained. | `solver_sensitivity` and `_suite` JSON/CSV/Markdown error-versus-runtime summaries, `solver_repeats.json`, saved results/manifests, references, campaign/checkpoints, coverage and audit. |
+ | Observables | Implemented `benchmark_observables.py --tier all`; correctness/performance can be selected separately. | `observable_performance` and `_suite` JSON/CSV/Markdown; `observable_repeats.json`, independent references, saved results/manifests, raw MCWF samples, empty-history controls and audit. |
+-| Open-system | Planned `benchmark_open_system_performance.py`. | Planned `open_system_performance` and suite; preserve existing one-atom correctness runner. |
++| Open-system | Implemented `benchmark_open_system_performance.py --tier all`; bounded CPU local decay/dephasing only. | `open_system_performance` and `_suite` JSON/CSV/Markdown; `open_system_repeats.json`, `convergence.json`, raw density/reference controls, real results/manifests, resource boundaries and offline audit. Original one-atom runner preserved. |
+ 
+ Run from `sagittarius_py` after source/editable installation:
+ 
+@@ -439,3 +439,32 @@ Goal: characterize practical representation/hardware limits with retained failur
+ Declare timeout, memory budget, stop condition, retry policy and process/device ownership before execution. Keep backend initialization, first-solve and warmed timing distinct, with attributable hardware/runtime/container/commit metadata. A parent supervisor records timeout/OOM/crash outcomes even if the child cannot write its final artifact.
+ 
+ Full dense/sparse construction, Lindblad D-by-D storage, reduced paths and MCWF each have their own budget. Do not attempt allocations already known to exceed it. Preserve raw failures and partial data; a failure-free subset is not a complete scale-limit result. Stress work does not replace small correctness gates, the declared performance campaign or public governance review. P2 advanced cluster/noise work stays outside this V2 plan.
++
++Open-system V2 (CPU local Markovian decay/dephasing; source/editable environment):
++
++```bash
++cd sagittarius_py
++uv run python tests/test_performance/benchmark_open_system_performance.py \
++  --tier all --output-dir benchmark-output/open-system-v2 \
++  --warmups 2 --repeat-count 5 --timeout-seconds 1800 \
++  --memory-limit-mb 4096 --max-density-dimension 256 --max-state-dimension 1024
++
++uv run python tests/test_performance/benchmark_open_system_performance.py \
++  --scenario performance-n2-reduced-chain-combined-scalar-mcwf-k500-raw \
++  --scenario correctness-n1-full-coherence-dephasing-scalar-lindblad \
++  --output-dir benchmark-output/open-system-v2-smoke
++
++uv run python ../scripts/audit_open_system_campaign.py benchmark-output/open-system-v2
++```
++
++The complete matrix has 99 rows: 89 cost configurations and ten correctness
++controls. Frozen default budgets exclude 14 representation/dimension rows;
++these stay skipped with reasons. The bounded acceptance audit requires every
++row accounted for and actual reduced N=20 MCWF execution, and reports excluded
++full/Lindblad coverage separately. `--allow-partial` audits selected smoke or
++short pilots without claiming campaign acceptance. Use a fresh output directory.
++Fixed seed20260811 timing and five statistical seeds20260811–20260815 are
++separate; seed-selected MCWF is serial. Rb=12.4 um gives D=907 at N=20. Primary
++SDK timing includes construction/collection/manifest; raw density/reference
++checks and writes are outside it. No scientific/model or public performance
++approval follows from these local measurements.
+diff --git a/docs/development/requirements.md b/docs/development/requirements.md
+index 4a8e9da..d9662a3 100644
+--- a/docs/development/requirements.md
++++ b/docs/development/requirements.md
+@@ -303,7 +303,7 @@ The initial suite is closed with [retained local evidence](../benchmarks/evidenc
+ 
+ Each row maps one-to-one to [SPEC-GOV-004: Benchmark Suites](../governance/SPEC-GOV-004-benchmarking-plan.md#benchmark-suites), in the same order and with the same priority. `Partial` means implementation or local evidence exists but the full declared scope remains open; `Planned` means dedicated benchmark coverage remains to be implemented. Completion requires retained artifacts and the applicable cross-cutting criteria below. P0/P1/P2 are the plan's priorities, separate from the initial suite's High/Medium implementation priorities.
+ 
+-The [P0–P1 implementation plan v2](../benchmarks/plans/v2.md) defines concrete matrices, runner changes, numerical/statistical gates, delivery batches and campaign acceptance for the first seven rows. Agreed scaling, MWIS/UDG and open-system targets extend through 20 atoms with separate basis/representation resource limits. Scaling, ablation, GPU, MWIS, solver and observable runner implementation is complete; execution and acceptance are tracked below. Other expanded matrices remain planned measurements until their evidence is retained. P2 noise/cluster work retains its Phase 14/18 dependencies and is outside that plan.
++The [P0–P1 implementation plan v2](../benchmarks/plans/v2.md) defines concrete matrices, runner changes, numerical/statistical gates, delivery batches and campaign acceptance for the first seven rows. Agreed scaling, MWIS/UDG and open-system targets extend through 20 atoms with separate basis/representation resource limits. All seven P0/P1 runner implementations are complete; execution and acceptance are tracked below. Expanded campaign status advances only when its evidence is retained. P2 noise/cluster work retains its Phase 14/18 dependencies and is outside that plan.
+ 
+ | GOV-004 suite | Priority | Status | Implemented / retained scope | Remaining work and acceptance evidence |
+ | :--- | :---: | :--- | :--- | :--- |
+diff --git a/docs/development/status.md b/docs/development/status.md
+index a289b12..52b588c 100644
+--- a/docs/development/status.md
++++ b/docs/development/status.md
+@@ -67,7 +67,7 @@ Before accepting release-oriented documentation changes, run `python3 scripts/va
+ | - | [`benchmarks/tiers.md`](../benchmarks/tiers.md) | Parallel Benchmarking V1/V2 chapters for tier summaries, command/output readiness and five tier definitions. | Phase 16 | Mixed | Versioned tier organization, verified runnable commands/outputs, planned runner availability, CI/GPU policy or scale limits change. |
+ | - | [`benchmarks/families.md`](../benchmarks/families.md) | Parallel Benchmarking V1/V2 family chapters retaining initial evidence and planned backend/observable/MWIS/open-system scope. | Phase 16 | Mixed | Versioned family organization, plan matrices, numerical/statistical gates, actual support or retained evidence change. |
+ | - | [`benchmarks/artifact-contracts.md`](../benchmarks/artifact-contracts.md) | Parallel Benchmarking V1/V2 chapters for types, aggregate/row fields, failures, metrics, retention and compatibility. | Phase 16 | Mixed | Versioned chapter organization, schema/metric semantics, V2 measurement-field implementation, failure status, provenance or retention changes. |
+-| - | [`benchmarks/plans/v2.md`](../benchmarks/plans/v2.md) | P0–P1 implementation matrices, scaling/ablation/GPU/MWIS/solver/observable implementation and evidence, separate path memory, exact ILP status, independent numerical/quality gates, qualified GPU median ratios, 20-atom targets, resource/reference gates and acceptance. | Phase 16 | Mixed | Suite targets, frozen scenario/config defaults, runners, numerical/statistical thresholds, measurement/resource rules, milestones or retained campaign evidence change. |
++| - | [`benchmarks/plans/v2.md`](../benchmarks/plans/v2.md) | P0–P1 implementation matrices, scaling/ablation/GPU/MWIS/solver/observable/open-system implementation and evidence, separate path memory, exact ILP status, independent numerical/quality gates, qualified GPU median ratios, 20-atom targets, resource/reference gates and acceptance. | Phase 16 | Mixed | Suite targets, frozen scenario/config defaults, runners, numerical/statistical thresholds, measurement/resource rules, milestones or retained campaign evidence change. |
+ | - | [`benchmarks/reports/p0-runtime-statistics-2026-11-27.md`](../benchmarks/reports/p0-runtime-statistics-2026-11-27.md) | Derived scaling/ablation timing distributions, original-source fingerprints, exclusions and interpretation/rerun boundaries; no new measurements. | Phase 16 | Current | Report inputs, statistic definitions, displayed values, provenance links or interpretation change; keep original campaign archives immutable. |
+ 
+ ## Development Workflows
+diff --git a/docs/governance/SPEC-GOV-001-performance-claims.md b/docs/governance/SPEC-GOV-001-performance-claims.md
+index bceda53..6555921 100644
+--- a/docs/governance/SPEC-GOV-001-performance-claims.md
++++ b/docs/governance/SPEC-GOV-001-performance-claims.md
+@@ -65,6 +65,7 @@ The repository scripts that produce claim-ready artifacts are:
+ | `sagittarius_py/tests/test_performance/benchmark_cluster.py` | `cluster_bench_results` | Parallel parameter-sweep timing. |
+ | `sagittarius_py/tests/test_performance/benchmark_ablation.py` | `ablation_bench_results`, `ablation_bench_results_suite` | Fixed-input Python CPU matvec batches with independent repeats, numerical/resource gates and saved-output audit; optional CUDA ODE has separate matched-CPU trajectory/configuration gates, saved results/manifests and independent timing summaries; no solve ratio is produced. Historical H^k*psi timings cannot be pooled with v2. |
+ | `sagittarius_py/tests/test_performance/benchmark_solver_performance.py` | `solver_performance` | Repeated CPU path correctness gates and Tsit5/Vern9/RK4 trajectory comparison. |
++| `sagittarius_py/tests/test_performance/benchmark_open_system_performance.py` | `open_system_performance`, `open_system_performance_suite` | Guarded local decay/dephasing Lindblad/MCWF runtime and throughput, small analytic/dense/raw-density checks and five-seed absolute uncertainty; representation exclusions and large interacting reference gaps remain explicit. No scientific validation or public-use approval follows from the runner. |
+ | `sagittarius_py/tests/test_performance/benchmark_sweep_cluster.py` | `sweep_cluster` | Local ParallelSimulation sweep throughput, resumability, and aggregate evidence. |
+ | `sagittarius_py/tests/test_performance/benchmark_mwis_aqc.py` | `mwis_aqc_smoke`, `mwis_aqc_correctness`, `mwis_aqc_scaling` | Seeded weighted UDG/AQC tiers with exact ILP, feasibility, objective-gap, and optimal-success-probability evidence. |
+ | `sagittarius_py/projects/mwis_udg/batch_verify.py` | `mwis-batch-verification/v1` in-memory report | Project-specific seeded AQC-vs-ILP verification helper; it is not a benchmark-artifact writer. |
+diff --git a/docs/governance/SPEC-GOV-004-benchmarking-plan.md b/docs/governance/SPEC-GOV-004-benchmarking-plan.md
+index 6485cc9..fd3f8cf 100644
+--- a/docs/governance/SPEC-GOV-004-benchmarking-plan.md
++++ b/docs/governance/SPEC-GOV-004-benchmarking-plan.md
+@@ -39,7 +39,7 @@ Benchmarks must not be used to imply general quantum speedup, production-ready G
+ | `mwis_udg` | P1 | Seeded UDG/MWIS AQC-vs-ILP verification, feasibility, objective value, and runtime. | `benchmark-artifact/v1` and suite aggregates from `benchmark_mwis_aqc.py`; `mwis-batch-verification/v1` remains the project-specific exact-verification helper. |
+ | `solver` | P1 | Solver method, tolerance, adaptive/fixed-step, `dt`, output-grid sensitivity, and dense/sparse/reduced path gates. | `benchmark-artifact/v1` and suite from `benchmark_solver_performance.py` (legacy correctness and v2 sensitivity); depends on Phase 12 and Phase 15 contracts. |
+ | `observables` | P1 | Observable type, count, declaration order, and output-grid cost. | `benchmark-artifact/v1` and suite from `benchmark_observables.py`, plus typed metadata/order and saved-output audit; depends on Phase 11. |
+-| `open_system` | P1 | Lindblad vs MCWF runtime, memory, trajectory count, and convergence behavior. | Benchmark artifacts, run manifests, and convergence notes. |
++| `open_system` | P1 | Local decay/dephasing Lindblad/MCWF runtime, memory, trajectory counts and multi-seed uncertainty. | `benchmark_open_system_performance.py` artifacts/suite, real manifests/results, density/analytic references, `convergence.json` and backend-free saved-evidence audit; original one-atom fixture preserved. |
+ | `noise` | P2 | Custom Lindblad, correlated noise, collective decay, and stochastic Hamiltonian ensemble overhead. | Benchmark artifacts with noise metadata; depends on Phase 14 and Phase 15. |
+ | `cluster_sweep` | P2 | Local ParallelSimulation parameter-map throughput, resumability, and artifact aggregation. | `benchmark-artifact/v1` plus linked `sweep-artifact/v1` from `benchmark_sweep_cluster.py`; multi-node deployment remains tied to Phase 18. |
+ 
+@@ -49,7 +49,7 @@ This plan is ongoing policy, not a completed Phase 16 checklist. The [Phase 16 s
+ 
+ The [initial Phase 16 archive](../benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md) closes bounded small-system and local execution verification. It does not close all nine suites, a release-candidate P0 campaign, or public performance review. Noise benchmarking depends on Phase 14 model extensions; advanced cluster deployment and physics-solver sweep coverage remain tied to Phase 18. Completed API or artifact infrastructure is distinct from completed performance measurements.
+ 
+-The [P0–P1 implementation plan v2](../benchmarks/plans/v2.md) defines the seven-suite implementation batches, frozen measurement discipline and numerical/statistical acceptance targets. Its scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate representation/basis resource limits. The scaling, ablation, GPU, MWIS, solver and observable runners implement their matrices and measurement controls; retained campaign acceptance is tracked in the requirements matrix. Other expanded targets remain planned measurements. Runner support alone does not establish retained coverage or a backend capability claim. Keep runner implementation, campaign execution and evidence review as separate milestones; resource exclusions and missing references remain visible. This policy's existing suite priorities, artifact schema meanings and recurring release gates continue to apply. P2 noise/cluster scope remains outside that implementation plan.
++The [P0–P1 implementation plan v2](../benchmarks/plans/v2.md) defines the seven-suite implementation batches, frozen measurement discipline and numerical/statistical acceptance targets. Its scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate representation/basis resource limits. All seven P0/P1 runners implement their matrices and measurement controls; retained campaign acceptance is tracked in the requirements matrix. Open-system retains representation-specific resource exclusions and independent large-interacting-reference limitations. Runner support alone does not establish retained coverage or a backend capability claim. Keep runner implementation, campaign execution and evidence review as separate milestones; resource exclusions and missing references remain visible. This policy's existing suite priorities, artifact schema meanings and recurring release gates continue to apply. P2 noise/cluster scope remains outside that implementation plan.
+ 
+ The [2026-11-26 local scaling archive](../benchmarks/evidence/p0-scaling-v2-2026-11-26/README.md) retains all 42 v2 scaling scenarios and an automated acceptance audit. Its same-method large-case references, shared-workstation timing and local-only evidence classification remain explicit. This closes the bounded local scaling campaign, not recurring RC, other-suite acceptance, independent disclosure review or public performance approval.
+ 
+diff --git a/docs/reference/known-limitations.md b/docs/reference/known-limitations.md
+index 0649636..f1b8678 100644
+--- a/docs/reference/known-limitations.md
++++ b/docs/reference/known-limitations.md
+@@ -34,6 +34,7 @@ Sagittarius 1.0.11 is the current stable research SDK release. This page records
+ - Current MCWF `connected_pair_correlation` averages per-trajectory covariance, generally different from covariance constructed from ensemble pair/population means. The observable campaign uses bitstring decay controls where per-trajectory covariance is zero; no general nonlinear ensemble-equivalence claim is established.
+ - Phase 16 `ParallelSimulation` sweep evidence uses local Julia `Distributed` workers and a deterministic parameter-map kernel. It does not validate multi-node scheduling, MPI/Slurm deployment, or end-to-end physics-solver sweep scalability.
+ - `experiment-config/v1` reproduces JSON-declared register, pulse, solver, observable, readout, and basis-state inputs only. Python callable pulses, arbitrary complex initial-state vectors, named helper forms, parameter sweeps, and hardware-calibration inputs remain outside this contract. The Python SDK provides all-ground, bitstring, and single-excitation helpers for direct simulation calls; uniform-superposition preparation remains unsupported.
++- MCWF results have no final-state sampling payload. Their current manifest readout metadata enumerates nominal full-space bitstrings even for reduced execution; this is not the executed basis or a final probability distribution. Use the solver radius and initial-state basis size for execution provenance. This nominal enumeration also adds full-space metadata memory/storage cost to reduced MCWF calls.
+ - Raw MCWF trajectory retention scales with observable count, output time samples, and trajectory count. It is opt-in diagnostic data, so plan memory and artifact capacity before enabling it for large ensembles.
+ - Stored samples require a common finite time axis and the same trajectory count for every observable. `trajectory-data/v1` rejects mismatched shapes, time values, or observable ordering during save/load. Raw samples are intentionally absent from `shared-result/v1`.
+ 

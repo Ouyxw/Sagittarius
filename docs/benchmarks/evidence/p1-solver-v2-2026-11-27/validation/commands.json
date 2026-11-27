@@ -1,0 +1,22 @@
+{
+  "working_directory": "/home/oyxw/Sagittarius/sagittarius_py",
+  "environment": "source /tmp/ablation-env.sh (retained as environment.sh)",
+  "unit_tests": "uv run pytest tests/test_solver_sensitivity_benchmark.py -m 'not requires_julia_backend' -q",
+  "backend_tests": "uv run pytest tests/test_solver_sensitivity_benchmark.py::test_real_ramp_audit_and_corruption_detection tests/test_solver_performance_benchmark.py tests/test_solver_configuration.py tests/test_serialization.py tests/test_cross_language_golden.py -q",
+  "artifact_documentation_tests": "uv run pytest tests/test_benchmark_artifacts.py tests/test_benchmark_row_contract.py tests/test_benchmark_suite_artifact.py tests/test_benchmark_failures.py tests/test_benchmark_documentation_consistency.py tests/test_documentation_governance.py -q",
+  "campaign": "uv run python tests/test_performance/benchmark_solver_performance.py --tier sensitivity --output-dir benchmark-output/p1-solver-v2-2026-11-27 --warmups 2 --repeat-count 5 --timeout-seconds 600 --memory-limit-mb 4096 --accuracy-atol 1e-6 --reference-stability-atol 1e-9",
+  "pilot_01": "uv run python tests/test_performance/benchmark_solver_performance.py --tier sensitivity --output-dir benchmark-output/p1-solver-pilot-01 --scenario rabi-tsit5-tol8-g101 --scenario addressed-rk4-s100-g101 --scenario ramp-tsit5-tol6-g101 --warmups 0 --repeat-count 1",
+  "pilot_02": "uv run python tests/test_performance/benchmark_solver_performance.py --tier sensitivity --output-dir benchmark-output/p1-solver-pilot-02 --scenario rabi-tsit5-tol8-g101 --scenario addressed-rk4-s100-g101 --scenario ramp-tsit5-tol6-g101 --warmups 0 --repeat-count 1",
+  "original_audit": "uv run python ../scripts/audit_solver_campaign.py benchmark-output/p1-solver-v2-2026-11-27 --allow-partial",
+  "repository_root_commands": {
+    "acceptance": "sagittarius_py/.venv/bin/python docs/benchmarks/evidence/p1-solver-v2-2026-11-27/validation/review.py sagittarius_py/benchmark-output/p1-solver-v2-2026-11-27 --output docs/benchmarks/evidence/p1-solver-v2-2026-11-27/acceptance.json",
+    "documentation": "python3 scripts/validate_documentation.py",
+    "relocated_audit": "sagittarius_py/.venv/bin/python scripts/audit_solver_campaign.py /tmp/sagittarius-p1-solver-evidence/campaign --allow-partial",
+    "relocated_acceptance": "sagittarius_py/.venv/bin/python docs/benchmarks/evidence/p1-solver-v2-2026-11-27/validation/review.py /tmp/sagittarius-p1-solver-evidence/campaign --output /tmp/p1-solver-relocated-acceptance.json"
+  },
+  "timer_boundary_test": "uv run pytest tests/test_solver_timing_boundary.py -q",
+  "pilot_02_audit": "sagittarius_py/.venv/bin/python scripts/audit_solver_campaign.py sagittarius_py/benchmark-output/p1-solver-pilot-02 --allow-partial (from repository root)",
+  "campaign_exit_code": 1,
+  "campaign_exit_reason": "All 39 configurations executed; ramp RK4 T/100 fails the frozen accuracy gate. Preserve numerical failure, no accuracy target relaxation.",
+  "final_documentation_tests": "uv run pytest tests/test_benchmark_documentation_consistency.py tests/test_documentation_governance.py -q"
+}

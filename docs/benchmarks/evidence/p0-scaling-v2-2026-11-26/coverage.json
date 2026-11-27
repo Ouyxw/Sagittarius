@@ -1,0 +1,35 @@
+{
+  "evidence_class": "local_only; numerical/software verification, not scientific validation or release approval",
+  "extended_rows_accounted": [
+    "chain-r1.1-n12",
+    "chain-r1.1-n16",
+    "chain-r1.1-n20",
+    "chain-r1.5-n12",
+    "chain-r1.5-n16",
+    "chain-r1.5-n20",
+    "chain-r2.1-n12",
+    "chain-r2.1-n16",
+    "chain-r2.1-n20",
+    "rectangle-r1.1-n12",
+    "rectangle-r1.1-n16",
+    "rectangle-r1.1-n20",
+    "rectangle-r1.5-n12",
+    "rectangle-r1.5-n16",
+    "rectangle-r1.5-n20",
+    "rectangle-r2.1-n12",
+    "rectangle-r2.1-n16",
+    "rectangle-r2.1-n20"
+  ],
+  "full_v2_matrix_passed": true,
+  "missing_successful_v2_scenarios": [],
+  "selected_campaign_passed": true,
+  "small_reference_group_passed": true,
+  "successful_n20_scenarios": [
+    "chain-r1.1-n20",
+    "chain-r1.5-n20",
+    "chain-r2.1-n20",
+    "rectangle-r1.1-n20",
+    "rectangle-r1.5-n20",
+    "rectangle-r2.1-n20"
+  ]
+}

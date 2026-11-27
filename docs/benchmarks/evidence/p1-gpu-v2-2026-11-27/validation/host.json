@@ -1,0 +1,10 @@
+{
+  "observed_at_utc": "2026-11-27T03:02:02.382628+00:00",
+  "observation_scope": "same host during the frozen campaign; independent of configuration hash",
+  "cpu_model": "Intel(R) Core(TM) i7-14700KF",
+  "logical_cpus": 28,
+  "physical_memory_bytes": 16637784064,
+  "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "gpu_report": "nvidia-smi.txt",
+  "performance_isolation": "shared workstation; no CPU/GPU affinity, governor, exclusive device or external-load isolation"
+}

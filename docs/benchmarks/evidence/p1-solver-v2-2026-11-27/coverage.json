@@ -1,0 +1,10 @@
+{
+  "classification": "local_only; software/numerical verification, not scientific validation or release/public approval",
+  "declared": 39,
+  "full_v2_matrix_passed": false,
+  "missing_successful_v2_scenarios": [
+    "ramp-rk4-s100-g101"
+  ],
+  "passed": 38,
+  "selected_campaign_passed": false
+}

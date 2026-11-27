@@ -1,0 +1,41 @@
+{
+  "diff_scope_passed": true,
+  "frozen_sources_match_handoff": {
+    "measurement": 23,
+    "review": 2
+  },
+  "no_commit_created": true,
+  "no_core_sdk_julia_or_schema_changes": true,
+  "tracked_changed": [
+    "docs/benchmarks/README.md",
+    "docs/benchmarks/artifact-contracts.md",
+    "docs/benchmarks/families.md",
+    "docs/benchmarks/plans/v2.md",
+    "docs/benchmarks/protocol.md",
+    "docs/benchmarks/tiers.md",
+    "docs/development/requirements.md",
+    "docs/development/status.md",
+    "docs/governance/SPEC-GOV-001-performance-claims.md",
+    "docs/governance/SPEC-GOV-004-benchmarking-plan.md",
+    "docs/physics/SPEC-PHYS-004-noise-models.md",
+    "docs/reference/known-limitations.md"
+  ],
+  "v1_preservation": {
+    "artifact-contracts": {
+      "sha256": "8d053bc2fb667d0e1cb58a9d9d90d010ecf78f45e3c0998f455a47099867faaf",
+      "unchanged": true
+    },
+    "families": {
+      "sha256": "9d9f2cae385706a6f7a0a0fe2213de9b9e18fe1192cdcf9819eb09f7d6e6bd78",
+      "unchanged": true
+    },
+    "protocol": {
+      "sha256": "4afa2c557f298a323ca25a893bd90ff92238aa9b0833793569b597178ffdc779",
+      "unchanged": true
+    },
+    "tiers": {
+      "sha256": "77ad7f947b8db96305730bb9b2e4fc5a5394e6d6312de6e2283f0d5e891268b6",
+      "unchanged": true
+    }
+  }
+}

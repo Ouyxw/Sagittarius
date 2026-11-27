@@ -4,7 +4,7 @@ Spec ID: `SPEC-API-003`
 Status: `Current`
 Roadmap: Phase 8
 Version: `julia-native-api/v1`
-Last reviewed: 2026-06-30
+Last reviewed: 2026-11-27
 
 
 Sagittarius exposes a Julia-native API for users who want direct access to registers, pulse ASTs, bases, Hamiltonians, jump operators, solvers, and structured logging without going through the Python SDK. Cross-language semantics are specified by [`SPEC-API-002-python-julia-parity.md`](SPEC-API-002-python-julia-parity.md).
@@ -48,7 +48,7 @@ obs = Dict("atom1" => RydbergPopulation(1, length(reg.atoms); basis_context=cont
 sol, saved = solve_schrodinger(psi0, H_func, (0.0, 1.0); observables=obs)
 ```
 
-Open-system users can call `get_jump_operators`, `solve_lindblad`, and `solve_mc_trajectories` directly. GPU users can call `solve_schrodinger_gpu` when the CUDA backend is available.
+Open-system users can call `get_jump_operators`, `solve_lindblad`, and `solve_mc_trajectories` directly. GPU users can call `solve_schrodinger_gpu` when the CUDA backend is available. CUDA remains an optional lazy import; a fresh process can execute its first GPU solve after initialized diagnostics succeed without a preparatory solve to expose CUDA bindings. The first-call path is exercised by hardware parity tests; solver failures after initialized CUDA diagnostics pass are test failures.
 
 ## Logging
 

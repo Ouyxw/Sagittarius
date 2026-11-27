@@ -1,0 +1,3684 @@
+{
+  "classification": "local_only; no physical approximation or public performance claim",
+  "command": [
+    "tests/test_performance/benchmark_scaling.py",
+    "--output-dir",
+    "benchmark-output/p0-scaling-v2-2026-11-26",
+    "--timeout-seconds",
+    "600",
+    "--memory-limit-mb",
+    "4096"
+  ],
+  "config_sha256": "5721ab4216050fec8ee74ae2cdc96577802d6320c9e93da946425be4c6424d80",
+  "cwd": "/home/oyxw/Sagittarius/sagittarius_py",
+  "frozen_at": "2026-11-26T10:36:47.969419+00:00",
+  "function_call": {
+    "blockade_radius": 5.0,
+    "matrix": true,
+    "n_max": 16
+  },
+  "hardware": {
+    "cpu_model": "Intel(R) Core(TM) i7-14700KF",
+    "physical_memory_bytes": 16637784064
+  },
+  "output_dir": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p0-scaling-v2-2026-11-26",
+  "plan_version": "benchmark-implementation-plan/v2",
+  "protocol_version": "benchmark-protocol/v1",
+  "python_executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+  "reference_policy": "N<=8 independent projected full dense; N>8 tighter Tsit5 1e-11/1e-13 sensitivity",
+  "scenarios": [
+    {
+      "C6": 100.0,
+      "N": 2,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 3,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147491920,
+      "full_dim": 4,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "chain-r1.1-n2",
+      "shape": [
+        1,
+        2
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 8,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147534416,
+      "full_dim": 16,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.5,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "chain-r1.1-n4",
+      "shape": [
+        1,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 6,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 21,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2148063312,
+      "full_dim": 64,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.671875,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "chain-r1.1-n6",
+      "shape": [
+        1,
+        6
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 55,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2156042832,
+      "full_dim": 256,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.78515625,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "chain-r1.1-n8",
+      "shape": [
+        1,
+        8
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 377,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2149029456,
+      "full_dim": 4096,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.907958984375,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "chain-r1.1-n12",
+      "shape": [
+        1,
+        12
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 2584,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ],
+        [
+          48.0,
+          0.0,
+          0.0
+        ],
+        [
+          52.0,
+          0.0,
+          0.0
+        ],
+        [
+          56.0,
+          0.0,
+          0.0
+        ],
+        [
+          60.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2160715344,
+      "full_dim": 65536,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9605712890625,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "chain-r1.1-n16",
+      "shape": [
+        1,
+        16
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 17711,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ],
+        [
+          48.0,
+          0.0,
+          0.0
+        ],
+        [
+          52.0,
+          0.0,
+          0.0
+        ],
+        [
+          56.0,
+          0.0,
+          0.0
+        ],
+        [
+          60.0,
+          0.0,
+          0.0
+        ],
+        [
+          64.0,
+          0.0,
+          0.0
+        ],
+        [
+          68.0,
+          0.0,
+          0.0
+        ],
+        [
+          72.0,
+          0.0,
+          0.0
+        ],
+        [
+          76.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2256301648,
+      "full_dim": 1048576,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9831094741821289,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "chain-r1.1-n20",
+      "shape": [
+        1,
+        20
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 2,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 3,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147491920,
+      "full_dim": 4,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "chain-r1.5-n2",
+      "shape": [
+        1,
+        2
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 8,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147534416,
+      "full_dim": 16,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.5,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "chain-r1.5-n4",
+      "shape": [
+        1,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 6,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 21,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2148063312,
+      "full_dim": 64,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.671875,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "chain-r1.5-n6",
+      "shape": [
+        1,
+        6
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 55,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2156042832,
+      "full_dim": 256,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.78515625,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "chain-r1.5-n8",
+      "shape": [
+        1,
+        8
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 377,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2149029456,
+      "full_dim": 4096,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.907958984375,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "chain-r1.5-n12",
+      "shape": [
+        1,
+        12
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 2584,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ],
+        [
+          48.0,
+          0.0,
+          0.0
+        ],
+        [
+          52.0,
+          0.0,
+          0.0
+        ],
+        [
+          56.0,
+          0.0,
+          0.0
+        ],
+        [
+          60.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2160715344,
+      "full_dim": 65536,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9605712890625,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "chain-r1.5-n16",
+      "shape": [
+        1,
+        16
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 17711,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ],
+        [
+          48.0,
+          0.0,
+          0.0
+        ],
+        [
+          52.0,
+          0.0,
+          0.0
+        ],
+        [
+          56.0,
+          0.0,
+          0.0
+        ],
+        [
+          60.0,
+          0.0,
+          0.0
+        ],
+        [
+          64.0,
+          0.0,
+          0.0
+        ],
+        [
+          68.0,
+          0.0,
+          0.0
+        ],
+        [
+          72.0,
+          0.0,
+          0.0
+        ],
+        [
+          76.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2256301648,
+      "full_dim": 1048576,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9831094741821289,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "chain-r1.5-n20",
+      "shape": [
+        1,
+        20
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 2,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 3,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147491920,
+      "full_dim": 4,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "chain-r2.1-n2",
+      "shape": [
+        1,
+        2
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 6,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147530320,
+      "full_dim": 16,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.625,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "chain-r2.1-n4",
+      "shape": [
+        1,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 6,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 13,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2148042832,
+      "full_dim": 64,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.796875,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "chain-r2.1-n6",
+      "shape": [
+        1,
+        6
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 28,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2155959888,
+      "full_dim": 256,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.890625,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "chain-r2.1-n8",
+      "shape": [
+        1,
+        8
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 129,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2148013648,
+      "full_dim": 4096,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.968505859375,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "chain-r2.1-n12",
+      "shape": [
+        1,
+        12
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 595,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ],
+        [
+          48.0,
+          0.0,
+          0.0
+        ],
+        [
+          52.0,
+          0.0,
+          0.0
+        ],
+        [
+          56.0,
+          0.0,
+          0.0
+        ],
+        [
+          60.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2150531664,
+      "full_dim": 65536,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9909210205078125,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "chain-r2.1-n16",
+      "shape": [
+        1,
+        16
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 2745,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ],
+        [
+          48.0,
+          0.0,
+          0.0
+        ],
+        [
+          52.0,
+          0.0,
+          0.0
+        ],
+        [
+          56.0,
+          0.0,
+          0.0
+        ],
+        [
+          60.0,
+          0.0,
+          0.0
+        ],
+        [
+          64.0,
+          0.0,
+          0.0
+        ],
+        [
+          68.0,
+          0.0,
+          0.0
+        ],
+        [
+          72.0,
+          0.0,
+          0.0
+        ],
+        [
+          76.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2164350544,
+      "full_dim": 1048576,
+      "geometry": "chain",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9973821640014648,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "chain-r2.1-n20",
+      "shape": [
+        1,
+        20
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 2,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 3,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147491920,
+      "full_dim": 4,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "rectangle-r1.1-n2",
+      "shape": [
+        1,
+        2
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 7,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147532368,
+      "full_dim": 16,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.5625,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "rectangle-r1.1-n4",
+      "shape": [
+        2,
+        2
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 6,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 17,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2148053072,
+      "full_dim": 64,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.734375,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "rectangle-r1.1-n6",
+      "shape": [
+        2,
+        3
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 41,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2155999824,
+      "full_dim": 256,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.83984375,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "rectangle-r1.1-n8",
+      "shape": [
+        2,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 227,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          8.0,
+          0.0
+        ],
+        [
+          4.0,
+          8.0,
+          0.0
+        ],
+        [
+          8.0,
+          8.0,
+          0.0
+        ],
+        [
+          12.0,
+          8.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2148415056,
+      "full_dim": 4096,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.944580078125,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "rectangle-r1.1-n12",
+      "shape": [
+        3,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 1234,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          8.0,
+          0.0
+        ],
+        [
+          4.0,
+          8.0,
+          0.0
+        ],
+        [
+          8.0,
+          8.0,
+          0.0
+        ],
+        [
+          12.0,
+          8.0,
+          0.0
+        ],
+        [
+          0.0,
+          12.0,
+          0.0
+        ],
+        [
+          4.0,
+          12.0,
+          0.0
+        ],
+        [
+          8.0,
+          12.0,
+          0.0
+        ],
+        [
+          12.0,
+          12.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2153803344,
+      "full_dim": 65536,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.981170654296875,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "rectangle-r1.1-n16",
+      "shape": [
+        4,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 6743,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ],
+        [
+          16.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          8.0,
+          0.0
+        ],
+        [
+          4.0,
+          8.0,
+          0.0
+        ],
+        [
+          8.0,
+          8.0,
+          0.0
+        ],
+        [
+          12.0,
+          8.0,
+          0.0
+        ],
+        [
+          16.0,
+          8.0,
+          0.0
+        ],
+        [
+          0.0,
+          12.0,
+          0.0
+        ],
+        [
+          4.0,
+          12.0,
+          0.0
+        ],
+        [
+          8.0,
+          12.0,
+          0.0
+        ],
+        [
+          12.0,
+          12.0,
+          0.0
+        ],
+        [
+          16.0,
+          12.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2188914256,
+      "full_dim": 1048576,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9935693740844727,
+      "radius_ratio": 1.1,
+      "required": true,
+      "scenario_id": "rectangle-r1.1-n20",
+      "shape": [
+        4,
+        5
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 2,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 3,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147491920,
+      "full_dim": 4,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "rectangle-r1.5-n2",
+      "shape": [
+        1,
+        2
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 5,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147528272,
+      "full_dim": 16,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.6875,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "rectangle-r1.5-n4",
+      "shape": [
+        2,
+        2
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 6,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 11,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2148037712,
+      "full_dim": 64,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.828125,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "rectangle-r1.5-n6",
+      "shape": [
+        2,
+        3
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 21,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2155938384,
+      "full_dim": 256,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.91796875,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "rectangle-r1.5-n8",
+      "shape": [
+        2,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 93,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          8.0,
+          0.0
+        ],
+        [
+          4.0,
+          8.0,
+          0.0
+        ],
+        [
+          8.0,
+          8.0,
+          0.0
+        ],
+        [
+          12.0,
+          8.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147866192,
+      "full_dim": 4096,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.977294921875,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "rectangle-r1.5-n12",
+      "shape": [
+        3,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 314,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          8.0,
+          0.0
+        ],
+        [
+          4.0,
+          8.0,
+          0.0
+        ],
+        [
+          8.0,
+          8.0,
+          0.0
+        ],
+        [
+          12.0,
+          8.0,
+          0.0
+        ],
+        [
+          0.0,
+          12.0,
+          0.0
+        ],
+        [
+          4.0,
+          12.0,
+          0.0
+        ],
+        [
+          8.0,
+          12.0,
+          0.0
+        ],
+        [
+          12.0,
+          12.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2149092944,
+      "full_dim": 65536,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.995208740234375,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "rectangle-r1.5-n16",
+      "shape": [
+        4,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 1213,
+      "blockade_radius": 6.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ],
+        [
+          16.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          8.0,
+          0.0
+        ],
+        [
+          4.0,
+          8.0,
+          0.0
+        ],
+        [
+          8.0,
+          8.0,
+          0.0
+        ],
+        [
+          12.0,
+          8.0,
+          0.0
+        ],
+        [
+          16.0,
+          8.0,
+          0.0
+        ],
+        [
+          0.0,
+          12.0,
+          0.0
+        ],
+        [
+          4.0,
+          12.0,
+          0.0
+        ],
+        [
+          8.0,
+          12.0,
+          0.0
+        ],
+        [
+          12.0,
+          12.0,
+          0.0
+        ],
+        [
+          16.0,
+          12.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2154937936,
+      "full_dim": 1048576,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9988431930541992,
+      "radius_ratio": 1.5,
+      "required": true,
+      "scenario_id": "rectangle-r1.5-n20",
+      "shape": [
+        4,
+        5
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 2,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 3,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147491920,
+      "full_dim": 4,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "rectangle-r2.1-n2",
+      "shape": [
+        1,
+        2
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 5,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147528272,
+      "full_dim": 16,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.6875,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "rectangle-r2.1-n4",
+      "shape": [
+        2,
+        2
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 6,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 9,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2148032592,
+      "full_dim": 64,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.859375,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "rectangle-r2.1-n6",
+      "shape": [
+        2,
+        3
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 17,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2155926096,
+      "full_dim": 256,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.93359375,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "rectangle-r2.1-n8",
+      "shape": [
+        2,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 48,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          8.0,
+          0.0
+        ],
+        [
+          4.0,
+          8.0,
+          0.0
+        ],
+        [
+          8.0,
+          8.0,
+          0.0
+        ],
+        [
+          12.0,
+          8.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2147681872,
+      "full_dim": 4096,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.98828125,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "rectangle-r2.1-n12",
+      "shape": [
+        3,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 146,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          8.0,
+          0.0
+        ],
+        [
+          4.0,
+          8.0,
+          0.0
+        ],
+        [
+          8.0,
+          8.0,
+          0.0
+        ],
+        [
+          12.0,
+          8.0,
+          0.0
+        ],
+        [
+          0.0,
+          12.0,
+          0.0
+        ],
+        [
+          4.0,
+          12.0,
+          0.0
+        ],
+        [
+          8.0,
+          12.0,
+          0.0
+        ],
+        [
+          12.0,
+          12.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2148232784,
+      "full_dim": 65536,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.997772216796875,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "rectangle-r2.1-n16",
+      "shape": [
+        4,
+        4
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_order": "row-major x-fastest; atom i is bit i (LSB)",
+      "basis": "blockade_reduced",
+      "basis_size": 437,
+      "blockade_radius": 8.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ],
+        [
+          8.0,
+          4.0,
+          0.0
+        ],
+        [
+          12.0,
+          4.0,
+          0.0
+        ],
+        [
+          16.0,
+          4.0,
+          0.0
+        ],
+        [
+          0.0,
+          8.0,
+          0.0
+        ],
+        [
+          4.0,
+          8.0,
+          0.0
+        ],
+        [
+          8.0,
+          8.0,
+          0.0
+        ],
+        [
+          12.0,
+          8.0,
+          0.0
+        ],
+        [
+          16.0,
+          8.0,
+          0.0
+        ],
+        [
+          0.0,
+          12.0,
+          0.0
+        ],
+        [
+          4.0,
+          12.0,
+          0.0
+        ],
+        [
+          8.0,
+          12.0,
+          0.0
+        ],
+        [
+          12.0,
+          12.0,
+          0.0
+        ],
+        [
+          16.0,
+          12.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "estimated_peak_bytes": 2150170192,
+      "full_dim": 1048576,
+      "geometry": "rectangle",
+      "initial_state": "all_ground",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9995832443237305,
+      "radius_ratio": 2.1,
+      "required": true,
+      "scenario_id": "rectangle-r2.1-n20",
+      "shape": [
+        4,
+        5
+      ],
+      "spacing": 4.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      }
+    }
+  ],
+  "seed": null,
+  "seed_reason": "deterministic all-ground constant-H evolution; no randomness",
+  "settings": {
+    "memory_limit_bytes": 4294967296,
+    "observable_atol": 1e-08,
+    "repeat_count": 5,
+    "solver": {
+      "abstol": 1e-10,
+      "adaptive": true,
+      "dt": null,
+      "method": "Tsit5",
+      "reltol": 1e-08,
+      "saveat": [
+        0.0,
+        0.005,
+        0.01,
+        0.015,
+        0.02,
+        0.025,
+        0.03,
+        0.035,
+        0.04,
+        0.045,
+        0.05,
+        0.055,
+        0.06,
+        0.065,
+        0.07,
+        0.075,
+        0.08,
+        0.085,
+        0.09,
+        0.095,
+        0.1,
+        0.105,
+        0.11,
+        0.115,
+        0.12,
+        0.125,
+        0.13,
+        0.135,
+        0.14,
+        0.145,
+        0.15,
+        0.155,
+        0.16,
+        0.165,
+        0.17,
+        0.17500000000000002,
+        0.18,
+        0.185,
+        0.19,
+        0.195,
+        0.2,
+        0.20500000000000002,
+        0.21,
+        0.215,
+        0.22,
+        0.225,
+        0.23,
+        0.23500000000000001,
+        0.24,
+        0.245,
+        0.25,
+        0.255,
+        0.26,
+        0.265,
+        0.27,
+        0.275,
+        0.28,
+        0.28500000000000003,
+        0.29,
+        0.295,
+        0.3,
+        0.305,
+        0.31,
+        0.315,
+        0.32,
+        0.325,
+        0.33,
+        0.335,
+        0.34,
+        0.34500000000000003,
+        0.35000000000000003,
+        0.355,
+        0.36,
+        0.365,
+        0.37,
+        0.375,
+        0.38,
+        0.385,
+        0.39,
+        0.395,
+        0.4,
+        0.405,
+        0.41000000000000003,
+        0.41500000000000004,
+        0.42,
+        0.425,
+        0.43,
+        0.435,
+        0.44,
+        0.445,
+        0.45,
+        0.455,
+        0.46,
+        0.465,
+        0.47000000000000003,
+        0.47500000000000003,
+        0.48,
+        0.485,
+        0.49,
+        0.495,
+        0.5
+      ]
+    },
+    "timeout_seconds": 600.0,
+    "warmups": 2
+  },
+  "source": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": null
+      },
+      "python": {
+        "cache_tag": "cpython-311",
+        "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.39"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.11.15"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "610.88",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "610.88"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "610.88",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "nvcc": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        },
+        "nvidia_smi": {
+          "missing": false,
+          "ok": true,
+          "output": "NVIDIA GeForce RTX 5070 Ti, 610.88, 16303, 12.0",
+          "query_fields": [
+            "name",
+            "driver_version",
+            "memory.total",
+            "compute_cap"
+          ],
+          "raw_output": "NVIDIA GeForce RTX 5070 Ti, 610.88, 16303, 12.0",
+          "returncode": 0
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "efef3754237b28b61e0829edf164088597ffc13a",
+        "git_commit_short": "efef375",
+        "git_dirty": true,
+        "root": "/home/oyxw/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": false,
+      "devcontainer": false,
+      "id": null,
+      "image": null
+    },
+    "in_container": false,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": null
+    },
+    "julia_version": null,
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": {
+      "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.6.1",
+        "numpy": "2.4.6",
+        "pandas": "3.0.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.17.1",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.11.15"
+    },
+    "python_version": "3.11.15",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  },
+  "source_file_sha256": {
+    "benchmark_measurement.py": "7eb88b5fa8ced710e64d1952bf4d72b09a53ff7a4e9f7ab907bfd07b1bc702bd",
+    "scaling_benchmark.py": "c54e983e58051eec26e27dc661eb0c5cc3f67900f3e175cb311c35ec81b49e8e"
+  },
+  "stop_policy": "continue; retain every declared scenario",
+  "thread_environment": {
+    "JULIA_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

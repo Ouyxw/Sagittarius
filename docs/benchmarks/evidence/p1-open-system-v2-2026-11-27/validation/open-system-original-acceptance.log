@@ -1,0 +1,50 @@
+{
+  "accepted": true,
+  "measurement_audit": {
+    "contract_audit_passed": true,
+    "selected_campaign_passed": false,
+    "full_matrix_passed": false,
+    "all_declared_rows_accounted": true,
+    "all_attempted_rows_passed": true,
+    "small_reference_group_passed": true,
+    "analytic_control_group_passed": true,
+    "reduced_n20_mcwf_counts_passed": true,
+    "missing_successful_scenarios": [
+      "performance-n10-full-chain-combined-scalar-lindblad",
+      "performance-n12-full-chain-combined-scalar-lindblad",
+      "performance-n12-full-chain-combined-scalar-mcwf-k100",
+      "performance-n12-full-chain-combined-scalar-mcwf-k500",
+      "performance-n12-full-chain-combined-scalar-mcwf-k1000",
+      "performance-n16-full-chain-combined-scalar-lindblad",
+      "performance-n16-full-chain-combined-scalar-mcwf-k100",
+      "performance-n16-full-chain-combined-scalar-mcwf-k500",
+      "performance-n16-full-chain-combined-scalar-mcwf-k1000",
+      "performance-n20-full-chain-combined-scalar-lindblad",
+      "performance-n20-full-chain-combined-scalar-mcwf-k100",
+      "performance-n20-full-chain-combined-scalar-mcwf-k500",
+      "performance-n20-full-chain-combined-scalar-mcwf-k1000",
+      "performance-n20-reduced-chain-combined-scalar-lindblad"
+    ],
+    "classification": "local_only; software/numerical/statistical checks, large interacting reference gaps; no scientific validation or public/release approval",
+    "bounded_campaign_accepted": true,
+    "scenario_count": 99,
+    "checked_results": 916,
+    "density_controls": 67,
+    "sensitivity_controls": 63,
+    "maximum_density_error": 6.589950807267542e-12,
+    "maximum_trace_error": 8.881784197001252e-16,
+    "minimum_density_eigenvalue": -1.1748868876035808e-13,
+    "cross_count_comparisons": 45,
+    "convergence_passed": true,
+    "eligible_measured_count": 375,
+    "status_counts": {
+      "failed": 0,
+      "incomplete": 0,
+      "passed": 85,
+      "skipped": 14
+    }
+  },
+  "cross_path_available": 54,
+  "cross_path_unavailable": 9,
+  "cross_path_individual": 708
+}

@@ -1,0 +1,473 @@
+# Benchmark Tiers
+
+Status: `Mixed`
+Roadmap: Phase 16
+Version: `benchmark-tiers/v1`
+Last reviewed: 2026-11-27
+
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU, MWIS, solver and observable implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+
+## Benchmarking V1
+
+Status: `Done`
+Roadmap: Phase 16
+Version: `benchmark-tiers/v1`
+Last reviewed: 2026-08-12
+
+Sagittarius benchmarks are grouped by tier so that developers can run the right amount of evidence for the task. Tiers are cumulative in discipline but not always cumulative in cost. A stress-tier run does not replace correctness-tier evidence.
+
+### Tier Summary
+
+| Tier | Purpose | Expected cost | Default CI policy |
+| :--- | :--- | :--- | :--- |
+| Smoke | Fast sanity checks for command wiring and artifact creation. | Seconds to a few minutes. | Optional PR CI when relevant. |
+| Correctness | Validate physics, solver, and optimization outputs against references. | Minutes to tens of minutes. | Local or manual CI unless small enough for PR. |
+| Parity | Compare CPU/CUDA, dense/reduced, Python/Julia, or solver methods. | Minutes to hours depending on backend. | Manual or self-hosted where hardware is needed. |
+| Scaling | Increase size or workload until timeout, memory pressure, or numerical failure. | Hardware dependent. | Manual, release-candidate, or local evidence. |
+| Stress | Hardware-specific limit finding and failure characterization. | Potentially long running. | Manual only. |
+
+### Runnable Commands and Outputs
+
+Run commands from `sagittarius_py`. The following commands implement the tiers above and make the expected evidence location explicit.
+
+| Tier | Command | Output |
+| :--- | :--- | :--- |
+| Smoke | `uv run python tests/test_performance/benchmark_physics_smoke.py --output-dir benchmark-output` | `physics_smoke` single-scenario artifacts and `physics_smoke_suite`. |
+| Correctness | `uv run python tests/test_performance/benchmark_phase16_validation.py --output-dir benchmark-output` | `cold_atom_dynamics` and `open_system_dynamics` artifacts with matching suite aggregates. |
+| Correctness | `uv run python tests/test_performance/benchmark_mwis_aqc.py --tier correctness --output-dir benchmark-output` | `mwis_aqc_correctness` artifacts and suite with deterministic ILP/AQC reference rows. |
+| Parity | `SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python tests/test_performance/benchmark_cuda_mwis_protocol.py --output-dir benchmark-output` | `cuda_parity` and `mwis_gpu_parity` artifacts/suites, including retained skipped or doctor-failure rows. |
+| Scaling | `uv run python tests/test_performance/benchmark_scaling.py` | `scaling_results` JSON/CSV/Markdown in the working directory; no suite wrapper. |
+| Stress | `uv run python tests/test_performance/benchmark_ablation.py --atom-count 12 --repeats 50 --output-dir benchmark-output` | `ablation_bench_results` JSON/CSV/Markdown, including structured failure context where a path cannot run. |
+
+The local, resumable sweep runner is also a scaling evidence path: `uv run python tests/test_performance/benchmark_sweep_cluster.py --output-dir benchmark-output` writes `sweep_cluster` and `sweep_cluster_suite` plus its `sweep-artifact/v1` checkpoint and final aggregate.
+
+### Smoke Tier
+
+Goal: prove the benchmark command, scenario selection, diagnostics, and artifact writing path work.
+
+Minimum requirements:
+
+- one small deterministic scenario;
+- one seed where randomness is involved;
+- CPU-first path unless the benchmark explicitly targets backend probing;
+- artifact output with at least one successful row or one structured failure row;
+- no public performance interpretation.
+
+Recommended examples:
+
+- one-atom Rabi smoke;
+- two-atom blockade smoke;
+- tiny UDG/MWIS instance with exact baseline;
+- CUDA doctor and one tiny CPU/CUDA parity row on local GPU hardware.
+Current implementation: `tests/test_performance/benchmark_physics_smoke.py` runs deterministic CPU Rabi and two-atom blockade scenarios, retaining a structured `benchmark-artifact/v1` row for every success or failure.
+
+
+### Correctness Tier
+
+Goal: establish that the scenario has a trustworthy reference before runtime or scaling is interpreted.
+
+Minimum requirements:
+
+- analytic, dense, exact ILP, or declared tighter-solver reference;
+- fixed seeds and fixed output grid where applicable;
+- explicit tolerance policy;
+- failure rows for reference mismatch, solver failure, or artifact write failure;
+- linked run manifests or result artifacts when simulations produce durable results.
+
+Correctness metrics may include max absolute trajectory error, final-state error, trace error, positivity violations, MWIS feasibility, exact objective gap, and reduced-vs-full observable deviation.
+
+Current implementation: `tests/test_performance/benchmark_physics_correctness.py` runs deterministic CPU Rabi, ideal two-atom blockade, Landau-Zener, and small-chain projected dense-vs-reduced cases. It records each reference kind and tolerance in row metrics, retains successful SDK result/manifest artifacts, and writes a durable dense-reference report for the static chain check.
+
+### Parity Tier
+
+Goal: compare two execution paths under one scenario definition.
+
+Supported parity modes:
+
+- CPU vs CUDA;
+- full dense vs reduced basis;
+- dense vs sparse Hamiltonian path;
+- Python vs Julia public API path;
+- solver method sensitivity such as `Tsit5`, `Vern9`, and fixed-step `RK4`;
+- Lindblad vs MCWF statistical agreement on small systems.
+
+Minimum requirements:
+
+- shared scenario ID and seed;
+- shared pulse schedule, solver target tolerances, and output grid;
+- declared metric used for comparison;
+- both paths' diagnostics and effective configuration;
+- bounded interpretation when parity does not imply equivalence for all systems.
+
+### Scaling Tier
+
+Goal: characterize how runtime, memory, basis size, and failure modes change as workload increases.
+
+Scaling axes may include:
+
+- atom count;
+- graph density or UDG radius;
+- basis mode and blockade radius;
+- output sample count;
+- observable count;
+- trajectory count;
+- solver tolerance;
+- backend and device;
+- parameter-sweep width.
+
+Minimum requirements:
+
+- monotonic scenario IDs such as `mwis_udg_n16_seed3`;
+- explicit timeout and memory policy;
+- rows for timeout, out-of-memory, numerical failure, backend initialization failure, and validation failure;
+- no claim that a failure-free subset is the scale limit unless failed rows are also reported.
+
+### Stress Tier
+
+Goal: find practical local limits and diagnose boundary behavior on a specific machine.
+
+Stress-tier results are local-first. They are valuable for development but are not public claims unless promoted through the release-grade evidence process.
+
+Minimum requirements:
+
+- hardware model, driver/runtime versions, and container status;
+- timeout and memory limit;
+- explicit stop condition;
+- structured failure rows;
+- separate notes for first-run setup cost and warmed execution cost;
+- no cross-machine comparison without governance review.
+
+A local RTX 5070 Ti can be used for Sagittarius CUDA benchmark development when `doctor(backend="CUDA")` passes, but artifact wording must say exactly that device and environment produced the result.
+
+## Benchmarking V2
+
+Status: `Mixed`
+
+Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-11-26/README.md): 42 scenarios and 210 eligible repeats, including all six N=20 geometry/radius configurations. This is bounded local numerical/software evidence; other suite targets and release/public-use gates remain separate.
+
+Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
+
+CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; this ablation-only archive is separate from the P1 GPU matrix below, recurring RC and public-use gates.
+
+
+This generation applies the same five tiers to [plan v2](plans/v2.md). It distinguishes planned runner work from verified executable commands and keeps the initial V1 evidence complete. Long campaigns remain manual, RC or self-hosted work.
+
+<a id="v2-tier-summary"></a>
+
+The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
+
+The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
+
+The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) completes all 39 declared sensitivity configurations across Rabi, the addressed chain and a linear ramp. All 312 first/warm/measured results and manifests are retained and audited; 38 configurations and 190/195 measured calls meet the frozen 1e-6 accuracy target. The coarse ramp RK4 T/100 case remains a failed accuracy row with all raw times/errors, as required by the plan. Independent stable references, raw norm checks, effective settings, per-configuration memory and error-versus-runtime companions support bounded local numerical characterization. Full-matrix all-accuracy-pass remains false; accepted characterization does not promote under-resolved times into performance comparisons or close scientific validation, recurring RC or public-use gates.
+
+The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.md) completes 52 cost configurations through reduced N=20 (D=17711) and 12 small full/reduced state-path fixtures. All 260 measured SDK calls and 476 saved results/manifests pass value/order, round-trip and independent-reference gates; five-seed MCWF samples use explicit simultaneous uncertainty bounds. Two empty-observable history controls, cross-order equality, attributable worker memory, frozen source/runtime and matching companions are audited after relocation. Counts/grids/orders are separate workloads; duplicate physical declarations are labeled. Timings include SDK construction/collection/manifest and provide no incremental-overhead subtraction. This closes bounded local numerical/software characterization, separate from physical validation, expanded open-system costs/convergence, recurring RC and public-use approval.
+
+The [P1 open-system local campaign](evidence/p1-open-system-v2-2026-11-27/README.md) accounts for all 99 frozen rows: 85 pass and 14 resource exclusions remain explicit. All 375 eligible measured SDK calls, 916 first/warm/measured/statistical/correctness results and 63 separate tighter results are retained. Reduced N=20 (Rb=12.4 um, D=907) executes MCWF at 100/500/1000 trajectories with five separate seeds and target-size analytic decay controls. Independent small dense/analytic references, 67 raw-density histories, trace/positivity/coherence, seed uncertainty, runtime/throughput statistics, manifests and all companions pass original/relocated backend-free audits. Full N=20 Lindblad/full-space coverage and independent large interacting references remain open. This is bounded shared-workstation local evidence, separate from scientific validation, recurring RC and public-use approval.
+
+### Tier Summary
+
+| Tier | V2 purpose | Expected cost | CI policy |
+| :--- | :--- | :--- | :--- |
+| Smoke | Verify each changed runner, configuration, artifact and controlled failure path. | Bounded small CPU cases. | Appropriate PR smoke only. |
+| Correctness | Analytic/dense/exact, basis/index/order, solver and local-noise reference gates. | Small reference fixtures. | CPU regression where bounded; broader checks manual. |
+| Parity | Matched CPU/CUDA, Python/Julia, representation/method and MCWF/Lindblad checks. | Scenario dependent. | CUDA opt-in on actual initialized hardware. |
+| Scaling | Frozen size/geometry/radius/grid/count/trajectory axes and independent measurements. | Resource dependent, targets through N=20 where declared. | Manual/RC; every declared row retained. |
+| Stress | Representation/hardware resource and numerical failure boundaries. | Potentially long running. | Manual only with explicit stop policy. |
+
+<a id="v2-runnable-commands-and-outputs"></a>
+
+### Runnable Commands and Outputs
+
+The V1 commands are retained as historical baseline. All seven P0/P1 suites now have V2 CLI support. Retained smoke/campaign evidence and representation-specific exclusions determine actual coverage.
+
+| Suite | Existing or planned entry point | V2 outputs and readiness |
+| :--- | :--- | :--- |
+| Scaling | Implemented `benchmark_scaling.py` CLI; positional Python function retained. | `scaling_results` and `scaling_results_suite` JSON/CSV/Markdown; `scaling_repeats.json`, campaign/checkpoints and coverage. |
+| Ablation | Implemented `benchmark_ablation.py` CLI; single-N positional function retained. | `ablation_bench_results` and `_suite` JSON/CSV/Markdown, `ablation_repeats.json`, frozen configs/checkpoints, saved numerical arrays and coverage/audit. `--repeats` counts operations; `--repeat-count` counts independent batches. |
+| GPU | Existing `benchmark_gpu.py` adopts doctor/opt-in discipline from `benchmark_cuda_mwis_protocol.py`. | Preserve `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`; implemented `gpu_bench_results_suite`, `gpu_repeats.json`, separate backend processes and repeated matched measurements. |
+| MWIS/UDG | Implemented `benchmark_mwis_aqc.py --tier performance`; legacy tiers preserved. | `mwis_aqc_performance` and `_suite` JSON/CSV/Markdown, `mwis_repeats.json`, raw paths, saved AQC results/manifests, independent references, CBC logs/status and audit. |
+| Solver | Implemented `benchmark_solver_performance.py --tier sensitivity`; default correctness fixtures/stems retained. | `solver_sensitivity` and `_suite` JSON/CSV/Markdown error-versus-runtime summaries, `solver_repeats.json`, saved results/manifests, references, campaign/checkpoints, coverage and audit. |
+| Observables | Implemented `benchmark_observables.py --tier all`; correctness/performance can be selected separately. | `observable_performance` and `_suite` JSON/CSV/Markdown; `observable_repeats.json`, independent references, saved results/manifests, raw MCWF samples, empty-history controls and audit. |
+| Open-system | Implemented `benchmark_open_system_performance.py --tier all`; bounded CPU local decay/dephasing only. | `open_system_performance` and `_suite` JSON/CSV/Markdown; `open_system_repeats.json`, `convergence.json`, raw density/reference controls, real results/manifests, resource boundaries and offline audit. Original one-atom runner preserved. |
+
+Run from `sagittarius_py` after source/editable installation:
+
+```bash
+# Full 42-scenario matrix, including N=20; unique output directory per campaign.
+uv run python tests/test_performance/benchmark_scaling.py \
+  --output-dir benchmark-output/scaling-v2 \
+  --timeout-seconds 600 --memory-limit-mb 4096
+
+# Bounded real-backend smoke with the same two warmups/five measured repeats.
+uv run python tests/test_performance/benchmark_scaling.py \
+  --sizes 2 --geometries chain --radii 1.1 \
+  --output-dir benchmark-output/scaling-v2-smoke
+```
+
+Scaling supports `--sizes`, `--geometries chain rectangle`, `--radii` (Rb/a),
+repeatable `--scenario ID`, `--warmups`, `--repeat-count`, `--timeout-seconds`,
+`--memory-limit-mb`, `--observable-atol` and `--output-dir`. Defaults are the
+plan matrix, two warmups, five repeats, 600 seconds, 4096 MiB and 1e-8.
+Changing the accuracy target must be a predeclared pilot decision. Short counts
+remain incomplete diagnostics; CLI exit 0 requires every selected row to pass.
+A subset smoke does not pass full-matrix coverage. RSS supervision currently
+requires Linux `/proc`; unsupported platforms retain failed setup rows.
+
+The Python function `benchmark_scaling(n_max=16, blockade_radius=5.0,
+output_dir=".")` retains consecutive chain N=2..n_max and absolute radius;
+zero radius retains full basis. New keyword controls select the v2 axes.
+Named runtime statistics are separate from the legacy single-call `time_s`.
+To audit the frozen source, configuration, companions and saved runs from the
+repository root:
+
+```bash
+sagittarius_py/.venv/bin/python scripts/audit_scaling_campaign.py \
+  sagittarius_py/benchmark-output/scaling-v2
+```
+
+Use `--allow-partial` only to audit diagnostic/subset artifacts; its report
+still records missing successful v2 scenarios.
+
+Ablation full CPU matrix and acceptance audit, from `sagittarius_py`:
+
+```bash
+uv run python tests/test_performance/benchmark_ablation.py \
+  --sizes 4 8 12 16 20 --repeats 50 --repeat-count 5 --warmups 2 \
+  --memory-limit-mb 9216 --timeout-seconds 600 \
+  --output-dir benchmark-output/ablation-v2
+.venv/bin/python ../scripts/audit_ablation_campaign.py benchmark-output/ablation-v2
+```
+
+Use `--atom-count 4` for a single-size smoke. Shorter `--repeat-count 1
+--warmups 1 --repeats 3` runs remain incomplete diagnostic pilot evidence;
+audit them with `--allow-partial`. The output directory must be empty.
+CUDA additionally requires `--include-gpu` and `SAGITTARIUS_ENABLE_GPU_TESTS=1`;
+it measures a separate ODE workload with matched CPU trajectory gates. A
+CUDA-only follow-up preserves the old CPU archive:
+
+```bash
+SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python tests/test_performance/benchmark_ablation.py \
+  --sizes 4 8 12 16 20 --modes reduced_sparse_gpu_cached --include-gpu \
+  --repeat-count 5 --warmups 2 --cuda-parity-atol 1e-6 \
+  --memory-limit-mb 9216 --timeout-seconds 600 \
+  --output-dir benchmark-output/ablation-cuda-v2
+.venv/bin/python ../scripts/audit_ablation_campaign.py benchmark-output/ablation-cuda-v2
+```
+
+Use an installed CUDA 6.2.0 environment that passes initialized doctor. A host
+whose sandbox hides the GPU requires execution with actual device access;
+a sandbox skip/failure is not CUDA validation. Both CPU/CUDA ODE paths retain
+first/warm/repeated reset-state solves, 101-point trajectory parity and results
+with manifests. The audit independently records CPU-matvec and CUDA coverage;
+a CUDA-only run cannot close missing CPU matrix coverage. No runtime ratio is
+produced. This ablation archive alone does not cover P1 GPU geometry/application; the separate P1 campaign supplies that matrix.
+
+The full ablation matrix declares 25 rows: 16 targeted CPU paths, four full-dimension
+exclusions above N=12 and five optional CUDA paths. Reduced sparse N=20
+has D=17711 with a dense construction intermediate and needs its declared
+memory budget. CPU results cannot characterize Julia solver internals.
+
+The P1 GPU scan is implemented and its CLI was smoke-verified on chain,
+2x2 lattice and seeded weighted-MWIS fixtures. From `sagittarius_py`, use a
+prepared source/editable environment with the CUDA Julia project selected:
+
+```bash
+SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run --no-sync python tests/test_performance/benchmark_gpu.py \
+  --sizes 2 4 8 12 16 20 --warmups 2 --repeat-count 5 \
+  --memory-limit-mb 9216 --timeout-seconds 1200 \
+  --output-dir benchmark-output/p1-gpu-v2-2026-11-27
+.venv/bin/python ../scripts/audit_gpu_campaign.py benchmark-output/p1-gpu-v2-2026-11-27
+```
+
+The default includes the lattice and application fixtures; `--chains-only`
+selects only the requested chains and leaves full-matrix coverage open. Outputs
+are `gpu_bench_results` and `gpu_bench_results_suite` JSON/CSV/Markdown,
+`gpu_repeats.json`, per-scenario raw pairs/configs/logs and per-backend
+checkpoints, initialized diagnostics, runtime projects and result/manifest sets.
+Use a new output directory. Opt-in disabled means retained skipped rows;
+attempted doctor/backend failures are failed, timeouts or short pilots incomplete.
+No CUDA fallback or insufficient-repeat ratio qualifies. Memory snapshots
+are distinct from GPU peaks; ratios characterize this shared host and SDK
+boundary only. The small `benchmark_cuda_mwis_protocol.py` retains its
+`cuda_parity`/`mwis_gpu_parity` stems while sharing these measurement helpers.
+
+The MWIS/UDG performance CLI was smoke-verified at N=2,8,20 (largest pilot
+D=53760). From a prepared source/editable CPU environment in `sagittarius_py`:
+
+```bash
+uv run --no-sync python tests/test_performance/benchmark_mwis_aqc.py --tier performance \
+  --sizes 2 4 6 8 10 12 16 20 --seeds 101 102 103 104 105 \
+  --warmups 2 --repeat-count 5 --timeout-seconds 600 --memory-limit-mb 4096 \
+  --ilp-time-limit 30 --numerical-atol 1e-6 \
+  --output-dir benchmark-output/p1-mwis-v2-2026-11-27
+.venv/bin/python ../scripts/audit_mwis_campaign.py benchmark-output/p1-mwis-v2-2026-11-27
+```
+
+Run the performance tier separately from the legacy tiers in a new output directory. Five frozen graphs are five workloads; each graph
+has its own AQC/ILP distributions. Short pilots remain incomplete. Nonoptimal
+incumbents/timeouts retain diagnostics and AQC results; unproven exact quality
+metrics remain unavailable. The graph hash, actual D, native solver guarantees,
+CPU worker memory scope and independent numerical gates qualify the evidence.
+CBC subprocess peak remains unavailable; no AQC/ILP speedup is derived. Running
+without `--tier performance` preserves the initial three tiers and filenames.
+
+The solver sensitivity CLI preserves the default legacy correctness command.
+Use a new output directory for every sensitivity campaign:
+
+```bash
+uv run python tests/test_performance/benchmark_solver_performance.py \
+  --tier sensitivity --output-dir benchmark-output/solver-v2 \
+  --warmups 2 --repeat-count 5 --timeout-seconds 600 --memory-limit-mb 4096 \
+  --accuracy-atol 1e-6 --reference-stability-atol 1e-9
+
+# One real-backend configuration with the same measurement contract.
+uv run python tests/test_performance/benchmark_solver_performance.py \
+  --tier sensitivity --scenario ramp-vern9-tol10-g501 \
+  --output-dir benchmark-output/solver-v2-smoke
+
+uv run python ../scripts/audit_solver_campaign.py benchmark-output/solver-v2
+```
+
+`--scenario` is repeatable and selects known IDs from the 39-case frozen matrix.
+Default sensitivity repeats are five; legacy correctness defaults remain two.
+Counts below two warmups/five repeats produce incomplete evidence and a nonzero
+CLI exit. `--allow-partial` permits auditing a selected/diagnostic campaign without
+claiming full-matrix acceptance. Accuracy failures retain their raw times but are
+excluded from eligible summaries; a denser output grid does not refine RK4 dt.
+See [implemented solver boundaries](plans/v2.md#implemented-solver-matrix-and-measurement-boundaries).
+
+The observable CLI was piloted at N=20/count64/grid101 and
+N=20/count16/grid501, plus state-path and saved-output/order controls. Use a new
+output directory; the default `all` tier includes 12 correctness fixtures and
+52 cost configurations:
+
+```bash
+uv run python tests/test_performance/benchmark_observables.py \
+  --tier all --output-dir benchmark-output/observables-v2 \
+  --warmups 2 --repeat-count 5 --timeout-seconds 900 --memory-limit-mb 4096 \
+  --accuracy-atol 1e-8 --reference-stability-atol 1e-10 --stochastic-alpha 1e-6
+
+uv run python tests/test_performance/benchmark_observables.py \
+  --tier performance \
+  --scenario performance-n4-reduced-evolving-mixed-c64-g501-permuted \
+  --output-dir benchmark-output/observables-v2-smoke
+
+uv run python ../scripts/audit_observable_campaign.py benchmark-output/observables-v2
+```
+
+`--tier correctness` and `--tier performance` select frozen submatrices;
+`--scenario` is repeatable. Fewer than two warmups/five measured repeats remains
+incomplete for costs. Correctness-only controls have no repeated-performance
+requirement. `--allow-partial` audits selected/diagnostic campaigns without
+claiming full coverage. Only CPU/diagonal observables are measured; timing is
+end-to-end SDK collection, with output-policy caveats in the
+[observable boundaries](plans/v2.md#implemented-observable-matrix-and-measurement-boundaries).
+
+All V2 performance commands eventually expose or retain frozen scenarios, output location, warmup/independent-repeat policy and numerical resource limits. Do not assume a shared flag exists on current scripts. Public examples must retain source-checkout execution and GPU opt-in requirements.
+
+Open-system V2 (CPU local Markovian decay/dephasing; source/editable environment):
+
+```bash
+cd sagittarius_py
+uv run python tests/test_performance/benchmark_open_system_performance.py \
+  --tier all --output-dir benchmark-output/open-system-v2 \
+  --warmups 2 --repeat-count 5 --timeout-seconds 1800 \
+  --memory-limit-mb 4096 --max-density-dimension 256 --max-state-dimension 1024
+
+uv run python tests/test_performance/benchmark_open_system_performance.py \
+  --scenario performance-n2-reduced-chain-combined-scalar-mcwf-k500-raw \
+  --scenario correctness-n1-full-coherence-dephasing-scalar-lindblad \
+  --output-dir benchmark-output/open-system-v2-smoke
+
+uv run python ../scripts/accept_open_system_campaign.py benchmark-output/open-system-v2
+```
+
+The complete matrix has 99 rows: 89 cost configurations and ten correctness
+controls. Frozen default budgets exclude 14 representation/dimension rows;
+these stay skipped with reasons. The bounded acceptance audit requires every
+row accounted for and actual reduced N=20 MCWF execution, and reports excluded
+full/Lindblad coverage separately. For selected smoke or short pilots, use
+`audit_open_system_campaign.py <directory> --allow-partial`; full acceptance uses
+`accept_open_system_campaign.py`. Use a fresh output directory.
+Fixed seed20260811 timing and five statistical seeds20260811–20260815 are
+separate; seed-selected MCWF is serial. Rb=12.4 um gives D=907 at N=20. Primary
+SDK timing includes construction/collection/manifest; raw density/reference
+checks and writes are outside it. No scientific/model or public performance
+approval follows from these local measurements.
+
+<a id="v2-smoke-tier"></a>
+
+### Smoke Tier
+
+Goal: verify the implemented V2 entry point and evidence path before expensive campaigns.
+
+Minimum requirements:
+
+- One small deterministic CPU scenario per changed runner with a retained config/command and numerical sanity gate.
+- Valid JSON/CSV/Markdown, aggregate where implemented, actual result/manifest/reference links and reload validation.
+- Controlled skip, numerical failure and supervisor timeout/crash checks with retained context.
+- Warmup/measurement count and timer-boundary checks; no exact wall-clock assertions or speedup requirements.
+
+CUDA setup/parity smoke is separate and requires `SAGITTARIUS_ENABLE_GPU_TESTS=1` plus successful initialized doctor. Passing CPU smoke does not close hardware evidence.
+
+<a id="v2-correctness-tier"></a>
+
+### Correctness Tier
+
+Goal: establish frozen accuracy/reference gates before performance summaries qualify.
+
+Use small analytic Rabi/blockade/decay, projected-dense scaling/ablation, exact-MWIS with small brute force, independent observable values/order, solver sensitivity and coherent/driven dephasing references. Retain requested/effective settings, stable shared times, error metric/tolerance, finite-value results and applicable Python/Julia golden logs. Pilot-confirm thresholds before campaign freeze; preserve mismatches as failed rows.
+
+Numerical targets and exact fixtures are defined per suite in [plan v2](plans/v2.md). Independent references, solver refinement, statistical uncertainty and physical approximation errors have separate meanings. Under-resolved solver cases remain visible but cannot rank performance at an unmet accuracy target.
+
+<a id="v2-parity-tier"></a>
+
+### Parity Tier
+
+Goal: compare execution paths under the same declared scenario and compatible accuracy.
+
+- CPU/CUDA: identical basis/input/precision, pulse, solver/output/observable policy; warm both paths, synchronize GPU and retain per-size trajectory parity.
+- Full/projected/reduced and dense/sparse: verify the intended operator/state mapping and disclose approximation/dimension differences.
+- Python/Julia: preserve atom/bitstring ordering, addressing, effective solver and serialized metadata.
+- Solver methods: compare shared output times and verified references; use legal adaptive Tsit5/Vern9 or fixed RK4 settings.
+- MCWF/Lindblad: use declared multi-seed uncertainty and common times; more trajectories need not improve every seed monotonically.
+
+Retain both paths' diagnostics, results/manifests/reference reports and unavailable combinations. CPU matvec and CUDA ODE solve are separate workloads and cannot yield a parity-based speedup.
+
+<a id="v2-scaling-tier"></a>
+
+### Scaling Tier
+
+Goal: execute the declared performance matrices with repeatable measurement and retained resource boundaries.
+
+| Suite/axis | Target coverage |
+| :--- | :--- |
+| Scaling atoms/geometry/radius | N=2,4,6,8,12,16,20; chains/declared rectangles; Rb/a=1.1,1.5,2.1. |
+| MWIS instances | N=2,4,6,8,10,12,16,20; five frozen weighted instances per size; independent AQC/ILP repeats. |
+| Open-system | N=1,2,4,6,8,10,12,16,20; separate Lindblad/MCWF resource limits; 100/500/1000 trajectories. |
+| GPU/reduced ablation | Bounded N=20 extensions with per-size CPU/CUDA gates or reduced-path references as applicable. |
+| Solver/observable cost | Declared tolerance/step/grid and type/count/order matrices; 21/101/501 output points. |
+
+Freeze the scenario list, exact replay inputs/hash, reference/statistical policy, limits and stop conditions. Use two warmups and at least five independent eligible measurements by default; retain all raw rows and statistic membership. Separate setup/solve/serialization, process-lifetime peaks and GPU snapshots. Preflight D, D^2 and dense intermediate allocations and preserve all budget exclusions/attempted failures.
+
+Do not expand every axis into an unbounded Cartesian product; use plan-defined anchor scans and selected combinations. Record lower measured limits and large-case reference gaps. A skipped N=20 row documents an unexecuted target and leaves successful coverage open.
+
+Performance-tier acceptance for all seven suites includes the plan's
+[suite-specific timing outputs](plans/v2.md#runtime-reporting-requirements-for-all-seven-suites):
+explicit timer scope, per-configuration raw records, median/min/max/p25/p75,
+eligible counts/membership and matching companion summaries. Include numerical
+error, graph-quality or stochastic-uncertainty context as applicable. Smoke,
+correctness-only controls and rejection tests do not require a five-repeat
+performance campaign. Existing [P0 distributions](reports/p0-runtime-statistics-2026-11-27.md)
+can be tabulated without rerunning computation; no new P1 flags or runner
+completion are implied by these documentation requirements.
+
+<a id="v2-stress-tier"></a>
+
+### Stress Tier
+
+Goal: characterize practical representation/hardware limits with retained failure evidence.
+
+Declare timeout, memory budget, stop condition, retry policy and process/device ownership before execution. Keep backend initialization, first-solve and warmed timing distinct, with attributable hardware/runtime/container/commit metadata. A parent supervisor records timeout/OOM/crash outcomes even if the child cannot write its final artifact.
+
+Full dense/sparse construction, Lindblad D-by-D storage, reduced paths and MCWF each have their own budget. Do not attempt allocations already known to exceed it. Preserve raw failures and partial data; a failure-free subset is not a complete scale-limit result. Stress work does not replace small correctness gates, the declared performance campaign or public governance review. P2 advanced cluster/noise work stays outside this V2 plan.

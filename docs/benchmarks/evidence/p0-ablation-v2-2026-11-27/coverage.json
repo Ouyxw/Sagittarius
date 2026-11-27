@@ -1,0 +1,12 @@
+{
+  "all_target_cpu_paths_passed": true,
+  "classification": "local_only",
+  "declared_rows_accounted": true,
+  "missing_successful_cpu_paths": [],
+  "optional_cuda_status": "separate GPU-suite parity required; skips do not close CUDA scope",
+  "required_small_cpu_passed": true,
+  "successful_n20_paths": [
+    "chain-n20-reduced_matrix_free",
+    "chain-n20-reduced_sparse"
+  ]
+}

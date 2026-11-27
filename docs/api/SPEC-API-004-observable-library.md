@@ -4,7 +4,7 @@ Spec ID: `SPEC-API-004`
 Status: `Mixed`
 Roadmap: Phase 11
 Version: `observable-library-contract/v1`
-Last reviewed: 2026-06-30
+Last reviewed: 2026-11-27
 
 
 This page defines the Phase 11 diagonal observable-library contract. The first-scope diagonal declarations below are implemented; off-diagonal observables remain future work. The backward-compatible surface remains:
@@ -112,6 +112,17 @@ Required state handling:
 | MCWF CPU | Supported for first-scope observables on normalized trajectory wavefunctions. |
 | CUDA Schrodinger | Supported where vectorized GPU implementations exist, otherwise rejected with a documented diagnostic. |
 | AMDGPU / Metal | Planned backend names only; observable support must not be implied before parity tests exist. |
+
+MCWF callbacks evaluate each observable on each normalized trajectory and then
+average those callback values. For linear diagonal expectations this gives the
+usual ensemble estimate. `connected_pair_correlation` is nonlinear: the current
+output averages per-trajectory connected correlations, which generally differs
+from `<n_i n_j>_ensemble - <n_i>_ensemble * <n_j>_ensemble`. To analyze the latter,
+retain the pair and two population series and subtract their ensemble means in
+post-processing. The P1 observable decay controls use bitstring trajectories,
+whose per-trajectory connected correlation is zero; they do not establish a
+general nonlinear ensemble-correlation equivalence. This documents existing
+behavior and does not change solver dispatch or observable declarations.
 
 ## Metadata Contract
 

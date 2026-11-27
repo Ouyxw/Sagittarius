@@ -1,0 +1,84 @@
+# Verifiable Performance Claims
+
+Spec ID: `SPEC-GOV-001`
+Status: `Policy`
+Roadmap: Phase 10
+Version: `performance-claims-policy/v1`
+Last reviewed: 2026-11-27
+
+
+Sagittarius performance statements must be tied to reproducible benchmark artifacts. Use this page as the review checklist before publishing README text, reports, plots, release notes, or hardware-facing summaries.
+
+For claims involving Rydberg/MWIS mappings or neutral-atom simulator positioning, also check [`SPEC-GOV-003-prior-art-notes.md`](SPEC-GOV-003-prior-art-notes.md). For public releases or external reports, create or update a row in [`SPEC-GOV-002-disclosure-control.md`](SPEC-GOV-002-disclosure-control.md).
+
+## Claim Requirements
+
+A performance claim is verifiable only when it names all of the following:
+
+- the benchmark artifact path or generated report stem;
+- hardware model, accelerator backend, and whether the run was inside a container;
+- `version-info/v1` metadata, including Python, Julia, Sagittarius.jl, and git source/build fields when available;
+- solver configuration, tolerances, pulse schedule, blockade radius, and problem size;
+- measured metric names exactly as written in the `benchmark-artifact/v1` rows;
+- date or commit associated with the artifact.
+
+Avoid unqualified claims such as "production ready", "linear scaling", "efficiently solves NP-hard instances", "GPU is faster", or "N=20 is sub-second" unless the same sentence or adjacent paragraph points to the exact artifact and configuration that produced the number.
+
+## Approved Wording Patterns
+
+Use bounded wording:
+
+- "In artifact `<path>`, benchmark `<name>` measured `<metric>` on `<hardware>` for `<problem/config>`."
+- "For this artifact only, CUDA was faster than CPU for rows where `<condition>` held."
+- "The benchmark script emits `benchmark-artifact/v1` JSON plus CSV and Markdown companions; rerun it on the target machine before comparing results."
+
+Use capability wording for unmeasured paths:
+
+- "The CUDA path exists and is experimental."
+- "AMDGPU and Metal are planned API names and require backend-specific validation before performance claims."
+- "MWIS examples are research scaffolding; exact correctness should be checked with `batch_verify.py` or another exact baseline."
+
+## Current Artifact Sources
+
+The retained [Phase 16 closure archive](../benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md) records local, reviewable execution evidence. It is not release-grade evidence and must not be cited publicly without the disclosure workflow below.
+
+The [v2 P0 scaling archive](../benchmarks/evidence/p0-scaling-v2-2026-11-26/README.md) retains a complete local matrix and automated evidence audit. It remains local-only; its exact timing/reference/memory boundaries and lack of independent governance approval must accompany interpretation.
+
+The [v2 P0 ablation archive](../benchmarks/evidence/p0-ablation-v2-2026-11-27/README.md)
+retains fixed-input Python CPU matvec measurements and a saved-output acceptance
+audit. It remains local-only on a shared workstation; independent governance
+review, CUDA parity and public performance approval are separate.
+
+The [optional ablation CUDA archive](../benchmarks/evidence/p0-ablation-cuda-v2-2026-11-27/README.md)
+retains hardware-backed five-size matched CPU/CUDA ODE parity. Its source fixes,
+end-to-end timer boundaries, host observable accumulation, snapshots versus
+unavailable GPU peaks and preserved failed/interrupted attempts must accompany
+interpretation. It derives no performance ratio and remains local-only.
+
+The repository scripts that produce claim-ready artifacts are:
+
+| Script | Artifact stem | Scope |
+| :--- | :--- | :--- |
+| `sagittarius_py/tests/test_performance/benchmark_scaling.py` | `scaling_results`, `scaling_results_suite` | Frozen CPU geometry/radius/size matrix, numerical gates, independent repeats and resource evidence; exact scope and acceptance in the Phase 16 matrix. |
+| `sagittarius_py/tests/test_performance/benchmark_gpu.py` | `gpu_bench_results` | CPU vs CUDA timing with observable evaluation. |
+| `sagittarius_py/tests/test_performance/benchmark_cuda_mwis_protocol.py` | `cuda_parity`, `mwis_gpu_parity` | Opt-in, doctor-gated CPU/CUDA and weighted-MWIS parity with local-only disclosure. |
+| `sagittarius_py/tests/test_performance/benchmark_cluster.py` | `cluster_bench_results` | Parallel parameter-sweep timing. |
+| `sagittarius_py/tests/test_performance/benchmark_ablation.py` | `ablation_bench_results`, `ablation_bench_results_suite` | Fixed-input Python CPU matvec batches with independent repeats, numerical/resource gates and saved-output audit; optional CUDA ODE has separate matched-CPU trajectory/configuration gates, saved results/manifests and independent timing summaries; no solve ratio is produced. Historical H^k*psi timings cannot be pooled with v2. |
+| `sagittarius_py/tests/test_performance/benchmark_solver_performance.py` | `solver_performance` | Repeated CPU path correctness gates and Tsit5/Vern9/RK4 trajectory comparison. |
+| `sagittarius_py/tests/test_performance/benchmark_open_system_performance.py` | `open_system_performance`, `open_system_performance_suite` | Guarded local decay/dephasing Lindblad/MCWF runtime and throughput, small analytic/dense/raw-density checks and five-seed absolute uncertainty; representation exclusions and large interacting reference gaps remain explicit. No scientific validation or public-use approval follows from the runner. |
+| `sagittarius_py/tests/test_performance/benchmark_sweep_cluster.py` | `sweep_cluster` | Local ParallelSimulation sweep throughput, resumability, and aggregate evidence. |
+| `sagittarius_py/tests/test_performance/benchmark_mwis_aqc.py` | `mwis_aqc_smoke`, `mwis_aqc_correctness`, `mwis_aqc_scaling` | Seeded weighted UDG/AQC tiers with exact ILP, feasibility, objective-gap, and optimal-success-probability evidence. |
+| `sagittarius_py/projects/mwis_udg/batch_verify.py` | `mwis-batch-verification/v1` in-memory report | Project-specific seeded AQC-vs-ILP verification helper; it is not a benchmark-artifact writer. |
+
+Generated benchmark JSON files carry `benchmark-artifact/v1`, companion CSV/Markdown tables, runtime/build/backend metadata, process memory usage, and linked run manifests when simulations produce `SimulationResult` objects.
+
+The [P1 open-system local campaign](../benchmarks/evidence/p1-open-system-v2-2026-11-27/README.md) accounts for all 99 frozen rows: 85 pass and 14 resource exclusions remain explicit. All 375 eligible measured SDK calls, 916 first/warm/measured/statistical/correctness results and 63 separate tighter results are retained. Reduced N=20 (Rb=12.4 um, D=907) executes MCWF at 100/500/1000 trajectories with five separate seeds and target-size analytic decay controls. Independent small dense/analytic references, 67 raw-density histories, trace/positivity/coherence, seed uncertainty, runtime/throughput statistics, manifests and all companions pass original/relocated backend-free audits. Full N=20 Lindblad/full-space coverage and independent large interacting references remain open. This is bounded shared-workstation local evidence, separate from scientific validation, recurring RC and public-use approval.
+
+## Visualization Outputs
+Public `plot_runtime_scaling`, `plot_memory_scaling`, `plot_solver_comparison`, `plot_success_failure_summary`, `plot_cpu_gpu_error_comparison`, and `save_mwis_benchmark_figure` validate a complete `benchmark-artifact/v1` envelope before rendering. The separate `plot_diagnostic_*` and `save_diagnostic_mwis_figure` helpers accept local mappings solely for diagnostic use and are not claim-ready evidence.
+
+Phase 19 figures, sidecars, and reports are presentation outputs. They do not convert local timing dictionaries into benchmark evidence. Before a chart, report, or exported image is used to support a public performance statement, reviewers must verify the source `benchmark-artifact/v1`, linked manifests, version metadata, and disclosure workflow. A caller-provided `artifact_id` or `benchmark_evidence` classification is not evidence validation.
+
+## Historical Notes
+
+Older Markdown summaries in `sagittarius_py/tests/test_performance/` or `sagittarius_py/projects/mwis_udg/` may record one-off local measurements. Treat them as historical notes unless they reference a current `benchmark-artifact/v1` file and include the exact environment and configuration. Prefer regenerating artifacts with the current scripts before using any number externally.

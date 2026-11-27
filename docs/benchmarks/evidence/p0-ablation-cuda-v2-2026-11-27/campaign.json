@@ -1,0 +1,688 @@
+{
+  "classification": "local_only; software/numerical evidence, no public performance or physical approximation claims",
+  "command": [
+    "tests/test_performance/benchmark_ablation.py",
+    "--sizes",
+    "4",
+    "8",
+    "12",
+    "16",
+    "20",
+    "--modes",
+    "reduced_sparse_gpu_cached",
+    "--include-gpu",
+    "--repeat-count",
+    "5",
+    "--warmups",
+    "2",
+    "--cuda-parity-atol",
+    "1e-6",
+    "--memory-limit-mb",
+    "9216",
+    "--timeout-seconds",
+    "600",
+    "--output-dir",
+    "benchmark-output/p0-ablation-cuda-v2-final-2026-11-27"
+  ],
+  "config_sha256": "93d9c8a34504c383b05bb5619e1aa061e335d3aea839098458f0725426c8ccf8",
+  "cwd": "/home/oyxw/Sagittarius/sagittarius_py",
+  "frozen_at": "2026-11-27T02:02:01.584952+00:00",
+  "hardware": {
+    "cpu_model": "Intel(R) Core(TM) i7-14700KF",
+    "physical_memory_bytes": 16637784064
+  },
+  "include_gpu": true,
+  "julia_source_sha256": {
+    "Sagittarius.jl": "0f46cd4e74e89905dcb0518ddb3d60e0b0dcba07a6a347e6479f6c0c4e04c6b8",
+    "cluster.jl": "a20afd1bcfaa367160eedfacd538f44eacb445f350c14ef553cbfc701e31976a",
+    "logging.jl": "d828b4e620c392230d5079f190351ae464204301555663fbf923fe81915faaa2",
+    "physics.jl": "5e67f1a84ad7aafeace6289cf0dd1d5e98e95df8434a0683ca3bfdc07402c102",
+    "program.jl": "ac025b03a5d7066c3c010069aaef47b8009296449022203c7a36bd83293b154c",
+    "solver.jl": "c6a8151f7d06290f173fe00905ce20673e2ac3013b4647b5667840bb80ce83ff"
+  },
+  "output_dir": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p0-ablation-cuda-v2-final-2026-11-27",
+  "plan_version": "benchmark-implementation-plan/v2",
+  "protocol_version": "benchmark-protocol/v1",
+  "python_executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+  "repeat_count": 5,
+  "repeats": 50,
+  "scenarios": [
+    {
+      "C6": 100.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 8,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2147526656,
+      "full_dim": 16,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.5,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 8,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n4-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 55,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2155998976,
+      "full_dim": 256,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.78515625,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 55,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n8-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 377,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2148738304,
+      "full_dim": 4096,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.907958984375,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 377,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n12-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 2584,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2158729216,
+      "full_dim": 65536,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9605712890625,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 2584,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n16-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "atom i is bit i (LSB); ascending bitstring basis",
+      "backend": "CUDA",
+      "basis": "blockade_reduced",
+      "basis_size": 17711,
+      "blockade_radius": 3.0,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          14.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          18.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          22.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          26.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          30.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          34.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          38.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "estimated_peak_bytes": 2242697984,
+      "full_dim": 1048576,
+      "geometry": "chain",
+      "mode": "reduced_sparse_gpu_cached",
+      "omega": 6.283185307179586,
+      "pruned_fraction": 0.9831094741821289,
+      "radius_ratio": 1.5,
+      "reduced_basis_size": 17711,
+      "representation": "blockade-reduced cached sparse matrix",
+      "required": false,
+      "scenario_id": "chain-n20-reduced_sparse_gpu_cached",
+      "spacing": 2.0,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "workload": "ode_solve"
+    }
+  ],
+  "settings": {
+    "gpu_opt_in": true,
+    "measurement": {
+      "cuda_parity_atol": 1e-06,
+      "full_rtol": 1e-12,
+      "gpu_duration": 0.2,
+      "include_gpu": true,
+      "max_full_dim": 4096,
+      "memory_limit_mb": 9216.0,
+      "reduced_atol": 1e-10,
+      "repeat_count": 5,
+      "repeats": 50,
+      "seed": 1234,
+      "warmups": 2
+    },
+    "memory_limit_bytes": 9663676416,
+    "timeout_seconds": 600.0
+  },
+  "source": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": null
+      },
+      "python": {
+        "cache_tag": "cpython-311",
+        "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.39"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.11.15"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "610.88",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "610.88"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "610.88",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "nvcc": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        },
+        "nvidia_smi": {
+          "missing": false,
+          "ok": true,
+          "output": "NVIDIA GeForce RTX 5070 Ti, 610.88, 16303, 12.0",
+          "query_fields": [
+            "name",
+            "driver_version",
+            "memory.total",
+            "compute_cap"
+          ],
+          "raw_output": "NVIDIA GeForce RTX 5070 Ti, 610.88, 16303, 12.0",
+          "returncode": 0
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "11f22d22eeb794f9cc2b53448d36df19bf21d4a7",
+        "git_commit_short": "11f22d2",
+        "git_dirty": true,
+        "root": "/home/oyxw/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": false,
+      "devcontainer": false,
+      "id": null,
+      "image": null
+    },
+    "in_container": false,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": null
+    },
+    "julia_version": null,
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": {
+      "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.6.1",
+        "numpy": "2.4.6",
+        "pandas": "3.0.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.17.1",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.11.15"
+    },
+    "python_version": "3.11.15",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  },
+  "source_file_sha256": {
+    "ablation.py": "473d15d087e3d56266943756770f195a337394429ef9d61877a679d186e4fe46",
+    "ablation_benchmark.py": "0131999358401929d11af2390aefaef63e2bb4b22d39c60f183a8f14a608d9d3",
+    "api.py": "cf19e5374c883f0c2d45b0283a41922a85744f13fbf976dfb3029522c8207c83",
+    "benchmark_failures.py": "ac05b2ffc6b6f9cc1fb7efe8147947b66c4e1b7d5340498e240a0e5616cdf421",
+    "benchmark_measurement.py": "7eb88b5fa8ced710e64d1952bf4d72b09a53ff7a4e9f7ab907bfd07b1bc702bd",
+    "benchmark_suite.py": "370759e72d545881814fc9548376d60a03a09ab9b5fa0076e46dbf05c8317197",
+    "benchmarking.py": "af7d7d91dfe15d8a2a9f0565059baea1309bddde1366aa31ec1e56e0d88fd04b",
+    "cuda_parity.py": "8a6e2afb5f9d6dc3d0db9c8f70c894db5bee5b184b0d06972297c9e3e1715f2d",
+    "runtime.py": "1c01231f6909b61f379de5958a5d1c20acef89d179525c67d7c0bb657a0781d7",
+    "scaling_benchmark.py": "c54e983e58051eec26e27dc661eb0c5cc3f67900f3e175cb311c35ec81b49e8e"
+  },
+  "stop_policy": "continue, preserve all declared paths and partial measurements",
+  "thread_environment": {
+    "JULIA_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "workload_version": "matched-cpu-cuda-ode/v2"
+}

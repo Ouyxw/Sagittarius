@@ -1,0 +1,16 @@
+{
+  "policy_sha256": "84ea6a467b71507b30317f3c6fed32b66ea29f0cc2cae85c3d0d03e8839f705e",
+  "policy_recorded_after_completed_scenarios": [
+    "rabi-tsit5-tol6-g101",
+    "rabi-tsit5-tol8-g101",
+    "rabi-tsit5-tol10-g101",
+    "rabi-vern9-tol6-g101",
+    "rabi-vern9-tol8-g101",
+    "rabi-vern9-tol10-g101",
+    "rabi-rk4-s100-g101",
+    "rabi-rk4-s200-g101",
+    "rabi-rk4-s400-g101"
+  ],
+  "ramp_measurement_started": false,
+  "reason": "Operationalize plan-v2 requirement to retain under-resolved calls; thresholds and measured configurations are unchanged."
+}

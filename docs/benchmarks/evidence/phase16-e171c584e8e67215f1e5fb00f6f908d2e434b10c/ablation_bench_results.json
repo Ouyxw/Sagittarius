@@ -1,0 +1,1985 @@
+{
+  "artifact_type": "sagittarius.benchmark",
+  "artifacts": {
+    "csv": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/ablation_bench_results.csv",
+    "markdown": "/workspaces/Sagittarius/docs/benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/ablation_bench_results.md"
+  },
+  "created_at": "2026-08-12T09:58:36.968151+00:00",
+  "description": "Compares full dense, full sparse, reduced matrix-free, reduced sparse, and reduced sparse CUDA-cached execution paths.",
+  "diagnostics": {
+    "available": true,
+    "backend_maturity": {
+      "AMDGPU": {
+        "notes": "Julia package hook exists, but parity and container tests are not established.",
+        "status": "planned"
+      },
+      "CPU": {
+        "notes": "Default SciML/OrdinaryDiffEq execution path covered by the regular test suite.",
+        "status": "stable"
+      },
+      "CUDA": {
+        "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+        "status": "experimental"
+      },
+      "METAL": {
+        "notes": "Julia package hook exists, but parity and CI coverage are not established.",
+        "status": "planned"
+      }
+    },
+    "backend_probe": null,
+    "backend_source": "source_checkout",
+    "capabilities": {
+      "abi": {
+        "backend": "CUDA",
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "591.86"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "driver": {
+          "version": "591.86"
+        },
+        "host": {
+          "julia": {
+            "available": true,
+            "path_env": null,
+            "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+            "sagittarius_julia_version": "1.0.8",
+            "source": "source_checkout",
+            "version": "1.11.9"
+          },
+          "python": {
+            "cache_tag": "cpython-310",
+            "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+            "implementation": "CPython",
+            "libc": {
+              "name": "glibc",
+              "version": "2.35"
+            },
+            "machine": "x86_64",
+            "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+            "processor": "x86_64",
+            "system": "Linux",
+            "version": "3.10.12"
+          }
+        },
+        "maturity": {
+          "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+          "status": "experimental"
+        },
+        "runtime": {
+          "nvcc": {
+            "missing": false,
+            "ok": true,
+            "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+            "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+            "returncode": 0
+          }
+        },
+        "toolchain": {
+          "compatibility": {
+            "blackwell_detected": true,
+            "blackwell_devices": [
+              {
+                "compute_capability": "12.0",
+                "driver_version": "591.86",
+                "memory_total_mib": "16303",
+                "name": "NVIDIA GeForce RTX 5070 Ti"
+              }
+            ],
+            "cuda_12_8_driver_ok": true,
+            "cuda_12_8_min_linux_driver": "570.26",
+            "cuda_12_8_min_windows_driver": "570.65",
+            "driver_version": "591.86"
+          },
+          "devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "nvcc": {
+            "missing": false,
+            "ok": true,
+            "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+            "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+            "returncode": 0
+          },
+          "nvidia_smi": {
+            "missing": false,
+            "ok": true,
+            "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "query_fields": [
+              "name",
+              "driver_version",
+              "memory.total",
+              "compute_cap"
+            ],
+            "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "returncode": 0
+          }
+        }
+      },
+      "backend": "CUDA",
+      "maturity": {
+        "notes": "Primary GPU target for containerized development; requires runtime capability checks.",
+        "status": "experimental"
+      },
+      "parity": {
+        "hardware_validated_by_doctor": false,
+        "notes": "doctor(backend='CUDA', initialize_backend=True) checks runtime capability. CPU/GPU numerical parity is validated separately by the opt-in CUDA parity suite.",
+        "status": "opt_in_hardware_parity_suite",
+        "test_entrypoints": [
+          "SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python -m pytest tests/test_gpu_acceleration.py"
+        ]
+      }
+    },
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "gpu": {
+      "compatibility": {
+        "blackwell_detected": true,
+        "blackwell_devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "cuda_12_8_driver_ok": true,
+        "cuda_12_8_min_linux_driver": "570.26",
+        "cuda_12_8_min_windows_driver": "570.65",
+        "driver_version": "591.86"
+      },
+      "devices": [
+        {
+          "compute_capability": "12.0",
+          "driver_version": "591.86",
+          "memory_total_mib": "16303",
+          "name": "NVIDIA GeForce RTX 5070 Ti"
+        }
+      ],
+      "driver": {
+        "version": "591.86"
+      },
+      "nvcc": {
+        "missing": false,
+        "ok": true,
+        "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+        "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+        "returncode": 0
+      },
+      "nvidia_smi": {
+        "missing": false,
+        "ok": true,
+        "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+        "query_fields": [
+          "name",
+          "driver_version",
+          "memory.total",
+          "compute_cap"
+        ],
+        "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+        "returncode": 0
+      }
+    },
+    "issue_details": [],
+    "issues": [],
+    "julia_backend": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": "1.11.9"
+    },
+    "requested_backend": "CUDA",
+    "runtime": {
+      "abi": {
+        "julia": {
+          "available": true,
+          "path_env": null,
+          "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+          "sagittarius_julia_version": "1.0.8",
+          "source": "source_checkout",
+          "version": "1.11.9"
+        },
+        "python": {
+          "cache_tag": "cpython-310",
+          "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+          "implementation": "CPython",
+          "libc": {
+            "name": "glibc",
+            "version": "2.35"
+          },
+          "machine": "x86_64",
+          "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+          "processor": "x86_64",
+          "system": "Linux",
+          "version": "3.10.12"
+        }
+      },
+      "backend_toolchains": {
+        "AMDGPU": {
+          "rocm_smi": {
+            "missing": true,
+            "ok": false,
+            "output": null,
+            "returncode": null
+          }
+        },
+        "CUDA": {
+          "compatibility": {
+            "blackwell_detected": true,
+            "blackwell_devices": [
+              {
+                "compute_capability": "12.0",
+                "driver_version": "591.86",
+                "memory_total_mib": "16303",
+                "name": "NVIDIA GeForce RTX 5070 Ti"
+              }
+            ],
+            "cuda_12_8_driver_ok": true,
+            "cuda_12_8_min_linux_driver": "570.26",
+            "cuda_12_8_min_windows_driver": "570.65",
+            "driver_version": "591.86"
+          },
+          "devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "nvcc": {
+            "missing": false,
+            "ok": true,
+            "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+            "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+            "returncode": 0
+          },
+          "nvidia_smi": {
+            "missing": false,
+            "ok": true,
+            "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "query_fields": [
+              "name",
+              "driver_version",
+              "memory.total",
+              "compute_cap"
+            ],
+            "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+            "returncode": 0
+          }
+        },
+        "METAL": {
+          "metal_compiler": {
+            "missing": true,
+            "ok": false,
+            "output": null,
+            "returncode": null
+          }
+        }
+      },
+      "build": {
+        "build_id": null,
+        "build_number": null,
+        "ci": false,
+        "source": {
+          "git_branch": "feature/benchmarking",
+          "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+          "git_commit_short": "e171c58",
+          "git_dirty": true,
+          "root": "/workspaces/Sagittarius"
+        }
+      },
+      "container": {
+        "detected": true,
+        "devcontainer": true,
+        "id": "07f419671ddf",
+        "image": null
+      },
+      "in_container": true,
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": "1.11.9"
+      },
+      "julia_version": "1.11.9",
+      "package_version": "1.0.8",
+      "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+      "python": {
+        "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "packages": {
+          "docplex": "2.32.264",
+          "juliacall": "0.9.35",
+          "juliapkg": "0.1.24",
+          "matplotlib": "3.10.9",
+          "networkx": "3.4.2",
+          "numpy": "2.2.6",
+          "pandas": "2.3.3",
+          "pulp": "3.3.2",
+          "sagittarius-py": "1.0.8",
+          "scipy": "1.15.3",
+          "seaborn": "0.13.2"
+        },
+        "version": "3.10.12"
+      },
+      "python_version": "3.10.12",
+      "sagittarius_julia_version": "1.0.8",
+      "schema_version": "version-info/v1"
+    },
+    "schema_version": "doctor/v2.1"
+  },
+  "hardware": {
+    "backend_devices": [],
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "gpu": {
+      "compatibility": {
+        "blackwell_detected": true,
+        "blackwell_devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "cuda_12_8_driver_ok": true,
+        "cuda_12_8_min_linux_driver": "570.26",
+        "cuda_12_8_min_windows_driver": "570.65",
+        "driver_version": "591.86"
+      },
+      "devices": [
+        {
+          "compute_capability": "12.0",
+          "driver_version": "591.86",
+          "memory_total_mib": "16303",
+          "name": "NVIDIA GeForce RTX 5070 Ti"
+        }
+      ],
+      "driver": {
+        "version": "591.86"
+      },
+      "nvcc": {
+        "missing": false,
+        "ok": true,
+        "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+        "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+        "returncode": 0
+      },
+      "nvidia_smi": {
+        "missing": false,
+        "ok": true,
+        "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+        "query_fields": [
+          "name",
+          "driver_version",
+          "memory.total",
+          "compute_cap"
+        ],
+        "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+        "returncode": 0
+      }
+    },
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35"
+  },
+  "markdown_table": "| mode | status | backend | workload | representation | atom_count | full_dim | basis_size | repeats | duration_s | total_time_s | time_per_operation_s | reference_error | max_rss | max_rss_unit | reason |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| full_dense | passed | {'requested_backend': 'CUDA'} | matvec | full dense matrix | 12 | 4096 | 4096 | 50 | None | 0.0672473 | 0.00134495 | 1.88388e+66 | 153468 | KiB on Linux, bytes on macOS |  |\n| full_sparse | passed | {'requested_backend': 'CUDA'} | matvec | full sparse CSR matrix | 12 | 4096 | 4096 | 50 | None | 0.00211221 | 4.22441e-05 | 1.88388e+66 | 155888 | KiB on Linux, bytes on macOS |  |\n| reduced_matrix_free | passed | {'requested_backend': 'CUDA'} | matvec | blockade-reduced matrix-free operator | 12 | 4096 | 377 | 50 | None | 0.0722425 | 0.00144485 | 0 | 155888 | KiB on Linux, bytes on macOS |  |\n| reduced_sparse | passed | {'requested_backend': 'CUDA'} | matvec | blockade-reduced sparse CSR matrix | 12 | 4096 | 377 | 50 | None | 0.000244786 | 4.89572e-06 | 0 | 157684 | KiB on Linux, bytes on macOS |  |\n| reduced_sparse_gpu_cached | passed | {'requested_backend': 'CUDA'} | ode_solve | blockade-reduced cached sparse matrix | 12 | 4096 | 377 | 1 | 0.2 | 31.9902 | 31.9902 |  | 3285936 | KiB on Linux, bytes on macOS |  |",
+  "memory": {
+    "available": true,
+    "max_rss": 3285936,
+    "max_rss_unit": "KiB on Linux, bytes on macOS"
+  },
+  "name": "Hamiltonian execution path ablation benchmark",
+  "parameters": {
+    "C6": 100.0,
+    "atom_count": 12,
+    "blockade_radius": 3.0,
+    "delta": 0.0,
+    "include_gpu": true,
+    "omega": 6.283185307179586,
+    "repeats": 50,
+    "spacing": 2.0
+  },
+  "run_manifests": [
+    {
+      "label": "reduced_sparse_gpu_cached",
+      "manifest": {
+        "backend_diagnostics": {
+          "available": true,
+          "backend_probe_available": null,
+          "backend_probe_schema": null,
+          "devices": [],
+          "issue_details": [],
+          "issues": [],
+          "requested_backend": "CUDA",
+          "versions": {}
+        },
+        "created_at": "2026-08-12T09:58:36.865433+00:00",
+        "event_ids": [
+          "SAG-EVT-0004",
+          "SAG-EVT-0005",
+          "SAG-EVT-0006"
+        ],
+        "event_taxonomy_schema": "event-taxonomy/v1",
+        "initial_state": {
+          "basis_size": 377,
+          "norm": 1.0,
+          "preparation": null
+        },
+        "pulse": {
+          "delta": {
+            "kind": "scalar",
+            "value": 0.0
+          },
+          "omega": {
+            "kind": "scalar",
+            "value": 6.283185307179586
+          }
+        },
+        "random": {
+          "effective_seed": null,
+          "n_trajectories": null,
+          "seed": null
+        },
+        "readout": {
+          "atom_count": 12,
+          "basis_bitstrings": [
+            "000000000000",
+            "100000000000",
+            "010000000000",
+            "001000000000",
+            "101000000000",
+            "000100000000",
+            "100100000000",
+            "010100000000",
+            "000010000000",
+            "100010000000",
+            "010010000000",
+            "001010000000",
+            "101010000000",
+            "000001000000",
+            "100001000000",
+            "010001000000",
+            "001001000000",
+            "101001000000",
+            "000101000000",
+            "100101000000",
+            "010101000000",
+            "000000100000",
+            "100000100000",
+            "010000100000",
+            "001000100000",
+            "101000100000",
+            "000100100000",
+            "100100100000",
+            "010100100000",
+            "000010100000",
+            "100010100000",
+            "010010100000",
+            "001010100000",
+            "101010100000",
+            "000000010000",
+            "100000010000",
+            "010000010000",
+            "001000010000",
+            "101000010000",
+            "000100010000",
+            "100100010000",
+            "010100010000",
+            "000010010000",
+            "100010010000",
+            "010010010000",
+            "001010010000",
+            "101010010000",
+            "000001010000",
+            "100001010000",
+            "010001010000",
+            "001001010000",
+            "101001010000",
+            "000101010000",
+            "100101010000",
+            "010101010000",
+            "000000001000",
+            "100000001000",
+            "010000001000",
+            "001000001000",
+            "101000001000",
+            "000100001000",
+            "100100001000",
+            "010100001000",
+            "000010001000",
+            "100010001000",
+            "010010001000",
+            "001010001000",
+            "101010001000",
+            "000001001000",
+            "100001001000",
+            "010001001000",
+            "001001001000",
+            "101001001000",
+            "000101001000",
+            "100101001000",
+            "010101001000",
+            "000000101000",
+            "100000101000",
+            "010000101000",
+            "001000101000",
+            "101000101000",
+            "000100101000",
+            "100100101000",
+            "010100101000",
+            "000010101000",
+            "100010101000",
+            "010010101000",
+            "001010101000",
+            "101010101000",
+            "000000000100",
+            "100000000100",
+            "010000000100",
+            "001000000100",
+            "101000000100",
+            "000100000100",
+            "100100000100",
+            "010100000100",
+            "000010000100",
+            "100010000100",
+            "010010000100",
+            "001010000100",
+            "101010000100",
+            "000001000100",
+            "100001000100",
+            "010001000100",
+            "001001000100",
+            "101001000100",
+            "000101000100",
+            "100101000100",
+            "010101000100",
+            "000000100100",
+            "100000100100",
+            "010000100100",
+            "001000100100",
+            "101000100100",
+            "000100100100",
+            "100100100100",
+            "010100100100",
+            "000010100100",
+            "100010100100",
+            "010010100100",
+            "001010100100",
+            "101010100100",
+            "000000010100",
+            "100000010100",
+            "010000010100",
+            "001000010100",
+            "101000010100",
+            "000100010100",
+            "100100010100",
+            "010100010100",
+            "000010010100",
+            "100010010100",
+            "010010010100",
+            "001010010100",
+            "101010010100",
+            "000001010100",
+            "100001010100",
+            "010001010100",
+            "001001010100",
+            "101001010100",
+            "000101010100",
+            "100101010100",
+            "010101010100",
+            "000000000010",
+            "100000000010",
+            "010000000010",
+            "001000000010",
+            "101000000010",
+            "000100000010",
+            "100100000010",
+            "010100000010",
+            "000010000010",
+            "100010000010",
+            "010010000010",
+            "001010000010",
+            "101010000010",
+            "000001000010",
+            "100001000010",
+            "010001000010",
+            "001001000010",
+            "101001000010",
+            "000101000010",
+            "100101000010",
+            "010101000010",
+            "000000100010",
+            "100000100010",
+            "010000100010",
+            "001000100010",
+            "101000100010",
+            "000100100010",
+            "100100100010",
+            "010100100010",
+            "000010100010",
+            "100010100010",
+            "010010100010",
+            "001010100010",
+            "101010100010",
+            "000000010010",
+            "100000010010",
+            "010000010010",
+            "001000010010",
+            "101000010010",
+            "000100010010",
+            "100100010010",
+            "010100010010",
+            "000010010010",
+            "100010010010",
+            "010010010010",
+            "001010010010",
+            "101010010010",
+            "000001010010",
+            "100001010010",
+            "010001010010",
+            "001001010010",
+            "101001010010",
+            "000101010010",
+            "100101010010",
+            "010101010010",
+            "000000001010",
+            "100000001010",
+            "010000001010",
+            "001000001010",
+            "101000001010",
+            "000100001010",
+            "100100001010",
+            "010100001010",
+            "000010001010",
+            "100010001010",
+            "010010001010",
+            "001010001010",
+            "101010001010",
+            "000001001010",
+            "100001001010",
+            "010001001010",
+            "001001001010",
+            "101001001010",
+            "000101001010",
+            "100101001010",
+            "010101001010",
+            "000000101010",
+            "100000101010",
+            "010000101010",
+            "001000101010",
+            "101000101010",
+            "000100101010",
+            "100100101010",
+            "010100101010",
+            "000010101010",
+            "100010101010",
+            "010010101010",
+            "001010101010",
+            "101010101010",
+            "000000000001",
+            "100000000001",
+            "010000000001",
+            "001000000001",
+            "101000000001",
+            "000100000001",
+            "100100000001",
+            "010100000001",
+            "000010000001",
+            "100010000001",
+            "010010000001",
+            "001010000001",
+            "101010000001",
+            "000001000001",
+            "100001000001",
+            "010001000001",
+            "001001000001",
+            "101001000001",
+            "000101000001",
+            "100101000001",
+            "010101000001",
+            "000000100001",
+            "100000100001",
+            "010000100001",
+            "001000100001",
+            "101000100001",
+            "000100100001",
+            "100100100001",
+            "010100100001",
+            "000010100001",
+            "100010100001",
+            "010010100001",
+            "001010100001",
+            "101010100001",
+            "000000010001",
+            "100000010001",
+            "010000010001",
+            "001000010001",
+            "101000010001",
+            "000100010001",
+            "100100010001",
+            "010100010001",
+            "000010010001",
+            "100010010001",
+            "010010010001",
+            "001010010001",
+            "101010010001",
+            "000001010001",
+            "100001010001",
+            "010001010001",
+            "001001010001",
+            "101001010001",
+            "000101010001",
+            "100101010001",
+            "010101010001",
+            "000000001001",
+            "100000001001",
+            "010000001001",
+            "001000001001",
+            "101000001001",
+            "000100001001",
+            "100100001001",
+            "010100001001",
+            "000010001001",
+            "100010001001",
+            "010010001001",
+            "001010001001",
+            "101010001001",
+            "000001001001",
+            "100001001001",
+            "010001001001",
+            "001001001001",
+            "101001001001",
+            "000101001001",
+            "100101001001",
+            "010101001001",
+            "000000101001",
+            "100000101001",
+            "010000101001",
+            "001000101001",
+            "101000101001",
+            "000100101001",
+            "100100101001",
+            "010100101001",
+            "000010101001",
+            "100010101001",
+            "010010101001",
+            "001010101001",
+            "101010101001",
+            "000000000101",
+            "100000000101",
+            "010000000101",
+            "001000000101",
+            "101000000101",
+            "000100000101",
+            "100100000101",
+            "010100000101",
+            "000010000101",
+            "100010000101",
+            "010010000101",
+            "001010000101",
+            "101010000101",
+            "000001000101",
+            "100001000101",
+            "010001000101",
+            "001001000101",
+            "101001000101",
+            "000101000101",
+            "100101000101",
+            "010101000101",
+            "000000100101",
+            "100000100101",
+            "010000100101",
+            "001000100101",
+            "101000100101",
+            "000100100101",
+            "100100100101",
+            "010100100101",
+            "000010100101",
+            "100010100101",
+            "010010100101",
+            "001010100101",
+            "101010100101",
+            "000000010101",
+            "100000010101",
+            "010000010101",
+            "001000010101",
+            "101000010101",
+            "000100010101",
+            "100100010101",
+            "010100010101",
+            "000010010101",
+            "100010010101",
+            "010010010101",
+            "001010010101",
+            "101010010101",
+            "000001010101",
+            "100001010101",
+            "010001010101",
+            "001001010101",
+            "101001010101",
+            "000101010101",
+            "100101010101",
+            "010101010101"
+          ],
+          "basis_mode": "reduced",
+          "final_distribution_key": "final_bitstring_probabilities",
+          "forbidden_bitstring_count": 3719,
+          "forbidden_bitstrings_excluded": true,
+          "supports_sampling": true
+        },
+        "register": {
+          "C6": 100.0,
+          "atom_count": 12,
+          "atoms": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              2.0,
+              0.0,
+              0.0
+            ],
+            [
+              4.0,
+              0.0,
+              0.0
+            ],
+            [
+              6.0,
+              0.0,
+              0.0
+            ],
+            [
+              8.0,
+              0.0,
+              0.0
+            ],
+            [
+              10.0,
+              0.0,
+              0.0
+            ],
+            [
+              12.0,
+              0.0,
+              0.0
+            ],
+            [
+              14.0,
+              0.0,
+              0.0
+            ],
+            [
+              16.0,
+              0.0,
+              0.0
+            ],
+            [
+              18.0,
+              0.0,
+              0.0
+            ],
+            [
+              20.0,
+              0.0,
+              0.0
+            ],
+            [
+              22.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "geometry": {
+            "atom_count": 12,
+            "blockade_edge_count": 11,
+            "blockade_radius": 3.0,
+            "topology": {
+              "axis": "x",
+              "kind": "chain",
+              "n": 12,
+              "origin": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "spacing": 2.0
+            }
+          }
+        },
+        "result_type": "observables",
+        "schema_version": "run-manifest/v1",
+        "solver": {
+          "abstol": 1e-08,
+          "adaptive": true,
+          "blockade_radius": 3.0,
+          "dt": null,
+          "effective_adaptive": true,
+          "effective_dt": null,
+          "effective_method": "Tsit5",
+          "effective_saveat": null,
+          "gamma": 0.0,
+          "gamma_phi": 0.0,
+          "gpu_backend": "CUDA",
+          "method": "Tsit5",
+          "n_trajectories": 100,
+          "observable_metadata": [
+            {
+              "basis_mode": "reduced",
+              "declaration_index": 0,
+              "name": "pop0",
+              "parameters": {
+                "atom": 0
+              },
+              "type": "rydberg_population"
+            }
+          ],
+          "observables": {
+            "pop0": 0
+          },
+          "reltol": 1e-08,
+          "saveat": null,
+          "store_trajectories": false,
+          "t_span": [
+            0.0,
+            0.2
+          ],
+          "trajectory_storage": {
+            "axis_order": [
+              "trajectory",
+              "time"
+            ],
+            "observable_names": [],
+            "requested": false,
+            "schema_version": "trajectory-data/v1",
+            "stored": false,
+            "time_count": 0,
+            "trajectory_count": 0
+          },
+          "use_gpu": true,
+          "use_mc": false
+        },
+        "versions": {
+          "abi": {
+            "julia": {
+              "available": true,
+              "path_env": null,
+              "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+              "sagittarius_julia_version": "1.0.8",
+              "source": "source_checkout",
+              "version": "1.11.9"
+            },
+            "python": {
+              "cache_tag": "cpython-310",
+              "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+              "implementation": "CPython",
+              "libc": {
+                "name": "glibc",
+                "version": "2.35"
+              },
+              "machine": "x86_64",
+              "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+              "processor": "x86_64",
+              "system": "Linux",
+              "version": "3.10.12"
+            }
+          },
+          "backend_toolchains": {
+            "AMDGPU": {
+              "rocm_smi": {
+                "missing": true,
+                "ok": false,
+                "output": null,
+                "returncode": null
+              }
+            },
+            "CUDA": {
+              "compatibility": {
+                "blackwell_detected": true,
+                "blackwell_devices": [
+                  {
+                    "compute_capability": "12.0",
+                    "driver_version": "591.86",
+                    "memory_total_mib": "16303",
+                    "name": "NVIDIA GeForce RTX 5070 Ti"
+                  }
+                ],
+                "cuda_12_8_driver_ok": true,
+                "cuda_12_8_min_linux_driver": "570.26",
+                "cuda_12_8_min_windows_driver": "570.65",
+                "driver_version": "591.86"
+              },
+              "devices": [
+                {
+                  "compute_capability": "12.0",
+                  "driver_version": "591.86",
+                  "memory_total_mib": "16303",
+                  "name": "NVIDIA GeForce RTX 5070 Ti"
+                }
+              ],
+              "nvcc": {
+                "missing": false,
+                "ok": true,
+                "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+                "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+                "returncode": 0
+              },
+              "nvidia_smi": {
+                "missing": false,
+                "ok": true,
+                "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+                "query_fields": [
+                  "name",
+                  "driver_version",
+                  "memory.total",
+                  "compute_cap"
+                ],
+                "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+                "returncode": 0
+              }
+            },
+            "METAL": {
+              "metal_compiler": {
+                "missing": true,
+                "ok": false,
+                "output": null,
+                "returncode": null
+              }
+            }
+          },
+          "build": {
+            "build_id": null,
+            "build_number": null,
+            "ci": false,
+            "source": {
+              "git_branch": "feature/benchmarking",
+              "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+              "git_commit_short": "e171c58",
+              "git_dirty": true,
+              "root": "/workspaces/Sagittarius"
+            }
+          },
+          "container": {
+            "detected": true,
+            "devcontainer": true,
+            "id": "07f419671ddf",
+            "image": null
+          },
+          "in_container": true,
+          "julia": {
+            "available": true,
+            "path_env": null,
+            "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+            "sagittarius_julia_version": "1.0.8",
+            "source": "source_checkout",
+            "version": "1.11.9"
+          },
+          "julia_version": "1.11.9",
+          "package_version": "1.0.8",
+          "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+          "python": {
+            "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+            "implementation": "CPython",
+            "packages": {
+              "docplex": "2.32.264",
+              "juliacall": "0.9.35",
+              "juliapkg": "0.1.24",
+              "matplotlib": "3.10.9",
+              "networkx": "3.4.2",
+              "numpy": "2.2.6",
+              "pandas": "2.3.3",
+              "pulp": "3.3.2",
+              "sagittarius-py": "1.0.8",
+              "scipy": "1.15.3",
+              "seaborn": "0.13.2"
+            },
+            "version": "3.10.12"
+          },
+          "python_version": "3.10.12",
+          "readout": {
+            "final_bitstring_probabilities": {
+              "000000000000": 0.0022090930556591857,
+              "000000000001": 0.0018344475714087633,
+              "000000000010": 0.0027154614886927895,
+              "000000000100": 0.002934555503264778,
+              "000000000101": 0.0016778977847388733,
+              "000000001000": 0.002985697386901935,
+              "000000001001": 0.002300709560031423,
+              "000000001010": 0.0024670457208343932,
+              "000000010000": 0.0029973902878569474,
+              "000000010001": 0.002447997072507765,
+              "000000010010": 0.0034010200665198016,
+              "000000010100": 0.0026630029834372663,
+              "000000010101": 0.0015309526448664178,
+              "000000100000": 0.002999928359682969,
+              "000000100001": 0.00248178495301497,
+              "000000100010": 0.0036224119544482317,
+              "000000100100": 0.003674415676763139,
+              "000000100101": 0.0021032063622637128,
+              "000000101000": 0.002708607873735735,
+              "000000101001": 0.0020894574670890322,
+              "000000101010": 0.002251222638636193,
+              "000001000000": 0.0029999283596829733,
+              "000001000001": 0.0024890244055782956,
+              "000001000010": 0.0036726909158688245,
+              "000001000100": 0.003913687221993985,
+              "000001000101": 0.0022382798458130907,
+              "000001001000": 0.003737512646001803,
+              "000001001001": 0.0028806643263720798,
+              "000001001010": 0.0030918565172023383,
+              "000001010000": 0.002718543538842658,
+              "000001010001": 0.002220798523324541,
+              "000001010010": 0.00308821397200041,
+              "000001010100": 0.002429635580187475,
+              "000001010101": 0.0013966279316840028,
+              "000010000000": 0.002997390287856949,
+              "000010000001": 0.0024885683996535616,
+              "000010000010": 0.0036810613928202137,
+              "000010000100": 0.003965432452356435,
+              "000010000101": 0.0022674494013668104,
+              "000010001000": 0.003978306296301391,
+              "000010001001": 0.0030657396690767632,
+              "000010001010": 0.0032880809764010946,
+              "000010010000": 0.0037488080558410975,
+              "000010010001": 0.003061835396870575,
+              "000010010010": 0.004254610501736752,
+              "000010010100": 0.003334524136765013,
+              "000010010101": 0.0019169634046446768,
+              "000010100000": 0.0027185435388426674,
+              "000010100001": 0.0022491243554534487,
+              "000010100010": 0.0032834930088132745,
+              "000010100100": 0.0033336958940521663,
+              "000010100101": 0.0019081495916440838,
+              "000010101000": 0.0024691965826342316,
+              "000010101001": 0.0019047276281658268,
+              "000010101010": 0.002051982453162881,
+              "000100000000": 0.002985697386901934,
+              "000100000001": 0.002479235129462934,
+              "000100000010": 0.0036693096984795055,
+              "000100000100": 0.003962495502016053,
+              "000100000101": 0.0022656740681505113,
+              "000100001000": 0.004018760252041958,
+              "000100001001": 0.003096798318179585,
+              "000100001010": 0.00332084903863608,
+              "000100010000": 0.003978306296301391,
+              "000100010001": 0.0032491559641416768,
+              "000100010010": 0.004514260880140094,
+              "000100010100": 0.0035354195845319018,
+              "000100010101": 0.0020324918444384363,
+              "000100100000": 0.0037375126460018047,
+              "000100100001": 0.0030920089800055652,
+              "000100100010": 0.00451327878140497,
+              "000100100100": 0.004578910287325114,
+              "000100100101": 0.002620923321659258,
+              "000100101000": 0.0033785587025850646,
+              "000100101001": 0.002606254517135162,
+              "000100101010": 0.0028079725552401062,
+              "000101000000": 0.0027086078737357335,
+              "000101000001": 0.002247345753632851,
+              "000101000010": 0.003316234641980702,
+              "000101000100": 0.003534563192025564,
+              "000101000101": 0.002021447590833317,
+              "000101001000": 0.003378558702585066,
+              "000101001001": 0.0026039942814923326,
+              "000101001010": 0.0027948623790769412,
+              "000101010000": 0.0024691965826342268,
+              "000101010001": 0.0020170946054288473,
+              "000101010010": 0.0028048900101953363,
+              "000101010100": 0.0022065076521092433,
+              "000101010101": 0.0012683704359658591,
+              "001000000000": 0.0029345555032647846,
+              "001000000001": 0.0024368523627753456,
+              "001000000010": 0.003607042780935396,
+              "001000000100": 0.0038974322564606046,
+              "001000000101": 0.002228450734821548,
+              "001000001000": 0.0039624955020160545,
+              "001000001001": 0.0030534156576707697,
+              "001000001010": 0.003274206407833574,
+              "001000010000": 0.003965432452356435,
+              "001000010001": 0.0032386146036462262,
+              "001000010010": 0.0044994724085669225,
+              "001000010100": 0.00352326098547743,
+              "001000010101": 0.0020255101569420114,
+              "001000100000": 0.00391368722199399,
+              "001000100001": 0.003237728984768176,
+              "001000100010": 0.004725830417116333,
+              "001000100100": 0.004793870511943459,
+              "001000100101": 0.0027439714842074077,
+              "001000101000": 0.003534563192025566,
+              "001000101001": 0.002726607976544414,
+              "001000101010": 0.002937687717068056,
+              "001001000000": 0.0036744156767631406,
+              "001001000001": 0.0030486508731338096,
+              "001001000010": 0.004498491663537899,
+              "001001000100": 0.004793870511943461,
+              "001001000101": 0.002741664277944164,
+              "001001001000": 0.004578910287325114,
+              "001001001001": 0.0035291639729425365,
+              "001001001010": 0.0037878891611952373,
+              "001001010000": 0.0033336958940521637,
+              "001001010001": 0.00272331826946253,
+              "001001010010": 0.003786996269498292,
+              "001001010100": 0.0029793380503921993,
+              "001001010101": 0.0017126142949425414,
+              "001010000000": 0.0026630029834372685,
+              "001010000001": 0.002210951563254547,
+              "001010000010": 0.0032704482192597046,
+              "001010000100": 0.00352326098547743,
+              "001010000101": 0.0020146125478577846,
+              "001010001000": 0.0035354195845319018,
+              "001010001001": 0.002724442967717943,
+              "001010001010": 0.0029220227682240038,
+              "001010010000": 0.003334524136765013,
+              "001010010001": 0.002723467459360076,
+              "001010010010": 0.003784416574751822,
+              "001010010100": 0.0029659698986204647,
+              "001010010101": 0.0017050881334251262,
+              "001010100000": 0.0024296355801874787,
+              "001010100001": 0.0020101007040177797,
+              "001010100010": 0.0029345296930759894,
+              "001010100100": 0.0029793380503922,
+              "001010100101": 0.0017053218550937348,
+              "001010101000": 0.0022065076521092446,
+              "001010101001": 0.0017020912916582045,
+              "001010101010": 0.0018336843466957673,
+              "010000000000": 0.002715461488692786,
+              "010000000001": 0.0022549345786276936,
+              "010000000010": 0.0033378641409248767,
+              "010000000100": 0.0036070427809353936,
+              "010000000101": 0.0020624090363767283,
+              "010000001000": 0.0036693096984795003,
+              "010000001001": 0.0028274874057875286,
+              "010000001010": 0.0030319158432982915,
+              "010000010000": 0.0036810613928202076,
+              "010000010001": 0.0030063597869965184,
+              "010000010010": 0.00417676611385588,
+              "010000010100": 0.0032704482192597055,
+              "010000010101": 0.0018801707332383932,
+              "010000100000": 0.0036726909158688193,
+              "010000100001": 0.0030383509673734014,
+              "010000100010": 0.0044347844057914315,
+              "010000100100": 0.004498491663537899,
+              "010000100101": 0.002574900571818885,
+              "010000101000": 0.003316234641980702,
+              "010000101001": 0.002558188596034812,
+              "010000101010": 0.0027562399569658965,
+              "010001000000": 0.0036224119544482273,
+              "010001000001": 0.0030054977327177114,
+              "010001000010": 0.004434784405791428,
+              "010001000100": 0.004725830417116331,
+              "010001000101": 0.002702752947016342,
+              "010001001000": 0.00451327878140497,
+              "010001001001": 0.0034785807271986314,
+              "010001001010": 0.0037336059984143712,
+              "010001010000": 0.0032834930088132706,
+              "010001010001": 0.002682309409364772,
+              "010001010010": 0.0037299817151120055,
+              "010001010100": 0.0029345296930759894,
+              "010001010101": 0.0016868564097464068,
+              "010010000000": 0.0034010200665198034,
+              "010010000001": 0.0028236819712317363,
+              "010010000010": 0.00417676611385588,
+              "010010000100": 0.0044994724085669225,
+              "010010000101": 0.002572815164234345,
+              "010010001000": 0.004514260880140092,
+              "010010001001": 0.003478753491311541,
+              "010010001010": 0.003731046116401344,
+              "010010010000": 0.0042546105017367535,
+              "010010010001": 0.0034749486020042917,
+              "010010010010": 0.0048286542155856205,
+              "010010010100": 0.0037844165747518248,
+              "010010010101": 0.0021755992567256506,
+              "010010100000": 0.0030882139720004114,
+              "010010100001": 0.0025549621322108217,
+              "010010100010": 0.0037299817151120063,
+              "010010100100": 0.0037869962694982947,
+              "010010100101": 0.0021676108935966194,
+              "010010101000": 0.0028048900101953385,
+              "010010101001": 0.0021636801730083657,
+              "010010101010": 0.002330955688901224,
+              "010100000000": 0.0024670457208343915,
+              "010100000001": 0.002048563653964234,
+              "010100000010": 0.0030319158432982937,
+              "010100000100": 0.003274206407833576,
+              "010100000101": 0.0018721241609610487,
+              "010100001000": 0.0033208490386360803,
+              "010100001001": 0.0025589977312618626,
+              "010100001010": 0.002744137131054511,
+              "010100010000": 0.003288080976401091,
+              "010100010001": 0.0026854358951204807,
+              "010100010010": 0.0037310461164013443,
+              "010100010100": 0.0029220227682240038,
+              "010100010101": 0.0016798536908287942,
+              "010100100000": 0.003091856517202337,
+              "010100100001": 0.002557863394147901,
+              "010100100010": 0.003733605998414374,
+              "010100100100": 0.0037878891611952347,
+              "010100100101": 0.0021681506174079292,
+              "010100101000": 0.0027948623790769395,
+              "010100101001": 0.002155985285876196,
+              "010100101010": 0.0023228542404777463,
+              "010101000000": 0.0022512226386361884,
+              "010101000001": 0.0018678504735621393,
+              "010101000010": 0.002756239956965896,
+              "010101000100": 0.002937687717068056,
+              "010101000101": 0.0016800893425775072,
+              "010101001000": 0.002807972555240105,
+              "010101001001": 0.0021642200921164886,
+              "010101001010": 0.0023228542404777467,
+              "010101010000": 0.0020519824531628796,
+              "010101010001": 0.0016762711342700235,
+              "010101010010": 0.002330955688901224,
+              "010101010100": 0.0018336843466957697,
+              "010101010101": 0.0010540596884299398,
+              "100000000000": 0.0018344475714087566,
+              "100000000001": 0.0015233382725984357,
+              "100000000010": 0.0022549345786276936,
+              "100000000100": 0.002436852362775342,
+              "100000000101": 0.0013933252399589836,
+              "100000001000": 0.0024792351294629306,
+              "100000001001": 0.0019104419001744696,
+              "100000001010": 0.0020485636539642315,
+              "100000010000": 0.0024885683996535585,
+              "100000010001": 0.0020324379040177446,
+              "100000010010": 0.0028236819712317363,
+              "100000010100": 0.002210951563254547,
+              "100000010101": 0.00127106962360937,
+              "100000100000": 0.0024890244055782926,
+              "100000100001": 0.002059124112963061,
+              "100000100010": 0.0030054977327177114,
+              "100000100100": 0.0030486508731338074,
+              "100000100101": 0.0017450235807033052,
+              "100000101000": 0.0022473457536328484,
+              "100000101001": 0.0017336335030779806,
+              "100000101010": 0.001867850473562141,
+              "100001000000": 0.002481784953014964,
+              "100001000001": 0.002059124112963061,
+              "100001000010": 0.0030383509673734006,
+              "100001000100": 0.003237728984768174,
+              "100001000101": 0.001851692087249901,
+              "100001001000": 0.0030920089800055644,
+              "100001001001": 0.00238314644087757,
+              "100001001010": 0.0025578633941479023,
+              "100001010000": 0.0022491243554534465,
+              "100001010001": 0.0018373264834436653,
+              "100001010010": 0.0025549621322108196,
+              "100001010100": 0.0020101007040177797,
+              "100001010101": 0.0011554665817778411,
+              "100010000000": 0.002447997072507763,
+              "100010000001": 0.002032437904017746,
+              "100010000010": 0.0030063597869965175,
+              "100010000100": 0.003238614603646227,
+              "100010000101": 0.001851852214284701,
+              "100010001000": 0.003249155964141672,
+              "100010001001": 0.002503846013544551,
+              "100010001010": 0.00268543589512048,
+              "100010010000": 0.003061835396870572,
+              "100010010001": 0.002500751133465978,
+              "100010010010": 0.0034749486020042904,
+              "100010010100": 0.002723467459360075,
+              "100010010101": 0.0015656768725442246,
+              "100010100000": 0.0022207985233245408,
+              "100010100001": 0.0018373264834436653,
+              "100010100010": 0.0026823094093647703,
+              "100010100100": 0.0027233182694625323,
+              "100010100101": 0.0015587800074997207,
+              "100010101000": 0.0020170946054288473,
+              "100010101001": 0.0015559780514334835,
+              "100010101010": 0.001676271134270023,
+              "100100000000": 0.002300709560031419,
+              "100100000001": 0.001910441900174469,
+              "100100000010": 0.0028274874057875273,
+              "100100000100": 0.003053415657670769,
+              "100100000101": 0.0017458807940740363,
+              "100100001000": 0.0030967983181795795,
+              "100100001001": 0.0023863478390919782,
+              "100100001010": 0.0025589977312618617,
+              "100100010000": 0.003065739669076758,
+              "100100010001": 0.002503846013544551,
+              "100100010010": 0.0034787534913115438,
+              "100100010100": 0.002724442967717943,
+              "100100010101": 0.0015662661360440163,
+              "100100100000": 0.0028806643263720798,
+              "100100100001": 0.0023831464408775693,
+              "100100100010": 0.0034785807271986305,
+              "100100100100": 0.0035291639729425374,
+              "100100100101": 0.0020200587808875806,
+              "100100101000": 0.0026039942814923326,
+              "100100101001": 0.002008747583059566,
+              "100100101010": 0.0021642200921164886,
+              "100101000000": 0.00208945746708903,
+              "100101000001": 0.0017336335030779823,
+              "100101000010": 0.002558188596034812,
+              "100101000100": 0.002726607976544414,
+              "100101000101": 0.001559370899209529,
+              "100101001000": 0.0026062545171351616,
+              "100101001001": 0.0020087475830595654,
+              "100101001010": 0.0021559852858761943,
+              "100101010000": 0.0019047276281658244,
+              "100101010001": 0.0015559780514334835,
+              "100101010010": 0.002163680173008364,
+              "100101010100": 0.001702091291658205,
+              "100101010101": 0.0009784158865880532,
+              "101000000000": 0.00167789778473887,
+              "101000000001": 0.001393325239958982,
+              "101000000010": 0.002062409036376727,
+              "101000000100": 0.002228450734821548,
+              "101000000101": 0.0012741704048543749,
+              "101000001000": 0.0022656740681505074,
+              "101000001001": 0.0017458807940740357,
+              "101000001010": 0.0018721241609610476,
+              "101000010000": 0.002267449401366809,
+              "101000010001": 0.0018518522142847006,
+              "101000010010": 0.002572815164234341,
+              "101000010100": 0.0020146125478577867,
+              "101000010101": 0.0011581935408911902,
+              "101000100000": 0.0022382798458130916,
+              "101000100001": 0.0018516920872498992,
+              "101000100010": 0.0027027529470163383,
+              "101000100100": 0.0027416642779441603,
+              "101000100101": 0.0015693057323248282,
+              "101000101000": 0.002021447590833317,
+              "101000101001": 0.0015593708992095283,
+              "101000101010": 0.0016800893425775079,
+              "101001000000": 0.0021032063622637106,
+              "101001000001": 0.0017450235807033056,
+              "101001000010": 0.0025749005718188837,
+              "101001000100": 0.002743971484207409,
+              "101001000101": 0.0015693057323248297,
+              "101001001000": 0.002620923321659259,
+              "101001001001": 0.002020058780887582,
+              "101001001010": 0.002168150617407929,
+              "101001010000": 0.0019081495916440838,
+              "101001010001": 0.0015587800074997207,
+              "101001010010": 0.0021676108935966202,
+              "101001010100": 0.001705321855093736,
+              "101001010101": 0.0009802709148575032,
+              "101010000000": 0.0015309526448664163,
+              "101010000001": 0.0012710696236093695,
+              "101010000010": 0.0018801707332383932,
+              "101010000100": 0.0020255101569420127,
+              "101010000101": 0.0011581935408911906,
+              "101010001000": 0.002032491844438437,
+              "101010001001": 0.0015662661360440167,
+              "101010001010": 0.0016798536908287924,
+              "101010010000": 0.0019169634046446763,
+              "101010010001": 0.0015656768725442246,
+              "101010010010": 0.00217559925672565,
+              "101010010100": 0.0017050881334251262,
+              "101010010101": 0.0009802275458482461,
+              "101010100000": 0.0013966279316840024,
+              "101010100001": 0.0011554665817778407,
+              "101010100010": 0.0016868564097464037,
+              "101010100100": 0.0017126142949425403,
+              "101010100101": 0.0009802709148575024,
+              "101010101000": 0.0012683704359658596,
+              "101010101001": 0.0009784158865880524,
+              "101010101010": 0.0010540596884299398
+            },
+            "schema_version": "readout-metadata/v1"
+          },
+          "sagittarius_julia_version": "1.0.8",
+          "schema_version": "version-info/v1"
+        }
+      }
+    }
+  ],
+  "schema_version": "benchmark-artifact/v1",
+  "timings": [
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "atom_count": 12,
+      "backend": {
+        "requested_backend": "CUDA"
+      },
+      "basis_size": 4096,
+      "disclosure_status": "local_only",
+      "duration_s": null,
+      "execution_backend": "CPU",
+      "execution_status": "ok",
+      "failure": null,
+      "family": "backend_performance",
+      "full_dim": 4096,
+      "max_rss": 153468,
+      "max_rss_unit": "KiB on Linux, bytes on macOS",
+      "metrics": {
+        "atom_count": 12,
+        "basis_size": 4096,
+        "duration_s": null,
+        "full_dim": 4096,
+        "max_rss": 153468,
+        "max_rss_unit": "KiB on Linux, bytes on macOS",
+        "reference_error": 1.883883544297429e+66,
+        "reference_relative_error": 2.029955239020601e-16,
+        "reference_scale": 9.280419134790147e+81,
+        "repeats": 50,
+        "representation": "full dense matrix",
+        "time_per_operation_s": 0.001344945400051074,
+        "total_time_s": 0.0672472700025537,
+        "workload": "matvec"
+      },
+      "mode": "full_dense",
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "atom_count": 12,
+        "basis_size": 4096,
+        "benchmark": "hamiltonian_ablation",
+        "blockade_radius": 3.0,
+        "full_dim": 4096
+      },
+      "reason": "",
+      "reference_error": 1.883883544297429e+66,
+      "reference_relative_error": 2.029955239020601e-16,
+      "reference_scale": 9.280419134790147e+81,
+      "repeats": 50,
+      "representation": "full dense matrix",
+      "row_id": "backend_performance-correctness-full_dense",
+      "scenario_id": "backend_performance-full_dense",
+      "solver": {
+        "repeats": 50
+      },
+      "stage": "artifact",
+      "status": "passed",
+      "tier": "correctness",
+      "time_per_operation_s": 0.001344945400051074,
+      "total_time_s": 0.0672472700025537,
+      "workload": "matvec"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "atom_count": 12,
+      "backend": {
+        "requested_backend": "CUDA"
+      },
+      "basis_size": 4096,
+      "disclosure_status": "local_only",
+      "duration_s": null,
+      "execution_backend": "CPU",
+      "execution_status": "ok",
+      "failure": null,
+      "family": "backend_performance",
+      "full_dim": 4096,
+      "max_rss": 155888,
+      "max_rss_unit": "KiB on Linux, bytes on macOS",
+      "metrics": {
+        "atom_count": 12,
+        "basis_size": 4096,
+        "duration_s": null,
+        "full_dim": 4096,
+        "max_rss": 155888,
+        "max_rss_unit": "KiB on Linux, bytes on macOS",
+        "reference_error": 1.883883544297429e+66,
+        "reference_relative_error": 2.029955239020601e-16,
+        "reference_scale": 9.280419134790147e+81,
+        "repeats": 50,
+        "representation": "full sparse CSR matrix",
+        "time_per_operation_s": 4.224411997711286e-05,
+        "total_time_s": 0.002112205998855643,
+        "workload": "matvec"
+      },
+      "mode": "full_sparse",
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "atom_count": 12,
+        "basis_size": 4096,
+        "benchmark": "hamiltonian_ablation",
+        "blockade_radius": 3.0,
+        "full_dim": 4096
+      },
+      "reason": "",
+      "reference_error": 1.883883544297429e+66,
+      "reference_relative_error": 2.029955239020601e-16,
+      "reference_scale": 9.280419134790147e+81,
+      "repeats": 50,
+      "representation": "full sparse CSR matrix",
+      "row_id": "backend_performance-correctness-full_sparse",
+      "scenario_id": "backend_performance-full_sparse",
+      "solver": {
+        "repeats": 50
+      },
+      "stage": "artifact",
+      "status": "passed",
+      "tier": "correctness",
+      "time_per_operation_s": 4.224411997711286e-05,
+      "total_time_s": 0.002112205998855643,
+      "workload": "matvec"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "atom_count": 12,
+      "backend": {
+        "requested_backend": "CUDA"
+      },
+      "basis_size": 377,
+      "disclosure_status": "local_only",
+      "duration_s": null,
+      "execution_backend": "CPU",
+      "execution_status": "ok",
+      "failure": null,
+      "family": "backend_performance",
+      "full_dim": 4096,
+      "max_rss": 155888,
+      "max_rss_unit": "KiB on Linux, bytes on macOS",
+      "metrics": {
+        "atom_count": 12,
+        "basis_size": 377,
+        "duration_s": null,
+        "full_dim": 4096,
+        "max_rss": 155888,
+        "max_rss_unit": "KiB on Linux, bytes on macOS",
+        "reference_error": 0.0,
+        "repeats": 50,
+        "representation": "blockade-reduced matrix-free operator",
+        "time_per_operation_s": 0.0014448497799457983,
+        "total_time_s": 0.07224248899728991,
+        "workload": "matvec"
+      },
+      "mode": "reduced_matrix_free",
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "atom_count": 12,
+        "basis_size": 377,
+        "benchmark": "hamiltonian_ablation",
+        "blockade_radius": 3.0,
+        "full_dim": 4096
+      },
+      "reason": "",
+      "reference_error": 0.0,
+      "repeats": 50,
+      "representation": "blockade-reduced matrix-free operator",
+      "row_id": "backend_performance-correctness-reduced_matrix_free",
+      "scenario_id": "backend_performance-reduced_matrix_free",
+      "solver": {
+        "repeats": 50
+      },
+      "stage": "artifact",
+      "status": "passed",
+      "tier": "correctness",
+      "time_per_operation_s": 0.0014448497799457983,
+      "total_time_s": 0.07224248899728991,
+      "workload": "matvec"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "atom_count": 12,
+      "backend": {
+        "requested_backend": "CUDA"
+      },
+      "basis_size": 377,
+      "disclosure_status": "local_only",
+      "duration_s": null,
+      "execution_backend": "CPU",
+      "execution_status": "ok",
+      "failure": null,
+      "family": "backend_performance",
+      "full_dim": 4096,
+      "max_rss": 157684,
+      "max_rss_unit": "KiB on Linux, bytes on macOS",
+      "metrics": {
+        "atom_count": 12,
+        "basis_size": 377,
+        "duration_s": null,
+        "full_dim": 4096,
+        "max_rss": 157684,
+        "max_rss_unit": "KiB on Linux, bytes on macOS",
+        "reference_error": 0.0,
+        "repeats": 50,
+        "representation": "blockade-reduced sparse CSR matrix",
+        "time_per_operation_s": 4.895719903288409e-06,
+        "total_time_s": 0.00024478599516442046,
+        "workload": "matvec"
+      },
+      "mode": "reduced_sparse",
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "atom_count": 12,
+        "basis_size": 377,
+        "benchmark": "hamiltonian_ablation",
+        "blockade_radius": 3.0,
+        "full_dim": 4096
+      },
+      "reason": "",
+      "reference_error": 0.0,
+      "repeats": 50,
+      "representation": "blockade-reduced sparse CSR matrix",
+      "row_id": "backend_performance-correctness-reduced_sparse",
+      "scenario_id": "backend_performance-reduced_sparse",
+      "solver": {
+        "repeats": 50
+      },
+      "stage": "artifact",
+      "status": "passed",
+      "tier": "correctness",
+      "time_per_operation_s": 4.895719903288409e-06,
+      "total_time_s": 0.00024478599516442046,
+      "workload": "matvec"
+    },
+    {
+      "artifacts": {
+        "result_artifact": null,
+        "run_manifest": null
+      },
+      "atom_count": 12,
+      "backend": {
+        "requested_backend": "CUDA"
+      },
+      "basis_size": 377,
+      "disclosure_status": "local_only",
+      "duration_s": 0.2,
+      "execution_backend": "CUDA",
+      "execution_status": "ok",
+      "failure": null,
+      "family": "backend_performance",
+      "full_dim": 4096,
+      "max_rss": 3285936,
+      "max_rss_unit": "KiB on Linux, bytes on macOS",
+      "metrics": {
+        "atom_count": 12,
+        "basis_size": 377,
+        "duration_s": 0.2,
+        "full_dim": 4096,
+        "max_rss": 3285936,
+        "max_rss_unit": "KiB on Linux, bytes on macOS",
+        "repeats": 1,
+        "representation": "blockade-reduced cached sparse matrix",
+        "time_per_operation_s": 31.99019698999473,
+        "total_time_s": 31.99019698999473,
+        "workload": "ode_solve"
+      },
+      "mode": "reduced_sparse_gpu_cached",
+      "observables": {
+        "count": 0,
+        "names": [],
+        "output_sample_count": 0
+      },
+      "problem": {
+        "atom_count": 12,
+        "basis_size": 377,
+        "benchmark": "hamiltonian_ablation",
+        "blockade_radius": 3.0,
+        "full_dim": 4096
+      },
+      "reason": "",
+      "repeats": 1,
+      "representation": "blockade-reduced cached sparse matrix",
+      "row_id": "backend_performance-correctness-reduced_sparse_gpu_cached",
+      "scenario_id": "backend_performance-reduced_sparse_gpu_cached",
+      "solver": {
+        "repeats": 50
+      },
+      "stage": "artifact",
+      "status": "passed",
+      "tier": "correctness",
+      "time_per_operation_s": 31.99019698999473,
+      "total_time_s": 31.99019698999473,
+      "workload": "ode_solve"
+    }
+  ],
+  "versions": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": "1.11.9"
+      },
+      "python": {
+        "cache_tag": "cpython-310",
+        "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.35"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.10.12"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "591.86",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "591.86"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "591.86",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "nvcc": {
+          "missing": false,
+          "ok": true,
+          "output": "nvcc: NVIDIA (R) Cuda compiler driver",
+          "raw_output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jan_15_19:20:09_PST_2025\nCuda compilation tools, release 12.8, V12.8.61\nBuild cuda_12.8.r12.8/compiler.35404655_0",
+          "returncode": 0
+        },
+        "nvidia_smi": {
+          "missing": false,
+          "ok": true,
+          "output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "query_fields": [
+            "name",
+            "driver_version",
+            "memory.total",
+            "compute_cap"
+          ],
+          "raw_output": "NVIDIA GeForce RTX 5070 Ti, 591.86, 16303, 12.0",
+          "returncode": 0
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "e171c584e8e67215f1e5fb00f6f908d2e434b10c",
+        "git_commit_short": "e171c58",
+        "git_dirty": true,
+        "root": "/workspaces/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": true,
+      "devcontainer": true,
+      "id": "07f419671ddf",
+      "image": null
+    },
+    "in_container": true,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/workspaces/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": "1.11.9"
+    },
+    "julia_version": "1.11.9",
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": {
+      "executable": "/workspaces/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.4.2",
+        "numpy": "2.2.6",
+        "pandas": "2.3.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.15.3",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.10.12"
+    },
+    "python_version": "3.10.12",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  }
+}

@@ -8,6 +8,13 @@ __pycache__/
 GEMINI.md
 *build/
 CI_artifacts/
+# Retained governed benchmark evidence
+!docs/benchmarks/evidence/**/*.json
+!docs/benchmarks/evidence/**/*.csv
+
+# Ephemeral local benchmark output; promote reviewed evidence under docs/benchmarks/evidence/.
+benchmark-output/
+
 # Debug and temporary files
 core.*
 *.deb

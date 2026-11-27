@@ -1,0 +1,15 @@
+{
+  "contract_audit_passed": true,
+  "all_p1_gpu_passed": true,
+  "scenario_count": 8,
+  "checked_pairs": 64,
+  "checked_measured_pairs": 40,
+  "maximum_trajectory_error": 2.9629076969683865e-15,
+  "status_counts": {
+    "failed": 0,
+    "incomplete": 0,
+    "passed": 8,
+    "skipped": 0
+  },
+  "classification": "local_only; saved numerical/software verification, no independent governance or scientific validation"
+}

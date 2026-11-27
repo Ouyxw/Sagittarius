@@ -1,0 +1,12 @@
+{
+  "scope": "All 39 declared plan-v2 solver sensitivity configurations; retain under-resolved outcomes",
+  "accuracy_atol": 1e-6,
+  "reference_stability_atol": 1e-9,
+  "minimum_warmups": 2,
+  "minimum_measured_repeats": 5,
+  "required_accurate_controls": "For each of rabi/addressed/ramp: Tsit5 tol10 g101, Vern9 tol10 g101, RK4 s400 g101",
+  "allowed_nonpassing_rows": "Only fully executed rows with BENCHMARK_ACCURACY_FAILED and saved numerical gates; no missing results, backend/reference/resource/serialization failures or insufficient repeats",
+  "performance_comparisons": "Only eligible measured calls at the frozen accuracy target; preserve all invalid raw times as diagnostics",
+  "completion": "Full matrix numerical characterization can be accepted with under-resolved rows; full_v2_matrix_passed remains false if any accuracy gate fails",
+  "classification": "Local numerical/software evidence only; no scientific validation, host-isolated performance, CUDA or release/public-use approval"
+}

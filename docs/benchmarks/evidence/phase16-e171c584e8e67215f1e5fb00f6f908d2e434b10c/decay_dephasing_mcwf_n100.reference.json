@@ -1,0 +1,35 @@
+{
+  "atom_count": 1,
+  "basis_size": 2,
+  "lindblad_positivity": {
+    "min_eigenvalue": 0.0,
+    "ok": true
+  },
+  "lindblad_sample_count": 22,
+  "lindblad_trace": {
+    "max_error": 1.1102230246251565e-16,
+    "ok": true
+  },
+  "mc_mean_abs_atol": 0.08,
+  "mcwf_vs_lindblad": {
+    "max_abs_error": 0.06626804034360867,
+    "max_mean_abs_error": 0.02485460643687609,
+    "observables": {
+      "pop": {
+        "max_abs_error": 0.06626804034360867,
+        "mean_abs_error": 0.02485460643687609
+      }
+    },
+    "ok": true
+  },
+  "n_trajectories": 100,
+  "observable_names": [
+    "pop"
+  ],
+  "ok": true,
+  "positivity_atol": 1e-07,
+  "schema_version": "open-system-sanity-checks/v1",
+  "t_end": 2.0,
+  "t_start": 0.0,
+  "trace_atol": 1e-06
+}

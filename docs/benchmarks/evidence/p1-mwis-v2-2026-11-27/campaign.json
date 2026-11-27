@@ -1,0 +1,6322 @@
+{
+  "cache_policy": "Fresh worker per graph/path; initialized CPU doctor before first AQC; first + two warmups + five independent calls; state reset, model rebuilt and CBC warmStart=False every time.",
+  "classification": "local_only; methods have different solution guarantees; no optimization speedup or scientific validation",
+  "command": [
+    "tests/test_performance/benchmark_mwis_aqc.py",
+    "--tier",
+    "performance",
+    "--sizes",
+    "2",
+    "4",
+    "6",
+    "8",
+    "10",
+    "12",
+    "16",
+    "20",
+    "--seeds",
+    "101",
+    "102",
+    "103",
+    "104",
+    "105",
+    "--warmups",
+    "2",
+    "--repeat-count",
+    "5",
+    "--timeout-seconds",
+    "600",
+    "--memory-limit-mb",
+    "4096",
+    "--ilp-time-limit",
+    "30",
+    "--numerical-atol",
+    "1e-6",
+    "--output-dir",
+    "benchmark-output/p1-mwis-v2-2026-11-27"
+  ],
+  "config_sha256": "9e1995d01461933a75d97086d9f981a3e3bfd643af02cd3c84d3e69951009472",
+  "created_at": "2026-11-27T03:35:26.134638+00:00",
+  "cwd": "/home/oyxw/Sagittarius/sagittarius_py",
+  "generation_seconds": {
+    "udg_weighted_n10_seed101": 6.99769880156964e-05,
+    "udg_weighted_n10_seed102": 7.01329845469445e-05,
+    "udg_weighted_n10_seed103": 7.757500861771405e-05,
+    "udg_weighted_n10_seed104": 0.00010439500329084694,
+    "udg_weighted_n10_seed105": 0.00013930798741057515,
+    "udg_weighted_n12_seed101": 0.00010139800724573433,
+    "udg_weighted_n12_seed102": 8.860099478624761e-05,
+    "udg_weighted_n12_seed103": 0.00010294897947460413,
+    "udg_weighted_n12_seed104": 8.865600102581084e-05,
+    "udg_weighted_n12_seed105": 8.861601236276329e-05,
+    "udg_weighted_n16_seed101": 0.0001268640044145286,
+    "udg_weighted_n16_seed102": 0.00012639898341149092,
+    "udg_weighted_n16_seed103": 0.0001254119852092117,
+    "udg_weighted_n16_seed104": 0.0001268720079679042,
+    "udg_weighted_n16_seed105": 0.00012785100261680782,
+    "udg_weighted_n20_seed101": 0.00016879098257049918,
+    "udg_weighted_n20_seed102": 0.00017237398424185812,
+    "udg_weighted_n20_seed103": 0.0001713000237941742,
+    "udg_weighted_n20_seed104": 0.00016874101129360497,
+    "udg_weighted_n20_seed105": 0.00018569600069895387,
+    "udg_weighted_n2_seed101": 0.003922033996786922,
+    "udg_weighted_n2_seed102": 6.788401515223086e-05,
+    "udg_weighted_n2_seed103": 3.126900992356241e-05,
+    "udg_weighted_n2_seed104": 0.00011062499834224582,
+    "udg_weighted_n2_seed105": 4.409998655319214e-05,
+    "udg_weighted_n4_seed101": 4.081198130734265e-05,
+    "udg_weighted_n4_seed102": 3.9964012103155255e-05,
+    "udg_weighted_n4_seed103": 4.074900061823428e-05,
+    "udg_weighted_n4_seed104": 3.589701373130083e-05,
+    "udg_weighted_n4_seed105": 3.3001997508108616e-05,
+    "udg_weighted_n6_seed101": 4.360399907454848e-05,
+    "udg_weighted_n6_seed102": 4.561999230645597e-05,
+    "udg_weighted_n6_seed103": 4.3790991185233e-05,
+    "udg_weighted_n6_seed104": 7.7831995440647e-05,
+    "udg_weighted_n6_seed105": 7.394800195470452e-05,
+    "udg_weighted_n8_seed101": 9.117601439356804e-05,
+    "udg_weighted_n8_seed102": 0.00011585201718844473,
+    "udg_weighted_n8_seed103": 6.178100011311471e-05,
+    "udg_weighted_n8_seed104": 5.6379998568445444e-05,
+    "udg_weighted_n8_seed105": 5.8164994698017836e-05
+  },
+  "host": {
+    "cpu_model": "Intel(R) Core(TM) i7-14700KF",
+    "isolation": "shared workstation, no affinity/exclusive-load controls",
+    "logical_cpus": 28,
+    "physical_memory_bytes": 16637784064
+  },
+  "output_dir": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-mwis-v2-2026-11-27",
+  "plan_version": "benchmark-implementation-plan/v2",
+  "scenarios": [
+    {
+      "C6": 1.0,
+      "N": 2,
+      "atom_count": 2,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.0,
+      "basis": "blockade_reduced",
+      "basis_size": 3,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 1.0,
+      "edges": [
+        [
+          0,
+          1
+        ]
+      ],
+      "full_dim": 4,
+      "graph_sha256": "b7c2ddff5fd50fc50fc01de618fb6124c626ea274df151a03ab0c137e7a2bf71",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.4918558820674754,
+            0.5682945521653455
+          ],
+          "weight": 1.3924027059849886
+        },
+        {
+          "node": 1,
+          "position": [
+            0.934892898047935,
+            0.4653743169112739
+          ],
+          "weight": 1.4613628432114572
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "required": true,
+      "scenario_id": "udg_weighted_n2_seed101",
+      "seed": 101,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 2,
+      "atom_count": 2,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.0,
+      "basis": "blockade_reduced",
+      "basis_size": 3,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 1.0,
+      "edges": [
+        [
+          0,
+          1
+        ]
+      ],
+      "full_dim": 4,
+      "graph_sha256": "f09a618bbc04a8dfb588f0d1aaf41c0d1ff68aca5622d1fb3e16b789460b58cd",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.25296821183593465,
+            0.9264580435498951
+          ],
+          "weight": 1.411918388591423
+        },
+        {
+          "node": 1,
+          "position": [
+            0.470009702981724,
+            1.0829212282229415
+          ],
+          "weight": 1.2319420801529914
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "required": true,
+      "scenario_id": "udg_weighted_n2_seed102",
+      "seed": 102,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 2,
+      "atom_count": 2,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 0.0,
+      "basis": "blockade_reduced",
+      "basis_size": 4,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.0,
+      "edges": [],
+      "full_dim": 4,
+      "graph_sha256": "23c3ac467fc97abc681465bdae5025984ee2d0a3651ef239b9a50240c6709d64",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.4943956007745037,
+            0.35467825208951376
+          ],
+          "weight": 1.0910048640471526
+        },
+        {
+          "node": 1,
+          "position": [
+            1.3600618573570025,
+            1.3558937268252222
+          ],
+          "weight": 1.051781216790237
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "required": true,
+      "scenario_id": "udg_weighted_n2_seed103",
+      "seed": 103,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 2,
+      "atom_count": 2,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 0.0,
+      "basis": "blockade_reduced",
+      "basis_size": 4,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.0,
+      "edges": [],
+      "full_dim": 4,
+      "graph_sha256": "671ff0e5fce5f49bba6382a8fb68c02f016c405f1cee5bc0804b2772d5d3acf6",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.3258873863797356,
+            1.0943823139655815
+          ],
+          "weight": 1.1080444141134123
+        },
+        {
+          "node": 1,
+          "position": [
+            0.19829362158897865,
+            0.5930366170557841
+          ],
+          "weight": 1.3769442590627945
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.0,
+      "required": true,
+      "scenario_id": "udg_weighted_n2_seed104",
+      "seed": 104,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 2,
+      "atom_count": 2,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.0,
+      "basis": "blockade_reduced",
+      "basis_size": 3,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 1.0,
+      "edges": [
+        [
+          0,
+          1
+        ]
+      ],
+      "full_dim": 4,
+      "graph_sha256": "4ade60b4d8cb410ec51bdc098f6115549e9606741c70e04ebe80d2a0ddd82e2a",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.0090754231359353,
+            1.56763554947997
+          ],
+          "weight": 1.048364727723312
+        },
+        {
+          "node": 1,
+          "position": [
+            0.801169910144409,
+            0.6268250199475629
+          ],
+          "weight": 1.1030081180233224
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "required": true,
+      "scenario_id": "udg_weighted_n2_seed105",
+      "seed": 105,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.5,
+      "basis": "blockade_reduced",
+      "basis_size": 8,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.5,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "full_dim": 16,
+      "graph_sha256": "4ea74931fef6d2515b6791d010c5a227d419b22948d90dbfa4f4b0dd9c5db7a3",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.1098028215259004,
+            0.803689863094976
+          ],
+          "weight": 1.3924027059849886
+        },
+        {
+          "node": 1,
+          "position": [
+            1.322138215785677,
+            0.6581386705560384
+          ],
+          "weight": 1.4613628432114572
+        },
+        {
+          "node": 2,
+          "position": [
+            1.943884428886177,
+            0.8142382744054057
+          ],
+          "weight": 1.486588407316447
+        },
+        {
+          "node": 3,
+          "position": [
+            0.5020516661263987,
+            1.8011435162824738
+          ],
+          "weight": 1.340448115640422
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.5,
+      "required": true,
+      "scenario_id": "udg_weighted_n4_seed101",
+      "seed": 101,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 0.5,
+      "basis": "blockade_reduced",
+      "basis_size": 12,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.16666666666666666,
+      "edges": [
+        [
+          0,
+          1
+        ]
+      ],
+      "full_dim": 16,
+      "graph_sha256": "b6978b52e1111a3872fe8a50588adf9e7cdbdd5bcbb5d4af44071f7065ee3b66",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.3577510760276489,
+            1.3102095301579053
+          ],
+          "weight": 1.411918388591423
+        },
+        {
+          "node": 1,
+          "position": [
+            0.6646940964037042,
+            1.5314818879346135
+          ],
+          "weight": 1.2319420801529914
+        },
+        {
+          "node": 2,
+          "position": [
+            1.9931358054441595,
+            1.26309501257059
+          ],
+          "weight": 1.4965959958044461
+        },
+        {
+          "node": 3,
+          "position": [
+            0.5422946943144289,
+            0.24439386802887644
+          ],
+          "weight": 1.1727749605694597
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.25,
+      "required": true,
+      "scenario_id": "udg_weighted_n4_seed102",
+      "seed": 102,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.5,
+      "basis": "blockade_reduced",
+      "basis_size": 8,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.5,
+      "edges": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "full_dim": 16,
+      "graph_sha256": "e2be5276af6a9de823950a23deeb9da709800980e69f7a784c9f0558e22f71c0",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.6991809637928973,
+            0.5015907943837739
+          ],
+          "weight": 1.0910048640471526
+        },
+        {
+          "node": 1,
+          "position": [
+            1.9234179243406146,
+            1.9175232976128298
+          ],
+          "weight": 1.051781216790237
+        },
+        {
+          "node": 2,
+          "position": [
+            0.6464245274365028,
+            1.4793193807238627
+          ],
+          "weight": 1.3506478818146206
+        },
+        {
+          "node": 3,
+          "position": [
+            0.9809183073451406,
+            1.0764578907847393
+          ],
+          "weight": 1.3699915721707148
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.5,
+      "required": true,
+      "scenario_id": "udg_weighted_n4_seed103",
+      "seed": 103,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.0,
+      "basis": "blockade_reduced",
+      "basis_size": 10,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.3333333333333333,
+      "edges": [
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "full_dim": 16,
+      "graph_sha256": "df2a57b72be0b84d64088cc099ec36d53938232a103408ed78e972162124b0ef",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.8750879239976381,
+            1.547690310831376
+          ],
+          "weight": 1.1080444141134123
+        },
+        {
+          "node": 1,
+          "position": [
+            0.28042952898321194,
+            0.8386804268241494
+          ],
+          "weight": 1.3769442590627945
+        },
+        {
+          "node": 2,
+          "position": [
+            1.6439302582841846,
+            0.923248950155309
+          ],
+          "weight": 1.3224656847274887
+        },
+        {
+          "node": 3,
+          "position": [
+            1.8429790774451509,
+            0.14821253368680473
+          ],
+          "weight": 1.2691486184919358
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.375,
+      "required": true,
+      "scenario_id": "udg_weighted_n4_seed104",
+      "seed": 104,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 4,
+      "atom_count": 4,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.0,
+      "basis": "blockade_reduced",
+      "basis_size": 10,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.3333333333333333,
+      "edges": [
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ]
+      ],
+      "full_dim": 16,
+      "graph_sha256": "aa6935fb592cba47e65c80bdc0ed4cd2b026917b4f2d307e673f3bf3c75e157a",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.4270481488562095,
+            2.216971454932773
+          ],
+          "weight": 1.048364727723312
+        },
+        {
+          "node": 1,
+          "position": [
+            1.133025352691457,
+            0.8864644444446294
+          ],
+          "weight": 1.1030081180233224
+        },
+        {
+          "node": 2,
+          "position": [
+            1.9752727382610746,
+            1.2085564600938916
+          ],
+          "weight": 1.3061022302791874
+        },
+        {
+          "node": 3,
+          "position": [
+            0.6380879080230565,
+            1.2433857754254818
+          ],
+          "weight": 1.366837886145627
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.375,
+      "required": true,
+      "scenario_id": "udg_weighted_n4_seed105",
+      "seed": 105,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 6,
+      "atom_count": 6,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.0,
+      "basis": "blockade_reduced",
+      "basis_size": 22,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.4,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "full_dim": 64,
+      "graph_sha256": "cc736ad361bacbc5f97f1002e9243c8c2b711cc61afd3a4028397f2a4c195f54",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.5839701853113506,
+            0.9843150380149802
+          ],
+          "weight": 1.3924027059849886
+        },
+        {
+          "node": 1,
+          "position": [
+            1.6192819990543337,
+            0.8060519614279865
+          ],
+          "weight": 1.4613628432114572
+        },
+        {
+          "node": 2,
+          "position": [
+            2.380762484856313,
+            0.997234150668758
+          ],
+          "weight": 1.486588407316447
+        },
+        {
+          "node": 3,
+          "position": [
+            0.6148852032619092,
+            2.2059412842071726
+          ],
+          "weight": 1.340448115640422
+        },
+        {
+          "node": 4,
+          "position": [
+            1.2900523671272848,
+            0.08436425557674551
+          ],
+          "weight": 1.4473991015413985
+        },
+        {
+          "node": 5,
+          "position": [
+            1.5709573650595838,
+            1.0689031854859181
+          ],
+          "weight": 1.1773395186074516
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.65625,
+      "required": true,
+      "scenario_id": "udg_weighted_n6_seed101",
+      "seed": 101,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 6,
+      "atom_count": 6,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 0.6666666666666666,
+      "basis": "blockade_reduced",
+      "basis_size": 36,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.13333333333333333,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "full_dim": 64,
+      "graph_sha256": "6e460ffe28ba800c07b9c2600c70cbe8654f294b468504e2f0991d1b366b3792",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.4381537955996854,
+            1.6046724025092778
+          ],
+          "weight": 1.411918388591423
+        },
+        {
+          "node": 1,
+          "position": [
+            0.8140806856147033,
+            1.875674587877026
+          ],
+          "weight": 1.2319420801529914
+        },
+        {
+          "node": 2,
+          "position": [
+            2.4410828557046784,
+            1.5469691387261246
+          ],
+          "weight": 1.4965959958044461
+        },
+        {
+          "node": 3,
+          "position": [
+            0.6641726456444663,
+            0.2993201364679193
+          ],
+          "weight": 1.1727749605694597
+        },
+        {
+          "node": 4,
+          "position": [
+            2.133966791864947,
+            1.4778992668275945
+          ],
+          "weight": 1.4621277252975569
+        },
+        {
+          "node": 5,
+          "position": [
+            2.723182324956748,
+            2.525670793986401
+          ],
+          "weight": 1.0811547860665232
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.4375,
+      "required": true,
+      "scenario_id": "udg_weighted_n6_seed102",
+      "seed": 102,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 6,
+      "atom_count": 6,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.3333333333333333,
+      "basis": "blockade_reduced",
+      "basis_size": 26,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.26666666666666666,
+      "edges": [
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          5
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "full_dim": 64,
+      "graph_sha256": "58587bd8c43a59294a7dfb8e0f90c2326e85fb728e63c99246c05a3037ba9798",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.8563182995799793,
+            0.6143207529587601
+          ],
+          "weight": 1.0910048640471526
+        },
+        {
+          "node": 1,
+          "position": [
+            2.355696238378823,
+            2.348476824525201
+          ],
+          "weight": 1.051781216790237
+        },
+        {
+          "node": 2,
+          "position": [
+            0.7917051247195884,
+            1.8117888246917322
+          ],
+          "weight": 1.3506478818146206
+        },
+        {
+          "node": 3,
+          "position": [
+            1.2013746661750795,
+            1.3183862810076168
+          ],
+          "weight": 1.3699915721707148
+        },
+        {
+          "node": 4,
+          "position": [
+            1.2021526862914966,
+            2.628720030132044
+          ],
+          "weight": 1.1547295213529636
+        },
+        {
+          "node": 5,
+          "position": [
+            0.306197776574305,
+            0.6935246270850883
+          ],
+          "weight": 1.0279355113557622
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.59375,
+      "required": true,
+      "scenario_id": "udg_weighted_n6_seed103",
+      "seed": 103,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 6,
+      "atom_count": 6,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.6666666666666667,
+      "basis": "blockade_reduced",
+      "basis_size": 22,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.3333333333333333,
+      "edges": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "full_dim": 64,
+      "graph_sha256": "73f5149932d08ddea3e19ff8367270c58db67616459c4f9c8b4347bb8d13bc0d",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.296504318324409,
+            1.8955257706931818
+          ],
+          "weight": 1.1080444141134123
+        },
+        {
+          "node": 1,
+          "position": [
+            0.3434546274089478,
+            1.027169551489386
+          ],
+          "weight": 1.3769442590627945
+        },
+        {
+          "node": 2,
+          "position": [
+            2.0133951527590055,
+            1.1307444167203835
+          ],
+          "weight": 1.3224656847274887
+        },
+        {
+          "node": 3,
+          "position": [
+            2.2571791731829505,
+            0.1815225405088672
+          ],
+          "weight": 1.2691486184919358
+        },
+        {
+          "node": 4,
+          "position": [
+            2.0700424017805177,
+            2.2602458515519364
+          ],
+          "weight": 1.1095564354640945
+        },
+        {
+          "node": 5,
+          "position": [
+            1.3252986706179117,
+            1.0026549351759306
+          ],
+          "weight": 1.1326745527740354
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.65625,
+      "required": true,
+      "scenario_id": "udg_weighted_n6_seed104",
+      "seed": 104,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 6,
+      "atom_count": 6,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.6666666666666667,
+      "basis": "blockade_reduced",
+      "basis_size": 24,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.3333333333333333,
+      "edges": [
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          5
+        ]
+      ],
+      "full_dim": 64,
+      "graph_sha256": "c6a34a4023220a20958f01fa24f1785652afd4e086ec2bd5f9821b54b53945fd",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.7477699015405033,
+            2.7152244194504624
+          ],
+          "weight": 1.048364727723312
+        },
+        {
+          "node": 1,
+          "position": [
+            1.3876669898655083,
+            1.0856927820045539
+          ],
+          "weight": 1.1030081180233224
+        },
+        {
+          "node": 2,
+          "position": [
+            2.4192051557848715,
+            1.4801733262871675
+          ],
+          "weight": 1.3061022302791874
+        },
+        {
+          "node": 3,
+          "position": [
+            0.7814948928482265,
+            1.5228303516136128
+          ],
+          "weight": 1.366837886145627
+        },
+        {
+          "node": 4,
+          "position": [
+            0.544641899457034,
+            0.725086079308301
+          ],
+          "weight": 1.162730248853519
+        },
+        {
+          "node": 5,
+          "position": [
+            1.4085428605809616,
+            1.2484560008468837
+          ],
+          "weight": 1.247212521383093
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.625,
+      "required": true,
+      "scenario_id": "udg_weighted_n6_seed105",
+      "seed": 105,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.5,
+      "basis": "blockade_reduced",
+      "basis_size": 44,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.35714285714285715,
+      "edges": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "full_dim": 256,
+      "graph_sha256": "a781aef823ce412ba610622106d9464bc70e732acf84dc903a3af46d122169c9",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.983711764134951,
+            1.136589104330691
+          ],
+          "weight": 1.3924027059849886
+        },
+        {
+          "node": 1,
+          "position": [
+            1.86978579609587,
+            0.9307486338225478
+          ],
+          "weight": 1.4613628432114572
+        },
+        {
+          "node": 2,
+          "position": [
+            2.7490677230167098,
+            1.1515068106673905
+          ],
+          "weight": 1.486588407316447
+        },
+        {
+          "node": 3,
+          "position": [
+            0.7100082752479622,
+            2.5472015885070403
+          ],
+          "weight": 1.340448115640422
+        },
+        {
+          "node": 4,
+          "position": [
+            1.4896241628593039,
+            0.09741545133443283
+          ],
+          "weight": 1.4473991015413985
+        },
+        {
+          "node": 5,
+          "position": [
+            1.813985315205152,
+            1.2342630837558866
+          ],
+          "weight": 1.1773395186074516
+        },
+        {
+          "node": 6,
+          "position": [
+            2.0617197144721633,
+            1.0974002345960916
+          ],
+          "weight": 1.253789954074585
+        },
+        {
+          "node": 7,
+          "position": [
+            1.1730016860396761,
+            0.17456675181480047
+          ],
+          "weight": 1.1252046001648501
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.828125,
+      "required": true,
+      "scenario_id": "udg_weighted_n8_seed101",
+      "seed": 101,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.5,
+      "basis": "blockade_reduced",
+      "basis_size": 72,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.21428571428571427,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          1,
+          7
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          4,
+          6
+        ]
+      ],
+      "full_dim": 256,
+      "graph_sha256": "2948cce19d4a21b4bde6687b51f5d45e5c72b5685be6b13e23668f463a0a92b0",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.5059364236718693,
+            1.8529160870997903
+          ],
+          "weight": 1.411918388591423
+        },
+        {
+          "node": 1,
+          "position": [
+            0.940019405963448,
+            2.165842456445883
+          ],
+          "weight": 1.2319420801529914
+        },
+        {
+          "node": 2,
+          "position": [
+            2.818719687710553,
+            1.7862860973431434
+          ],
+          "weight": 1.4965959958044461
+        },
+        {
+          "node": 3,
+          "position": [
+            0.7669205115024371,
+            0.34562512272725743
+          ],
+          "weight": 1.1727749605694597
+        },
+        {
+          "node": 4,
+          "position": [
+            2.4640926034498984,
+            1.7065310790761248
+          ],
+          "weight": 1.4621277252975569
+        },
+        {
+          "node": 5,
+          "position": [
+            3.1444600967324194,
+            2.916393425584849
+          ],
+          "weight": 1.0811547860665232
+        },
+        {
+          "node": 6,
+          "position": [
+            1.8659686999519773,
+            2.294684885530737
+          ],
+          "weight": 1.4594831569438658
+        },
+        {
+          "node": 7,
+          "position": [
+            0.4629904011001218,
+            1.9372595072397665
+          ],
+          "weight": 1.0270525992179294
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.71875,
+      "required": true,
+      "scenario_id": "udg_weighted_n8_seed102",
+      "seed": 102,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.25,
+      "basis": "blockade_reduced",
+      "basis_size": 78,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.17857142857142858,
+      "edges": [
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          7
+        ]
+      ],
+      "full_dim": 256,
+      "graph_sha256": "00fa8c82ca424386dbc7661627babdf1c33844d6ca4da6f78422442c8a612c20",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.9887912015490073,
+            0.7093565041790275
+          ],
+          "weight": 1.0910048640471526
+        },
+        {
+          "node": 1,
+          "position": [
+            2.720123714714005,
+            2.7117874536504445
+          ],
+          "weight": 1.051781216790237
+        },
+        {
+          "node": 2,
+          "position": [
+            0.9141823337513212,
+            2.092073531301055
+          ],
+          "weight": 1.3506478818146206
+        },
+        {
+          "node": 3,
+          "position": [
+            1.387227973827558,
+            1.5223413484713142
+          ],
+          "weight": 1.3699915721707148
+        },
+        {
+          "node": 4,
+          "position": [
+            1.3881263540748545,
+            3.0353844340417937
+          ],
+          "weight": 1.1547295213529636
+        },
+        {
+          "node": 5,
+          "position": [
+            0.3535667374608798,
+            0.8008132602744211
+          ],
+          "weight": 1.0279355113557622
+        },
+        {
+          "node": 6,
+          "position": [
+            2.915987192567843,
+            2.0518110167709853
+          ],
+          "weight": 1.0981558835523197
+        },
+        {
+          "node": 7,
+          "position": [
+            0.11622806863910107,
+            2.677935245430748
+          ],
+          "weight": 1.1855327396676114
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.6953125,
+      "required": true,
+      "scenario_id": "udg_weighted_n8_seed103",
+      "seed": 103,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.5,
+      "basis": "blockade_reduced",
+      "basis_size": 80,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.21428571428571427,
+      "edges": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          4,
+          6
+        ]
+      ],
+      "full_dim": 256,
+      "graph_sha256": "10f379bdc8aa05c873872588adc968fc46ed061ad925cc44f6357396aabf0b4f",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.651774772759471,
+            2.188764627931163
+          ],
+          "weight": 1.1080444141134123
+        },
+        {
+          "node": 1,
+          "position": [
+            0.3965872431779573,
+            1.1860732341115683
+          ],
+          "weight": 1.3769442590627945
+        },
+        {
+          "node": 2,
+          "position": [
+            2.324868466860999,
+            1.3056711867563595
+          ],
+          "weight": 1.3224656847274887
+        },
+        {
+          "node": 3,
+          "position": [
+            2.606366006492787,
+            0.20960417525355848
+          ],
+          "weight": 1.2691486184919358
+        },
+        {
+          "node": 4,
+          "position": [
+            2.3902790758038424,
+            2.609907101656491
+          ],
+          "weight": 1.1095564354640945
+        },
+        {
+          "node": 5,
+          "position": [
+            1.530323088475809,
+            1.1577661934562606
+          ],
+          "weight": 1.1326745527740354
+        },
+        {
+          "node": 6,
+          "position": [
+            2.524541687187342,
+            1.7713729465040282
+          ],
+          "weight": 1.2810894596668763
+        },
+        {
+          "node": 7,
+          "position": [
+            0.84083798857289,
+            2.2071276474253465
+          ],
+          "weight": 1.0302295190422361
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.6875,
+      "required": true,
+      "scenario_id": "udg_weighted_n8_seed104",
+      "seed": 104,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 8,
+      "atom_count": 8,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.75,
+      "basis": "blockade_reduced",
+      "basis_size": 56,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.25,
+      "edges": [
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          6,
+          7
+        ]
+      ],
+      "full_dim": 256,
+      "graph_sha256": "cec097a2c4150ef0dc3d1c83b4d1ff98a152aa8698edecec65d175a4bf8a1eab",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.0181508462718707,
+            3.13527109895994
+          ],
+          "weight": 1.048364727723312
+        },
+        {
+          "node": 1,
+          "position": [
+            1.602339820288818,
+            1.2536500398951258
+          ],
+          "weight": 1.1030081180233224
+        },
+        {
+          "node": 2,
+          "position": [
+            2.7934574958346525,
+            1.7091569367583999
+          ],
+          "weight": 1.3061022302791874
+        },
+        {
+          "node": 3,
+          "position": [
+            0.9023925735124826,
+            1.7584130268685036
+          ],
+          "weight": 1.366837886145627
+        },
+        {
+          "node": 4,
+          "position": [
+            0.6288982945269355,
+            0.837257286148596
+          ],
+          "weight": 1.162730248853519
+        },
+        {
+          "node": 5,
+          "position": [
+            1.6264451994430875,
+            1.441592816320704
+          ],
+          "weight": 1.247212521383093
+        },
+        {
+          "node": 6,
+          "position": [
+            1.9021128810047578,
+            2.4874763191779543
+          ],
+          "weight": 1.367549347189947
+        },
+        {
+          "node": 7,
+          "position": [
+            1.9155167883831776,
+            2.5361983697335466
+          ],
+          "weight": 1.1900509976333353
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.78125,
+      "required": true,
+      "scenario_id": "udg_weighted_n8_seed105",
+      "seed": 105,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 10,
+      "atom_count": 10,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.2,
+      "basis": "blockade_reduced",
+      "basis_size": 264,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.13333333333333333,
+      "edges": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "full_dim": 1024,
+      "graph_sha256": "2b5f7ca864e973bfb6aeaae098fc1027f9b9f89ea4bafc3cf6ff438d73231632",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            3.3358911649357843,
+            1.2707452498845129
+          ],
+          "weight": 1.3924027059849886
+        },
+        {
+          "node": 1,
+          "position": [
+            2.090484071716963,
+            1.0406086075961383
+          ],
+          "weight": 1.4613628432114572
+        },
+        {
+          "node": 2,
+          "position": [
+            3.073551151707963,
+            1.2874237526031325
+          ],
+          "weight": 1.486588407316447
+        },
+        {
+          "node": 3,
+          "position": [
+            0.7938133840209124,
+            2.847857952148594
+          ],
+          "weight": 1.340448115640422
+        },
+        {
+          "node": 4,
+          "position": [
+            1.6654504445398104,
+            0.1089137856213072
+          ],
+          "weight": 1.4473991015413985
+        },
+        {
+          "node": 5,
+          "position": [
+            2.028097237492551,
+            1.3799480786983394
+          ],
+          "weight": 1.1773395186074516
+        },
+        {
+          "node": 6,
+          "position": [
+            2.305072716055607,
+            1.2269307615405387
+          ],
+          "weight": 1.253789954074585
+        },
+        {
+          "node": 7,
+          "position": [
+            1.311455753853291,
+            0.19517156183461432
+          ],
+          "weight": 1.1252046001648501
+        },
+        {
+          "node": 8,
+          "position": [
+            2.9732533352200745,
+            2.8926126731964494
+          ],
+          "weight": 1.3336627131179344
+        },
+        {
+          "node": 9,
+          "position": [
+            1.6637783840384865,
+            3.4289180874782983
+          ],
+          "weight": 1.4201303769898004
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.7421875,
+      "required": true,
+      "scenario_id": "udg_weighted_n10_seed101",
+      "seed": 101,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 10,
+      "atom_count": 10,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.2,
+      "basis": "blockade_reduced",
+      "basis_size": 120,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.24444444444444444,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          9
+        ],
+        [
+          1,
+          7
+        ],
+        [
+          1,
+          9
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          7,
+          9
+        ]
+      ],
+      "full_dim": 1024,
+      "graph_sha256": "6e808018e317f78c08fd09bae4ddee1e79891e20a170550d260f68b54f377bd3",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.5656541178117168,
+            2.071623163679026
+          ],
+          "weight": 1.411918388591423
+        },
+        {
+          "node": 1,
+          "position": [
+            1.0509736459516206,
+            2.4214854805840607
+          ],
+          "weight": 1.2319420801529914
+        },
+        {
+          "node": 2,
+          "position": [
+            3.1514244156188873,
+            1.9971285704610373
+          ],
+          "weight": 1.4965959958044461
+        },
+        {
+          "node": 3,
+          "position": [
+            0.8574431985291794,
+            0.38642063457492754
+          ],
+          "weight": 1.1727749605694597
+        },
+        {
+          "node": 4,
+          "position": [
+            2.754939282084203,
+            1.907959749265142
+          ],
+          "weight": 1.4621277252975569
+        },
+        {
+          "node": 5,
+          "position": [
+            3.5156132644146267,
+            3.2606269743705982
+          ],
+          "weight": 1.0811547860665232
+        },
+        {
+          "node": 6,
+          "position": [
+            2.086216428489765,
+            2.5655356954940256
+          ],
+          "weight": 1.4594831569438658
+        },
+        {
+          "node": 7,
+          "position": [
+            0.5176390048948828,
+            2.165921974122932
+          ],
+          "weight": 1.0270525992179294
+        },
+        {
+          "node": 8,
+          "position": [
+            2.6273003003509117,
+            2.0257176667067314
+          ],
+          "weight": 1.063308985844149
+        },
+        {
+          "node": 9,
+          "position": [
+            0.40191171914962187,
+            1.8542807009333202
+          ],
+          "weight": 1.247005363145421
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.8828125,
+      "required": true,
+      "scenario_id": "udg_weighted_n10_seed102",
+      "seed": 102,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 10,
+      "atom_count": 10,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.6,
+      "basis": "blockade_reduced",
+      "basis_size": 204,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.17777777777777778,
+      "edges": [
+        [
+          0,
+          5
+        ],
+        [
+          0,
+          8
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          3,
+          8
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          5,
+          9
+        ]
+      ],
+      "full_dim": 1024,
+      "graph_sha256": "7aaef59c4773d92b08c1ee8fb659166f66ebca8db7200d783ed2575bca67e33a",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.105502171108638,
+            0.7930846818129595
+          ],
+          "weight": 1.0910048640471526
+        },
+        {
+          "node": 1,
+          "position": [
+            3.04119076665488,
+            3.0318705434467272
+          ],
+          "weight": 1.051781216790237
+        },
+        {
+          "node": 2,
+          "position": [
+            1.0220869210486774,
+            2.339009314958596
+          ],
+          "weight": 1.3506478818146206
+        },
+        {
+          "node": 3,
+          "position": [
+            1.5509680248838593,
+            1.702029370070277
+          ],
+          "weight": 1.3699915721707148
+        },
+        {
+          "node": 4,
+          "position": [
+            1.5519724445351584,
+            3.3936629661810884
+          ],
+          "weight": 1.1547295213529636
+        },
+        {
+          "node": 5,
+          "position": [
+            0.3952996297726743,
+            0.8953364436284188
+          ],
+          "weight": 1.0279355113557622
+        },
+        {
+          "node": 6,
+          "position": [
+            3.2601727920502332,
+            2.293994455241442
+          ],
+          "weight": 1.0981558835523197
+        },
+        {
+          "node": 7,
+          "position": [
+            0.12994693118527073,
+            2.9940226240628673
+          ],
+          "weight": 1.1855327396676114
+        },
+        {
+          "node": 8,
+          "position": [
+            0.7400272607428442,
+            1.4374696099798627
+          ],
+          "weight": 1.081438163067301
+        },
+        {
+          "node": 9,
+          "position": [
+            0.25285807053695847,
+            0.07707354360549681
+          ],
+          "weight": 1.0042731187888385
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.80078125,
+      "required": true,
+      "scenario_id": "udg_weighted_n10_seed103",
+      "seed": 103,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 10,
+      "atom_count": 10,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.8,
+      "basis": "blockade_reduced",
+      "basis_size": 180,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.2,
+      "edges": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          8
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          7,
+          9
+        ]
+      ],
+      "full_dim": 1024,
+      "graph_sha256": "f87e659e193de9accaf17e703fba750dfb59da0ca642aae064d747d6d2deb0fe",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.964774326454618,
+            2.4471132474005577
+          ],
+          "weight": 1.1080444141134123
+        },
+        {
+          "node": 1,
+          "position": [
+            0.4433980173775761,
+            1.3260701888832445
+          ],
+          "weight": 1.3769442590627945
+        },
+        {
+          "node": 2,
+          "position": [
+            2.5992819653234553,
+            1.4597847649250215
+          ],
+          "weight": 1.3224656847274887
+        },
+        {
+          "node": 3,
+          "position": [
+            2.914005782381265,
+            0.234344592117368
+          ],
+          "weight": 1.2691486184919358
+        },
+        {
+          "node": 4,
+          "position": [
+            2.6724132493463824,
+            2.917964847131684
+          ],
+          "weight": 1.1095564354640945
+        },
+        {
+          "node": 5,
+          "position": [
+            1.710953226684667,
+            1.2944219553096854
+          ],
+          "weight": 1.1326745527740354
+        },
+        {
+          "node": 6,
+          "position": [
+            2.822523412291453,
+            1.9804551609435528
+          ],
+          "weight": 1.2810894596668763
+        },
+        {
+          "node": 7,
+          "position": [
+            0.9400854502565867,
+            2.4676437273311316
+          ],
+          "weight": 1.0302295190422361
+        },
+        {
+          "node": 8,
+          "position": [
+            3.4352296171133805,
+            1.7699589702568492
+          ],
+          "weight": 1.0951317719439526
+        },
+        {
+          "node": 9,
+          "position": [
+            1.6335142048121274,
+            2.5244425619368456
+          ],
+          "weight": 1.4123256253910983
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.82421875,
+      "required": true,
+      "scenario_id": "udg_weighted_n10_seed104",
+      "seed": 104,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 10,
+      "atom_count": 10,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.6,
+      "basis": "blockade_reduced",
+      "basis_size": 96,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.28888888888888886,
+      "edges": [
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          8
+        ],
+        [
+          1,
+          9
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          3,
+          9
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          9
+        ],
+        [
+          5,
+          9
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ]
+      ],
+      "full_dim": 1024,
+      "graph_sha256": "61dc1d08e0396f50b5d25a542698234186a576f97b8030a439c0e2a983227b03",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.2563612405563154,
+            3.505339652582448
+          ],
+          "weight": 1.048364727723312
+        },
+        {
+          "node": 1,
+          "position": [
+            1.7914703806102967,
+            1.4016233546004124
+          ],
+          "weight": 1.1030081180233224
+        },
+        {
+          "node": 2,
+          "position": [
+            3.1231804264713094,
+            1.9108955474035454
+          ],
+          "weight": 1.3061022302791874
+        },
+        {
+          "node": 3,
+          "position": [
+            1.0089055683824437,
+            1.965965530299569
+          ],
+          "weight": 1.366837886145627
+        },
+        {
+          "node": 4,
+          "position": [
+            0.7031296687479558,
+            0.9360821032426269
+          ],
+          "weight": 1.162730248853519
+        },
+        {
+          "node": 5,
+          "position": [
+            1.8184210138164734,
+            1.611749766584231
+          ],
+          "weight": 1.247212521383093
+        },
+        {
+          "node": 6,
+          "position": [
+            2.1266268514023032,
+            2.7810830710514347
+          ],
+          "weight": 1.367549347189947
+        },
+        {
+          "node": 7,
+          "position": [
+            2.1416128754334323,
+            2.8355559795741776
+          ],
+          "weight": 1.1900509976333353
+        },
+        {
+          "node": 8,
+          "position": [
+            1.2432300171652668,
+            0.7759174277753083
+          ],
+          "weight": 1.3619500564914628
+        },
+        {
+          "node": 9,
+          "position": [
+            1.332876319205704,
+            1.3325806520768368
+          ],
+          "weight": 1.3194698137821756
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.90625,
+      "required": true,
+      "scenario_id": "udg_weighted_n10_seed105",
+      "seed": 105,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.0,
+      "basis": "blockade_reduced",
+      "basis_size": 432,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.18181818181818182,
+      "edges": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          11
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          1,
+          11
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          11
+        ],
+        [
+          3,
+          10
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          11
+        ],
+        [
+          6,
+          11
+        ]
+      ],
+      "full_dim": 4096,
+      "graph_sha256": "66cc66d58f700b3ea1289f3c4e7228ef665bb2b94d6d0e02f6d7a23dd7fb5802",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            3.6542856808350317,
+            1.3920316764085736
+          ],
+          "weight": 1.3924027059849886
+        },
+        {
+          "node": 1,
+          "position": [
+            2.2900105643692563,
+            1.1399296158288934
+          ],
+          "weight": 1.4613628432114572
+        },
+        {
+          "node": 2,
+          "position": [
+            3.3669065948728685,
+            1.410302060737372
+          ],
+          "weight": 1.486588407316447
+        },
+        {
+          "node": 3,
+          "position": [
+            0.8695789937555294,
+            3.119672081924506
+          ],
+          "weight": 1.340448115640422
+        },
+        {
+          "node": 4,
+          "position": [
+            1.8244095537629215,
+            0.11930907441614352
+          ],
+          "weight": 1.4473991015413985
+        },
+        {
+          "node": 5,
+          "position": [
+            2.221669211577165,
+            1.5116573817779895
+          ],
+          "weight": 1.1773395186074516
+        },
+        {
+          "node": 6,
+          "position": [
+            2.525080646546713,
+            1.34403530918549
+          ],
+          "weight": 1.253789954074585
+        },
+        {
+          "node": 7,
+          "position": [
+            1.43662779911078,
+            0.21379973400066524
+          ],
+          "weight": 1.1252046001648501
+        },
+        {
+          "node": 8,
+          "position": [
+            3.2570358417550085,
+            3.168698422470029
+          ],
+          "weight": 1.3336627131179344
+        },
+        {
+          "node": 9,
+          "position": [
+            1.8225779032547447,
+            3.756191568698673
+          ],
+          "weight": 1.4201303769898004
+        },
+        {
+          "node": 10,
+          "position": [
+            0.9491421961323527,
+            2.1981004253851313
+          ],
+          "weight": 1.4779756236335235
+        },
+        {
+          "node": 11,
+          "position": [
+            3.0426837441593095,
+            1.4304874823186615
+          ],
+          "weight": 1.234961832970671
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.89453125,
+      "required": true,
+      "scenario_id": "udg_weighted_n12_seed101",
+      "seed": 101,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.0,
+      "basis": "blockade_reduced",
+      "basis_size": 330,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.18181818181818182,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          9
+        ],
+        [
+          1,
+          7
+        ],
+        [
+          1,
+          9
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          6,
+          10
+        ],
+        [
+          7,
+          9
+        ]
+      ],
+      "full_dim": 4096,
+      "graph_sha256": "be21fd882000dd87348dd5c479dedeba740a389c7df01b782d430f7429e3f9dd",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.6196430401423241,
+            2.269349474794439
+          ],
+          "weight": 1.411918388591423
+        },
+        {
+          "node": 1,
+          "position": [
+            1.151283946462301,
+            2.652604440774256
+          ],
+          "weight": 1.2319420801529914
+        },
+        {
+          "node": 2,
+          "position": [
+            3.4522124814140014,
+            2.1877447365591114
+          ],
+          "weight": 1.4965959958044461
+        },
+        {
+          "node": 3,
+          "position": [
+            0.939281963227624,
+            0.4233025964842971
+          ],
+          "weight": 1.1727749605694597
+        },
+        {
+          "node": 4,
+          "position": [
+            3.017884778709212,
+            2.090065186968838
+          ],
+          "weight": 1.4621277252975569
+        },
+        {
+          "node": 5,
+          "position": [
+            3.8511613767685304,
+            3.5718378909451918
+          ],
+          "weight": 1.0811547860665232
+        },
+        {
+          "node": 6,
+          "position": [
+            2.285335595443415,
+            2.810403545013566
+          ],
+          "weight": 1.4594831569438658
+        },
+        {
+          "node": 7,
+          "position": [
+            0.5670451192509088,
+            2.372648646046501
+          ],
+          "weight": 1.0270525992179294
+        },
+        {
+          "node": 8,
+          "position": [
+            2.878063279684585,
+            2.219062522384017
+          ],
+          "weight": 1.063308985844149
+        },
+        {
+          "node": 9,
+          "position": [
+            0.4402722294078579,
+            2.0312627356953405
+          ],
+          "weight": 1.247005363145421
+        },
+        {
+          "node": 10,
+          "position": [
+            2.085015121264438,
+            3.7842321622996513
+          ],
+          "weight": 1.489318893907301
+        },
+        {
+          "node": 11,
+          "position": [
+            1.145053195299566,
+            0.2898309712581846
+          ],
+          "weight": 1.1459506125265286
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.91943359375,
+      "required": true,
+      "scenario_id": "udg_weighted_n12_seed102",
+      "seed": 102,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.6666666666666667,
+      "basis": "blockade_reduced",
+      "basis_size": 564,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.15151515151515152,
+      "edges": [
+        [
+          0,
+          5
+        ],
+        [
+          0,
+          8
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          11
+        ],
+        [
+          3,
+          8
+        ],
+        [
+          3,
+          10
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          5,
+          9
+        ]
+      ],
+      "full_dim": 4096,
+      "graph_sha256": "2330cb6d09167a237b487a3c9a2b44dac3a6a6dc589f0f3b05e9cb33786d6cd8",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.2110169529742738,
+            0.8687807404815302
+          ],
+          "weight": 1.0910048640471526
+        },
+        {
+          "node": 1,
+          "position": [
+            3.331457569146615,
+            3.3212477761624384
+          ],
+          "weight": 1.051781216790237
+        },
+        {
+          "node": 2,
+          "position": [
+            1.1196401247787247,
+            2.562256328035058
+          ],
+          "weight": 1.3506478818146206
+        },
+        {
+          "node": 3,
+          "position": [
+            1.699000346396247,
+            1.8644797590475979
+          ],
+          "weight": 1.3699915721707148
+        },
+        {
+          "node": 4,
+          "position": [
+            1.700100632996683,
+            3.7175715182945477
+          ],
+          "weight": 1.1547295213529636
+        },
+        {
+          "node": 5,
+          "position": [
+            0.433029048399869,
+            0.980791933463475
+          ],
+          "weight": 1.0279355113557622
+        },
+        {
+          "node": 6,
+          "position": [
+            3.5713403591410238,
+            2.512945019855026
+          ],
+          "weight": 1.0981558835523197
+        },
+        {
+          "node": 7,
+          "position": [
+            0.14234973097748863,
+            3.2797874577600843
+          ],
+          "weight": 1.1855327396676114
+        },
+        {
+          "node": 8,
+          "position": [
+            0.810659247755226,
+            1.5746690622282482
+          ],
+          "weight": 1.081438163067301
+        },
+        {
+          "node": 9,
+          "position": [
+            0.27699213816064916,
+            0.0844298368391773
+          ],
+          "weight": 1.0042731187888385
+        },
+        {
+          "node": 10,
+          "position": [
+            2.3940144385640862,
+            1.2776890906032077
+          ],
+          "weight": 1.1283332429958621
+        },
+        {
+          "node": 11,
+          "position": [
+            1.7790111394810717,
+            2.441791086970715
+          ],
+          "weight": 1.1208444734050222
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.8623046875,
+      "required": true,
+      "scenario_id": "udg_weighted_n12_seed103",
+      "seed": 103,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.1666666666666665,
+      "basis": "blockade_reduced",
+      "basis_size": 352,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.19696969696969696,
+      "edges": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          8
+        ],
+        [
+          0,
+          10
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          4,
+          10
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          6,
+          10
+        ],
+        [
+          7,
+          9
+        ],
+        [
+          7,
+          11
+        ],
+        [
+          9,
+          11
+        ]
+      ],
+      "full_dim": 4096,
+      "graph_sha256": "eac561a09fd6237dc806e1abaafadc4442b39ff9030f8dd69d6d762c3e98f21f",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            3.2477475530227586,
+            2.680678252742011
+          ],
+          "weight": 1.1080444141134123
+        },
+        {
+          "node": 1,
+          "position": [
+            0.4857181921415321,
+            1.4526371105729787
+          ],
+          "weight": 1.3769442590627945
+        },
+        {
+          "node": 2,
+          "position": [
+            2.8473707314480348,
+            1.5991140897036211
+          ],
+          "weight": 1.3224656847274887
+        },
+        {
+          "node": 3,
+          "position": [
+            3.192133399421418,
+            0.25671163866405955
+          ],
+          "weight": 1.2691486184919358
+        },
+        {
+          "node": 4,
+          "position": [
+            2.9274820392853833,
+            3.196470337562274
+          ],
+          "weight": 1.1095564354640945
+        },
+        {
+          "node": 5,
+          "position": [
+            1.874255354182884,
+            1.4179682077061175
+          ],
+          "weight": 1.1326745527740354
+        },
+        {
+          "node": 6,
+          "position": [
+            3.091919483996966,
+            2.1694799315526163
+          ],
+          "weight": 1.2810894596668763
+        },
+        {
+          "node": 7,
+          "position": [
+            1.0298120141758667,
+            2.7031682666907764
+          ],
+          "weight": 1.0302295190422361
+        },
+        {
+          "node": 8,
+          "position": [
+            3.763105503005667,
+            1.9388929077365835
+          ],
+          "weight": 1.0951317719439526
+        },
+        {
+          "node": 9,
+          "position": [
+            1.7894251559614325,
+            2.7653882725978858
+          ],
+          "weight": 1.4123256253910983
+        },
+        {
+          "node": 10,
+          "position": [
+            3.367593872608855,
+            2.9631944042019978
+          ],
+          "weight": 1.1892178283274957
+        },
+        {
+          "node": 11,
+          "position": [
+            1.1498965268548775,
+            2.7025713850642537
+          ],
+          "weight": 1.229644970286324
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.9140625,
+      "required": true,
+      "scenario_id": "udg_weighted_n12_seed104",
+      "seed": 104,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 12,
+      "atom_count": 12,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 3.1666666666666665,
+      "basis": "blockade_reduced",
+      "basis_size": 200,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.2878787878787879,
+      "edges": [
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          8
+        ],
+        [
+          1,
+          9
+        ],
+        [
+          1,
+          11
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          3,
+          9
+        ],
+        [
+          3,
+          10
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          9
+        ],
+        [
+          5,
+          9
+        ],
+        [
+          5,
+          11
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          6,
+          11
+        ],
+        [
+          7,
+          11
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ]
+      ],
+      "full_dim": 4096,
+      "graph_sha256": "456aecb86bef613679d80ed1d275a95fedf4e9c82aa3c68e0099df3980796b2e",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.471719898666069,
+            3.839907198873458
+          ],
+          "weight": 1.048364727723312
+        },
+        {
+          "node": 1,
+          "position": [
+            1.96245747712525,
+            1.5354014568814165
+          ],
+          "weight": 1.1030081180233224
+        },
+        {
+          "node": 2,
+          "position": [
+            3.421272741473882,
+            2.0932811926982087
+          ],
+          "weight": 1.3061022302791874
+        },
+        {
+          "node": 3,
+          "position": [
+            1.1052006763912705,
+            2.15360733644536
+          ],
+          "weight": 1.366837886145627
+        },
+        {
+          "node": 4,
+          "position": [
+            0.7702399608487812,
+            1.025426567245733
+          ],
+          "weight": 1.162730248853519
+        },
+        {
+          "node": 5,
+          "position": [
+            1.9919804166173916,
+            1.7655834084237392
+          ],
+          "weight": 1.247212521383093
+        },
+        {
+          "node": 6,
+          "position": [
+            2.329602995818457,
+            3.046523864621227
+          ],
+          "weight": 1.367549347189947
+        },
+        {
+          "node": 7,
+          "position": [
+            2.3460193626367847,
+            3.1061959461628703
+          ],
+          "weight": 1.1900509976333353
+        },
+        {
+          "node": 8,
+          "position": [
+            1.361890249137903,
+            0.8499749559078438
+          ],
+          "weight": 1.3619500564914628
+        },
+        {
+          "node": 9,
+          "position": [
+            1.4600928527868409,
+            1.459768965674854
+          ],
+          "weight": 1.3194698137821756
+        },
+        {
+          "node": 10,
+          "position": [
+            1.3493961092101858,
+            2.6247986892488546
+          ],
+          "weight": 1.3061664414591407
+        },
+        {
+          "node": 11,
+          "position": [
+            1.9632670433678883,
+            2.48375038490864
+          ],
+          "weight": 1.3165830911374625
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.951171875,
+      "required": true,
+      "scenario_id": "udg_weighted_n12_seed105",
+      "seed": 105,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.375,
+      "basis": "blockade_reduced",
+      "basis_size": 2664,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.15833333333333333,
+      "edges": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          11
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          1,
+          11
+        ],
+        [
+          1,
+          14
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          11
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          4,
+          14
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          11
+        ],
+        [
+          5,
+          13
+        ],
+        [
+          5,
+          14
+        ],
+        [
+          6,
+          11
+        ],
+        [
+          6,
+          14
+        ],
+        [
+          7,
+          14
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          10,
+          13
+        ]
+      ],
+      "full_dim": 65536,
+      "graph_sha256": "d26f5b8b80c7a667061d767c505277dd4430e05c2f38e6f4f7459ad63639b93b",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            4.219605643051801,
+            1.607379726189952
+          ],
+          "weight": 1.3924027059849886
+        },
+        {
+          "node": 1,
+          "position": [
+            2.644276431571354,
+            1.3162773411120767
+          ],
+          "weight": 1.4613628432114572
+        },
+        {
+          "node": 2,
+          "position": [
+            3.887768857772354,
+            1.6284765488108115
+          ],
+          "weight": 1.486588407316447
+        },
+        {
+          "node": 3,
+          "position": [
+            1.0041033322527975,
+            3.6022870325649476
+          ],
+          "weight": 1.340448115640422
+        },
+        {
+          "node": 4,
+          "position": [
+            2.1066466939542954,
+            0.13776625246185112
+          ],
+          "weight": 1.4473991015413985
+        },
+        {
+          "node": 5,
+          "position": [
+            2.5653626347087597,
+            1.7455115925840141
+          ],
+          "weight": 1.1773395186074516
+        },
+        {
+          "node": 6,
+          "position": [
+            2.915711982018518,
+            1.551958295117209
+          ],
+          "weight": 1.253789954074585
+        },
+        {
+          "node": 7,
+          "position": [
+            1.658874893083817,
+            0.24687466795590893
+          ],
+          "weight": 1.1252046001648501
+        },
+        {
+          "node": 8,
+          "position": [
+            3.7609010399950273,
+            3.658897774387628
+          ],
+          "weight": 1.3336627131179344
+        },
+        {
+          "node": 9,
+          "position": [
+            2.104531686126381,
+            4.337276426631963
+          ],
+          "weight": 1.4201303769898004
+        },
+        {
+          "node": 10,
+          "position": [
+            1.0959750048724928,
+            2.5381477446038727
+          ],
+          "weight": 1.4779756236335235
+        },
+        {
+          "node": 11,
+          "position": [
+            3.5133885574985517,
+            1.6517846659781386
+          ],
+          "weight": 1.234961832970671
+        },
+        {
+          "node": 12,
+          "position": [
+            2.31579197276393,
+            4.033389909298874
+          ],
+          "weight": 1.3571477728070214
+        },
+        {
+          "node": 13,
+          "position": [
+            1.7805269227932066,
+            2.0663117325502136
+          ],
+          "weight": 1.0461549030355308
+        },
+        {
+          "node": 14,
+          "position": [
+            2.2004472259085937,
+            1.0242191477232063
+          ],
+          "weight": 1.046566013977646
+        },
+        {
+          "node": 15,
+          "position": [
+            0.40820234931672683,
+            0.9652007975556941
+          ],
+          "weight": 1.3495631954869052
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.9593505859375,
+      "required": true,
+      "scenario_id": "udg_weighted_n16_seed101",
+      "seed": 101,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.0,
+      "basis": "blockade_reduced",
+      "basis_size": 3200,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.13333333333333333,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          9
+        ],
+        [
+          0,
+          15
+        ],
+        [
+          1,
+          7
+        ],
+        [
+          1,
+          15
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          3,
+          14
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          6,
+          13
+        ],
+        [
+          7,
+          9
+        ],
+        [
+          7,
+          15
+        ],
+        [
+          8,
+          13
+        ]
+      ],
+      "full_dim": 65536,
+      "graph_sha256": "54347dfda4d76ec438f96eedf78fb53f0405a6b0afbb55db4b14d1e6360332c7",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.7155021520552978,
+            2.6204190603158106
+          ],
+          "weight": 1.411918388591423
+        },
+        {
+          "node": 1,
+          "position": [
+            1.3293881928074085,
+            3.062963775869227
+          ],
+          "weight": 1.2319420801529914
+        },
+        {
+          "node": 2,
+          "position": [
+            3.986271610888319,
+            2.52619002514118
+          ],
+          "weight": 1.4965959958044461
+        },
+        {
+          "node": 3,
+          "position": [
+            1.0845893886288578,
+            0.4887877360577529
+          ],
+          "weight": 1.1727749605694597
+        },
+        {
+          "node": 4,
+          "position": [
+            3.484753178742075,
+            2.4133993966406484
+          ],
+          "weight": 1.4621277252975569
+        },
+        {
+          "node": 5,
+          "position": [
+            4.446938115140002,
+            4.124403135677823
+          ],
+          "weight": 1.0811547860665232
+        },
+        {
+          "node": 6,
+          "position": [
+            2.6388782424357786,
+            3.2451744864901215
+          ],
+          "weight": 1.4594831569438658
+        },
+        {
+          "node": 7,
+          "position": [
+            0.6547673044843514,
+            2.739698668974697
+          ],
+          "weight": 1.0270525992179294
+        },
+        {
+          "node": 8,
+          "position": [
+            3.3233012185413444,
+            2.5623526892940447
+          ],
+          "weight": 1.063308985844149
+        },
+        {
+          "node": 9,
+          "position": [
+            0.5083825803306868,
+            2.345500174497121
+          ],
+          "weight": 1.247005363145421
+        },
+        {
+          "node": 10,
+          "position": [
+            2.407568083052927,
+            4.369654915159487
+          ],
+          "weight": 1.489318893907301
+        },
+        {
+          "node": 11,
+          "position": [
+            1.322193541085291,
+            0.3346679785508071
+          ],
+          "weight": 1.1459506125265286
+        },
+        {
+          "node": 12,
+          "position": [
+            3.638106545234136,
+            1.17993277174625
+          ],
+          "weight": 1.0711348005560586
+        },
+        {
+          "node": 13,
+          "position": [
+            2.7007402190022014,
+            3.089417108696994
+          ],
+          "weight": 1.0869322904585594
+        },
+        {
+          "node": 14,
+          "position": [
+            0.25966186977289296,
+            0.7325000927990746
+          ],
+          "weight": 1.1181714610709677
+        },
+        {
+          "node": 15,
+          "position": [
+            1.6158548997216111,
+            2.515425911786415
+          ],
+          "weight": 1.456635558623267
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.951171875,
+      "required": true,
+      "scenario_id": "udg_weighted_n16_seed102",
+      "seed": 102,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.875,
+      "basis": "blockade_reduced",
+      "basis_size": 3120,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.125,
+      "edges": [
+        [
+          0,
+          5
+        ],
+        [
+          0,
+          8
+        ],
+        [
+          0,
+          14
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          1,
+          15
+        ],
+        [
+          2,
+          11
+        ],
+        [
+          2,
+          12
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          5,
+          14
+        ],
+        [
+          6,
+          13
+        ],
+        [
+          6,
+          15
+        ],
+        [
+          7,
+          12
+        ],
+        [
+          9,
+          14
+        ],
+        [
+          13,
+          15
+        ]
+      ],
+      "full_dim": 65536,
+      "graph_sha256": "b6d57ba7608055a9ab8e39121d4987a4b60c92f23ba007d63b3d617c497a41a4",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.3983619275857946,
+            1.0031815887675477
+          ],
+          "weight": 1.0910048640471526
+        },
+        {
+          "node": 1,
+          "position": [
+            3.8468358486812293,
+            3.8350465952256596
+          ],
+          "weight": 1.051781216790237
+        },
+        {
+          "node": 2,
+          "position": [
+            1.2928490548730056,
+            2.9586387614477254
+          ],
+          "weight": 1.3506478818146206
+        },
+        {
+          "node": 3,
+          "position": [
+            1.9618366146902813,
+            2.1529157815694786
+          ],
+          "weight": 1.3699915721707148
+        },
+        {
+          "node": 4,
+          "position": [
+            1.9631071162201763,
+            4.292681833638086
+          ],
+          "weight": 1.1547295213529636
+        },
+        {
+          "node": 5,
+          "position": [
+            0.5000188753211837,
+            1.1325209736083017
+          ],
+          "weight": 1.0279355113557622
+        },
+        {
+          "node": 6,
+          "position": [
+            4.1238286354356894,
+            2.9016989673440574
+          ],
+          "weight": 1.0981558835523197
+        },
+        {
+          "node": 7,
+          "position": [
+            0.16437131099784774,
+            3.787172343245086
+          ],
+          "weight": 1.1855327396676114
+        },
+        {
+          "node": 8,
+          "position": [
+            0.9360686698250786,
+            1.8182712139241095
+          ],
+          "weight": 1.081438163067301
+        },
+        {
+          "node": 9,
+          "position": [
+            0.31984297106092163,
+            0.0974911780534704
+          ],
+          "weight": 1.0042731187888385
+        },
+        {
+          "node": 10,
+          "position": [
+            2.764369761097652,
+            1.47534828080082
+          ],
+          "weight": 1.1283332429958621
+        },
+        {
+          "node": 11,
+          "position": [
+            2.054225120541479,
+            2.8195374827347424
+          ],
+          "weight": 1.1208444734050222
+        },
+        {
+          "node": 12,
+          "position": [
+            0.5743359158481426,
+            2.9988779731645896
+          ],
+          "weight": 1.1400388621145527
+        },
+        {
+          "node": 13,
+          "position": [
+            3.7860395203262724,
+            2.2861338680687378
+          ],
+          "weight": 1.491346503250924
+        },
+        {
+          "node": 14,
+          "position": [
+            0.8107909248086401,
+            0.5633477802235216
+          ],
+          "weight": 1.0792496676680308
+        },
+        {
+          "node": 15,
+          "position": [
+            4.3678079963276755,
+            3.049720960014361
+          ],
+          "weight": 1.2988624978521672
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.952392578125,
+      "required": true,
+      "scenario_id": "udg_weighted_n16_seed103",
+      "seed": 103,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.0,
+      "basis": "blockade_reduced",
+      "basis_size": 2880,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.13333333333333333,
+      "edges": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          10
+        ],
+        [
+          1,
+          13
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          4,
+          10
+        ],
+        [
+          4,
+          12
+        ],
+        [
+          5,
+          15
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          6,
+          10
+        ],
+        [
+          7,
+          9
+        ],
+        [
+          7,
+          11
+        ],
+        [
+          7,
+          14
+        ],
+        [
+          9,
+          11
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          11,
+          14
+        ]
+      ],
+      "full_dim": 65536,
+      "graph_sha256": "c82fc4f15bb95df19ae97d9534105a27e3e07df7d5117b0c9dc4c510c99a7d37",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            3.7501758479952763,
+            3.095380621662752
+          ],
+          "weight": 1.1080444141134123
+        },
+        {
+          "node": 1,
+          "position": [
+            0.5608590579664239,
+            1.677360853648299
+          ],
+          "weight": 1.3769442590627945
+        },
+        {
+          "node": 2,
+          "position": [
+            3.287860516568369,
+            1.846497900310618
+          ],
+          "weight": 1.3224656847274887
+        },
+        {
+          "node": 3,
+          "position": [
+            3.6859581548903018,
+            0.29642506737360946
+          ],
+          "weight": 1.2691486184919358
+        },
+        {
+          "node": 4,
+          "position": [
+            3.3803650868584216,
+            3.6909660196964653
+          ],
+          "weight": 1.1095564354640945
+        },
+        {
+          "node": 5,
+          "position": [
+            2.164203666535171,
+            1.6373286528429163
+          ],
+          "weight": 1.1326745527740354
+        },
+        {
+          "node": 6,
+          "position": [
+            3.570241092796594,
+            2.5050996449667875
+          ],
+          "weight": 1.2810894596668763
+        },
+        {
+          "node": 7,
+          "position": [
+            1.1891244871982947,
+            3.1213498528775476
+          ],
+          "weight": 1.0302295190422361
+        },
+        {
+          "node": 8,
+          "position": [
+            4.345259950298567,
+            2.2388406844231454
+          ],
+          "weight": 1.0951317719439526
+        },
+        {
+          "node": 9,
+          "position": [
+            2.066250190978042,
+            3.193195327196447
+          ],
+          "weight": 1.4123256253910983
+        },
+        {
+          "node": 10,
+          "position": [
+            3.888562457744113,
+            3.421602173854432
+          ],
+          "weight": 1.1892178283274957
+        },
+        {
+          "node": 11,
+          "position": [
+            1.3277861386397585,
+            3.120660633342053
+          ],
+          "weight": 1.229644970286324
+        },
+        {
+          "node": 12,
+          "position": [
+            2.406729362148757,
+            3.8604809230219215
+          ],
+          "weight": 1.055675068589724
+        },
+        {
+          "node": 13,
+          "position": [
+            0.20801146819008257,
+            1.1274695453575438
+          ],
+          "weight": 1.1994083934353008
+        },
+        {
+          "node": 14,
+          "position": [
+            1.3247663554471811,
+            3.9985857222850822
+          ],
+          "weight": 1.2279459136358826
+        },
+        {
+          "node": 15,
+          "position": [
+            1.5755372744037326,
+            1.6810181141780776
+          ],
+          "weight": 1.3050202010048297
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.9560546875,
+      "required": true,
+      "scenario_id": "udg_weighted_n16_seed104",
+      "seed": 104,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 16,
+      "atom_count": 16,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 3.375,
+      "basis": "blockade_reduced",
+      "basis_size": 816,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.225,
+      "edges": [
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          14
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          9
+        ],
+        [
+          3,
+          9
+        ],
+        [
+          3,
+          10
+        ],
+        [
+          3,
+          12
+        ],
+        [
+          3,
+          13
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          9
+        ],
+        [
+          4,
+          15
+        ],
+        [
+          5,
+          9
+        ],
+        [
+          5,
+          11
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          6,
+          11
+        ],
+        [
+          6,
+          14
+        ],
+        [
+          7,
+          11
+        ],
+        [
+          7,
+          14
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          8,
+          15
+        ],
+        [
+          9,
+          13
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          10,
+          12
+        ],
+        [
+          10,
+          13
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          12,
+          13
+        ]
+      ],
+      "full_dim": 65536,
+      "graph_sha256": "6f20db433370a121a6f8ce081ead1f2da5ce73a94381c765012c6424a6362e1c",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            2.854096297712419,
+            4.433942909865546
+          ],
+          "weight": 1.048364727723312
+        },
+        {
+          "node": 1,
+          "position": [
+            2.266050705382914,
+            1.7729288888892587
+          ],
+          "weight": 1.1030081180233224
+        },
+        {
+          "node": 2,
+          "position": [
+            3.9505454765221493,
+            2.4171129201877832
+          ],
+          "weight": 1.3061022302791874
+        },
+        {
+          "node": 3,
+          "position": [
+            1.276175816046113,
+            2.4867715508509636
+          ],
+          "weight": 1.366837886145627
+        },
+        {
+          "node": 4,
+          "position": [
+            0.8893964974733013,
+            1.1840606092670356
+          ],
+          "weight": 1.162730248853519
+        },
+        {
+          "node": 5,
+          "position": [
+            2.300140859509028,
+            2.0387201122603655
+          ],
+          "weight": 1.247212521383093
+        },
+        {
+          "node": 6,
+          "position": [
+            2.6899938334814895,
+            3.5178227466633687
+          ],
+          "weight": 1.367549347189947
+        },
+        {
+          "node": 7,
+          "position": [
+            2.7089498210848437,
+            3.586726131345715
+          ],
+          "weight": 1.1900509976333353
+        },
+        {
+          "node": 8,
+          "position": [
+            1.5725754038929898,
+            0.9814665391956677
+          ],
+          "weight": 1.3619500564914628
+        },
+        {
+          "node": 9,
+          "position": [
+            1.6859700031966625,
+            1.6855960105740773
+          ],
+          "weight": 1.3194698137821756
+        },
+        {
+          "node": 10,
+          "position": [
+            1.558148413791869,
+            3.030856459612806
+          ],
+          "weight": 1.3061664414591407
+        },
+        {
+          "node": 11,
+          "position": [
+            2.266985511959142,
+            2.8679879066536804
+          ],
+          "weight": 1.3165830911374625
+        },
+        {
+          "node": 12,
+          "position": [
+            1.5115769131918746,
+            2.9457595048413254
+          ],
+          "weight": 1.111146363233488
+        },
+        {
+          "node": 13,
+          "position": [
+            1.1646505735173145,
+            2.4891872203223633
+          ],
+          "weight": 1.0833018710793207
+        },
+        {
+          "node": 14,
+          "position": [
+            2.65509990374927,
+            3.8434477222921313
+          ],
+          "weight": 1.427102736961451
+        },
+        {
+          "node": 15,
+          "position": [
+            1.4286444047349052,
+            0.6975524032397488
+          ],
+          "weight": 1.1348637840792435
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.987548828125,
+      "required": true,
+      "scenario_id": "udg_weighted_n16_seed105",
+      "seed": 105,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.9,
+      "basis": "blockade_reduced",
+      "basis_size": 27360,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.1,
+      "edges": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          11
+        ],
+        [
+          0,
+          17
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          1,
+          14
+        ],
+        [
+          2,
+          11
+        ],
+        [
+          2,
+          17
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          4,
+          14
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          13
+        ],
+        [
+          5,
+          14
+        ],
+        [
+          6,
+          11
+        ],
+        [
+          6,
+          14
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          10,
+          13
+        ],
+        [
+          10,
+          16
+        ],
+        [
+          16,
+          18
+        ]
+      ],
+      "full_dim": 1048576,
+      "graph_sha256": "7e0a21cf11559ba34cf1b4305dbb6aadd7fb5c3b7fdc4195d04566228d54e32f",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            4.717662528052769,
+            1.797105166707866
+          ],
+          "weight": 1.3924027059849886
+        },
+        {
+          "node": 1,
+          "position": [
+            2.956390926147059,
+            1.471642805984641
+          ],
+          "weight": 1.4613628432114572
+        },
+        {
+          "node": 2,
+          "position": [
+            4.346657723392847,
+            1.8206921314526143
+          ],
+          "weight": 1.486588407316447
+        },
+        {
+          "node": 3,
+          "position": [
+            1.1226216536756561,
+            4.02747933964061
+          ],
+          "weight": 1.340448115640422
+        },
+        {
+          "node": 4,
+          "position": [
+            2.3553026061285,
+            0.15402735275504842
+          ],
+          "weight": 1.4473991015413985
+        },
+        {
+          "node": 5,
+          "position": [
+            2.8681626190733738,
+            1.9515412882658867
+          ],
+          "weight": 1.1773395186074516
+        },
+        {
+          "node": 6,
+          "position": [
+            3.2598650973020256,
+            1.7351421230633797
+          ],
+          "weight": 1.253789954074585
+        },
+        {
+          "node": 7,
+          "position": [
+            1.8546785135515553,
+            0.2760142697360507
+          ],
+          "weight": 1.1252046001648501
+        },
+        {
+          "node": 8,
+          "position": [
+            4.204815191039268,
+            4.090772073126712
+          ],
+          "weight": 1.3336627131179344
+        },
+        {
+          "node": 9,
+          "position": [
+            2.3529379554904195,
+            4.849222463578224
+          ],
+          "weight": 1.4201303769898004
+        },
+        {
+          "node": 10,
+          "position": [
+            1.2253373062677786,
+            2.8377354469360174
+          ],
+          "weight": 1.4779756236335235
+        },
+        {
+          "node": 11,
+          "position": [
+            3.9280878229683447,
+            1.8467513986594508
+          ],
+          "weight": 1.234961832970671
+        },
+        {
+          "node": 12,
+          "position": [
+            2.5891341364242444,
+            4.509467008476996
+          ],
+          "weight": 1.3571477728070214
+        },
+        {
+          "node": 13,
+          "position": [
+            1.9906896175670648,
+            2.310206748343821
+          ],
+          "weight": 1.0461549030355308
+        },
+        {
+          "node": 14,
+          "position": [
+            2.4601747890162255,
+            1.1451118190829939
+          ],
+          "weight": 1.046566013977646
+        },
+        {
+          "node": 15,
+          "position": [
+            0.456384100823658,
+            1.0791272976357724
+          ],
+          "weight": 1.3495631954869052
+        },
+        {
+          "node": 16,
+          "position": [
+            0.8959161246042702,
+            2.8419357915209438
+          ],
+          "weight": 1.3013095293406658
+        },
+        {
+          "node": 17,
+          "position": [
+            4.831327133953316,
+            2.290999240629276
+          ],
+          "weight": 1.3872636555931042
+        },
+        {
+          "node": 18,
+          "position": [
+            0.17447160328663003,
+            3.2230330934084046
+          ],
+          "weight": 1.4901516646408006
+        },
+        {
+          "node": 19,
+          "position": [
+            0.23691397465969488,
+            4.538249106756846
+          ],
+          "weight": 1.0778891824011287
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.973907470703125,
+      "required": true,
+      "scenario_id": "udg_weighted_n20_seed101",
+      "seed": 101,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.5,
+      "basis": "blockade_reduced",
+      "basis_size": 17480,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.13157894736842105,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          9
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          0,
+          17
+        ],
+        [
+          1,
+          7
+        ],
+        [
+          1,
+          15
+        ],
+        [
+          1,
+          16
+        ],
+        [
+          1,
+          17
+        ],
+        [
+          1,
+          19
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          2,
+          18
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          3,
+          14
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          13
+        ],
+        [
+          7,
+          9
+        ],
+        [
+          7,
+          17
+        ],
+        [
+          8,
+          13
+        ],
+        [
+          9,
+          17
+        ],
+        [
+          15,
+          16
+        ],
+        [
+          15,
+          17
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          16,
+          19
+        ]
+      ],
+      "full_dim": 1048576,
+      "graph_sha256": "dd0c2b50be1ef1112daab0c7a68431dccc43cbdb1200917028b484695d8da5fb",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            0.7999557250215183,
+            2.9297175742011365
+          ],
+          "weight": 1.411918388591423
+        },
+        {
+          "node": 1,
+          "position": [
+            1.4863011838014812,
+            3.42449760773151
+          ],
+          "weight": 1.2319420801529914
+        },
+        {
+          "node": 2,
+          "position": [
+            4.456787149361936,
+            2.8243663101487906
+          ],
+          "weight": 1.4965959958044461
+        },
+        {
+          "node": 3,
+          "position": [
+            1.2126078003245317,
+            0.5464813021966802
+          ],
+          "weight": 1.1727749605694597
+        },
+        {
+          "node": 4,
+          "position": [
+            3.896072496237877,
+            2.698262553872733
+          ],
+          "weight": 1.4621277252975569
+        },
+        {
+          "node": 5,
+          "position": [
+            4.971827958593915,
+            4.61122288899445
+          ],
+          "weight": 1.0811547860665232
+        },
+        {
+          "node": 6,
+          "position": [
+            2.9503555672157855,
+            3.628215375319942
+          ],
+          "weight": 1.4594831569438658
+        },
+        {
+          "node": 7,
+          "position": [
+            0.7320521011356562,
+            3.063076230846558
+          ],
+          "weight": 1.0270525992179294
+        },
+        {
+          "node": 8,
+          "position": [
+            3.7155637171831652,
+            2.8647973977954404
+          ],
+          "weight": 1.063308985844149
+        },
+        {
+          "node": 9,
+          "position": [
+            0.5683890040980816,
+            2.6223489157065902
+          ],
+          "weight": 1.247005363145421
+        },
+        {
+          "node": 10,
+          "position": [
+            2.691742947082602,
+            4.885422714256344
+          ],
+          "weight": 1.489318893907301
+        },
+        {
+          "node": 11,
+          "position": [
+            1.4782573186389358,
+            0.3741701749660231
+          ],
+          "weight": 1.1459506125265286
+        },
+        {
+          "node": 12,
+          "position": [
+            4.067526772265221,
+            1.319204943252179
+          ],
+          "weight": 1.0711348005560586
+        },
+        {
+          "node": 13,
+          "position": [
+            3.0195193596282954,
+            3.454073332948668
+          ],
+          "weight": 1.0869322904585594
+        },
+        {
+          "node": 14,
+          "position": [
+            0.2903107959884432,
+            0.8189600005118175
+          ],
+          "weight": 1.1181714610709677
+        },
+        {
+          "node": 15,
+          "position": [
+            1.806580698776814,
+            2.8123316655594066
+          ],
+          "weight": 1.456635558623267
+        },
+        {
+          "node": 16,
+          "position": [
+            1.7462388199778118,
+            3.17088249624598
+          ],
+          "weight": 1.3314469827659936
+        },
+        {
+          "node": 17,
+          "position": [
+            1.4135389191552123,
+            2.7705886468624508
+          ],
+          "weight": 1.4913747999463838
+        },
+        {
+          "node": 18,
+          "position": [
+            4.983979937230051,
+            2.1232764416778958
+          ],
+          "weight": 1.4121261417896434
+        },
+        {
+          "node": 19,
+          "position": [
+            1.670693760930868,
+            4.016082998821145
+          ],
+          "weight": 1.1889075267700187
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.9833297729492188,
+      "required": true,
+      "scenario_id": "udg_weighted_n20_seed102",
+      "seed": 102,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 1.4,
+      "basis": "blockade_reduced",
+      "basis_size": 53760,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.07368421052631578,
+      "edges": [
+        [
+          0,
+          14
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          2,
+          11
+        ],
+        [
+          2,
+          12
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          5,
+          14
+        ],
+        [
+          6,
+          13
+        ],
+        [
+          6,
+          15
+        ],
+        [
+          7,
+          12
+        ],
+        [
+          7,
+          18
+        ],
+        [
+          9,
+          14
+        ],
+        [
+          13,
+          17
+        ],
+        [
+          14,
+          16
+        ]
+      ],
+      "full_dim": 1048576,
+      "graph_sha256": "d27e438ac7b1e392649ea393ae31f5c28bdd002e47e4b45c76e050a2a8b18e7c",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            1.5634161636147375,
+            1.121591113130238
+          ],
+          "weight": 1.0910048640471526
+        },
+        {
+          "node": 1,
+          "position": [
+            4.300893227967161,
+            4.2877124419018475
+          ],
+          "weight": 1.051781216790237
+        },
+        {
+          "node": 2,
+          "position": [
+            1.4454491856711982,
+            3.307858695731449
+          ],
+          "weight": 1.3506478818146206
+        },
+        {
+          "node": 3,
+          "position": [
+            2.1934000155977658,
+            2.407033018710721
+          ],
+          "weight": 1.3699915721707148
+        },
+        {
+          "node": 4,
+          "position": [
+            2.194820479490947,
+            4.7993641928966015
+          ],
+          "weight": 1.1547295213529636
+        },
+        {
+          "node": 5,
+          "position": [
+            0.5590380976255793,
+            1.266196941466204
+          ],
+          "weight": 1.0279355113557622
+        },
+        {
+          "node": 6,
+          "position": [
+            4.6105805781972,
+            3.2441980706111275
+          ],
+          "weight": 1.0981558835523197
+        },
+        {
+          "node": 7,
+          "position": [
+            0.18377271247097315,
+            4.23418740100159
+          ],
+          "weight": 1.1855327396676114
+        },
+        {
+          "node": 8,
+          "position": [
+            1.046556588668341,
+            2.0328890179326855
+          ],
+          "weight": 1.081438163067301
+        },
+        {
+          "node": 9,
+          "position": [
+            0.35759531270885936,
+            0.10899845066704772
+          ],
+          "weight": 1.0042731187888385
+        },
+        {
+          "node": 10,
+          "position": [
+            3.0906593503796014,
+            1.6494895231790407
+          ],
+          "weight": 1.1283332429958621
+        },
+        {
+          "node": 11,
+          "position": [
+            2.2966935053092237,
+            3.1523387382517614
+          ],
+          "weight": 1.1208444734050222
+        },
+        {
+          "node": 12,
+          "position": [
+            0.6421270748780228,
+            3.3528475021114064
+          ],
+          "weight": 1.1400388621145527
+        },
+        {
+          "node": 13,
+          "position": [
+            4.232920866475121,
+            2.5559753673331165
+          ],
+          "weight": 1.491346503250924
+        },
+        {
+          "node": 14,
+          "position": [
+            0.90649181170602,
+            0.6298419657767029
+          ],
+          "weight": 1.0792496676680308
+        },
+        {
+          "node": 15,
+          "position": [
+            4.8833577962279175,
+            3.409691689499015
+          ],
+          "weight": 1.2988624978521672
+        },
+        {
+          "node": 16,
+          "position": [
+            1.7103634312316003,
+            0.7551186984069397
+          ],
+          "weight": 1.009765200540966
+        },
+        {
+          "node": 17,
+          "position": [
+            4.008335763221156,
+            2.333555052847518
+          ],
+          "weight": 1.4945487265372857
+        },
+        {
+          "node": 18,
+          "position": [
+            0.0764946607301853,
+            4.270831051309317
+          ],
+          "weight": 1.082209573623342
+        },
+        {
+          "node": 19,
+          "position": [
+            4.935985382106499,
+            0.7561478484819623
+          ],
+          "weight": 1.113257146020535
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.94873046875,
+      "required": true,
+      "scenario_id": "udg_weighted_n20_seed103",
+      "seed": 103,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.3,
+      "basis": "blockade_reduced",
+      "basis_size": 17280,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.12105263157894737,
+      "edges": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          10
+        ],
+        [
+          0,
+          17
+        ],
+        [
+          1,
+          13
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          4,
+          10
+        ],
+        [
+          4,
+          17
+        ],
+        [
+          5,
+          15
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          7,
+          9
+        ],
+        [
+          7,
+          11
+        ],
+        [
+          7,
+          14
+        ],
+        [
+          7,
+          18
+        ],
+        [
+          7,
+          19
+        ],
+        [
+          9,
+          11
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          9,
+          18
+        ],
+        [
+          10,
+          17
+        ],
+        [
+          11,
+          14
+        ],
+        [
+          11,
+          18
+        ],
+        [
+          12,
+          18
+        ],
+        [
+          14,
+          18
+        ]
+      ],
+      "full_dim": 1048576,
+      "graph_sha256": "841e657aa42c8c914bdb81068e05ac094d35262b3ef64f8da24a8231b9fcc9f1",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            4.192824061847678,
+            3.4607407431367356
+          ],
+          "weight": 1.1080444141134123
+        },
+        {
+          "node": 1,
+          "position": [
+            0.6270594897047094,
+            1.8753464457773361
+          ],
+          "weight": 1.3769442590627945
+        },
+        {
+          "node": 2,
+          "position": [
+            3.6759398077922234,
+            2.064447412702586
+          ],
+          "weight": 1.3224656847274887
+        },
+        {
+          "node": 3,
+          "position": [
+            4.121026498277207,
+            0.3314133004411729
+          ],
+          "weight": 1.2691486184919358
+        },
+        {
+          "node": 4,
+          "position": [
+            3.7793630614912055,
+            4.126625461341562
+          ],
+          "weight": 1.1095564354640945
+        },
+        {
+          "node": 5,
+          "position": [
+            2.419653257763464,
+            1.8305890846324573
+          ],
+          "weight": 1.1326745527740354
+        },
+        {
+          "node": 6,
+          "position": [
+            3.9916508897781595,
+            2.800786548278163
+          ],
+          "weight": 1.2810894596668763
+        },
+        {
+          "node": 7,
+          "position": [
+            1.3294815935424826,
+            3.489775226296582
+          ],
+          "weight": 1.0302295190422361
+        },
+        {
+          "node": 8,
+          "position": [
+            4.858148314387477,
+            2.503099980581154
+          ],
+          "weight": 1.0951317719439526
+        },
+        {
+          "node": 9,
+          "position": [
+            2.3101379427744124,
+            3.570100908522969
+          ],
+          "weight": 1.4123256253910983
+        },
+        {
+          "node": 10,
+          "position": [
+            4.347544995134745,
+            3.8254675263497817
+          ],
+          "weight": 1.1892178283274957
+        },
+        {
+          "node": 11,
+          "position": [
+            1.4845100327902299,
+            3.4890046554301883
+          ],
+          "weight": 1.229644970286324
+        },
+        {
+          "node": 12,
+          "position": [
+            2.690805228604665,
+            4.316148884859075
+          ],
+          "weight": 1.055675068589724
+        },
+        {
+          "node": 13,
+          "position": [
+            0.23256389148627987,
+            1.2605492729901253
+          ],
+          "weight": 1.1994083934353008
+        },
+        {
+          "node": 14,
+          "position": [
+            1.4811338125422728,
+            4.47055474444477
+          ],
+          "weight": 1.2279459136358826
+        },
+        {
+          "node": 15,
+          "position": [
+            1.7615042233257427,
+            1.879435387355342
+          ],
+          "weight": 1.3050202010048297
+        },
+        {
+          "node": 16,
+          "position": [
+            2.3720428481433715,
+            0.6060087672897768
+          ],
+          "weight": 1.2485490346100212
+        },
+        {
+          "node": 17,
+          "position": [
+            3.721359743070742,
+            3.811284058551998
+          ],
+          "weight": 1.4910100307532597
+        },
+        {
+          "node": 18,
+          "position": [
+            2.01944267519178,
+            4.2069181780467915
+          ],
+          "weight": 1.3244357000531202
+        },
+        {
+          "node": 19,
+          "position": [
+            0.3679154005750851,
+            3.456224144478157
+          ],
+          "weight": 1.4932123057509974
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.9835205078125,
+      "required": true,
+      "scenario_id": "udg_weighted_n20_seed104",
+      "seed": 104,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    },
+    {
+      "C6": 1.0,
+      "N": 20,
+      "atom_count": 20,
+      "atom_order": "node iteration order; atom i is bit i (LSB); labels in atom order",
+      "average_degree": 2.8,
+      "basis": "blockade_reduced",
+      "basis_size": 9240,
+      "blockade_radius": 1.0,
+      "density_parameter": 0.8,
+      "duration": 0.15,
+      "edge_density": 0.14736842105263157,
+      "edges": [
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          14
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          9
+        ],
+        [
+          1,
+          18
+        ],
+        [
+          3,
+          10
+        ],
+        [
+          3,
+          12
+        ],
+        [
+          3,
+          13
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          15
+        ],
+        [
+          5,
+          9
+        ],
+        [
+          5,
+          11
+        ],
+        [
+          5,
+          16
+        ],
+        [
+          5,
+          18
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          6,
+          11
+        ],
+        [
+          6,
+          14
+        ],
+        [
+          7,
+          11
+        ],
+        [
+          7,
+          14
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          8,
+          15
+        ],
+        [
+          9,
+          18
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          10,
+          12
+        ],
+        [
+          10,
+          13
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          11,
+          16
+        ],
+        [
+          12,
+          13
+        ]
+      ],
+      "full_dim": 1048576,
+      "graph_sha256": "107d2a606e44c91ea6ac92c49e699f0499aa68190aa3d2bfad33e7c5f7373b11",
+      "nodes": [
+        {
+          "node": 0,
+          "position": [
+            3.190976668007723,
+            4.957298877406291
+          ],
+          "weight": 1.048364727723312
+        },
+        {
+          "node": 1,
+          "position": [
+            2.533521708848772,
+            1.982194757414777
+          ],
+          "weight": 1.1030081180233224
+        },
+        {
+          "node": 2,
+          "position": [
+            4.4168441168539125,
+            2.7024143994164533
+          ],
+          "weight": 1.3061022302791874
+        },
+        {
+          "node": 3,
+          "position": [
+            1.426807937960188,
+            2.7802951161076646
+          ],
+          "weight": 1.366837886145627
+        },
+        {
+          "node": 4,
+          "position": [
+            0.9943755136502608,
+            1.3238200059004546
+          ],
+          "weight": 1.162730248853519
+        },
+        {
+          "node": 5,
+          "position": [
+            2.5716356598434897,
+            2.2793583790550898
+          ],
+          "weight": 1.247212521383093
+        },
+        {
+          "node": 6,
+          "position": [
+            3.00750453535993,
+            3.933045397167157
+          ],
+          "weight": 1.367549347189947
+        },
+        {
+          "node": 7,
+          "position": [
+            3.0286979737908015,
+            4.010081723181928
+          ],
+          "weight": 1.1900509976333353
+        },
+        {
+          "node": 8,
+          "position": [
+            1.7581927514244562,
+            1.0973129496414873
+          ],
+          "weight": 1.3619500564914628
+        },
+        {
+          "node": 9,
+          "position": [
+            1.8849717675866373,
+            1.8845536311230453
+          ],
+          "weight": 1.3194698137821756
+        },
+        {
+          "node": 10,
+          "position": [
+            1.7420628861360448,
+            3.38860053686929
+          ],
+          "weight": 1.3061664414591407
+        },
+        {
+          "node": 11,
+          "position": [
+            2.534566854373902,
+            3.206507958962475
+          ],
+          "weight": 1.3165830911374625
+        },
+        {
+          "node": 12,
+          "position": [
+            1.689994365558165,
+            3.2934592490956622
+          ],
+          "weight": 1.111146363233488
+        },
+        {
+          "node": 13,
+          "position": [
+            1.3021189262094157,
+            2.7829959166822746
+          ],
+          "weight": 1.0833018710793207
+        },
+        {
+          "node": 14,
+          "position": [
+            2.968491935918258,
+            4.29710518750597
+          ],
+          "weight": 1.427102736961451
+        },
+        {
+          "node": 15,
+          "position": [
+            1.5972730023309851,
+            0.7798872957562114
+          ],
+          "weight": 1.1348637840792435
+        },
+        {
+          "node": 16,
+          "position": [
+            3.4142079970458497,
+            2.815601192032303
+          ],
+          "weight": 1.272321649145284
+        },
+        {
+          "node": 17,
+          "position": [
+            4.004124725587154,
+            0.15869171788630065
+          ],
+          "weight": 1.4435149081823022
+        },
+        {
+          "node": 18,
+          "position": [
+            2.440448782010294,
+            2.124757407565279
+          ],
+          "weight": 1.3623212393308881
+        },
+        {
+          "node": 19,
+          "position": [
+            1.2765869539468744,
+            4.598221887421878
+          ],
+          "weight": 1.3054690265584075
+        }
+      ],
+      "omega_max": 6.283185307179586,
+      "pruned_fraction": 0.9911880493164062,
+      "required": true,
+      "scenario_id": "udg_weighted_n20_seed105",
+      "seed": 105,
+      "units": {
+        "C6": "rad*um^6/us",
+        "angular_frequency": "rad/us",
+        "length": "um",
+        "time": "us"
+      },
+      "weight_range": [
+        1.0,
+        1.5
+      ]
+    }
+  ],
+  "settings": {
+    "cbc_gap_abs": 0.0,
+    "cbc_gap_rel": 0.0,
+    "cbc_seed": 1234,
+    "cbc_threads": 1,
+    "ilp_time_limit": 30.0,
+    "initial_state": "all_ground",
+    "memory_limit_bytes": 4294967296,
+    "numerical_atol": 1e-06,
+    "objective_atol": 1e-09,
+    "observables": {
+      "pop0": 0,
+      "z0": {
+        "atom": 0,
+        "type": "pauli_z"
+      }
+    },
+    "output_count": 101,
+    "precision": "complex128",
+    "readout_policy": "SDK normalized final probabilities; raw norm independently checked through Z0+2n0",
+    "reference_stability_atol": 1e-09,
+    "repeat_count": 5,
+    "solver": {
+      "abstol": 1e-10,
+      "adaptive": true,
+      "dt": null,
+      "method": "Tsit5",
+      "reltol": 1e-08
+    },
+    "timeout_seconds": 600.0,
+    "warmups": 2
+  },
+  "source": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": null
+      },
+      "python": {
+        "cache_tag": "cpython-311",
+        "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.39"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.11.15"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": false,
+          "blackwell_devices": [],
+          "cuda_12_8_driver_ok": null,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": null
+        },
+        "devices": [
+          {
+            "compute_capability": null,
+            "driver_version": null,
+            "memory_total_mib": null,
+            "name": "Failed to initialize NVML: GPU access blocked by the operating system"
+          },
+          {
+            "compute_capability": null,
+            "driver_version": null,
+            "memory_total_mib": null,
+            "name": "Failed to properly shut down NVML: GPU access blocked by the operating system"
+          }
+        ],
+        "nvcc": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        },
+        "nvidia_smi": {
+          "fallback": {
+            "missing": false,
+            "ok": false,
+            "output": "Failed to initialize NVML: GPU access blocked by the operating system",
+            "raw_output": "Failed to initialize NVML: GPU access blocked by the operating system\nFailed to properly shut down NVML: GPU access blocked by the operating system",
+            "returncode": 255
+          },
+          "missing": false,
+          "ok": false,
+          "output": "Failed to initialize NVML: GPU access blocked by the operating system",
+          "raw_output": "Failed to initialize NVML: GPU access blocked by the operating system\nFailed to properly shut down NVML: GPU access blocked by the operating system",
+          "returncode": 255
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "58dfd10bc7d97ebefd7b78342eec695d0f55b770",
+        "git_commit_short": "58dfd10",
+        "git_dirty": true,
+        "root": "/home/oyxw/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": false,
+      "devcontainer": false,
+      "id": null,
+      "image": null
+    },
+    "in_container": false,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": null
+    },
+    "julia_version": null,
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": {
+      "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.6.1",
+        "numpy": "2.4.6",
+        "pandas": "3.0.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.17.1",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.11.15"
+    },
+    "python_version": "3.11.15",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  },
+  "source_root": "/home/oyxw/Sagittarius",
+  "source_sha256": {
+    "Sagittarius.jl/Project.toml": "b6f0d95535cec3d3755fa9e07e593200f09c98c6b42672efdf0ab343b65c2dba",
+    "Sagittarius.jl/src/Sagittarius.jl": "0f46cd4e74e89905dcb0518ddb3d60e0b0dcba07a6a347e6479f6c0c4e04c6b8",
+    "Sagittarius.jl/src/cluster.jl": "a20afd1bcfaa367160eedfacd538f44eacb445f350c14ef553cbfc701e31976a",
+    "Sagittarius.jl/src/logging.jl": "d828b4e620c392230d5079f190351ae464204301555663fbf923fe81915faaa2",
+    "Sagittarius.jl/src/physics.jl": "5e67f1a84ad7aafeace6289cf0dd1d5e98e95df8434a0683ca3bfdc07402c102",
+    "Sagittarius.jl/src/program.jl": "ac025b03a5d7066c3c010069aaef47b8009296449022203c7a36bd83293b154c",
+    "Sagittarius.jl/src/solver.jl": "c6a8151f7d06290f173fe00905ce20673e2ac3013b4647b5667840bb80ce83ff",
+    "sagittarius_py/projects/mwis_udg/batch_verify.py": "53f1d1615bb380958e208a9ea0a94fdf1274357d470467cf4df085c892456952",
+    "sagittarius_py/projects/mwis_udg/mwis_solver.py": "1aac4a9bdbb86e5a8cb722c2a054897b66491109b6f2da46505aeacf1d124dc1",
+    "sagittarius_py/projects/mwis_udg/solution_verify.py": "264f7386796257f89f9da4a327fa51efaebf8cdd18522bfd93202ae28b5b1ca3",
+    "sagittarius_py/pyproject.toml": "4cb4acaede7a9404ec1aa54eb030afb2bd9d63cd2f40f0cedc04363d9b09680f",
+    "sagittarius_py/sagittarius/ablation_benchmark.py": "0131999358401929d11af2390aefaef63e2bb4b22d39c60f183a8f14a608d9d3",
+    "sagittarius_py/sagittarius/api.py": "cf19e5374c883f0c2d45b0283a41922a85744f13fbf976dfb3029522c8207c83",
+    "sagittarius_py/sagittarius/benchmark_failures.py": "ac05b2ffc6b6f9cc1fb7efe8147947b66c4e1b7d5340498e240a0e5616cdf421",
+    "sagittarius_py/sagittarius/benchmark_measurement.py": "7eb88b5fa8ced710e64d1952bf4d72b09a53ff7a4e9f7ab907bfd07b1bc702bd",
+    "sagittarius_py/sagittarius/benchmark_suite.py": "370759e72d545881814fc9548376d60a03a09ab9b5fa0076e46dbf05c8317197",
+    "sagittarius_py/sagittarius/benchmarking.py": "af7d7d91dfe15d8a2a9f0565059baea1309bddde1366aa31ec1e56e0d88fd04b",
+    "sagittarius_py/sagittarius/mwis_benchmark.py": "ef59e2d579228cd49c7231413084cd57f2af2100f6da8c6926c8db0083472122",
+    "sagittarius_py/sagittarius/pulse.py": "8075dfda39d86401f2e28ebc2b03848b8b39387ac8ae58bede49256cf9586a59",
+    "sagittarius_py/sagittarius/runtime.py": "1c01231f6909b61f379de5958a5d1c20acef89d179525c67d7c0bb657a0781d7",
+    "sagittarius_py/sagittarius/scaling_benchmark.py": "c54e983e58051eec26e27dc661eb0c5cc3f67900f3e175cb311c35ec81b49e8e",
+    "sagittarius_py/tests/test_mwis_performance.py": "a6c87d971f09f13a4f60f111ca2a1440aa87ad20bb17f67ecb2e86c9b9135da7",
+    "sagittarius_py/tests/test_performance/benchmark_mwis_aqc.py": "42aca8aee861042daa6909acc23b99f4b9458f5b944fb98d35fe25f1e6865557",
+    "sagittarius_py/uv.lock": "adcaa4bad1936b195757844a05100625917a03938370aff9ac59f1d9cb0a9d0c",
+    "scripts/audit_mwis_campaign.py": "6c155118a7808602bdf9df1ec083c4631c5b6b79e9a157a8e4d11dcb4af325cf"
+  },
+  "stop_policy": "Continue after path failures; interruption prevents starting further paths but preserves every declared row.",
+  "thread_environment": {
+    "JULIA_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "timer_policy": {
+    "aqc": "Simulation.run including SDK validation/operator/pulse construction, pop0/Z0 collection and manifest. Setup/reset, references, validation, decoding and writes excluded.",
+    "ilp": "Fresh model.solve(CBC), including PuLP model-file writing, CBC subprocess startup/IPC and result parsing; model construction/validation/report writes excluded."
+  },
+  "workload_version": "mwis-aqc-ilp-performance/v2"
+}
