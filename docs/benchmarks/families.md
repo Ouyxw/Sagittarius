@@ -264,6 +264,18 @@ Observable correctness covers small full/reduced Schrodinger and representative 
 
 All rows retain effective settings, requested/output metadata, numerical gates, hardware/backend/runtime, source/result links and attributable memory; GPU snapshots remain distinct from peaks. Full fixture values, reference policies and planned output stems are in [plan v2](plans/v2.md).
 
+All seven suites use the plan's [runtime reporting requirements](plans/v2.md#runtime-reporting-requirements-for-all-seven-suites).
+Backend reports pair per-configuration runtime distributions with numerical
+errors; solver reports include error-versus-runtime, and observable reports
+identify output/storage policy before estimating added cost. Optimization
+reports separate AQC/ILP solve distributions per frozen graph and retain exact
+termination/quality. Open-system reports separate Lindblad/MCWF time and MCWF
+completed-trajectories-per-second samples from multi-seed convergence. Each
+summary retains counts, statistic membership and median/min/max/p25/p75.
+The [P0 timing report](reports/p0-runtime-statistics-2026-11-27.md) exposes
+retained scaling/ablation statistics without changing evidence status or
+deriving CPU-matvec/CUDA-solve ratios.
+
 <a id="v2-sweepcluster-execution"></a>
 
 ### Sweep/Cluster Execution

@@ -38,6 +38,15 @@ CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-
 | [`families.md`](families.md) | Parallel [V1](families.md#benchmarking-v1)/[V2](families.md#benchmarking-v2) family summaries and physics/dynamics/open-system/optimization/backend/sweep protocols. |
 | [`artifact-contracts.md`](artifact-contracts.md) | Parallel [V1](artifact-contracts.md#benchmarking-v1)/[V2](artifact-contracts.md#benchmarking-v2) artifact types, aggregate/row contracts, failures, metrics, retention and compatibility. |
 | [`plans/v2.md`](plans/v2.md) | P0–P1 plan, implemented scaling matrix/controls, remaining targets, numerical/statistical gates, resource policy and delivery/acceptance evidence. |
+| [`reports/p0-runtime-statistics-2026-11-27.md`](reports/p0-runtime-statistics-2026-11-27.md) | Complete derived timing distributions for 42 scaling scenarios, 16 CPU ablation paths and five matched CPU/CUDA ODE cases; raw-source links, exclusions and local-only interpretation. |
+
+All seven P0–P1 suites have explicit [runtime reporting requirements](plans/v2.md#runtime-reporting-requirements-for-all-seven-suites)
+and suite-specific timer/output definitions. Default performance evidence uses
+two warmups and at least five independent measurements, with median/min/max/
+p25/p75, counts and raw membership. Scaling and ablation already retain these
+statistics; the linked report recomputes and presents them without modifying
+original archives or rerunning simulations. Expanded P1 statistical outputs
+remain planned; correctness-only tests need no separate performance campaign.
 
 ## Implemented CPU smoke
 

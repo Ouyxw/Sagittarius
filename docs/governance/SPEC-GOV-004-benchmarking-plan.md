@@ -98,6 +98,24 @@ Recommended defaults:
 
 If a benchmark fails validation or emits incomplete metadata, its runtime numbers should be treated as diagnostic output only.
 
+The first seven suites implement these rules through the
+[v2 runtime reporting requirements](../benchmarks/plans/v2.md#runtime-reporting-requirements-for-all-seven-suites)
+and suite-specific timer/output definitions. Performance acceptance includes
+recomputable per-configuration distributions, raw membership/counts, explicit
+workload and phase boundaries, and matching JSON/CSV/Markdown summaries.
+Report numerical error, optimization quality/termination or stochastic
+uncertainty beside time. Single setup measurements and timeout elapsed time
+must not masquerade as repeated successful execution statistics. Correctness-only
+controls and invalid-configuration tests need no dedicated performance campaign;
+no performance gate requires CUDA or another implementation to be faster.
+
+The [P0 timing report](../benchmarks/reports/p0-runtime-statistics-2026-11-27.md)
+reorganizes existing scaling/CPU-ablation/CUDA-follow-up measurements without
+modifying archives or rerunning simulations. Such presentation changes do not
+advance evidence status or satisfy a new current-code, controlled-comparison,
+RC or public-use gate. Expanded P1 outputs remain planned until implemented
+and accepted; the release cadence below continues to apply.
+
 ## Correctness Gates
 
 Performance results are publishable only after the relevant correctness gates pass:

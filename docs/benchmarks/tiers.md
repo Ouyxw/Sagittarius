@@ -316,6 +316,16 @@ Freeze the scenario list, exact replay inputs/hash, reference/statistical policy
 
 Do not expand every axis into an unbounded Cartesian product; use plan-defined anchor scans and selected combinations. Record lower measured limits and large-case reference gaps. A skipped N=20 row documents an unexecuted target and leaves successful coverage open.
 
+Performance-tier acceptance for all seven suites includes the plan's
+[suite-specific timing outputs](plans/v2.md#runtime-reporting-requirements-for-all-seven-suites):
+explicit timer scope, per-configuration raw records, median/min/max/p25/p75,
+eligible counts/membership and matching companion summaries. Include numerical
+error, graph-quality or stochastic-uncertainty context as applicable. Smoke,
+correctness-only controls and rejection tests do not require a five-repeat
+performance campaign. Existing [P0 distributions](reports/p0-runtime-statistics-2026-11-27.md)
+can be tabulated without rerunning computation; no new P1 flags or runner
+completion are implied by these documentation requirements.
+
 <a id="v2-stress-tier"></a>
 
 ### Stress Tier

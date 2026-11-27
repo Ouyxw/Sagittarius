@@ -323,6 +323,19 @@ These requirements apply to every relevant suite. Release-cadence actions recur 
 
 The [v2 shared measurement implementation](../benchmarks/plans/v2.md#shared-measurement-implementation) and [completion checklist](../benchmarks/plans/v2.md#completion-recurring-runs-and-maintenance) operationalize the P0–P1 work below. Defaults of two warmups and at least five independent repeats, frozen statistical seed sets, explicit timer/memory scope and retained resource failures are planned campaign acceptance requirements; the retained scaling and ablation campaigns implement and audit these controls. P1/P2 runners still require the listed implementation and evidence audits. Track runner implementation, campaign execution and evidence acceptance separately.
 
+All first seven suites must deliver the [v2 runtime outputs](../benchmarks/plans/v2.md#runtime-reporting-requirements-for-all-seven-suites):
+per-configuration raw wall times, declared timer/cache/output scope, eligible
+counts/member IDs and median/min/max/p25/p75 with matching companion tables.
+Suite-specific acceptance adds matched CPU/CUDA distributions and qualified
+ratio, per-instance AQC/ILP phase statistics/termination, solver error-versus-time,
+observable collection/storage context, and separate Lindblad/MCWF time plus
+MCWF throughput and convergence. Correctness-only/rejection tests are exempt
+from a dedicated timing campaign. The [P0 timing report](../benchmarks/reports/p0-runtime-statistics-2026-11-27.md)
+recomputes existing 210 scaling calls, 80 CPU batches and 25 CPU/CUDA pairs;
+it changes no suite milestone or original archive and requires no simulation
+rerun. Shared-workstation timings remain local diagnostics, not a current-code
+or controlled performance baseline; recurring RC and affected-scope reruns remain.
+
 | GOV-004 section | Current status | Remaining work / acceptance condition |
 | :--- | :--- | :--- |
 | [Goals](../governance/SPEC-GOV-004-benchmarking-plan.md#goals) and [Benchmark Layers](../governance/SPEC-GOV-004-benchmarking-plan.md#benchmark-layers) | Initial correctness/application evidence retained; performance characterization partial. | Track software/numerical verification separately from scientific validation. Complete declared suite measurements before claiming runtime, memory, observable-cost, or scaling coverage. Initial closure establishes no general quantum speedup, production CUDA, or hardware-control capability. |

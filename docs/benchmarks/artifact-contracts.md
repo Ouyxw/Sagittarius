@@ -298,6 +298,26 @@ Use existing correctness metrics and add compatible measures only with documente
 
 Exclude warmups from summaries, preserve invalid rows, and retain slow valid repeats. Do not pool different workloads, sizes, precisions or statistical populations. Missing GPU peaks remain unavailable rather than inferred from before/after snapshots. Ratios require matched workload and accuracy; CPU matvec/CUDA solve ratios are invalid.
 
+For the [seven-suite runtime outputs](plans/v2.md#runtime-reporting-requirements-for-all-seven-suites),
+keep raw seconds, clock/timer scope, reset/cache policy, phase designation,
+statistic input IDs and requested/completed/eligible counts in benchmark
+`metrics` or linked records. Use compatible optional fields and reuse existing
+type-7 statistics helpers. Do not move runtime statistics into simulation data
+or change manifest meanings. Phase timings measured only once are not repeated
+distributions; unavailable values retain reasons. Timeout elapsed time remains
+diagnostic, separate from successful runtime distributions. Companion tables
+must agree with the summary and expose raw-source links even if not every
+nested record is printed in CSV/Markdown.
+
+Suite-specific summaries include per-graph AQC/ILP phases and termination,
+solver error-versus-runtime, observable output-policy context, and per-repeat
+MCWF completed-trajectory throughput. GPU median ratios require matched
+per-backend accuracy and at least five eligible measurements each. The
+[derived P0 timing report](reports/p0-runtime-statistics-2026-11-27.md) preserves
+existing flat first-repeat semantics and immutable source archives; its added
+per-operation median is explicitly derived from batch median/operation count.
+These requirements do not make new fields mandatory for historical artifacts.
+
 <a id="v2-evidence-retention"></a>
 
 ### Evidence Retention

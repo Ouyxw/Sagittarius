@@ -170,6 +170,23 @@ Time initialization/JIT, basis/operator construction, first solve and warmed exe
 
 Retain every raw measurement and its warmup/eligible designation. Compute median/min/max/p25/p75 with declared quantile convention, source row IDs and requested/completed/eligible counts. Do not remove slow valid repeats or pool different configurations. Fixed-seed timing repeats measure execution variability; independent seed studies measure sampling variability.
 
+Apply the [seven-suite runtime requirements](plans/v2.md#runtime-reporting-requirements-for-all-seven-suites)
+and each suite's timing subsection: SDK calls for scaling/GPU/solver, fixed-input
+CPU matvec batches for ablation, per-instance AQC/ILP solves, observable solve/
+collection and separate Lindblad/MCWF workloads. Use monotonic wall-clock seconds
+and linear type-7 quantiles; retain single setup timings as single measurements.
+Each scenario summary must be recomputable from identified raw records and
+agree across JSON/CSV/Markdown companions. Report errors/quality/uncertainty
+beside time; failed accuracy or timeout elapsed time cannot rank successful
+completion at that target. Optional phase/kernel timing carries its own scope.
+
+The [P0 timing report](reports/p0-runtime-statistics-2026-11-27.md) presents
+existing distributions separately for scaling, CPU matvec and matched CPU/CUDA
+ODE calls. Derived presentation or offline auditing needs no simulation rerun;
+new code/environment baselines, affected-scope changes and recurring RC gates
+require applicable fresh measurement. Original archives and local-only evidence
+classifications remain unchanged.
+
 Preflight state/construction/output memory and time budgets. A supervised child process records attributable lifetime peak including setup/warmup, baseline and method. Repeated `max_rss` snapshots from a shared process are not independent peaks. GPU snapshots are not peaks; retain unavailable values explicitly. The parent keeps failure rows if a child times out, crashes or exhausts memory.
 
 For stochastic convergence, freeze seed lists, observables, confidence/error criteria and time-point multiplicity treatment. More trajectories need not reduce every seed's error. Keep fixed-seed serial/threaded execution mode and requested/effective trajectory settings. Raw trajectory storage is opt-in and its cost is a separate workload.
