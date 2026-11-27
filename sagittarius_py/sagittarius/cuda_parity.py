@@ -22,7 +22,7 @@ def json_native(value):
     return value
 
 
-def solve_pair_gate(cpu, cuda, times, atol):
+def solve_pair_gate(cpu, cuda, times, atol, observable_names=("pop0",)):
     """Check full trajectories and executed settings, rejecting GPU fallback.
 
     CPU parity verifies implementation agreement, not independent scientific
@@ -39,8 +39,9 @@ def solve_pair_gate(cpu, cuda, times, atol):
             raise AssertionError("Executed solver differs from adaptive Tsit5 anchor")
         if solver["effective_saveat"] != list(times):
             raise AssertionError("Effective output grid differs from frozen grid")
-        t, values = np.asarray(result.data["t"]), np.asarray(result.data["pop0"])
-        if t.shape != (len(times),) or values.shape != t.shape or not np.allclose(t, times, rtol=0, atol=1e-14):
+        t = np.asarray(result.data["t"])
+        values = np.asarray([result.data[name] for name in observable_names])
+        if t.shape != (len(times),) or values.shape != (len(observable_names), len(times)) or not np.allclose(t, times, rtol=0, atol=1e-14):
             raise AssertionError("Trajectory shape/output grid mismatch")
         trajectories.append(values)
     if any(cpu.manifest["solver"][key] != cuda.manifest["solver"][key] for key in MATCHED_SOLVER_FIELDS):

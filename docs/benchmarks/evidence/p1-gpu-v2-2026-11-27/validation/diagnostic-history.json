@@ -1,0 +1,24 @@
+[
+  {
+    "attempt": "pilot-01",
+    "outcome": "controller failed during teardown with BrokenPipeError after Julia initialization consumed standard input; zero measured pairs",
+    "retention": "pilots.tar.gz: original configuration, sources, CPU/CUDA logs and checkpoints",
+    "resolution": "file-based worker handshake; no stdin pipe"
+  },
+  {
+    "attempt": "pilot-02",
+    "outcome": "N=2 completed first/warm/measured pairs; incomplete due to one warmup/one measured repeat",
+    "scope": "early synchronized timer implementation; predates explicit prepared-state and expanded frozen-scenario gates; not campaign acceptance"
+  },
+  {
+    "attempt": "pilot-03",
+    "outcome": "chain N=2, 2x2 and seeded MWIS all passed first/warm/measured gates; all three rows incomplete because one warmup/one repeat",
+    "audit": "9 saved pairs checked; maximum observable trajectory difference 2.9629076969683865e-15; no qualified ratio"
+  },
+  {
+    "attempt": "initial benchmark regression command without retained environment",
+    "outcome": "30 passed, 1 failed, 2 deselected; ablation child CPU diagnostics could not initialize",
+    "resolution": "reran with documented writable depot overlay and Julia CUDA project: 36 passed",
+    "scope": "test-environment failure, not a final campaign measurement"
+  }
+]

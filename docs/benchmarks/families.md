@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-families/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling and ablation implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation and GPU implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -165,12 +165,14 @@ Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-
 
 Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
-CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; the full P1 GPU matrix, recurring RC and public-use gates remain separate.
+CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; this ablation-only archive is separate from the P1 GPU matrix below, recurring RC and public-use gates.
 
 
 This generation maps the seven suites in [plan v2](plans/v2.md) into the existing family taxonomy. Matrices, thresholds and delivery batches remain defined by that plan. Current V1 evidence is preserved separately; no V2 measurement is completed by this document.
 
 <a id="v2-family-summary"></a>
+
+The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
 
 ### Family Summary
 
@@ -254,7 +256,7 @@ Purpose: complete P0 scaling/ablation and P1 GPU/solver/observable characterizat
 | :--- | :--- | :--- |
 | `scaling` | Implemented: N=2,4,6,8,12,16,20; chain and declared rectangular shapes; Rb/a=1.1,1.5,2.1. | Small projected-dense and larger sensitivity checks; actual D/pruning, setup/solve/memory and resource rows. |
 | `ablation` | Implemented four Python CPU matvec paths at N=4,8,12; reduced N=16,20 under budget; separate optional CUDA ODE with matched CPU trajectory gates and saved manifests. | Fixed seeded normalized H*psi, independent dense/projected references at N<=8 and analytic transition action above; full relative error 1e-12, reduced absolute error 1e-10 and finite gates. Two warmups/five batches, construction/dense intermediates, supervised memory/failures and saved-output audit. |
-| `gpu` | Chain parity N=2,4,8, 2x2 geometry, performance chain N=12,16,20 and existing small MWIS parity. | Initialized doctor/opt-in, same times/configuration, symmetric warmup, synchronization and per-size error initially <=1e-6. |
+| `gpu` | Implemented chain parity N=2,4,8, 2x2 geometry, performance chain N=12,16,20 and seeded two-node MWIS parity. | Initialized doctor/opt-in, 101 shared times, separate CPU/CUDA workers, two warmups/five measurements, synchronized SDK timing, per-scenario error <=1e-6 and qualified median ratios. |
 | `solver` | Rabi, addressed chain and time-dependent ramp; Tsit5/Vern9 reltol=1e-6,1e-8,1e-10; RK4 dt=T/100,T/200,T/400; 21/101/501 output points. | Legal method/stepping combinations, verified tighter/independent references, common times and error target initially 1e-6. |
 | `observables` | Ten implemented diagonal types; 1/4/16/64 declarations; original/reverse/fixed permutation; 21/101/501 points; bounded N=4,8,12,16,20 cost series. | Independent probability/occupation references initially <=1e-8, basis/index/order and saved metadata, comparable output/storage policy. |
 

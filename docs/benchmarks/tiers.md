@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-tiers/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling and ablation implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation and GPU implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -147,12 +147,14 @@ Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-
 
 Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
-CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; the full P1 GPU matrix, recurring RC and public-use gates remain separate.
+CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; this ablation-only archive is separate from the P1 GPU matrix below, recurring RC and public-use gates.
 
 
 This generation applies the same five tiers to [plan v2](plans/v2.md). It distinguishes planned runner work from verified executable commands and keeps the initial V1 evidence complete. Long campaigns remain manual, RC or self-hosted work.
 
 <a id="v2-tier-summary"></a>
+
+The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
 
 ### Tier Summary
 
@@ -174,7 +176,7 @@ The V1 commands are retained as historical baseline. Scaling and ablation now ha
 | :--- | :--- | :--- |
 | Scaling | Implemented `benchmark_scaling.py` CLI; positional Python function retained. | `scaling_results` and `scaling_results_suite` JSON/CSV/Markdown; `scaling_repeats.json`, campaign/checkpoints and coverage. |
 | Ablation | Implemented `benchmark_ablation.py` CLI; single-N positional function retained. | `ablation_bench_results` and `_suite` JSON/CSV/Markdown, `ablation_repeats.json`, frozen configs/checkpoints, saved numerical arrays and coverage/audit. `--repeats` counts operations; `--repeat-count` counts independent batches. |
-| GPU | Existing `benchmark_gpu.py` adopts doctor/opt-in discipline from `benchmark_cuda_mwis_protocol.py`. | Preserve `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`; planned scan aggregate and repeated matched measurements. |
+| GPU | Existing `benchmark_gpu.py` adopts doctor/opt-in discipline from `benchmark_cuda_mwis_protocol.py`. | Preserve `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`; implemented `gpu_bench_results_suite`, `gpu_repeats.json`, separate backend processes and repeated matched measurements. |
 | MWIS/UDG | Existing `benchmark_mwis_aqc.py` and adapter need expanded matrix/provenance. | Preserve initial tier outputs; planned `mwis_aqc_performance` and suite. |
 | Solver | Existing `benchmark_solver_performance.py` needs sensitivity and timer work. | Preserve correctness outputs; planned `solver_sensitivity` and suite. |
 | Observables | Planned `benchmark_observables.py`. | Planned `observable_performance` and suite; runner/flags not implemented. |
@@ -250,12 +252,36 @@ a sandbox skip/failure is not CUDA validation. Both CPU/CUDA ODE paths retain
 first/warm/repeated reset-state solves, 101-point trajectory parity and results
 with manifests. The audit independently records CPU-matvec and CUDA coverage;
 a CUDA-only run cannot close missing CPU matrix coverage. No runtime ratio is
-produced. Other P1 GPU geometry/application/performance requirements remain open.
+produced. This ablation archive alone does not cover P1 GPU geometry/application; the separate P1 campaign supplies that matrix.
 
 The full ablation matrix declares 25 rows: 16 targeted CPU paths, four full-dimension
 exclusions above N=12 and five optional CUDA paths. Reduced sparse N=20
 has D=17711 with a dense construction intermediate and needs its declared
 memory budget. CPU results cannot characterize Julia solver internals.
+
+The P1 GPU scan is implemented and its CLI was smoke-verified on chain,
+2x2 lattice and seeded weighted-MWIS fixtures. From `sagittarius_py`, use a
+prepared source/editable environment with the CUDA Julia project selected:
+
+```bash
+SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run --no-sync python tests/test_performance/benchmark_gpu.py \
+  --sizes 2 4 8 12 16 20 --warmups 2 --repeat-count 5 \
+  --memory-limit-mb 9216 --timeout-seconds 1200 \
+  --output-dir benchmark-output/p1-gpu-v2-2026-11-27
+.venv/bin/python ../scripts/audit_gpu_campaign.py benchmark-output/p1-gpu-v2-2026-11-27
+```
+
+The default includes the lattice and application fixtures; `--chains-only`
+selects only the requested chains and leaves full-matrix coverage open. Outputs
+are `gpu_bench_results` and `gpu_bench_results_suite` JSON/CSV/Markdown,
+`gpu_repeats.json`, per-scenario raw pairs/configs/logs and per-backend
+checkpoints, initialized diagnostics, runtime projects and result/manifest sets.
+Use a new output directory. Opt-in disabled means retained skipped rows;
+attempted doctor/backend failures are failed, timeouts or short pilots incomplete.
+No CUDA fallback or insufficient-repeat ratio qualifies. Memory snapshots
+are distinct from GPU peaks; ratios characterize this shared host and SDK
+boundary only. The small `benchmark_cuda_mwis_protocol.py` retains its
+`cuda_parity`/`mwis_gpu_parity` stems while sharing these measurement helpers.
 
 All V2 performance commands eventually expose or retain frozen scenarios, output location, warmup/independent-repeat policy and numerical resource limits. Do not assume a shared flag exists on current scripts. Public examples must retain source-checkout execution and GPU opt-in requirements.
 

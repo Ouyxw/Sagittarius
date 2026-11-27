@@ -1,0 +1,338 @@
+[
+  {
+    "gate": {
+      "finite": true,
+      "output_sample_count": 101,
+      "parity_atol": 1e-06,
+      "parity_max_abs_error": 6.661338147750939e-16,
+      "passed": true
+    },
+    "index": 0,
+    "pair_order": [
+      "CPU",
+      "CUDA"
+    ],
+    "paths": {
+      "CPU": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/first-0.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/first-0.manifest.json"
+        },
+        "call_finished_monotonic": 177470.166122237,
+        "call_started_monotonic": 177465.016518816,
+        "label": "first-0",
+        "runtime_seconds": 5.149556005984778
+      },
+      "CUDA": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/first-0.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/first-0.manifest.json"
+        },
+        "call_finished_monotonic": 177491.319396588,
+        "call_started_monotonic": 177470.208916692,
+        "gpu_memory_snapshot": {
+          "available_bytes": 15274606592,
+          "total_bytes": 17094475776
+        },
+        "label": "first-0",
+        "runtime_seconds": 21.10528335001436
+      }
+    },
+    "phase": "first",
+    "row_id": "chain_n16_cpu_cuda-first-0"
+  },
+  {
+    "gate": {
+      "finite": true,
+      "output_sample_count": 101,
+      "parity_atol": 1e-06,
+      "parity_max_abs_error": 5.551115123125783e-16,
+      "passed": true
+    },
+    "index": 0,
+    "pair_order": [
+      "CPU",
+      "CUDA"
+    ],
+    "paths": {
+      "CPU": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/warmup-0.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/warmup-0.manifest.json"
+        },
+        "call_finished_monotonic": 177492.031939902,
+        "call_started_monotonic": 177491.407312705,
+        "label": "warmup-0",
+        "runtime_seconds": 0.6245296229899395
+      },
+      "CUDA": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/warmup-0.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/warmup-0.manifest.json"
+        },
+        "call_finished_monotonic": 177493.120367931,
+        "call_started_monotonic": 177492.067110293,
+        "gpu_memory_snapshot": {
+          "available_bytes": 14737735680,
+          "total_bytes": 17094475776
+        },
+        "label": "warmup-0",
+        "runtime_seconds": 1.052956711006118
+      }
+    },
+    "phase": "warmup",
+    "row_id": "chain_n16_cpu_cuda-warmup-0"
+  },
+  {
+    "gate": {
+      "finite": true,
+      "output_sample_count": 101,
+      "parity_atol": 1e-06,
+      "parity_max_abs_error": 7.771561172376096e-16,
+      "passed": true
+    },
+    "index": 1,
+    "pair_order": [
+      "CUDA",
+      "CPU"
+    ],
+    "paths": {
+      "CPU": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/warmup-1.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/warmup-1.manifest.json"
+        },
+        "call_finished_monotonic": 177495.02655153,
+        "call_started_monotonic": 177494.387953501,
+        "label": "warmup-1",
+        "runtime_seconds": 0.638507974013919
+      },
+      "CUDA": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/warmup-1.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/warmup-1.manifest.json"
+        },
+        "call_finished_monotonic": 177494.31863276,
+        "call_started_monotonic": 177493.19850429,
+        "gpu_memory_snapshot": {
+          "available_bytes": 14536409088,
+          "total_bytes": 17094475776
+        },
+        "label": "warmup-1",
+        "runtime_seconds": 1.119330892979633
+      }
+    },
+    "phase": "warmup",
+    "row_id": "chain_n16_cpu_cuda-warmup-1"
+  },
+  {
+    "gate": {
+      "finite": true,
+      "output_sample_count": 101,
+      "parity_atol": 1e-06,
+      "parity_max_abs_error": 9.992007221626409e-16,
+      "passed": true
+    },
+    "index": 0,
+    "pair_order": [
+      "CPU",
+      "CUDA"
+    ],
+    "paths": {
+      "CPU": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-0.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-0.manifest.json"
+        },
+        "call_finished_monotonic": 177495.650528729,
+        "call_started_monotonic": 177495.082731852,
+        "label": "measured-0",
+        "runtime_seconds": 0.5677090770041104
+      },
+      "CUDA": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-0.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-0.manifest.json"
+        },
+        "call_finished_monotonic": 177496.682201814,
+        "call_started_monotonic": 177495.689455292,
+        "gpu_memory_snapshot": {
+          "available_bytes": 14536409088,
+          "total_bytes": 17094475776
+        },
+        "label": "measured-0",
+        "runtime_seconds": 0.9924372440145817
+      }
+    },
+    "phase": "measured",
+    "row_id": "chain_n16_cpu_cuda-measured-0"
+  },
+  {
+    "gate": {
+      "finite": true,
+      "output_sample_count": 101,
+      "parity_atol": 1e-06,
+      "parity_max_abs_error": 7.771561172376096e-16,
+      "passed": true
+    },
+    "index": 1,
+    "pair_order": [
+      "CUDA",
+      "CPU"
+    ],
+    "paths": {
+      "CPU": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-1.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-1.manifest.json"
+        },
+        "call_finished_monotonic": 177498.440562584,
+        "call_started_monotonic": 177497.809255359,
+        "label": "measured-1",
+        "runtime_seconds": 0.6312227040180005
+      },
+      "CUDA": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-1.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-1.manifest.json"
+        },
+        "call_finished_monotonic": 177497.751656957,
+        "call_started_monotonic": 177496.739058861,
+        "gpu_memory_snapshot": {
+          "available_bytes": 14234419200,
+          "total_bytes": 17094475776
+        },
+        "label": "measured-1",
+        "runtime_seconds": 1.0122724999964703
+      }
+    },
+    "phase": "measured",
+    "row_id": "chain_n16_cpu_cuda-measured-1"
+  },
+  {
+    "gate": {
+      "finite": true,
+      "output_sample_count": 101,
+      "parity_atol": 1e-06,
+      "parity_max_abs_error": 6.661338147750939e-16,
+      "passed": true
+    },
+    "index": 2,
+    "pair_order": [
+      "CPU",
+      "CUDA"
+    ],
+    "paths": {
+      "CPU": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-2.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-2.manifest.json"
+        },
+        "call_finished_monotonic": 177499.116977194,
+        "call_started_monotonic": 177498.496817113,
+        "label": "measured-2",
+        "runtime_seconds": 0.6200754269957542
+      },
+      "CUDA": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-2.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-2.manifest.json"
+        },
+        "call_finished_monotonic": 177500.273165994,
+        "call_started_monotonic": 177499.161138093,
+        "gpu_memory_snapshot": {
+          "available_bytes": 13731102720,
+          "total_bytes": 17094475776
+        },
+        "label": "measured-2",
+        "runtime_seconds": 1.111683194001671
+      }
+    },
+    "phase": "measured",
+    "row_id": "chain_n16_cpu_cuda-measured-2"
+  },
+  {
+    "gate": {
+      "finite": true,
+      "output_sample_count": 101,
+      "parity_atol": 1e-06,
+      "parity_max_abs_error": 7.771561172376096e-16,
+      "passed": true
+    },
+    "index": 3,
+    "pair_order": [
+      "CUDA",
+      "CPU"
+    ],
+    "paths": {
+      "CPU": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-3.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-3.manifest.json"
+        },
+        "call_finished_monotonic": 177502.021299515,
+        "call_started_monotonic": 177501.411570691,
+        "label": "measured-3",
+        "runtime_seconds": 0.6096357819915283
+      },
+      "CUDA": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-3.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-3.manifest.json"
+        },
+        "call_finished_monotonic": 177501.345824627,
+        "call_started_monotonic": 177500.309754617,
+        "gpu_memory_snapshot": {
+          "available_bytes": 13731102720,
+          "total_bytes": 17094475776
+        },
+        "label": "measured-3",
+        "runtime_seconds": 1.0357664109906182
+      }
+    },
+    "phase": "measured",
+    "row_id": "chain_n16_cpu_cuda-measured-3"
+  },
+  {
+    "gate": {
+      "finite": true,
+      "output_sample_count": 101,
+      "parity_atol": 1e-06,
+      "parity_max_abs_error": 6.661338147750939e-16,
+      "passed": true
+    },
+    "index": 4,
+    "pair_order": [
+      "CPU",
+      "CUDA"
+    ],
+    "paths": {
+      "CPU": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-4.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cpu/measured-4.manifest.json"
+        },
+        "call_finished_monotonic": 177502.806994969,
+        "call_started_monotonic": 177502.078846172,
+        "label": "measured-4",
+        "runtime_seconds": 0.7280450940015726
+      },
+      "CUDA": {
+        "artifacts": {
+          "result_artifact": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-4.result.json",
+          "run_manifest": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27/chain_n16_cpu_cuda/cuda/measured-4.manifest.json"
+        },
+        "call_finished_monotonic": 177503.915495783,
+        "call_started_monotonic": 177502.856299667,
+        "gpu_memory_snapshot": {
+          "available_bytes": 13731102720,
+          "total_bytes": 17094475776
+        },
+        "label": "measured-4",
+        "runtime_seconds": 1.058882754005026
+      }
+    },
+    "phase": "measured",
+    "row_id": "chain_n16_cpu_cuda-measured-4"
+  }
+]

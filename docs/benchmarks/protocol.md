@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-protocol/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling and ablation implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation and GPU implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -105,12 +105,14 @@ Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-
 
 Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
-CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; the full P1 GPU matrix, recurring RC and public-use gates remain separate.
+CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; this ablation-only archive is separate from the P1 GPU matrix below, recurring RC and public-use gates.
 
 
-This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It defines campaign acceptance discipline; scaling and ablation implement frozen matrices, supervised child processes, references and repeated measurements. P1 runners still need the specified work. GOV-004 remains the policy authority. Benchmarking V2 does not rename artifact schemas or reclassify the initial archive.
+This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It defines campaign acceptance discipline; scaling and ablation implement frozen matrices, supervised child processes, references and repeated measurements. The GPU runner implements its matrix and measurement controls; the other P1 runners still need the specified work. GOV-004 remains the policy authority. Benchmarking V2 does not rename artifact schemas or reclassify the initial archive.
 
 <a id="v2-scope"></a>
+
+The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
 
 ### Scope
 
@@ -163,6 +165,17 @@ is supported. GPU diagonal observables copy to host once per observable before s
 SDK operator/pulse construction repeats per call, with sparse reuse within each
 solve. These costs remain included in the end-to-end timer. Full P1 GPU-suite
 acceptance remains separate.
+
+The P1 GPU scan and original small CUDA/MWIS protocol now share the
+`gpu_benchmark` measurement path. A separate persistent child for each backend
+makes process memory attributable to that path. First solves, symmetric
+warmups and alternating measured calls retain actual monotonic intervals.
+The synchronized timer surrounds the end-to-end SDK call; validation and writes
+follow it. Full-grid/configuration gates apply to every pair. At least five
+eligible measurements per backend and two warmups qualify the ratio of CPU and
+CUDA runtime medians; a failed/incomplete scenario reports a missing-data reason.
+The [implemented GPU boundaries](plans/v2.md#implemented-gpu-measurement-boundaries)
+define the anchor, resource limits, memory scope and saved-evidence audit.
 
 Use two warmups and at least five independent measured executions per frozen scenario/path by default. The default matvec batch is 50 operations, independently recorded; preserve legacy `repeats` semantics when adding controls. Reset initial state and fixed seeded input for every execution. V2 matvec uses fixed normalized H*psi input rather than growing H^k*psi and carries a distinct workload label.
 

@@ -10,34 +10,17 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
-import time
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
-import numpy as np
 
 from sagittarius import (
-    Atom,
-    PulseSequence,
-    Register,
-    Simulation,
-    SolverConfig,
     doctor,
     make_benchmark_failure_row,
     make_benchmark_row,
     write_benchmark_artifacts,
     write_benchmark_suite_artifact,
 )
-
-PROJECT_DIR = Path(__file__).resolve().parents[2] / "projects" / "mwis_udg"
-if str(PROJECT_DIR) not in sys.path:
-    sys.path.insert(0, str(PROJECT_DIR))
-
-from batch_verify import generate_random_udg, solve_mwis_ilp  # noqa: E402
-from mwis_solver import MWIS_AQC  # noqa: E402
-from solution_verify import calculate_weight, verify_independent_set  # noqa: E402
-
 
 DISCLOSURE_STATUS = "local_only"
 PARITY_FAMILY = "backend_performance"
@@ -81,40 +64,6 @@ def _cuda_metadata(report: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def _cuda_memory_snapshot() -> dict[str, Any]:
-    """Return best-effort CUDA memory data after doctor has initialized CUDA."""
-    from juliacall import Main as jl
-
-    raw = jl.seval(
-        """
-        begin
-            using CUDA
-            CUDA.synchronize()
-            total = try CUDA.totalmem() catch; missing end
-            available = try CUDA.available_memory() catch; missing end
-            Dict(
-                "total_bytes" => string(total),
-                "available_bytes" => string(available),
-                "used_bytes" => string(try total - available catch; missing end),
-            )
-        end
-        """
-    )
-    return dict(raw)
-
-
-def _cuda_synchronize() -> None:
-    from juliacall import Main as jl
-
-    jl.seval("using CUDA; CUDA.synchronize()")
-
-
-def _write_reference(output_dir: Path, name: str, payload: Mapping[str, Any]) -> str:
-    path = output_dir / f"{name}.reference.json"
-    path.write_text(json.dumps(dict(payload), indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return str(path)
-
-
 def _skip_row(*, family: str, scenario_id: str, problem: Mapping[str, Any], solver: Mapping[str, Any]) -> dict[str, Any]:
     return make_benchmark_row(
         row_id=f"{family}-{TIER}-{scenario_id}", scenario_id=scenario_id,
@@ -142,156 +91,79 @@ def _doctor_failure_row(
     )
 
 
+def _shared_row(output_dir: Path, scenario: dict, family: str, report: Mapping[str, Any]) -> dict:
+    # The protocol keeps its original small fixtures and stems, while using the
+    # scan's reset, synchronized timing, symmetric warmup and saved-grid gates.
+    from sagittarius.gpu_benchmark import benchmark_gpu
+    paths = benchmark_gpu(output_dir=output_dir / scenario["scenario_id"], scenario_list=[scenario])
+    row = json.loads(Path(paths["json"]).read_text())["timings"][0]
+    row.update(family=family, tier=TIER)
+    row["backend"].update(_cuda_metadata(report))
+    pairs = row["metrics"]["pairs"]
+    first = next((p for p in pairs if p["phase"] == "first"), None)
+    warm = next((p for p in pairs if p["phase"] == "warmup"), None)
+    measured = next((p for p in pairs if p["phase"] == "measured"), None)
+    def seconds(pair, backend):
+        return pair["paths"].get(backend, {}).get("runtime_seconds") if pair else None
+    row["metrics"].update(
+        cpu_seconds=seconds(measured, "CPU"),
+        cuda_cold_start_seconds=seconds(first, "CUDA"),
+        cuda_warmup_seconds=seconds(warm, "CUDA"),
+        cuda_warm_seconds=seconds(measured, "CUDA"),
+        parity_passed=row["status"] == "passed",
+        cpu_cuda_max_abs_error=row["max_trajectory_error"],
+        gpu_memory_before=row["metrics"]["paths"].get("CUDA", {}).get("gpu_memory", {}).get("before"),
+        gpu_memory_after_cold=(first or {}).get("paths", {}).get("CUDA", {}).get("gpu_memory_snapshot"),
+        gpu_memory_after_warm=(measured or {}).get("paths", {}).get("CUDA", {}).get("gpu_memory_snapshot"),
+    )
+    if measured and "gate" in measured:
+        row["metrics"].update(measured["gate"])
+    row["artifacts"]["reference_report"] = row["artifacts"]["paired_records"]
+    return row
+
+
 def _parity_row(output_dir: Path, report: Mapping[str, Any]) -> dict[str, Any]:
-    scenario_id = "chain_n3_cpu_cuda"
-    problem = {"problem_type": "rydberg_chain", "atom_count": 3, "spacing": 0.5, "C6": 10.0, "blockade_radius": 0.6}
-    solver = {"method": "Tsit5", "duration": 0.25, "reltol": 1e-8, "abstol": 1e-8, "warmup_runs": 1, "measured_repeats": 1}
-    started = time.perf_counter()
-    reference_path: str | None = None
-    try:
-        register = Register.chain(3, spacing=0.5, C6=10.0)
-        sequence = PulseSequence(omega=0.3, delta=0.05)
-        cpu = Simulation(register, sequence, SolverConfig(blockade_radius=0.6, reltol=1e-8, abstol=1e-8))
-        basis_size = cpu.validate()
-        initial = np.zeros(basis_size, dtype=np.complex128)
-        initial[0] = 1.0
-
-        cpu_started = time.perf_counter()
-        cpu_result = cpu.run(initial, 0.0, 0.25, observables={"pop0": 0})
-        cpu_seconds = time.perf_counter() - cpu_started
-
-        gpu = Simulation(register, sequence, SolverConfig(blockade_radius=0.6, reltol=1e-8, abstol=1e-8, use_gpu=True, gpu_backend="CUDA"))
-        memory_before = _cuda_memory_snapshot()
-        cold_started = time.perf_counter()
-        gpu.run(initial, 0.0, 0.25, observables={"pop0": 0})
-        _cuda_synchronize()
-        cold_start_seconds = time.perf_counter() - cold_started
-        memory_after_cold = _cuda_memory_snapshot()
-
-        warmup_started = time.perf_counter()
-        gpu.run(initial, 0.0, 0.25, observables={"pop0": 0})
-        _cuda_synchronize()
-        warmup_seconds = time.perf_counter() - warmup_started
-        warm_started = time.perf_counter()
-        gpu_result = gpu.run(initial, 0.0, 0.25, observables={"pop0": 0})
-        _cuda_synchronize()
-        warm_seconds = time.perf_counter() - warm_started
-        memory_after_warm = _cuda_memory_snapshot()
-
-        cpu_t = np.asarray(cpu_result.data["t"], dtype=float)
-        gpu_t = np.asarray(gpu_result.data["t"], dtype=float)
-        cpu_values = np.asarray(cpu_result.data["pop0"], dtype=float)
-        gpu_values = np.asarray(gpu_result.data["pop0"], dtype=float)
-        max_abs_error = float(np.max(np.abs(np.interp(gpu_t, cpu_t, cpu_values) - gpu_values)))
-        reference_path = _write_reference(output_dir, scenario_id, {"cpu": cpu_result.manifest, "cuda": gpu_result.manifest, "max_abs_error": max_abs_error})
-        if max_abs_error > 1e-6:
-            raise AssertionError(f"CPU/CUDA observable parity error {max_abs_error} exceeds 1e-6")
-        return make_benchmark_row(
-            row_id=f"{PARITY_FAMILY}-{TIER}-{scenario_id}", scenario_id=scenario_id,
-            family=PARITY_FAMILY, tier=TIER, status="passed", stage="validation",
-            problem=problem, solver=solver, backend=_cuda_metadata(report), observables=OBSERVABLES,
-            metrics={
-                "basis_size": basis_size, "cpu_seconds": cpu_seconds,
-                "cuda_cold_start_seconds": cold_start_seconds, "cuda_warmup_seconds": warmup_seconds,
-                "cuda_warm_seconds": warm_seconds, "cpu_cuda_max_abs_error": max_abs_error,
-                "parity_atol": 1e-6, "parity_passed": max_abs_error <= 1e-6,
-                "gpu_memory_before": memory_before, "gpu_memory_after_cold": memory_after_cold,
-                "gpu_memory_after_warm": memory_after_warm, "total_runtime_seconds": time.perf_counter() - started,
-            },
-            artifacts={"reference_report": reference_path, "cpu_run_manifest": cpu_result.manifest, "cuda_run_manifest": gpu_result.manifest},
-            disclosure_status=DISCLOSURE_STATUS,
-        )
-    except Exception as exc:
-        row = make_benchmark_failure_row(
-            row_id=f"{PARITY_FAMILY}-{TIER}-{scenario_id}", scenario_id=scenario_id,
-            family=PARITY_FAMILY, tier=TIER, stage="validation", exc=exc, problem=problem,
-            solver=solver, backend=_cuda_metadata(report), observables=OBSERVABLES,
-            backend_probe=report, disclosure_status=DISCLOSURE_STATUS,
-        )
-        if reference_path is not None:
-            row["artifacts"]["reference_report"] = reference_path
-        return row
+    from sagittarius.gpu_benchmark import chain_scenario
+    return _shared_row(output_dir, chain_scenario(3, legacy=True), PARITY_FAMILY, report)
 
 
 def _mwis_gpu_row(output_dir: Path, report: Mapping[str, Any]) -> dict[str, Any]:
-    scenario_id = "weighted_udg_n2_seed3_cpu_cuda"
-    graph = generate_random_udg(2, density=1.0, blockade_radius=1.0, seed=3)
-    weights = [float(graph.nodes[node]["weight"]) for node in graph.nodes()]
-    problem = {"problem_type": "weighted_unit_disk_mwis", "atom_count": 2, "instance_seed": 3, "density": 1.0, "blockade_radius": 1.0, "edge_list": [list(edge) for edge in graph.edges()], "node_weights": weights}
-    solver = {"solver_type": "MWIS_AQC", "reference_solver": "PuLP_CBC_ILP", "duration": 0.1, "warmup_runs": 1, "measured_repeats": 1}
-    started = time.perf_counter()
-    reference_path: str | None = None
-    try:
-        exact_bits, exact_weight, ilp_status = solve_mwis_ilp(graph)
-        cpu_solver = MWIS_AQC(graph, blockade_radius=1.0)
-        cpu_started = time.perf_counter()
-        cpu_bits, cpu_probabilities, basis = cpu_solver.solve_full(SolverConfig(blockade_radius=1.0), duration=0.1)
-        cpu_seconds = time.perf_counter() - cpu_started
-
-        gpu_solver = MWIS_AQC(graph, blockade_radius=1.0)
-        memory_before = _cuda_memory_snapshot()
-        cold_started = time.perf_counter()
-        gpu_solver.solve_full(SolverConfig(blockade_radius=1.0, use_gpu=True, gpu_backend="CUDA"), duration=0.1)
-        _cuda_synchronize()
-        cold_start_seconds = time.perf_counter() - cold_started
-        memory_after_cold = _cuda_memory_snapshot()
-
-        gpu_solver = MWIS_AQC(graph, blockade_radius=1.0)
-        gpu_solver.solve_full(SolverConfig(blockade_radius=1.0, use_gpu=True, gpu_backend="CUDA"), duration=0.1)
-        _cuda_synchronize()
-        warm_started = time.perf_counter()
-        gpu_bits, gpu_probabilities, gpu_basis = gpu_solver.solve_full(SolverConfig(blockade_radius=1.0, use_gpu=True, gpu_backend="CUDA"), duration=0.1)
-        _cuda_synchronize()
-        warm_seconds = time.perf_counter() - warm_started
-        memory_after_warm = _cuda_memory_snapshot()
-
-        cpu_bits = np.asarray(cpu_bits, dtype=int)
-        gpu_bits = np.asarray(gpu_bits, dtype=int)
-        gpu_feasible = verify_independent_set(graph, gpu_bits)
-        gpu_weight = calculate_weight(graph, gpu_bits) if gpu_feasible else 0.0
-        probability_error = float(np.max(np.abs(np.asarray(cpu_probabilities) - np.asarray(gpu_probabilities))))
-        reference_path = _write_reference(output_dir, scenario_id, {
-            "exact": {"bitstring": exact_bits, "weight": exact_weight, "ilp_status": ilp_status},
-            "cpu": {"bitstring": cpu_bits.tolist(), "probabilities": np.asarray(cpu_probabilities).tolist(), "basis": list(basis)},
-            "cuda": {"bitstring": gpu_bits.tolist(), "probabilities": np.asarray(gpu_probabilities).tolist(), "basis": list(gpu_basis)},
-        })
-        if not gpu_feasible:
-            raise AssertionError("CUDA MWIS candidate is not an independent set")
-        if probability_error > 1e-6 or list(basis) != list(gpu_basis):
-            raise AssertionError("CPU/CUDA MWIS final probability or basis parity mismatch")
-        return make_benchmark_row(
-            row_id=f"{MWIS_FAMILY}-{TIER}-{scenario_id}", scenario_id=scenario_id,
-            family=MWIS_FAMILY, tier=TIER, status="passed", stage="validation",
-            problem=problem, solver=solver, backend=_cuda_metadata(report), observables=OBSERVABLES,
-            metrics={
-                "ilp_status": ilp_status, "exact_objective": exact_weight,
-                "cuda_feasible": gpu_feasible, "cuda_objective": gpu_weight,
-                "cuda_objective_gap": max(0.0, exact_weight - gpu_weight),
-                "cpu_cuda_probability_max_abs_error": probability_error, "parity_atol": 1e-6,
-                "parity_passed": probability_error <= 1e-6 and list(basis) == list(gpu_basis),
-                "cpu_seconds": cpu_seconds, "cuda_cold_start_seconds": cold_start_seconds,
-                "cuda_warm_seconds": warm_seconds, "gpu_memory_before": memory_before,
-                "gpu_memory_after_cold": memory_after_cold, "gpu_memory_after_warm": memory_after_warm,
-                "total_runtime_seconds": time.perf_counter() - started,
-            },
-            artifacts={"reference_report": reference_path}, disclosure_status=DISCLOSURE_STATUS,
-        )
-    except Exception as exc:
-        row = make_benchmark_failure_row(
-            row_id=f"{MWIS_FAMILY}-{TIER}-{scenario_id}", scenario_id=scenario_id,
-            family=MWIS_FAMILY, tier=TIER, stage="validation", exc=exc, problem=problem,
-            solver=solver, backend=_cuda_metadata(report), observables=OBSERVABLES,
-            backend_probe=report, disclosure_status=DISCLOSURE_STATUS,
-        )
-        if reference_path is not None:
-            row["artifacts"]["reference_report"] = reference_path
-        return row
+    from sagittarius.gpu_benchmark import mwis_scenario
+    scenario = mwis_scenario()
+    row = _shared_row(output_dir, scenario, MWIS_FAMILY, report)
+    if row["status"] == "passed":
+        # Preserve the original ILP reference alongside the shared exhaustive
+        # two-node probability/basis check, outside every SDK timer.
+        import sys
+        project = Path(__file__).resolve().parents[2] / "projects/mwis_udg"
+        sys.path.insert(0, str(project))
+        try:
+            import networkx as nx
+            from batch_verify import solve_mwis_ilp
+            graph = nx.Graph()
+            for i, (xyz, weight) in enumerate(zip(scenario["coordinates"], scenario["weights"])):
+                graph.add_node(i, pos=tuple(xyz[:2]), weight=weight)
+            graph.add_edges_from(scenario["edges"])
+            bits, weight, ilp_status = solve_mwis_ilp(graph)
+            if ilp_status != "Optimal" or abs(weight - row["metrics"]["exact_objective"]) > 1e-12:
+                raise AssertionError("MWIS ILP/exhaustive reference mismatch")
+            row["metrics"].update(ilp_status=ilp_status, exact_objective=weight,
+                cuda_objective_gap=max(0., weight - row["metrics"]["cuda_objective"]))
+            reference = output_dir / "weighted_udg_n2_seed3_cpu_cuda.ilp-reference.json"
+            reference.write_text(json.dumps({"bitstring": bits, "weight": weight, "ilp_status": ilp_status}) + "\n")
+            row["artifacts"]["ilp_reference"] = str(reference)
+        except Exception as exc:
+            from sagittarius import benchmark_failure_context
+            row["status"], row["failure"] = "failed", benchmark_failure_context(exc, stage="reference")
+        finally:
+            sys.path.remove(str(project))
+    return row
 
 
 def _write_family(output: Path, *, family: str, name: str, row: Mapping[str, Any], report: Mapping[str, Any]) -> dict[str, Any]:
     artifact = write_benchmark_artifacts(
         output_dir=output, stem=name, name=f"Phase 16 CUDA {family} parity protocol",
-        description="Opt-in CPU/CUDA parity evidence. Runtime values are local diagnostics only.",
+        description="Opt-in CPU/CUDA parity evidence. Matched runtime distributions are local diagnostics; first solve after doctor is not process-cold.",
         parameters={"opt_in_environment_variable": "SAGITTARIUS_ENABLE_GPU_TESTS=1", "doctor_initialize_backend": True},
         rows=[row], backend="CUDA", diagnostics=report,
         columns=["row_id", "scenario_id", "status", "stage", "problem", "solver", "backend", "metrics", "artifacts", "failure"],

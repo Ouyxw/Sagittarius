@@ -1,0 +1,701 @@
+{
+  "cache_policy": "Fresh process per scenario/backend; initialized doctor before first solve; persistent JIT; actual-scenario warmups; operators reconstructed per SDK call. First solve is not process-cold.",
+  "classification": "local_only; same-method implementation parity, no independent scientific validation or public performance approval",
+  "command": [
+    "tests/test_performance/benchmark_gpu.py",
+    "--sizes",
+    "2",
+    "4",
+    "8",
+    "12",
+    "16",
+    "20",
+    "--warmups",
+    "2",
+    "--repeat-count",
+    "5",
+    "--memory-limit-mb",
+    "9216",
+    "--timeout-seconds",
+    "1200",
+    "--output-dir",
+    "benchmark-output/p1-gpu-v2-2026-11-27"
+  ],
+  "config_sha256": "8d01bcb716f6e01d89ffb9f367ec9a35f52ce976cc1bcd8034996fc49ce91683",
+  "created_at": "2026-11-27T02:57:44.526153+00:00",
+  "cwd": "/home/oyxw/Sagittarius/sagittarius_py",
+  "opt_in": true,
+  "output_dir": "/home/oyxw/Sagittarius/sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27",
+  "plan_version": "benchmark-implementation-plan/v2",
+  "scenarios": [
+    {
+      "C6": 100.0,
+      "N": 2,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "geometry": "chain",
+      "observables": {
+        "pop0": 0
+      },
+      "omega": 6.283185307179586,
+      "required": true,
+      "scenario_id": "chain_n2_cpu_cuda"
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "geometry": "chain",
+      "observables": {
+        "pop0": 0
+      },
+      "omega": 6.283185307179586,
+      "required": true,
+      "scenario_id": "chain_n4_cpu_cuda"
+    },
+    {
+      "C6": 100.0,
+      "N": 8,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "geometry": "chain",
+      "observables": {
+        "pop0": 0
+      },
+      "omega": 6.283185307179586,
+      "required": true,
+      "scenario_id": "chain_n8_cpu_cuda"
+    },
+    {
+      "C6": 100.0,
+      "N": 12,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "geometry": "chain",
+      "observables": {
+        "pop0": 0
+      },
+      "omega": 6.283185307179586,
+      "required": true,
+      "scenario_id": "chain_n12_cpu_cuda"
+    },
+    {
+      "C6": 100.0,
+      "N": 16,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ],
+        [
+          48.0,
+          0.0,
+          0.0
+        ],
+        [
+          52.0,
+          0.0,
+          0.0
+        ],
+        [
+          56.0,
+          0.0,
+          0.0
+        ],
+        [
+          60.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "geometry": "chain",
+      "observables": {
+        "pop0": 0
+      },
+      "omega": 6.283185307179586,
+      "required": true,
+      "scenario_id": "chain_n16_cpu_cuda"
+    },
+    {
+      "C6": 100.0,
+      "N": 20,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          8.0,
+          0.0,
+          0.0
+        ],
+        [
+          12.0,
+          0.0,
+          0.0
+        ],
+        [
+          16.0,
+          0.0,
+          0.0
+        ],
+        [
+          20.0,
+          0.0,
+          0.0
+        ],
+        [
+          24.0,
+          0.0,
+          0.0
+        ],
+        [
+          28.0,
+          0.0,
+          0.0
+        ],
+        [
+          32.0,
+          0.0,
+          0.0
+        ],
+        [
+          36.0,
+          0.0,
+          0.0
+        ],
+        [
+          40.0,
+          0.0,
+          0.0
+        ],
+        [
+          44.0,
+          0.0,
+          0.0
+        ],
+        [
+          48.0,
+          0.0,
+          0.0
+        ],
+        [
+          52.0,
+          0.0,
+          0.0
+        ],
+        [
+          56.0,
+          0.0,
+          0.0
+        ],
+        [
+          60.0,
+          0.0,
+          0.0
+        ],
+        [
+          64.0,
+          0.0,
+          0.0
+        ],
+        [
+          68.0,
+          0.0,
+          0.0
+        ],
+        [
+          72.0,
+          0.0,
+          0.0
+        ],
+        [
+          76.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "geometry": "chain",
+      "observables": {
+        "pop0": 0
+      },
+      "omega": 6.283185307179586,
+      "required": true,
+      "scenario_id": "chain_n20_cpu_cuda"
+    },
+    {
+      "C6": 100.0,
+      "N": 4,
+      "blockade_radius": 4.4,
+      "coordinates": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          4.0,
+          0.0
+        ]
+      ],
+      "delta": 0.0,
+      "duration": 0.5,
+      "geometry": "lattice_2x2",
+      "observables": {
+        "pop0": 0
+      },
+      "omega": 6.283185307179586,
+      "required": true,
+      "scenario_id": "lattice_2x2_cpu_cuda"
+    },
+    {
+      "C6": 1.0,
+      "N": 2,
+      "blockade_radius": 1.0,
+      "coordinates": [
+        [
+          0.12112621378047365,
+          0.3349006301406475,
+          0.0
+        ],
+        [
+          0.8233014469009639,
+          0.13311800246413752,
+          0.0
+        ]
+      ],
+      "density": 1.0,
+      "duration": 0.1,
+      "edges": [
+        [
+          0,
+          1
+        ]
+      ],
+      "geometry": "weighted_udg",
+      "observables": {
+        "pop0": 0,
+        "pop1": 1
+      },
+      "omega_max": 6.283185307179586,
+      "required": true,
+      "scenario_id": "weighted_udg_n2_seed3_cpu_cuda",
+      "seed": 3,
+      "weights": [
+        1.4006372326031984,
+        1.2165634701182368
+      ]
+    }
+  ],
+  "settings": {
+    "abstol": 1e-10,
+    "adaptive": true,
+    "dt": null,
+    "initial_state": "all_ground",
+    "memory_limit_bytes": 9663676416,
+    "method": "Tsit5",
+    "output_count": 101,
+    "parity_atol": 1e-06,
+    "precision": "complex128",
+    "reltol": 1e-08,
+    "repeat_count": 5,
+    "timeout_seconds": 1200.0,
+    "warmups": 2
+  },
+  "source": {
+    "abi": {
+      "julia": {
+        "available": true,
+        "path_env": null,
+        "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+        "sagittarius_julia_version": "1.0.8",
+        "source": "source_checkout",
+        "version": null
+      },
+      "python": {
+        "cache_tag": "cpython-311",
+        "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+        "implementation": "CPython",
+        "libc": {
+          "name": "glibc",
+          "version": "2.39"
+        },
+        "machine": "x86_64",
+        "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "system": "Linux",
+        "version": "3.11.15"
+      }
+    },
+    "backend_toolchains": {
+      "AMDGPU": {
+        "rocm_smi": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      },
+      "CUDA": {
+        "compatibility": {
+          "blackwell_detected": true,
+          "blackwell_devices": [
+            {
+              "compute_capability": "12.0",
+              "driver_version": "610.88",
+              "memory_total_mib": "16303",
+              "name": "NVIDIA GeForce RTX 5070 Ti"
+            }
+          ],
+          "cuda_12_8_driver_ok": true,
+          "cuda_12_8_min_linux_driver": "570.26",
+          "cuda_12_8_min_windows_driver": "570.65",
+          "driver_version": "610.88"
+        },
+        "devices": [
+          {
+            "compute_capability": "12.0",
+            "driver_version": "610.88",
+            "memory_total_mib": "16303",
+            "name": "NVIDIA GeForce RTX 5070 Ti"
+          }
+        ],
+        "nvcc": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        },
+        "nvidia_smi": {
+          "missing": false,
+          "ok": true,
+          "output": "NVIDIA GeForce RTX 5070 Ti, 610.88, 16303, 12.0",
+          "query_fields": [
+            "name",
+            "driver_version",
+            "memory.total",
+            "compute_cap"
+          ],
+          "raw_output": "NVIDIA GeForce RTX 5070 Ti, 610.88, 16303, 12.0",
+          "returncode": 0
+        }
+      },
+      "METAL": {
+        "metal_compiler": {
+          "missing": true,
+          "ok": false,
+          "output": null,
+          "returncode": null
+        }
+      }
+    },
+    "build": {
+      "build_id": null,
+      "build_number": null,
+      "ci": false,
+      "source": {
+        "git_branch": "feature/benchmarking",
+        "git_commit": "3891b14c5dff640cc6d3ea48d104beb7135e550a",
+        "git_commit_short": "3891b14",
+        "git_dirty": true,
+        "root": "/home/oyxw/Sagittarius"
+      }
+    },
+    "container": {
+      "detected": false,
+      "devcontainer": false,
+      "id": null,
+      "image": null
+    },
+    "in_container": false,
+    "julia": {
+      "available": true,
+      "path_env": null,
+      "project_path": "/home/oyxw/Sagittarius/Sagittarius.jl",
+      "sagittarius_julia_version": "1.0.8",
+      "source": "source_checkout",
+      "version": null
+    },
+    "julia_version": null,
+    "package_version": "1.0.8",
+    "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": {
+      "executable": "/home/oyxw/Sagittarius/sagittarius_py/.venv/bin/python3",
+      "implementation": "CPython",
+      "packages": {
+        "docplex": "2.32.264",
+        "juliacall": "0.9.35",
+        "juliapkg": "0.1.24",
+        "matplotlib": "3.10.9",
+        "networkx": "3.6.1",
+        "numpy": "2.4.6",
+        "pandas": "3.0.3",
+        "pulp": "3.3.2",
+        "sagittarius-py": "1.0.8",
+        "scipy": "1.17.1",
+        "seaborn": "0.13.2"
+      },
+      "version": "3.11.15"
+    },
+    "python_version": "3.11.15",
+    "sagittarius_julia_version": "1.0.8",
+    "schema_version": "version-info/v1"
+  },
+  "source_root": "/home/oyxw/Sagittarius",
+  "source_sha256": {
+    "Sagittarius.jl/Project.toml": "b6f0d95535cec3d3755fa9e07e593200f09c98c6b42672efdf0ab343b65c2dba",
+    "Sagittarius.jl/src/Sagittarius.jl": "0f46cd4e74e89905dcb0518ddb3d60e0b0dcba07a6a347e6479f6c0c4e04c6b8",
+    "Sagittarius.jl/src/cluster.jl": "a20afd1bcfaa367160eedfacd538f44eacb445f350c14ef553cbfc701e31976a",
+    "Sagittarius.jl/src/logging.jl": "d828b4e620c392230d5079f190351ae464204301555663fbf923fe81915faaa2",
+    "Sagittarius.jl/src/physics.jl": "5e67f1a84ad7aafeace6289cf0dd1d5e98e95df8434a0683ca3bfdc07402c102",
+    "Sagittarius.jl/src/program.jl": "ac025b03a5d7066c3c010069aaef47b8009296449022203c7a36bd83293b154c",
+    "Sagittarius.jl/src/solver.jl": "c6a8151f7d06290f173fe00905ce20673e2ac3013b4647b5667840bb80ce83ff",
+    "sagittarius_py/projects/mwis_udg/batch_verify.py": "53f1d1615bb380958e208a9ea0a94fdf1274357d470467cf4df085c892456952",
+    "sagittarius_py/pyproject.toml": "4cb4acaede7a9404ec1aa54eb030afb2bd9d63cd2f40f0cedc04363d9b09680f",
+    "sagittarius_py/sagittarius/api.py": "cf19e5374c883f0c2d45b0283a41922a85744f13fbf976dfb3029522c8207c83",
+    "sagittarius_py/sagittarius/benchmark_failures.py": "ac05b2ffc6b6f9cc1fb7efe8147947b66c4e1b7d5340498e240a0e5616cdf421",
+    "sagittarius_py/sagittarius/benchmark_measurement.py": "7eb88b5fa8ced710e64d1952bf4d72b09a53ff7a4e9f7ab907bfd07b1bc702bd",
+    "sagittarius_py/sagittarius/benchmark_suite.py": "370759e72d545881814fc9548376d60a03a09ab9b5fa0076e46dbf05c8317197",
+    "sagittarius_py/sagittarius/benchmarking.py": "af7d7d91dfe15d8a2a9f0565059baea1309bddde1366aa31ec1e56e0d88fd04b",
+    "sagittarius_py/sagittarius/cuda_parity.py": "36e14d83bd47678d036ec221df1a6fc4dd57da0cdace5c8818d471e46c0fe260",
+    "sagittarius_py/sagittarius/gpu_benchmark.py": "770e369e21a85fcce5dbc311298fbb4b56b36e5330343e9b9cdb394bf8e2f457",
+    "sagittarius_py/sagittarius/runtime.py": "1c01231f6909b61f379de5958a5d1c20acef89d179525c67d7c0bb657a0781d7",
+    "sagittarius_py/sagittarius/scaling_benchmark.py": "c54e983e58051eec26e27dc661eb0c5cc3f67900f3e175cb311c35ec81b49e8e",
+    "sagittarius_py/tests/test_gpu_benchmark.py": "51d30292ce6cb21d5fda4036a862fb2e518ca4271a509aa4f3ba5df960e42775",
+    "sagittarius_py/tests/test_performance/benchmark_cuda_mwis_protocol.py": "90f8d71f8ff77d0e6a15b6831a2f994ea36b9363b24de9ecf0abcdd9e5eb75a3",
+    "sagittarius_py/tests/test_performance/benchmark_gpu.py": "2f7cca82149af27d1c6b463ffda97bb98875f666f2299806beebd82f87088fe5",
+    "sagittarius_py/uv.lock": "adcaa4bad1936b195757844a05100625917a03938370aff9ac59f1d9cb0a9d0c",
+    "scripts/audit_gpu_campaign.py": "5f1bc305290dd753c48bc715e35a18f9da78ce9a612498ee4eb96e961dfe570c"
+  },
+  "stop_policy": "Continue; retain failures, partial records and every declared scenario.",
+  "thread_environment": {
+    "JULIA_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "timer_policy": "End-to-end Simulation.run including construction/transfers/collection/manifest; CUDA sync before/after. Reset/references/checks/writes/reporting excluded.",
+  "workload_version": "matched-cpu-cuda-scan/v2"
+}

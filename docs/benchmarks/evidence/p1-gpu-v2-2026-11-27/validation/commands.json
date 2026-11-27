@@ -1,0 +1,41 @@
+{
+  "baseline": "feature/benchmarking@3891b14",
+  "hardware_environment": "source docs/benchmarks/evidence/p1-gpu-v2-2026-11-27/validation/environment.sh",
+  "hardware_tests": "sagittarius_py/.venv/bin/python -m pytest sagittarius_py/tests/test_gpu_benchmark.py sagittarius_py/tests/test_cuda_mwis_protocol.py sagittarius_py/tests/test_gpu_acceleration.py sagittarius_py/tests/test_cross_language_golden.py -q",
+  "benchmark_regressions": "sagittarius_py/.venv/bin/python -m pytest sagittarius_py/tests/test_ablation_benchmarks.py sagittarius_py/tests/test_benchmark_artifacts.py sagittarius_py/tests/test_benchmark_row_contract.py sagittarius_py/tests/test_benchmark_suite_artifact.py sagittarius_py/tests/test_benchmark_failures.py -q",
+  "solver_artifact_regressions": "sagittarius_py/.venv/bin/python -m pytest sagittarius_py/tests/test_serialization.py sagittarius_py/tests/test_solver_configuration.py sagittarius_py/tests/test_observable_library.py sagittarius_py/tests/test_invariants.py -q",
+  "final_contracts": "sagittarius_py/.venv/bin/python -m pytest sagittarius_py/tests/test_gpu_benchmark.py sagittarius_py/tests/test_gpu_supervision.py sagittarius_py/tests/test_cuda_mwis_protocol.py -m 'not requires_cuda_backend' -q",
+  "pilot_03": "sagittarius_py/.venv/bin/python -m sagittarius.gpu_benchmark --sizes 2 --warmups 1 --repeat-count 1 --output-dir sagittarius_py/benchmark-output/p1-gpu-pilot-03-2026-11-27",
+  "pilot_audit": "sagittarius_py/.venv/bin/python scripts/audit_gpu_campaign.py sagittarius_py/benchmark-output/p1-gpu-pilot-03-2026-11-27 --allow-partial",
+  "documentation": "python3 scripts/validate_documentation.py",
+  "campaign": {
+    "cwd": "sagittarius_py",
+    "argv": [
+      "uv",
+      "run",
+      "--no-sync",
+      "python",
+      "tests/test_performance/benchmark_gpu.py",
+      "--sizes",
+      "2",
+      "4",
+      "8",
+      "12",
+      "16",
+      "20",
+      "--warmups",
+      "2",
+      "--repeat-count",
+      "5",
+      "--memory-limit-mb",
+      "9216",
+      "--timeout-seconds",
+      "1200",
+      "--output-dir",
+      "benchmark-output/p1-gpu-v2-2026-11-27"
+    ]
+  },
+  "audit": "sagittarius_py/.venv/bin/python scripts/audit_gpu_campaign.py sagittarius_py/benchmark-output/p1-gpu-v2-2026-11-27",
+  "relocated_audit": "sagittarius_py/.venv/bin/python scripts/audit_gpu_campaign.py /tmp/sagittarius-p1-gpu-evidence/campaign",
+  "final_documentation_tests": "sagittarius_py/.venv/bin/python -m pytest sagittarius_py/tests/test_documentation_governance.py sagittarius_py/tests/test_benchmark_documentation_consistency.py -q"
+}

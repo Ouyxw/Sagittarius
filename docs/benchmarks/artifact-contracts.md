@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling and ablation implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation and GPU implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -152,12 +152,14 @@ Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-
 
 Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
-CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; the full P1 GPU matrix, recurring RC and public-use gates remain separate.
+CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; this ablation-only archive is separate from the P1 GPU matrix below, recurring RC and public-use gates.
 
 
-This generation defines the artifact work for the seven P0–P1 suites in [plan v2](plans/v2.md#artifact-and-compatibility-work). Scaling implements its compatible extensions with structured rows, suite validation, audit tooling and regression tests; other acceptance targets become executable contracts when their writers, readers and tests land together. The existing schema names and field responsibilities remain authoritative.
+This generation defines the artifact work for the seven P0–P1 suites in [plan v2](plans/v2.md#artifact-and-compatibility-work). Scaling implements its compatible extensions with structured rows, suite validation, audit tooling and regression tests; GPU adds per-backend process records, qualified median ratios and saved-trajectory audits; other acceptance targets become executable contracts when their writers, readers and tests land together. The existing schema names and field responsibilities remain authoritative.
 
 <a id="v2-artifact-types"></a>
+
+The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
 
 ### Artifact Types
 
@@ -169,7 +171,7 @@ This generation defines the artifact work for the seven P0–P1 suites in [plan 
 | `run-manifest/v1` | Actual executed simulation configuration and requested/effective settings. | Pure matvec work has benchmark inputs/reference reports rather than fabricated simulation manifests. |
 | `result-artifact/v1` | Saved simulation results with metadata, diagnostics, manifest and shared payload. | Add actual AQC result provenance through the existing adapter boundary. |
 
-Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Ablation writes `ablation_bench_results_suite` and `ablation_repeats.json`. Planned additions include optional GPU aggregates, and `mwis_aqc_performance`, `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
+Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Ablation writes `ablation_bench_results_suite` and `ablation_repeats.json`. GPU writes `gpu_bench_results_suite` and `gpu_repeats.json`. Planned additions include `mwis_aqc_performance`, `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
 
 Ablation retains one aggregate row per size/path and a validated structured row
 per measured batch in `ablation_repeats.json`. `metrics.measurements` retains
@@ -203,6 +205,26 @@ GPU snapshots remain separate from unavailable peak memory. The campaign
 never produces CPU-matvec/CUDA-solve or CPU/CUDA solve ratios.
 
 <a id="v2-aggregate-shape"></a>
+
+The GPU scan writes `gpu_bench_results` and `gpu_bench_results_suite` in
+JSON/CSV/Markdown, plus `gpu_repeats.json` and per-scenario `pairs.json`.
+Each pair retains phase/index, stable ID, declared order, actual monotonic
+call intervals, raw per-backend seconds, result/standalone-manifest links and
+a full-grid gate. `metrics.statistics.CPU` and `.CUDA` retain separate
+Hyndman-Fan type-7 summaries, exact eligible pair IDs and requested/completed/
+eligible counts. `median_cpu_over_cuda` is `median(CPU runtime) / median(CUDA
+runtime)` only with two warmups, five eligible measurements on each path and
+successful scenario gates; otherwise it is null with a reason. Legacy
+`t_cpu_s`/`t_gpu_s` remain the first measured calls; `speedup` is the qualified
+median ratio. Historical one-call ratios have a different measurement scope.
+Legacy combined `max_rss` is unavailable with an explicit reason; use separate
+worker baseline/HWM byte records and sampled supervisor peaks. Device snapshots
+never imply GPU peak. Initialization, construction and first solves are separate
+single measurements; raw checkpoints retain elapsed times even on write failure.
+`scripts/audit_gpu_campaign.py` checks saved results, standalone manifests,
+frozen configs/source/runtime hashes, pair order, statistics and every companion
+value without initializing either backend. These are compatible optional
+extensions under existing schemas, not new required historical fields.
 
 ### Aggregate Shape
 
