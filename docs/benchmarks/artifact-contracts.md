@@ -152,6 +152,8 @@ Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-
 
 Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
+CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; the full P1 GPU matrix, recurring RC and public-use gates remain separate.
+
 
 This generation defines the artifact work for the seven P0–P1 suites in [plan v2](plans/v2.md#artifact-and-compatibility-work). Scaling implements its compatible extensions with structured rows, suite validation, audit tooling and regression tests; other acceptance targets become executable contracts when their writers, readers and tests land together. The existing schema names and field responsibilities remain authoritative.
 
@@ -186,8 +188,19 @@ doctor/runtime projects and coverage support replay. `audit_ablation_campaign.py
 checks saved CPU outputs, configuration/statistics membership and companion
 contracts, including after relocation. A required numerical gate or reference
 failure excludes the repeat; a slow valid repeat is retained. Optional CUDA
-solve rows carry their own manifests and scope, remain incomplete without
-matched GPU-suite parity and never produce CPU-matvec/CUDA-solve ratios.
+solve rows carry their own manifests and scope. Matched CUDA follow-ups retain
+nested `cpu`/`cuda` result-artifact and run-manifest links for first, warmup and
+measured pairs. Pair metadata records execution order, independent CPU and CUDA
+timings, finite/grid/backend/configuration gates and full trajectory error;
+`statistics` summarizes eligible CUDA solves and `cpu_statistics` separately
+summarizes their CPU references. The audit reloads both artifacts, validates
+standalone manifests and recomputes the pair gates, membership and coverage.
+Source snapshots/hash guards include the executed Julia backend, including
+first-call initialization behavior. A fresh-process CUDA solve now loads the
+optional backend before entering the solver in the current Julia world; a
+failed first solve must remain a failure and cannot be accepted as warmup.
+GPU snapshots remain separate from unavailable peak memory. The campaign
+never produces CPU-matvec/CUDA-solve or CPU/CUDA solve ratios.
 
 <a id="v2-aggregate-shape"></a>
 

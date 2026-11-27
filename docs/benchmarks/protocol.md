@@ -105,6 +105,8 @@ Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-
 
 Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
+CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; the full P1 GPU matrix, recurring RC and public-use gates remain separate.
+
 
 This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It defines campaign acceptance discipline; scaling and ablation implement frozen matrices, supervised child processes, references and repeated measurements. P1 runners still need the specified work. GOV-004 remains the policy authority. Benchmarking V2 does not rename artifact schemas or reclassify the initial archive.
 
@@ -152,8 +154,15 @@ output validation/writes; operator construction is separate and sparse paths
 retain dense intermediates. Independent full/projected dense checks apply at
 N<=8; larger cases use analytic transition-action references. Saved arrays,
 per-repeat gates, source/config identity and companion reports are audited.
-Optional CUDA SDK solves use a separate timer scope and remain diagnostic
-without matched GPU-suite parity. No matvec/solve ratio is supported.
+Optional CUDA SDK solves use a separate timer scope and matched CPU ODE
+references. The complete 101-point trajectory, grid, effective configuration,
+manifest and actual backend must pass before repeat eligibility. First solves,
+symmetric two-warmup/five-repeat boundaries and alternating measured pair order
+are retained, with explicit CUDA synchronization. No matvec/solve or solve ratio
+is supported. GPU diagonal observables copy to host once per observable before summation;
+SDK operator/pulse construction repeats per call, with sparse reuse within each
+solve. These costs remain included in the end-to-end timer. Full P1 GPU-suite
+acceptance remains separate.
 
 Use two warmups and at least five independent measured executions per frozen scenario/path by default. The default matvec batch is 50 operations, independently recorded; preserve legacy `repeats` semantics when adding controls. Reset initial state and fixed seeded input for every execution. V2 matvec uses fixed normalized H*psi input rather than growing H^k*psi and carries a distinct workload label.
 

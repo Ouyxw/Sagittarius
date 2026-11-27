@@ -278,3 +278,62 @@ def test_reduced_analytic_action_matches_projected_full_dense_at_nine():
     # verification of the large-fixture reference branch.
     projected = _dense_hamiltonian_matrix(register, omega, delta)[np.ix_(basis, basis)]
     assert np.allclose(actual, projected @ initial, rtol=1e-13, atol=1e-13)
+
+
+def test_cuda_pair_gate_rejects_fallback_grid_configuration_and_nan(monkeypatch):
+    import copy
+    from types import SimpleNamespace
+    import numpy as np
+    import pytest
+    import sagittarius.cuda_parity as parity
+    monkeypatch.setattr(parity, 'validate_run_manifest', lambda manifest: None)
+    times = [0., .1, .2]
+    solver = dict.fromkeys(parity.MATCHED_SOLVER_FIELDS)
+    solver.update(effective_method='Tsit5', effective_adaptive=True, effective_dt=None,
+                  effective_saveat=times, use_gpu=False, gpu_backend='CUDA', reltol=1e-8)
+    cpu = SimpleNamespace(data={'t': times, 'pop0': [0., .1, .2]}, manifest={
+        'solver': solver, 'backend_diagnostics': {'requested_backend': 'CPU'},
+        'register': {}, 'pulse': {}, 'initial_state': {'basis_size': 8}})
+    cuda = copy.deepcopy(cpu)
+    cuda.manifest['solver']['use_gpu'] = True
+    cuda.manifest['backend_diagnostics']['requested_backend'] = 'CUDA'
+    assert parity.solve_pair_gate(cpu, cuda, times, 1e-6)['passed']
+    cuda.data['pop0'][1] += 1e-4
+    assert not parity.solve_pair_gate(cpu, cuda, times, 1e-6)['passed']
+    cuda.data['pop0'][1] = np.nan
+    assert not parity.solve_pair_gate(cpu, cuda, times, 1e-6)['finite']
+    cuda.data['pop0'][1] = .1
+    cuda.manifest['solver']['use_gpu'] = False
+    with pytest.raises(AssertionError, match='fallback'):
+        parity.solve_pair_gate(cpu, cuda, times, 1e-6)
+    cuda.manifest['solver']['use_gpu'] = True
+    cuda.manifest['solver']['reltol'] = 1e-3
+    with pytest.raises(AssertionError, match='configuration'):
+        parity.solve_pair_gate(cpu, cuda, times, 1e-6)
+    cuda.manifest['solver']['reltol'] = 1e-8
+    cuda.data['t'] = [0., .11, .2]
+    with pytest.raises(AssertionError, match='grid'):
+        parity.solve_pair_gate(cpu, cuda, times, 1e-6)
+
+
+def test_cuda_only_campaign_selection_preserves_cpu_coverage_gaps(monkeypatch, tmp_path):
+    import sagittarius.ablation_benchmark as campaign
+    monkeypatch.delenv('SAGITTARIUS_ENABLE_GPU_TESTS', raising=False)
+    def forbidden(*args, **kwargs):
+        raise AssertionError('Disabled CUDA must not launch a process')
+    monkeypatch.setattr(campaign, 'supervise', forbidden)
+    paths = campaign.benchmark_ablation(sizes=[4, 8, 12, 16, 20], modes=['reduced_sparse_gpu_cached'],
+                                       include_gpu=True, output_dir=tmp_path)
+    rows = json.loads(Path(paths['json']).read_text())['timings']
+    assert len(rows) == 5 and all(row['status'] == 'skipped' for row in rows)
+    coverage = json.loads((tmp_path / 'coverage.json').read_text())
+    assert not coverage['all_target_cpu_paths_passed']
+    assert not coverage['all_target_cuda_paths_passed']
+
+
+def test_cuda_diagnostics_keep_bridge_device_fields_structured():
+    from sagittarius.cuda_parity import json_native
+    class BridgeMapping:
+        def items(self):
+            return [('name', 'GPU'), ('index', 0)]
+    assert json_native({'devices': [BridgeMapping()]}) == {'devices': [{'name': 'GPU', 'index': 0}]}

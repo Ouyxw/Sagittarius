@@ -165,6 +165,8 @@ Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-
 
 Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
+CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; the full P1 GPU matrix, recurring RC and public-use gates remain separate.
+
 
 This generation maps the seven suites in [plan v2](plans/v2.md) into the existing family taxonomy. Matrices, thresholds and delivery batches remain defined by that plan. Current V1 evidence is preserved separately; no V2 measurement is completed by this document.
 
@@ -251,7 +253,7 @@ Purpose: complete P0 scaling/ablation and P1 GPU/solver/observable characterizat
 | Suite | V2 matrix and implementation | Reference/interpretation gate |
 | :--- | :--- | :--- |
 | `scaling` | Implemented: N=2,4,6,8,12,16,20; chain and declared rectangular shapes; Rb/a=1.1,1.5,2.1. | Small projected-dense and larger sensitivity checks; actual D/pruning, setup/solve/memory and resource rows. |
-| `ablation` | Implemented four Python CPU matvec paths at N=4,8,12; reduced N=16,20 under budget; separate optional diagnostic CUDA solve. | Fixed seeded normalized H*psi, independent dense/projected references at N<=8 and analytic transition action above; full relative error 1e-12, reduced absolute error 1e-10 and finite gates. Two warmups/five batches, construction/dense intermediates, supervised memory/failures and saved-output audit. |
+| `ablation` | Implemented four Python CPU matvec paths at N=4,8,12; reduced N=16,20 under budget; separate optional CUDA ODE with matched CPU trajectory gates and saved manifests. | Fixed seeded normalized H*psi, independent dense/projected references at N<=8 and analytic transition action above; full relative error 1e-12, reduced absolute error 1e-10 and finite gates. Two warmups/five batches, construction/dense intermediates, supervised memory/failures and saved-output audit. |
 | `gpu` | Chain parity N=2,4,8, 2x2 geometry, performance chain N=12,16,20 and existing small MWIS parity. | Initialized doctor/opt-in, same times/configuration, symmetric warmup, synchronization and per-size error initially <=1e-6. |
 | `solver` | Rabi, addressed chain and time-dependent ramp; Tsit5/Vern9 reltol=1e-6,1e-8,1e-10; RK4 dt=T/100,T/200,T/400; 21/101/501 output points. | Legal method/stepping combinations, verified tighter/independent references, common times and error target initially 1e-6. |
 | `observables` | Ten implemented diagonal types; 1/4/16/64 declarations; original/reverse/fixed permutation; 21/101/501 points; bounded N=4,8,12,16,20 cost series. | Independent probability/occupation references initially <=1e-8, basis/index/order and saved metadata, comparable output/storage policy. |

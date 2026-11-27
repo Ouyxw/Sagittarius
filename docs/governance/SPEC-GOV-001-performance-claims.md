@@ -49,6 +49,12 @@ retains fixed-input Python CPU matvec measurements and a saved-output acceptance
 audit. It remains local-only on a shared workstation; independent governance
 review, CUDA parity and public performance approval are separate.
 
+The [optional ablation CUDA archive](../benchmarks/evidence/p0-ablation-cuda-v2-2026-11-27/README.md)
+retains hardware-backed five-size matched CPU/CUDA ODE parity. Its source fixes,
+end-to-end timer boundaries, host observable accumulation, snapshots versus
+unavailable GPU peaks and preserved failed/interrupted attempts must accompany
+interpretation. It derives no performance ratio and remains local-only.
+
 The repository scripts that produce claim-ready artifacts are:
 
 | Script | Artifact stem | Scope |
@@ -57,7 +63,7 @@ The repository scripts that produce claim-ready artifacts are:
 | `sagittarius_py/tests/test_performance/benchmark_gpu.py` | `gpu_bench_results` | CPU vs CUDA timing with observable evaluation. |
 | `sagittarius_py/tests/test_performance/benchmark_cuda_mwis_protocol.py` | `cuda_parity`, `mwis_gpu_parity` | Opt-in, doctor-gated CPU/CUDA and weighted-MWIS parity with local-only disclosure. |
 | `sagittarius_py/tests/test_performance/benchmark_cluster.py` | `cluster_bench_results` | Parallel parameter-sweep timing. |
-| `sagittarius_py/tests/test_performance/benchmark_ablation.py` | `ablation_bench_results`, `ablation_bench_results_suite` | Fixed-input Python CPU matvec batches with independent repeats, numerical/resource gates and saved-output audit; optional CUDA ODE is separate diagnostic evidence. Historical H^k*psi timings cannot be pooled with v2. |
+| `sagittarius_py/tests/test_performance/benchmark_ablation.py` | `ablation_bench_results`, `ablation_bench_results_suite` | Fixed-input Python CPU matvec batches with independent repeats, numerical/resource gates and saved-output audit; optional CUDA ODE has separate matched-CPU trajectory/configuration gates, saved results/manifests and independent timing summaries; no solve ratio is produced. Historical H^k*psi timings cannot be pooled with v2. |
 | `sagittarius_py/tests/test_performance/benchmark_solver_performance.py` | `solver_performance` | Repeated CPU path correctness gates and Tsit5/Vern9/RK4 trajectory comparison. |
 | `sagittarius_py/tests/test_performance/benchmark_sweep_cluster.py` | `sweep_cluster` | Local ParallelSimulation sweep throughput, resumability, and aggregate evidence. |
 | `sagittarius_py/tests/test_performance/benchmark_mwis_aqc.py` | `mwis_aqc_smoke`, `mwis_aqc_correctness`, `mwis_aqc_scaling` | Seeded weighted UDG/AQC tiers with exact ILP, feasibility, objective-gap, and optimal-success-probability evidence. |

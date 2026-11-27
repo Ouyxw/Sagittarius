@@ -20,6 +20,7 @@ import numpy as np
 from . import PulseSequence, Register, doctor
 from .ablation import (ABLATION_BENCHMARK_MODES, CPU_MODES, WORKLOAD_VERSION,
                        benchmark_ablation_modes, construction_estimate)
+from .cuda_parity import CUDA_WORKLOAD_VERSION
 from .benchmark_failures import benchmark_failure_context
 from .benchmark_measurement import linux_process_memory, runtime_summary, supervise, write_json
 from .benchmark_suite import write_benchmark_suite_artifact
@@ -32,7 +33,7 @@ FAMILY, TIER = "backend_performance", "performance"
 OBSERVABLES = {"names": [], "count": 0, "output_sample_count": 0}
 SOURCE_FILES = ("ablation.py", "ablation_benchmark.py", "benchmark_measurement.py",
                 "benchmarking.py", "benchmark_suite.py", "benchmark_failures.py", "api.py", "runtime.py",
-                "scaling_benchmark.py")
+                "scaling_benchmark.py", "cuda_parity.py")
 
 
 def scenarios(sizes=SIZES, *, spacing=2., blockade_radius=3.):
@@ -94,6 +95,10 @@ def _child(config_path, checkpoint_path):
         for name, expected in config["source_file_sha256"].items():
             if hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest() != expected:
                 raise RuntimeError("Frozen source changed during campaign")
+        backend = Path(version_info(initialize_backend=False)["julia"]["project_path"]) / "src"
+        for name, expected in config.get("julia_source_sha256", {}).items():
+            if hashlib.sha256((backend / name).read_bytes()).hexdigest() != expected:
+                raise RuntimeError("Frozen Julia backend changed during campaign")
         started = time.perf_counter()
         state["doctor"] = doctor(backend="CPU", initialize_backend=True)
         state["initialized_cpu_doctor_seconds"] = time.perf_counter() - started
@@ -159,15 +164,16 @@ def campaign_row(s, settings, state, supervision, *, exclusion=None):
                    "remediation": "Inspect retained partial evidence; rerun in a new directory with the required counts and references."}
     if failure:
         failure.update(limits={k: settings[k] for k in ("timeout_seconds", "memory_limit_bytes")},
-                       backend_probe=state.get("doctor", {}).get("backend_probe"), process_memory=state.get("memory"))
+                       backend_probe=(raw.get("doctor") or state.get("doctor", {})).get("backend_probe"), process_memory=state.get("memory"))
     backend = {"requested_backend": s["backend"], "path": s["mode"], "precision": "complex128",
                "implementation": "Python/NumPy/SciPy" if s["mode"] in CPU_MODES else "Julia CUDA ODE through Python SDK"}
     metrics = {**raw, "statistics": summary, "supervision": supervision,
                "memory": state.get("memory"), "memory_baseline": state.get("memory_baseline"),
                "memory_scope": "fresh scenario/path process lifetime including doctor, construction, references and serialization",
                "runtime_context": state.get("runtime_context"), "initialized_cpu_doctor_seconds": state.get("initialized_cpu_doctor_seconds"),
-               "timer_scope": "fixed-input H*psi batch only; excludes construction, references, validation and writes" if s["mode"] in CPU_MODES else "SDK end-to-end CUDA ODE solve, synchronization included; separate workload, no matvec/solve ratio",
-               "cache_policy": "fresh process per scenario/path; doctor then construction/reference, first operation, actual-scenario warmups; operator reused"}
+               "timer_scope": "fixed-input H*psi batch only; excludes construction, references, validation and writes" if s["mode"] in CPU_MODES else "SDK end-to-end CUDA ODE solve with synchronization; matched CPU ODE reference timed separately, no matvec/solve or solve ratio",
+               "cache_policy": "fresh process per CPU path; doctor then construction/reference, first operation, actual-batch warmups; operator reused" if s["mode"] in CPU_MODES else
+                   "fresh process per CUDA case; Simulation/basis context reused; SDK validation, pulse compilation and operator construction repeated per call; sparse caches reused within each solve; doctor precedes first solve"}
     row = make_benchmark_row(row_id=s["scenario_id"], scenario_id=s["scenario_id"], family=FAMILY, tier=TIER,
         status=status, stage=failure["stage"] if failure else "artifact", problem=s,
         solver=raw.get("solver", {"operation_count": settings["measurement"]["repeats"], "repeat_count": settings["measurement"]["repeat_count"], "method": "not applicable: CPU matvec"}),
@@ -184,18 +190,24 @@ def campaign_row(s, settings, state, supervision, *, exclusion=None):
 def benchmark_ablation(atom_count=10, spacing=2., blockade_radius=3., repeats=50,
                        include_gpu=False, output_dir=".", *, sizes=None, repeat_count=5,
                        warmups=2, seed=1234, max_full_dim=4096, memory_limit_mb=9216,
-                       timeout_seconds=600., full_rtol=1e-12, reduced_atol=1e-10, gpu_duration=.2):
+                       timeout_seconds=600., full_rtol=1e-12, reduced_atol=1e-10, gpu_duration=.2,
+                       cuda_parity_atol=1e-6, modes=None):
     selected = scenarios((atom_count,) if sizes is None else sizes, spacing=spacing, blockade_radius=blockade_radius)
+    if modes is not None:
+        modes = list(modes)
+        if not modes or len(set(modes)) != len(modes) or set(modes) - {item["mode"] for item in ABLATION_BENCHMARK_MODES}:
+            raise ValueError("Select nonempty unique supported modes")
+        selected = [scenario for scenario in selected if scenario["mode"] in modes]
     # Validate before freezing or launching any work, using the helper's public contract.
     for name, value, minimum in (("repeats", repeats, 1), ("repeat_count", repeat_count, 1),
                                  ("warmups", warmups, 0), ("seed", seed, 0), ("max_full_dim", max_full_dim, 1)):
         if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
             raise ValueError(f"{name} must be an integer >= {minimum}")
-    if not all(math.isfinite(v) and v > 0 for v in (memory_limit_mb, timeout_seconds, full_rtol, reduced_atol, gpu_duration)):
+    if not all(math.isfinite(v) and v > 0 for v in (memory_limit_mb, timeout_seconds, full_rtol, reduced_atol, cuda_parity_atol, gpu_duration)):
         raise ValueError("Limits, tolerances and duration must be finite and positive")
     settings = {"measurement": dict(repeats=repeats, repeat_count=repeat_count, warmups=warmups,
         seed=seed, max_full_dim=max_full_dim, memory_limit_mb=memory_limit_mb, include_gpu=include_gpu,
-        full_rtol=full_rtol, reduced_atol=reduced_atol, gpu_duration=gpu_duration),
+        full_rtol=full_rtol, reduced_atol=reduced_atol, cuda_parity_atol=cuda_parity_atol, gpu_duration=gpu_duration),
         "memory_limit_bytes": int(memory_limit_mb * 1024**2), "timeout_seconds": timeout_seconds,
         "gpu_opt_in": os.environ.get("SAGITTARIUS_ENABLE_GPU_TESTS") == "1"}
     output = Path(output_dir).resolve()
@@ -209,7 +221,7 @@ def benchmark_ablation(atom_count=10, spacing=2., blockade_radius=3., repeats=50
         env[key] = "1"
     campaign = {**freeze, "config_sha256": digest, "output_dir": str(output),
                 "plan_version": "benchmark-implementation-plan/v2", "protocol_version": "benchmark-protocol/v1",
-                "workload_version": WORKLOAD_VERSION, "frozen_at": datetime.now(timezone.utc).isoformat(),
+                "workload_version": WORKLOAD_VERSION if any(s["mode"] in CPU_MODES for s in selected) else CUDA_WORKLOAD_VERSION, "frozen_at": datetime.now(timezone.utc).isoformat(),
                 "command": sys.argv, "cwd": str(Path.cwd()), "python_executable": sys.executable,
                 "source": version_info(initialize_backend=False), "thread_environment": {k: env[k] for k in ("JULIA_NUM_THREADS", "OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")},
                 "include_gpu": include_gpu, "repeats": repeats, "repeat_count": repeat_count,
@@ -226,13 +238,19 @@ def benchmark_ablation(atom_count=10, spacing=2., blockade_radius=3., repeats=50
         source = Path(__file__).with_name(name)
         shutil.copyfile(source, output / "source" / name)
         campaign["source_file_sha256"][name] = hashlib.sha256(source.read_bytes()).hexdigest()
+    backend = Path(campaign["source"]["julia"]["project_path"]) / "src"
+    (output / "source" / "julia").mkdir()
+    campaign["julia_source_sha256"] = {}
+    for source in backend.glob("*.jl"):
+        shutil.copyfile(source, output / "source" / "julia" / source.name)
+        campaign["julia_source_sha256"][source.name] = hashlib.sha256(source.read_bytes()).hexdigest()
     write_json(output / "campaign.json", campaign)
     rows, interrupted = [], False
     for s in selected:
         directory = output / s["scenario_id"]
         directory.mkdir()
         config_path, checkpoint_path = directory / "config.json", directory / "checkpoint.json"
-        write_json(config_path, {"scenario": s, "settings": settings, "source_file_sha256": campaign["source_file_sha256"], "config_sha256": digest})
+        write_json(config_path, {"scenario": s, "settings": settings, "source_file_sha256": campaign["source_file_sha256"], "config_sha256": digest, "julia_source_sha256": campaign["julia_source_sha256"]})
         exclusion = None
         if s["mode"] not in CPU_MODES and not (include_gpu and settings["gpu_opt_in"]):
             exclusion = "Optional CUDA disabled; requires --include-gpu and SAGITTARIUS_ENABLE_GPU_TESTS=1"
@@ -267,11 +285,11 @@ def benchmark_ablation(atom_count=10, spacing=2., blockade_radius=3., repeats=50
         write_json(output / "progress.json", {"rows": rows})
         print(f"{s['scenario_id']} D={s['basis_size']}: {row['status']}", flush=True)
     paths = write_benchmark_artifacts(output_dir=output, stem="ablation_bench_results", name="Hamiltonian execution path ablation v2",
-        description="Fixed normalized Python matvec batches; optional CUDA ODE is separate diagnostic evidence.",
+        description="Fixed-input Python matvecs and optional matched CPU/CUDA ODE parity; separate workloads and statistics.",
         parameters=campaign, rows=rows, backend="CPU", diagnostics={"initialized_doctor": "per-path checkpoints"},
         run_manifests=[manifest for r in rows for manifest in r["metrics"].get("run_manifests", [])],
         columns=["row_id", "mode", "status", "workload", "atom_count", "full_dim", "basis_size", "repeats", "total_time_s", "time_per_operation_s", "median_batch_time_s", "reference_error", "reference_relative_error", "max_rss", "max_rss_unit"],
-        benchmark_context={"family": FAMILY, "tier": TIER, "disclosure_status": "local_only", "workload_version": WORKLOAD_VERSION})
+        benchmark_context={"family": FAMILY, "tier": TIER, "disclosure_status": "local_only", "workload_version": campaign["workload_version"]})
     paths["suite"] = write_benchmark_suite_artifact(output_dir=output, stem="ablation_bench_results_suite",
         suite_id="phase16-p0-ablation-v2", family=FAMILY, tier=TIER, rows=rows,
         source=campaign["source"], environment={"threads": campaign["thread_environment"]},
@@ -294,7 +312,9 @@ def benchmark_ablation(atom_count=10, spacing=2., blockade_radius=3., repeats=50
         "declared_rows_accounted": len(rows) == len(selected),
         "missing_successful_cpu_paths": sorted(cpu - passed),
         "successful_n20_paths": [r["scenario_id"] for r in rows if r["atom_count"] == 20 and r["status"] == "passed"],
-        "optional_cuda_status": "separate GPU-suite parity required; skips do not close CUDA scope",
+        "optional_cuda_status": "matched CPU ODE trajectory checks; no performance ratio; skipped/failed rows leave CUDA coverage open",
+        "all_target_cuda_paths_passed": all(s in selected for s in expected if s["mode"] not in CPU_MODES) and
+            {s["scenario_id"] for s in expected if s["mode"] not in CPU_MODES} <= passed,
         "classification": "local_only"})
     return paths
 
@@ -316,6 +336,8 @@ def main():
     parser.add_argument("--full-rtol", type=float, default=1e-12)
     parser.add_argument("--reduced-atol", type=float, default=1e-10)
     parser.add_argument("--gpu-duration", type=float, default=.2)
+    parser.add_argument("--cuda-parity-atol", type=float, default=1e-6)
+    parser.add_argument("--modes", nargs="+", choices=[item["mode"] for item in ABLATION_BENCHMARK_MODES])
     parser.add_argument("--include-gpu", action="store_true")
     parser.add_argument("--output-dir", default=".")
     args = parser.parse_args()

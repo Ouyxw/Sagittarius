@@ -1,0 +1,4 @@
+s......                                                                  [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_gpu_acceleration.py:53: CUDA solver unavailable in this runtime: SOLVER_EXECUTION_FAILED
+6 passed, 1 skipped in 46.27s

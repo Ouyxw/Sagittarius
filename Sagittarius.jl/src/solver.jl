@@ -43,6 +43,12 @@ function _state_probability(state, idx::Int)
 end
 
 function _diagonal_expectation(state, N_atoms::Integer, basis, value_func)
+    # Diagonal observables accumulate on the host in the same basis order.
+    # Transfer once per observable, rather than copying the complete device
+    # vector separately for every component in _state_probability.
+    if isdefined(@__MODULE__, :CUDA) && state isa CUDA.CuVector
+        state = Array(state)
+    end
     total = 0.0
     if isnothing(basis)
         for bitstring in 0:(2^N_atoms - 1)
@@ -255,7 +261,16 @@ function _cached_gpu_sparse!(op)
     return op.cached_sparse_H
 end
 
-function solve_schrodinger_gpu(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
+# CUDA stays optional. Enter the solve after lazy imports have become visible
+# in the latest world; otherwise the first ODE RHS call cannot see Solver.CUDA
+# on Julia versions with world-age-tracked global bindings.
+function solve_schrodinger_gpu(ψ0, H_func, tspan; kwargs...)
+    @eval using CUDA
+    @eval using CUDA.CUSPARSE
+    return Base.invokelatest(_solve_schrodinger_gpu_impl, ψ0, H_func, tspan; kwargs...)
+end
+
+function _solve_schrodinger_gpu_impl(ψ0, H_func, tspan; observables=nothing, reltol=1e-8, abstol=1e-8, backend="CUDA", blockade_radius=0.0, saveat=nothing, method="Tsit5", adaptive=true, dt=nothing)
     _log_solver_start(; backend=backend, use_gpu=true, reltol=reltol, abstol=abstol, blockade_radius=blockade_radius, method=method, adaptive=adaptive, dt=dt)
     @eval using CUDA
     @eval using CUDA.CUSPARSE

@@ -60,6 +60,13 @@ exclusions and five optional CUDA skips are retained. Python matvecs and CUDA
 ODE solves remain different workloads; this CPU completion establishes no
 CUDA parity, physical approximation validation, recurring RC or public-use approval.
 
+The [2026-11-27 optional ablation CUDA follow-up](../benchmarks/evidence/p0-ablation-cuda-v2-2026-11-27/README.md)
+retains five chain cases through N=20 with 25 independently measured CPU/CUDA
+ODE pairs and audited full-grid numerical gates. It preserves initial failures
+and interrupted progress separately from final accepted measurements. CUDA
+remains experimental; same-method parity and unavailable peak memory do not
+close the full P1 GPU matrix, physical validation, RC or public-use approval.
+
 ## Required Row Metadata
 
 Every benchmark row should record enough context to reproduce or audit the measurement:

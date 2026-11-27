@@ -105,3 +105,7 @@ physical approximation validation, P1 suites, recurring RC and independent
 public/governance review remain separate. Shared-workstation validation overlapped
 early sizes; no host-isolated performance claim is made. Retain this document
 as development record; formal behavior/evidence is in the benchmark docs.
+
+CUDA follow-up on baseline `11f22d2` is tracked separately in the
+[CUDA validation workflow](p0-ablation-cuda.md); the original CPU archive
+and its historical skip rows remain immutable.

@@ -21,8 +21,8 @@ This directory contains scripts for profiling and benchmarking the Sagittarius n
 
 ### 4. `benchmark_ablation.py`
 - **Goal**: Compare Hamiltonian execution path representations.
-- **Metric**: Fixed normalized H*psi batch and per-operation time for four Python CPU paths, with separate construction and independent-repeat statistics. CLI defaults to N=4,8,12,16,20; full paths above dimension 4096 are excluded. `--repeats` remains operations per batch; `--repeat-count` is independent batches. Optional CUDA cached ODE solves are separate diagnostic timings.
-- **GPU Gate**: Requires `--include-gpu`, `SAGITTARIUS_ENABLE_GPU_TESTS=1` and initialized CUDA diagnostics. GPU-suite matched parity is needed for qualified solve comparisons.
+- **Metric**: Fixed normalized H*psi batch and per-operation time for four Python CPU paths, with separate construction and independent-repeat statistics. CLI defaults to N=4,8,12,16,20; full paths above dimension 4096 are excluded. `--repeats` remains operations per batch; `--repeat-count` is independent batches. Optional CUDA cached ODE solves are a separate workload with matched CPU ODE trajectory gates, two warmups and independent paired repeats. Select only that path with `--modes reduced_sparse_gpu_cached --include-gpu`.
+- **GPU Gate**: Requires `--include-gpu`, `SAGITTARIUS_ENABLE_GPU_TESTS=1` and initialized CUDA diagnostics. Full-grid matched parity and sufficient paired measurements are required; no runtime ratio is produced by this runner.
 
 ## Execution
 ```bash

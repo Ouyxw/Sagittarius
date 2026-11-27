@@ -147,6 +147,8 @@ Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-
 
 Ablation has [local ablation evidence](evidence/p0-ablation-v2-2026-11-27/README.md): all 16 targeted CPU paths and 80 independent measured batches passed, including both reduced paths at N=20 (D=17711). Four full-dimension exclusions and five optional CUDA skips are retained. CUDA, recurring RC and public-use approval remain separate.
 
+CUDA follow-up has [retained local hardware evidence](evidence/p0-ablation-cuda-v2-2026-11-27/README.md): all five ablation chain cases through N=20 passed, with 25 measured CPU/CUDA ODE pairs and 80 saved first/warm/measured result/manifest pairs. First-call initialization and diagonal-observable transfer fixes are included. The original CPU archive and its historical CUDA skips remain unchanged. CUDA stays experimental; the full P1 GPU matrix, recurring RC and public-use gates remain separate.
+
 
 This generation applies the same five tiers to [plan v2](plans/v2.md). It distinguishes planned runner work from verified executable commands and keeps the initial V1 evidence complete. Long campaigns remain manual, RC or self-hosted work.
 
@@ -230,8 +232,27 @@ Use `--atom-count 4` for a single-size smoke. Shorter `--repeat-count 1
 --warmups 1 --repeats 3` runs remain incomplete diagnostic pilot evidence;
 audit them with `--allow-partial`. The output directory must be empty.
 CUDA additionally requires `--include-gpu` and `SAGITTARIUS_ENABLE_GPU_TESTS=1`;
-it remains separate diagnostic ODE evidence pending matched GPU-suite parity.
-The matrix declares 25 rows: 16 targeted CPU paths, four full-dimension
+it measures a separate ODE workload with matched CPU trajectory gates. A
+CUDA-only follow-up preserves the old CPU archive:
+
+```bash
+SAGITTARIUS_ENABLE_GPU_TESTS=1 uv run python tests/test_performance/benchmark_ablation.py \
+  --sizes 4 8 12 16 20 --modes reduced_sparse_gpu_cached --include-gpu \
+  --repeat-count 5 --warmups 2 --cuda-parity-atol 1e-6 \
+  --memory-limit-mb 9216 --timeout-seconds 600 \
+  --output-dir benchmark-output/ablation-cuda-v2
+.venv/bin/python ../scripts/audit_ablation_campaign.py benchmark-output/ablation-cuda-v2
+```
+
+Use an installed CUDA 6.2.0 environment that passes initialized doctor. A host
+whose sandbox hides the GPU requires execution with actual device access;
+a sandbox skip/failure is not CUDA validation. Both CPU/CUDA ODE paths retain
+first/warm/repeated reset-state solves, 101-point trajectory parity and results
+with manifests. The audit independently records CPU-matvec and CUDA coverage;
+a CUDA-only run cannot close missing CPU matrix coverage. No runtime ratio is
+produced. Other P1 GPU geometry/application/performance requirements remain open.
+
+The full ablation matrix declares 25 rows: 16 targeted CPU paths, four full-dimension
 exclusions above N=12 and five optional CUDA paths. Reduced sparse N=20
 has D=17711 with a dense construction intermediate and needs its declared
 memory budget. CPU results cannot characterize Julia solver internals.

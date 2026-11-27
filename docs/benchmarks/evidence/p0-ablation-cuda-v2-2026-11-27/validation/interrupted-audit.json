@@ -1,0 +1,19 @@
+{
+  "contract_audit_passed": true,
+  "all_target_cuda_paths_passed": false,
+  "checked_cuda_pairs": 20,
+  "max_cuda_parity_error": 8.881784197001252e-16,
+  "required_small_cpu_passed": false,
+  "all_target_cpu_paths_passed": false,
+  "scenario_count": 5,
+  "status_counts": {
+    "failed": 0,
+    "incomplete": 1,
+    "passed": 4,
+    "skipped": 0
+  },
+  "checked_cpu_outputs": 0,
+  "max_absolute_error": 0.0,
+  "max_relative_error": 0.0,
+  "classification": "local_only; software/numerical audit, not independent governance review or physical validation"
+}

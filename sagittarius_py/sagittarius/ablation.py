@@ -151,7 +151,7 @@ def _reduced_matrix_free_callable(register: Register, omega: List[float], delta:
 
 def _benchmark_mode(register, sequence, mode, *, blockade_radius, repeats, warmups,
                     repeat_count, seed, max_full_dim, include_gpu, gpu_duration,
-                    memory_limit_bytes, full_rtol, reduced_atol,
+                    memory_limit_bytes, full_rtol, reduced_atol, cuda_parity_atol,
                     directory=None, checkpoint=None):
     """One path, with checkpointed timing progress and validation after timing."""
     n = len(register.atoms)
@@ -197,7 +197,7 @@ def _benchmark_mode(register, sequence, mode, *, blockade_radius, repeats, warmu
         delta = _constant_vector(sequence.delta, n, field_name="delta")
         if mode not in CPU_MODES:
             return _gpu_measure(register, sequence, basis, row, save, directory,
-                                blockade_radius, gpu_duration, warmups, repeat_count)
+                                blockade_radius, gpu_duration, warmups, repeat_count, cuda_parity_atol)
         state = _seeded_state(d, seed)
         state.setflags(write=False)
         row["input"] = {"seed": seed, "norm": float(np.linalg.norm(state)), "precision": "complex128",
@@ -267,69 +267,108 @@ def _benchmark_mode(register, sequence, mode, *, blockade_radius, repeats, warmu
     except Exception as exc:
         row.update(status="failed", measurement_status="failed", reason=str(exc),
                    failure=benchmark_failure_context(exc, stage=row["stage"]))
+        if exc.__cause__ is not None:
+            row["failure"]["cause"] = {"exception_type": type(exc.__cause__).__name__, "message": str(exc.__cause__)}
         save(row["stage"])
     return row
 
 
-def _gpu_measure(register, sequence, basis, row, save, directory, radius, duration, warmups, repeat_count):
+def _gpu_measure(register, sequence, basis, row, save, directory, radius, duration, warmups, repeat_count, parity_atol):
+    from dataclasses import replace
+    from .cuda_parity import CUDA_WORKLOAD_VERSION, json_native, solve_pair_gate
+    from .runtime import get_julia
+    from .benchmark_measurement import write_json
     started = time.perf_counter()
-    diagnostics = doctor(backend="CUDA", initialize_backend=True)
+    diagnostics = json_native(doctor(backend="CUDA", initialize_backend=True))
     row["doctor"] = diagnostics
     row["timing"]["initialized_cuda_doctor_seconds"] = time.perf_counter() - started
     if not diagnostics.get("available") or not (diagnostics.get("backend_probe") or {}).get("available"):
         raise RuntimeError("Initialized CUDA diagnostics failed")
     times = np.linspace(0., duration, 101).tolist()
     config = SolverConfig(blockade_radius=radius, use_gpu=True, gpu_backend="CUDA",
-                          method="Tsit5", reltol=1e-8, abstol=1e-10, saveat=times)
-    sim = Simulation(register, sequence, config)
-    row["solver"] = {"method": "Tsit5", "reltol": 1e-8, "abstol": 1e-10, "saveat": times,
-                     "blockade_radius": radius, "use_gpu": True, "gpu_backend": "CUDA"}
-    row["gpu_memory"] = {"peak_bytes": None, "reason": "No supported GPU peak collector; process RSS is CPU memory."}
-    row["reference"] = {"type": "finite_and_output_grid_only", "limitations": "Matched CPU/CUDA numerical parity belongs to the GPU suite; no solve ratio or qualified CUDA performance evidence."}
-    # Simulation.run converts observable data back to CPU before returning.
-    # Explicit device synchronization also brackets every timed end-to-end solve.
-    from .runtime import get_julia
+                          method="Tsit5", adaptive=True, reltol=1e-8, abstol=1e-10, saveat=times)
+    simulations = {"CUDA": Simulation(register, sequence, config),
+                   "CPU": Simulation(register, sequence, replace(config, use_gpu=False))}
+    row["solver"] = {"method": "Tsit5", "adaptive": True, "dt": None, "reltol": 1e-8, "abstol": 1e-10,
+                     "saveat": times, "blockade_radius": radius, "use_gpu": True, "gpu_backend": "CUDA"}
+    row["reference"] = {"type": "matched_cpu_ode_trajectory", "parity_atol": parity_atol,
+                        "initial_state": "all_ground; reset before every solve",
+                        "limitations": "Same-method CPU/CUDA parity, not independent physical validation. No matvec/ODE or solve ratio."}
+    row["workload_version"] = CUDA_WORKLOAD_VERSION
+    row["cpu_measurements"] = []
+    row["gpu_memory"] = {"peak_bytes": None, "reason": "Snapshots are not measured peaks; device memory also includes other users."}
     jl, _ = get_julia()
-    def solve():
+    def snapshot():
+        try:
+            raw = jl.seval('begin; using CUDA; CUDA.synchronize(); Dict("total_bytes" => Int(CUDA.total_memory()), "available_bytes" => Int(CUDA.free_memory())); end')
+            return {str(k): int(v) for k, v in raw.items()}
+        except Exception as exc:
+            return {"unavailable_reason": str(exc)}
+    row["gpu_memory"]["before"] = snapshot()
+    def solve(backend):
         initial = np.zeros(len(basis), dtype=np.complex128)
         initial[0] = 1.
-        jl.seval("using CUDA; CUDA.synchronize()")
+        if backend == "CUDA":
+            jl.seval("using CUDA; CUDA.synchronize()")
         started = time.perf_counter()
-        result = sim.run(initial, 0., duration, observables={"pop0": 0})
-        jl.seval("using CUDA; CUDA.synchronize()")
-        elapsed = time.perf_counter() - started
-        values = np.asarray(result.data["pop0"])
-        if values.shape != (101,) or not np.all(np.isfinite(values)) or not np.allclose(result.data["t"], times, rtol=0, atol=1e-14):
-            raise AssertionError("CUDA output is nonfinite or differs from frozen output grid")
-        return result, elapsed
+        result = simulations[backend].run(initial, 0., duration, observables={"pop0": 0})
+        if backend == "CUDA":
+            jl.seval("CUDA.synchronize()")
+        return result, time.perf_counter() - started
     def retain(result, label):
         row["run_manifests"].append({"label": label, "manifest": result.manifest})
         if not directory:
             return {}
         result_path, manifest_path = Path(directory) / f"{label}.result.json", Path(directory) / f"{label}.manifest.json"
-        from .benchmark_measurement import write_json
         result.save(str(result_path))
         write_json(manifest_path, result.manifest)
         return {"result_artifact": str(result_path), "run_manifest": str(manifest_path)}
-    save("solve")
-    result, elapsed = solve()
-    row["timing"]["first_solve_seconds"] = elapsed
-    row["artifacts"]["first_solve"] = retain(result, "first")
-    for index in range(warmups):
-        result, elapsed = solve()
-        row["warmups"].append({"warmup_index": index, "warmup": True, "runtime_seconds": elapsed})
-        save("solve")
-    for index in range(repeat_count):
-        result, elapsed = solve()
-        item = {"row_id": f"{row['mode']}-repeat-{index}", "repeat_index": index, "warmup": False,
-                "operation_count": 1, "runtime_seconds": elapsed, "time_per_operation_s": elapsed,
-                "eligible": False, "finite": True, "artifacts": retain(result, f"repeat-{index}")}
-        row["measurements"].append(item)
+    def pair(label, index, collection):
+        order = ("CPU", "CUDA") if index % 2 == 0 else ("CUDA", "CPU")
+        item = {"pair_order": list(order), "eligible": False, "artifacts": {}, "runtime_seconds": None}
+        if collection is row["measurements"]:
+            item.update(row_id=f"{row['mode']}-repeat-{index}", repeat_index=index,
+                        warmup=False, operation_count=1)
+        else:
+            item.update(warmup_index=index, warmup=label.startswith("warmup"))
+        collection.append(item)
+        outputs = {}
+        for backend in order:
+            save("solve")
+            result, elapsed = solve(backend)
+            outputs[backend] = result
+            item["runtime_seconds" if backend == "CUDA" else "cpu_runtime_seconds"] = elapsed
+            if backend == "CUDA":
+                item["time_per_operation_s"] = elapsed
+            # Checkpoint timings before result serialization or parity validation.
+            save("artifact")
+            item["artifacts"][backend.lower()] = retain(result, f"{label}-{backend.lower()}")
+            save("validation")
+        checked = solve_pair_gate(outputs["CPU"], outputs["CUDA"], times, parity_atol)
+        item.update(checked)
+        item["eligible"] = checked["passed"]
         save("validation")
-    row.update(total_time_s=row["measurements"][0]["runtime_seconds"],
-               time_per_operation_s=row["measurements"][0]["runtime_seconds"],
-               measurement_status="incomplete", complete=True,
-               reason="CUDA timings diagnostic until matched GPU-suite parity evidence is retained")
+        if not checked["passed"]:
+            raise AssertionError("CPU/CUDA trajectory failed finite/parity gate")
+        return item
+    row["first_pairs"] = []
+    first = pair("first", 0, row["first_pairs"])
+    row["artifacts"]["first_pair"] = first["artifacts"]
+    row["first_gate"] = {k: first[k] for k in ("finite", "parity_max_abs_error", "passed")}
+    row["timing"].update(first_solve_seconds=first["runtime_seconds"], first_cpu_solve_seconds=first["cpu_runtime_seconds"])
+    for index in range(warmups):
+        pair(f"warmup-{index}", index, row["warmups"])
+    for index in range(repeat_count):
+        item = pair(f"repeat-{index}", index, row["measurements"])
+        row["cpu_measurements"].append({"row_id": f"matched-cpu-repeat-{index}", "eligible": item["eligible"],
+            "runtime_seconds": item["cpu_runtime_seconds"], "artifacts": item["artifacts"]["cpu"]})
+        row["cpu_statistics"] = runtime_summary(row["cpu_measurements"], repeat_count)
+        row.update(total_time_s=row["measurements"][0]["runtime_seconds"],
+                   time_per_operation_s=row["measurements"][0]["runtime_seconds"])
+        save("validation")
+    row["gpu_memory"]["after"] = snapshot()
+    row.update(measurement_status="passed" if warmups >= 2 and repeat_count >= 5 else "incomplete",
+               complete=True, reason="" if warmups >= 2 and repeat_count >= 5 else "Insufficient paired warmups/repeats")
     save("artifact")
     return row
 
@@ -339,7 +378,7 @@ def benchmark_ablation_modes(register: Register, sequence: PulseSequence, *, blo
                              max_full_dim: int = 4096, include_gpu: bool = False,
                              gpu_duration: float = .2, repeat_count: int = 5,
                              memory_limit_mb: float = 8192, full_rtol: float = 1e-12,
-                             reduced_atol: float = 1e-10, modes=None,
+                             reduced_atol: float = 1e-10, cuda_parity_atol: float = 1e-6, modes=None,
                              directory=None, checkpoint=None) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """Benchmark fixed-input batches. ``repeats`` remains operations per batch.
 
@@ -358,7 +397,7 @@ def benchmark_ablation_modes(register: Register, sequence: PulseSequence, *, blo
         raise ValueError("Ablation fixtures support 1..20 atoms")
     if not math.isfinite(blockade_radius) or blockade_radius < 0:
         raise ValueError("blockade_radius must be finite and nonnegative")
-    if not all(math.isfinite(v) and v > 0 for v in (memory_limit_mb, full_rtol, reduced_atol, gpu_duration)):
+    if not all(math.isfinite(v) and v > 0 for v in (memory_limit_mb, full_rtol, reduced_atol, cuda_parity_atol, gpu_duration)):
         raise ValueError("Memory limit, tolerances and duration must be finite and positive")
     selected = [item["mode"] for item in ABLATION_BENCHMARK_MODES] if modes is None else list(modes)
     if not selected or len(set(selected)) != len(selected) or set(selected) - {item["mode"] for item in ABLATION_BENCHMARK_MODES}:
@@ -367,6 +406,6 @@ def benchmark_ablation_modes(register: Register, sequence: PulseSequence, *, blo
                 repeats=repeats, warmups=warmups, repeat_count=repeat_count, seed=seed,
                 max_full_dim=max_full_dim, include_gpu=include_gpu, gpu_duration=gpu_duration,
                 memory_limit_bytes=int(memory_limit_mb * 1024**2), full_rtol=full_rtol,
-                reduced_atol=reduced_atol, directory=directory, checkpoint=checkpoint)
+                reduced_atol=reduced_atol, cuda_parity_atol=cuda_parity_atol, directory=directory, checkpoint=checkpoint)
             for mode in selected]
     return rows, [manifest for row in rows for manifest in row["run_manifests"]]
