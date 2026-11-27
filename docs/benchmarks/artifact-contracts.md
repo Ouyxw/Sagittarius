@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU, MWIS and solver implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU, MWIS, solver and observable implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -164,6 +164,8 @@ The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes t
 The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
 
 The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) completes all 39 declared sensitivity configurations across Rabi, the addressed chain and a linear ramp. All 312 first/warm/measured results and manifests are retained and audited; 38 configurations and 190/195 measured calls meet the frozen 1e-6 accuracy target. The coarse ramp RK4 T/100 case remains a failed accuracy row with all raw times/errors, as required by the plan. Independent stable references, raw norm checks, effective settings, per-configuration memory and error-versus-runtime companions support bounded local numerical characterization. Full-matrix all-accuracy-pass remains false; accepted characterization does not promote under-resolved times into performance comparisons or close scientific validation, recurring RC or public-use gates.
+
+The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.md) completes 52 cost configurations through reduced N=20 (D=17711) and 12 small full/reduced state-path fixtures. All 260 measured SDK calls and 476 saved results/manifests pass value/order, round-trip and independent-reference gates; five-seed MCWF samples use explicit simultaneous uncertainty bounds. Two empty-observable history controls, cross-order equality, attributable worker memory, frozen source/runtime and matching companions are audited after relocation. Counts/grids/orders are separate workloads; duplicate physical declarations are labeled. Timings include SDK construction/collection/manifest and provide no incremental-overhead subtraction. This closes bounded local numerical/software characterization, separate from physical validation, expanded open-system costs/convergence, recurring RC and public-use approval.
 
 ### Artifact Types
 
@@ -402,3 +404,21 @@ accuracy target. Short runs and timeouts are incomplete; memory/backend/referenc
 failures are failed; planned budget exclusions are skipped. Raw norm, observable
 and normalized final-probability checks are distinct compatible optional metrics.
 These fields add no required keys to historical artifacts and rename no schemas.
+
+### Implemented observable collection contract
+
+The [observable boundaries](plans/v2.md#implemented-observable-matrix-and-measurement-boundaries)
+define 52 one-axis/combined cost configurations through reduced N=20 and 12
+small full/reduced state-path fixtures. Ten single types stay separate from mixed
+sets; uniquely named duplicate declarations are labeled collection workloads.
+Independent probability references, nonlinear connected-correlation semantics,
+MWIS penalties and explicit MCWF uncertainty apply before cost interpretation.
+Result data, manifest declaration/metadata order, shared names/series and round
+trips are checked outside the SDK timer. Ordered declaration lists preserve
+identity through canonical campaign JSON. Empty-observable history controls are
+retained separately; no incremental-overhead subtraction or evaluation-only cost
+is claimed. First/warm/measured calls, measured-only type-7 summaries, attributable
+worker memory, real result/manifest/reference links and matching companions are
+recomputable by the backend-free audit. Correctness-only rows retain unavailable
+runtime statistics with reasons, and MCWF raw samples keep their own storage
+policy. Existing schema names and unsupported observable/backend scope remain.

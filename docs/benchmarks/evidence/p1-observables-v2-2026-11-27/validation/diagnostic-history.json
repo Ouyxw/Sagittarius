@@ -1,0 +1,17 @@
+{
+  "pilot_01": {
+    "classification": "Three correctness fixtures pass; one cost row incomplete at zero warmups/one measurement",
+    "checked_results": 23
+  },
+  "pilot_02": {
+    "classification": "One correctness fixture passes; N20/501-grid cost row incomplete at zero warmups/one measurement",
+    "checked_results": 5
+  },
+  "performance_policy": "Short-run cost times are diagnostics and never pooled into final campaign.",
+  "initial_archive_extraction": {
+    "stage": "archive assembly",
+    "error": "gzip unexpected end of file; archive writer was still running",
+    "result": "No simulation outputs or original audit changed; wait for writer completion and rerun complete extraction/checksums/audit",
+    "final_result": "Archive writer exited successfully; complete re-extraction, all 1500 checksums and relocated independent audit passed"
+  }
+}

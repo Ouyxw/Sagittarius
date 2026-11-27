@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-tiers/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU, MWIS and solver implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU, MWIS, solver and observable implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -160,6 +160,8 @@ The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) compl
 
 The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) completes all 39 declared sensitivity configurations across Rabi, the addressed chain and a linear ramp. All 312 first/warm/measured results and manifests are retained and audited; 38 configurations and 190/195 measured calls meet the frozen 1e-6 accuracy target. The coarse ramp RK4 T/100 case remains a failed accuracy row with all raw times/errors, as required by the plan. Independent stable references, raw norm checks, effective settings, per-configuration memory and error-versus-runtime companions support bounded local numerical characterization. Full-matrix all-accuracy-pass remains false; accepted characterization does not promote under-resolved times into performance comparisons or close scientific validation, recurring RC or public-use gates.
 
+The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.md) completes 52 cost configurations through reduced N=20 (D=17711) and 12 small full/reduced state-path fixtures. All 260 measured SDK calls and 476 saved results/manifests pass value/order, round-trip and independent-reference gates; five-seed MCWF samples use explicit simultaneous uncertainty bounds. Two empty-observable history controls, cross-order equality, attributable worker memory, frozen source/runtime and matching companions are audited after relocation. Counts/grids/orders are separate workloads; duplicate physical declarations are labeled. Timings include SDK construction/collection/manifest and provide no incremental-overhead subtraction. This closes bounded local numerical/software characterization, separate from physical validation, expanded open-system costs/convergence, recurring RC and public-use approval.
+
 ### Tier Summary
 
 | Tier | V2 purpose | Expected cost | CI policy |
@@ -174,7 +176,7 @@ The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) compl
 
 ### Runnable Commands and Outputs
 
-The V1 commands are retained as historical baseline. Scaling, ablation, GPU, MWIS/UDG and solver now have V2 CLI support; other entries below remain implementation targets until their runners and smoke evidence exist.
+The V1 commands are retained as historical baseline. Scaling, ablation, GPU, MWIS/UDG, solver and observables now have V2 CLI support; other entries below remain implementation targets until their runners and smoke evidence exist.
 
 | Suite | Existing or planned entry point | V2 outputs and readiness |
 | :--- | :--- | :--- |
@@ -183,7 +185,7 @@ The V1 commands are retained as historical baseline. Scaling, ablation, GPU, MWI
 | GPU | Existing `benchmark_gpu.py` adopts doctor/opt-in discipline from `benchmark_cuda_mwis_protocol.py`. | Preserve `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`; implemented `gpu_bench_results_suite`, `gpu_repeats.json`, separate backend processes and repeated matched measurements. |
 | MWIS/UDG | Implemented `benchmark_mwis_aqc.py --tier performance`; legacy tiers preserved. | `mwis_aqc_performance` and `_suite` JSON/CSV/Markdown, `mwis_repeats.json`, raw paths, saved AQC results/manifests, independent references, CBC logs/status and audit. |
 | Solver | Implemented `benchmark_solver_performance.py --tier sensitivity`; default correctness fixtures/stems retained. | `solver_sensitivity` and `_suite` JSON/CSV/Markdown error-versus-runtime summaries, `solver_repeats.json`, saved results/manifests, references, campaign/checkpoints, coverage and audit. |
-| Observables | Planned `benchmark_observables.py`. | Planned `observable_performance` and suite; runner/flags not implemented. |
+| Observables | Implemented `benchmark_observables.py --tier all`; correctness/performance can be selected separately. | `observable_performance` and `_suite` JSON/CSV/Markdown; `observable_repeats.json`, independent references, saved results/manifests, raw MCWF samples, empty-history controls and audit. |
 | Open-system | Planned `benchmark_open_system_performance.py`. | Planned `open_system_performance` and suite; preserve existing one-atom correctness runner. |
 
 Run from `sagittarius_py` after source/editable installation:
@@ -331,6 +333,33 @@ CLI exit. `--allow-partial` permits auditing a selected/diagnostic campaign with
 claiming full-matrix acceptance. Accuracy failures retain their raw times but are
 excluded from eligible summaries; a denser output grid does not refine RK4 dt.
 See [implemented solver boundaries](plans/v2.md#implemented-solver-matrix-and-measurement-boundaries).
+
+The observable CLI was piloted at N=20/count64/grid101 and
+N=20/count16/grid501, plus state-path and saved-output/order controls. Use a new
+output directory; the default `all` tier includes 12 correctness fixtures and
+52 cost configurations:
+
+```bash
+uv run python tests/test_performance/benchmark_observables.py \
+  --tier all --output-dir benchmark-output/observables-v2 \
+  --warmups 2 --repeat-count 5 --timeout-seconds 900 --memory-limit-mb 4096 \
+  --accuracy-atol 1e-8 --reference-stability-atol 1e-10 --stochastic-alpha 1e-6
+
+uv run python tests/test_performance/benchmark_observables.py \
+  --tier performance \
+  --scenario performance-n4-reduced-evolving-mixed-c64-g501-permuted \
+  --output-dir benchmark-output/observables-v2-smoke
+
+uv run python ../scripts/audit_observable_campaign.py benchmark-output/observables-v2
+```
+
+`--tier correctness` and `--tier performance` select frozen submatrices;
+`--scenario` is repeatable. Fewer than two warmups/five measured repeats remains
+incomplete for costs. Correctness-only controls have no repeated-performance
+requirement. `--allow-partial` audits selected/diagnostic campaigns without
+claiming full coverage. Only CPU/diagonal observables are measured; timing is
+end-to-end SDK collection, with output-policy caveats in the
+[observable boundaries](plans/v2.md#implemented-observable-matrix-and-measurement-boundaries).
 
 All V2 performance commands eventually expose or retain frozen scenarios, output location, warmup/independent-repeat policy and numerical resource limits. Do not assume a shared flag exists on current scripts. Public examples must retain source-checkout execution and GPU opt-in requirements.
 

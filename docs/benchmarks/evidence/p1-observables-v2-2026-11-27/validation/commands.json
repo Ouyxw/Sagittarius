@@ -1,0 +1,20 @@
+{
+  "cwd": "/home/oyxw/Sagittarius/sagittarius_py",
+  "environment": "source /tmp/ablation-env.sh; retained as environment.sh",
+  "unit_tests": "uv run pytest tests/test_observable_benchmark.py -m 'not requires_julia_backend' -q",
+  "backend_tests": "uv run pytest tests/test_observable_benchmark.py -m 'requires_julia_backend' tests/test_observable_library.py tests/test_serialization.py tests/test_cross_language_golden.py tests/test_solver_configuration.py -q",
+  "backend_selection": "Only marked tests ran in the backend command (6 passed, 49 deselected); unmarked observable/serialization/solver modules ran separately below.",
+  "artifact_tests": "uv run pytest tests/test_observable_library.py tests/test_serialization.py tests/test_benchmark_artifacts.py tests/test_benchmark_row_contract.py tests/test_benchmark_suite_artifact.py tests/test_benchmark_failures.py -q",
+  "solver_tests": "uv run pytest tests/test_solver_configuration.py -q",
+  "documentation_tests": "uv run pytest tests/test_benchmark_documentation_consistency.py tests/test_documentation_governance.py -q",
+  "campaign": "uv run python tests/test_performance/benchmark_observables.py --output-dir benchmark-output/p1-observables-v2-2026-11-27 --tier all --warmups 2 --repeat-count 5 --timeout-seconds 900 --memory-limit-mb 4096 --accuracy-atol 1e-8 --reference-stability-atol 1e-10 --stochastic-alpha 1e-6",
+  "pilot_01": "uv run python tests/test_performance/benchmark_observables.py --output-dir benchmark-output/p1-observables-pilot-01 --scenario correctness-n3-full-ground-mixed-c10-g21-original --scenario correctness-n3-reduced-distribution-mixed-c10-g21-original --scenario correctness-n3-reduced-mcwf-mixed-c10-g21-original --scenario performance-n20-reduced-evolving-mixed-c64-g101-original --warmups 0 --repeat-count 1",
+  "pilot_02": "uv run python tests/test_performance/benchmark_observables.py --output-dir benchmark-output/p1-observables-pilot-02 --scenario correctness-n3-reduced-ground-mixed-c10-g21-original --scenario performance-n20-reduced-evolving-mixed-c16-g501-reverse --warmups 0 --repeat-count 1",
+  "repository_root_commands": {
+    "audit": "sagittarius_py/.venv/bin/python scripts/audit_observable_campaign.py sagittarius_py/benchmark-output/p1-observables-v2-2026-11-27",
+    "relocated_audit": "sagittarius_py/.venv/bin/python scripts/audit_observable_campaign.py /tmp/sagittarius-p1-observables-evidence/campaign",
+    "documentation": "python3 scripts/validate_documentation.py",
+    "additional_checks": "python3 docs/benchmarks/evidence/p1-observables-v2-2026-11-27/validation/report-checks.py"
+  },
+  "campaign_exit_code": 0
+}

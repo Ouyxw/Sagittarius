@@ -1,0 +1,24 @@
+{
+  "contract_audit_passed": true,
+  "selected_campaign_passed": true,
+  "full_matrix_passed": true,
+  "correctness_matrix_passed": true,
+  "performance_matrix_passed": true,
+  "missing_successful_scenarios": [],
+  "classification": "local_only; software/numerical verification, not physical validation or public/release approval",
+  "scenario_count": 64,
+  "checked_results": 476,
+  "deterministic_results": 446,
+  "stochastic_results": 30,
+  "empty_policy_controls": 2,
+  "cross_order_pairs": 120,
+  "maximum_deterministic_error": 7.385203559806541e-12,
+  "maximum_reference_stability_error": 4.2460065325116453e-13,
+  "eligible_measured_count": 260,
+  "status_counts": {
+    "failed": 0,
+    "incomplete": 0,
+    "passed": 64,
+    "skipped": 0
+  }
+}
