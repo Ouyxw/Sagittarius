@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-tiers/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU and MWIS implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU, MWIS and solver implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -158,6 +158,8 @@ The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes t
 
 The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
 
+The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) completes all 39 declared sensitivity configurations across Rabi, the addressed chain and a linear ramp. All 312 first/warm/measured results and manifests are retained and audited; 38 configurations and 190/195 measured calls meet the frozen 1e-6 accuracy target. The coarse ramp RK4 T/100 case remains a failed accuracy row with all raw times/errors, as required by the plan. Independent stable references, raw norm checks, effective settings, per-configuration memory and error-versus-runtime companions support bounded local numerical characterization. Full-matrix all-accuracy-pass remains false; accepted characterization does not promote under-resolved times into performance comparisons or close scientific validation, recurring RC or public-use gates.
+
 ### Tier Summary
 
 | Tier | V2 purpose | Expected cost | CI policy |
@@ -172,7 +174,7 @@ The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) compl
 
 ### Runnable Commands and Outputs
 
-The V1 commands are retained as historical baseline. Scaling, ablation, GPU and MWIS/UDG now have V2 CLI support; other entries below remain implementation targets until their runners and smoke evidence exist.
+The V1 commands are retained as historical baseline. Scaling, ablation, GPU, MWIS/UDG and solver now have V2 CLI support; other entries below remain implementation targets until their runners and smoke evidence exist.
 
 | Suite | Existing or planned entry point | V2 outputs and readiness |
 | :--- | :--- | :--- |
@@ -180,7 +182,7 @@ The V1 commands are retained as historical baseline. Scaling, ablation, GPU and 
 | Ablation | Implemented `benchmark_ablation.py` CLI; single-N positional function retained. | `ablation_bench_results` and `_suite` JSON/CSV/Markdown, `ablation_repeats.json`, frozen configs/checkpoints, saved numerical arrays and coverage/audit. `--repeats` counts operations; `--repeat-count` counts independent batches. |
 | GPU | Existing `benchmark_gpu.py` adopts doctor/opt-in discipline from `benchmark_cuda_mwis_protocol.py`. | Preserve `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`; implemented `gpu_bench_results_suite`, `gpu_repeats.json`, separate backend processes and repeated matched measurements. |
 | MWIS/UDG | Implemented `benchmark_mwis_aqc.py --tier performance`; legacy tiers preserved. | `mwis_aqc_performance` and `_suite` JSON/CSV/Markdown, `mwis_repeats.json`, raw paths, saved AQC results/manifests, independent references, CBC logs/status and audit. |
-| Solver | Existing `benchmark_solver_performance.py` needs sensitivity and timer work. | Preserve correctness outputs; planned `solver_sensitivity` and suite. |
+| Solver | Implemented `benchmark_solver_performance.py --tier sensitivity`; default correctness fixtures/stems retained. | `solver_sensitivity` and `_suite` JSON/CSV/Markdown error-versus-runtime summaries, `solver_repeats.json`, saved results/manifests, references, campaign/checkpoints, coverage and audit. |
 | Observables | Planned `benchmark_observables.py`. | Planned `observable_performance` and suite; runner/flags not implemented. |
 | Open-system | Planned `benchmark_open_system_performance.py`. | Planned `open_system_performance` and suite; preserve existing one-atom correctness runner. |
 
@@ -304,6 +306,31 @@ metrics remain unavailable. The graph hash, actual D, native solver guarantees,
 CPU worker memory scope and independent numerical gates qualify the evidence.
 CBC subprocess peak remains unavailable; no AQC/ILP speedup is derived. Running
 without `--tier performance` preserves the initial three tiers and filenames.
+
+The solver sensitivity CLI preserves the default legacy correctness command.
+Use a new output directory for every sensitivity campaign:
+
+```bash
+uv run python tests/test_performance/benchmark_solver_performance.py \
+  --tier sensitivity --output-dir benchmark-output/solver-v2 \
+  --warmups 2 --repeat-count 5 --timeout-seconds 600 --memory-limit-mb 4096 \
+  --accuracy-atol 1e-6 --reference-stability-atol 1e-9
+
+# One real-backend configuration with the same measurement contract.
+uv run python tests/test_performance/benchmark_solver_performance.py \
+  --tier sensitivity --scenario ramp-vern9-tol10-g501 \
+  --output-dir benchmark-output/solver-v2-smoke
+
+uv run python ../scripts/audit_solver_campaign.py benchmark-output/solver-v2
+```
+
+`--scenario` is repeatable and selects known IDs from the 39-case frozen matrix.
+Default sensitivity repeats are five; legacy correctness defaults remain two.
+Counts below two warmups/five repeats produce incomplete evidence and a nonzero
+CLI exit. `--allow-partial` permits auditing a selected/diagnostic campaign without
+claiming full-matrix acceptance. Accuracy failures retain their raw times but are
+excluded from eligible summaries; a denser output grid does not refine RK4 dt.
+See [implemented solver boundaries](plans/v2.md#implemented-solver-matrix-and-measurement-boundaries).
 
 All V2 performance commands eventually expose or retain frozen scenarios, output location, warmup/independent-repeat policy and numerical resource limits. Do not assume a shared flag exists on current scripts. Public examples must retain source-checkout execution and GPU opt-in requirements.
 

@@ -1,0 +1,21 @@
+{
+  "pilot_01": {
+    "classification": "failed; no eligible performance evidence",
+    "failures": [
+      "invalid pauli_string benchmark declaration; use supported pauli_z with atom index",
+      "full-space Simulation._basis is None; enumerate full basis for comparison"
+    ]
+  },
+  "pilot_02": {
+    "classification": "incomplete short diagnostic run; not performance acceptance",
+    "scenarios": 3,
+    "eligible_measured": 3,
+    "warmups": 0,
+    "repeat_count": 1
+  },
+  "uv_initial_attempt": {
+    "classification": "environment setup; no tests executed",
+    "message": "Default uv cache outside writable roots; used retained UV_CACHE_DIR=/tmp/sagittarius-uv-cache"
+  },
+  "claim_boundary": "Preserve failed/short pilots separately; do not pool their timings with final measurements."
+}

@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-families/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU and MWIS implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU, MWIS and solver implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -176,6 +176,8 @@ The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes t
 
 The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
 
+The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) completes all 39 declared sensitivity configurations across Rabi, the addressed chain and a linear ramp. All 312 first/warm/measured results and manifests are retained and audited; 38 configurations and 190/195 measured calls meet the frozen 1e-6 accuracy target. The coarse ramp RK4 T/100 case remains a failed accuracy row with all raw times/errors, as required by the plan. Independent stable references, raw norm checks, effective settings, per-configuration memory and error-versus-runtime companions support bounded local numerical characterization. Full-matrix all-accuracy-pass remains false; accepted characterization does not promote under-resolved times into performance comparisons or close scientific validation, recurring RC or public-use gates.
+
 ### Family Summary
 
 | Family | V2 scope | Acceptance evidence |
@@ -289,3 +291,16 @@ Purpose: preserve the existing local checkpoint/resume evidence while keeping ne
 V2 adds no cluster/sweep implementation or new throughput campaign. Retain V1 `ParallelSimulation` deterministic-map artifacts and the distinction between scientific `sweep-artifact/v1` and governed benchmark evidence. Physics-solver sweep and multi-node deployment remain in the requirements P2/Phase 18 scope.
 
 Any reused sweep/checkpoint links must resolve and preserve item IDs, statuses, failures and result/manifests. Do not cite the existing local mapping workload as end-to-end physics-solver or multi-node scaling evidence. Campaign aggregation in V2 is not a new distributed scheduler.
+
+### Implemented solver sensitivity
+
+The [solver matrix](plans/v2.md#implemented-solver-matrix-and-measurement-boundaries)
+uses 39 CPU configurations across analytic Rabi, the retained addressed chain
+and an explicit linear drive/detuning ramp. Adaptive tolerance pairs, RK4 steps,
+output-grid-only scans and two combined controls stay distinct. Each configuration
+retains independent stable references, requested/effective settings, raw norm and
+trajectory/final-probability errors, results/manifests, attributable worker memory,
+and first/warm/measured timings. Error-versus-runtime summaries compare only
+eligible calls at the frozen common target. Solver integration accuracy and saved
+output density are separate controls; no monotonic convergence or performance
+ordering is required. Physical blockade/model validation remains separate.

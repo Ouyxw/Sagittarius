@@ -33,6 +33,8 @@ The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes t
 
 The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
 
+The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) completes all 39 declared sensitivity configurations across Rabi, the addressed chain and a linear ramp. All 312 first/warm/measured results and manifests are retained and audited; 38 configurations and 190/195 measured calls meet the frozen 1e-6 accuracy target. The coarse ramp RK4 T/100 case remains a failed accuracy row with all raw times/errors, as required by the plan. Independent stable references, raw norm checks, effective settings, per-configuration memory and error-versus-runtime companions support bounded local numerical characterization. Full-matrix all-accuracy-pass remains false; accepted characterization does not promote under-resolved times into performance comparisons or close scientific validation, recurring RC or public-use gates.
+
 ## Documents
 
 | Document | Purpose |
@@ -41,7 +43,7 @@ The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) compl
 | [`tiers.md`](tiers.md) | Parallel [V1](tiers.md#benchmarking-v1)/[V2](tiers.md#benchmarking-v2) tier summaries, command/output boundaries, and smoke/correctness/parity/scaling/stress requirements. |
 | [`families.md`](families.md) | Parallel [V1](families.md#benchmarking-v1)/[V2](families.md#benchmarking-v2) family summaries and physics/dynamics/open-system/optimization/backend/sweep protocols. |
 | [`artifact-contracts.md`](artifact-contracts.md) | Parallel [V1](artifact-contracts.md#benchmarking-v1)/[V2](artifact-contracts.md#benchmarking-v2) artifact types, aggregate/row contracts, failures, metrics, retention and compatibility. |
-| [`plans/v2.md`](plans/v2.md) | P0–P1 plan, implemented scaling/ablation/GPU/MWIS matrices and controls, remaining targets, numerical/statistical gates, resource policy and delivery/acceptance evidence. |
+| [`plans/v2.md`](plans/v2.md) | P0–P1 plan, implemented scaling/ablation/GPU/MWIS/solver matrices and controls, remaining targets, numerical/statistical gates, resource policy and delivery/acceptance evidence. |
 | [`reports/p0-runtime-statistics-2026-11-27.md`](reports/p0-runtime-statistics-2026-11-27.md) | Complete derived timing distributions for 42 scaling scenarios, 16 CPU ablation paths and five matched CPU/CUDA ODE cases; raw-source links, exclusions and local-only interpretation. |
 
 All seven P0–P1 suites have explicit [runtime reporting requirements](plans/v2.md#runtime-reporting-requirements-for-all-seven-suites)
@@ -49,7 +51,7 @@ and suite-specific timer/output definitions. Default performance evidence uses
 two warmups and at least five independent measurements, with median/min/max/
 p25/p75, counts and raw membership. Scaling and ablation already retain these
 statistics; the linked report recomputes and presents them without modifying
-original archives or rerunning simulations. GPU distributions are retained in its own campaign. MWIS also retains separate per-graph AQC/ILP distributions. Other expanded P1 statistical outputs
+original archives or rerunning simulations. GPU distributions are retained in its own campaign. MWIS also retains separate per-graph AQC/ILP distributions. Solver now retains its per-configuration sensitivity distributions. Observable and expanded open-system statistical outputs
 remain planned; correctness-only tests need no separate performance campaign.
 
 ## Implemented CPU smoke
@@ -101,6 +103,16 @@ uv run python tests/test_performance/benchmark_solver_performance.py --output-di
 ```
 
 It emits repeated dense/sparse/reduced path rows, a cached-GPU skip unless independently validated through the CUDA protocol, and Tsit5/Vern9/RK4 trajectory rows against a high-accuracy Tsit5 reference. Each SDK solver row retains result and manifest links; timing remains local diagnostic evidence.
+
+For the implemented 39-configuration solver sensitivity matrix, use
+`benchmark_solver_performance.py --tier sensitivity` in a new output directory.
+It retains independent stable references, first execution/two warmups/five measured
+SDK calls, per-configuration memory, actual results/manifests and error-versus-runtime
+JSON/CSV/Markdown. See [commands and audit](tiers.md#v2-runnable-commands-and-outputs)
+and [measurement boundaries](plans/v2.md#implemented-solver-matrix-and-measurement-boundaries).
+Under-resolved runs remain failed accuracy rows with raw diagnostics; they do not
+qualify for comparisons at the frozen 1e-6 target.
+
 
 Run the local resumable ParallelSimulation sweep benchmark:
 

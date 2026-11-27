@@ -119,6 +119,7 @@ def _method_rows(output: Path, *, repeat_count: int) -> tuple[list[dict[str, Any
             started = time.perf_counter()
             try:
                 result = Simulation(register, sequence, config).run(initial, 0.0, 0.3, observables={"pop0": 0})
+                runtime_seconds = time.perf_counter() - started
                 values = np.asarray(result.data["pop0"], dtype=float)
                 error = float(np.max(np.abs(values - reference_values)))
                 artifacts, manifest = _save_result(result, output, scenario_id)
@@ -130,7 +131,7 @@ def _method_rows(output: Path, *, repeat_count: int) -> tuple[list[dict[str, Any
                     row_id=f"{FAMILY}-{TIER}-{scenario_id}", scenario_id=scenario_id,
                     family=FAMILY, tier=TIER, status="passed", stage="validation",
                     problem=problem, solver=solver, backend=BACKEND, observables=OBSERVABLES,
-                    metrics={"repeat_index": repeat_index, "reference_method": "Tsit5", "max_abs_error": error, "reference_atol": METHOD_ATOL, "runtime_seconds": time.perf_counter() - started, "effective_solver": result.diagnostics.get("simulation", {})},
+                    metrics={"repeat_index": repeat_index, "reference_method": "Tsit5", "max_abs_error": error, "reference_atol": METHOD_ATOL, "runtime_seconds": runtime_seconds, "timer_scope": "Simulation construction and run; reference checks and serialization excluded", "effective_solver": result.diagnostics.get("simulation", {})},
                     artifacts=artifacts, disclosure_status="local_only",
                 ))
             except Exception as exc:
@@ -165,8 +166,24 @@ def benchmark_solver_performance(output_dir: str | Path = "benchmark-output", *,
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Phase 16 solver/performance correctness benchmarks.")
     parser.add_argument("--output-dir", default="benchmark-output")
-    parser.add_argument("--repeat-count", type=int, default=2)
+    parser.add_argument("--tier", choices=["correctness", "sensitivity"], default="correctness")
+    parser.add_argument("--repeat-count", type=int, default=None)
     parser.add_argument("--ablation-repeats", type=int, default=5)
+    parser.add_argument("--scenario", action="append", dest="scenario_ids")
+    parser.add_argument("--warmups", type=int, default=2)
+    parser.add_argument("--timeout-seconds", type=float, default=600.)
+    parser.add_argument("--memory-limit-mb", type=float, default=4096.)
+    parser.add_argument("--accuracy-atol", type=float, default=1e-6)
+    parser.add_argument("--reference-stability-atol", type=float, default=1e-9)
     arguments = parser.parse_args()
-    paths = benchmark_solver_performance(arguments.output_dir, repeat_count=arguments.repeat_count, ablation_repeats=arguments.ablation_repeats)
+    if arguments.tier == "sensitivity":
+        from sagittarius.solver_benchmark import benchmark_solver_sensitivity
+        paths = benchmark_solver_sensitivity(arguments.output_dir, scenario_ids=arguments.scenario_ids,
+            repeat_count=arguments.repeat_count if arguments.repeat_count is not None else 5,
+            warmups=arguments.warmups, timeout_seconds=arguments.timeout_seconds, memory_limit_mb=arguments.memory_limit_mb,
+            accuracy_atol=arguments.accuracy_atol, reference_stability_atol=arguments.reference_stability_atol)
+    else:
+        paths = benchmark_solver_performance(arguments.output_dir, repeat_count=arguments.repeat_count if arguments.repeat_count is not None else 2, ablation_repeats=arguments.ablation_repeats)
     print(f"Solver/performance benchmark complete. Results saved to {paths['json']}")
+    if arguments.tier == "sensitivity":
+        raise SystemExit(0 if all(row["status"] == "passed" for row in paths["artifact"]["timings"]) else 1)

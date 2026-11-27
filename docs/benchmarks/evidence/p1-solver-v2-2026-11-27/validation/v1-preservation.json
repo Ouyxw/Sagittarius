@@ -1,0 +1,6 @@
+{
+  "protocol": true,
+  "tiers": true,
+  "families": true,
+  "artifact-contracts": true
+}

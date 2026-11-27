@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU and MWIS implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU, MWIS and solver implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -162,6 +162,8 @@ This generation defines the artifact work for the seven P0–P1 suites in [plan 
 The [P1 GPU local campaign](evidence/p1-gpu-v2-2026-11-27/README.md) completes the declared eight-case matrix: chains N=2,4,8,12,16,20, a 2x2 lattice and seeded two-node MWIS. All 40 measured CPU/CUDA pairs passed at 101 shared times after symmetric warmups; N=20 has D=17711. Separate backend memory, saved results/manifests, qualified median ratios and all companion values passed the backend-free audit. CUDA remains experimental; this is shared-workstation software/numerical evidence, not independent physical validation, recurring RC or public-use approval.
 
 The [P1 MWIS/UDG local campaign](evidence/p1-mwis-v2-2026-11-27/README.md) completes all 40 frozen instances through N=20 (five seeds per size), with 200 eligible AQC and 200 eligible ILP measurements. Independent DOP853/refinement, raw-norm checks, exhaustive graph objectives and CBC problem/solution optimality gate the results. Actual AQC result/manifests, native solver logs, per-path memory and all companion statistics pass the saved-evidence audit. Short-schedule suboptimal candidates remain valid data; different solution guarantees prevent an AQC/ILP speedup interpretation. This is bounded local numerical/software evidence, separate from scientific validation, general algorithm quality and release/public-use approval.
+
+The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) completes all 39 declared sensitivity configurations across Rabi, the addressed chain and a linear ramp. All 312 first/warm/measured results and manifests are retained and audited; 38 configurations and 190/195 measured calls meet the frozen 1e-6 accuracy target. The coarse ramp RK4 T/100 case remains a failed accuracy row with all raw times/errors, as required by the plan. Independent stable references, raw norm checks, effective settings, per-configuration memory and error-versus-runtime companions support bounded local numerical characterization. Full-matrix all-accuracy-pass remains false; accepted characterization does not promote under-resolved times into performance comparisons or close scientific validation, recurring RC or public-use gates.
 
 ### Artifact Types
 
@@ -379,3 +381,24 @@ Link the durable archive in the requirements matrices before advancing evidence 
 Benchmarking V2 is an execution/documentation generation, not a new artifact schema. Preserve `benchmark-artifact/v1`, `benchmark-suite-artifact/v1`, `run-manifest/v1`, `result-artifact/v1`, `shared-result/v1`, `version-info/v1`, `doctor/v2.1` and `event-taxonomy/v1` semantics. Add optional measurement fields compatibly; changes to required fields or meanings need coordinated version/reader/writer/validator/test/docs decisions.
 
 Keep original V1 artifact stems, flat metric meanings and archives readable. Label the revised fixed-input matvec workload and never pool it with historical H^k*psi batches. A stored `release_grade` classification does not validate evidence or approve public wording. Apply GOV-001/GOV-002 and applicable prior-art review before public use.
+
+### Implemented solver sensitivity records
+
+`solver_sensitivity` and `solver_sensitivity_suite` use existing v1 envelopes;
+legacy `solver_performance` correctness stems remain unchanged. A row is one
+frozen physical fixture/method/tolerance/dt/grid configuration. `metrics.state`
+retains doctor/runtime, setup/reference timing, process memory and all records;
+`metrics.statistics` uses only eligible measured calls, with exact member IDs,
+requested/completed/eligible counts and linear type-7 quantiles. First and warmup
+calls remain separately labeled in `solver_repeats.json`. Runtime seconds are one
+SDK call including construction/collection/manifest; state reset, reference/checks
+and serialization stay outside. The performance CSV/Markdown gives method,
+stepping, tolerances/dt, output count, error/gate, eligible count and all five timing
+statistics; suite CSV retains full structured metrics. Source, runtime files,
+references and every saved result/manifest are auditable after relocation.
+
+Under-resolved calls retain diagnostic time/error but cannot qualify at an unmet
+accuracy target. Short runs and timeouts are incomplete; memory/backend/reference
+failures are failed; planned budget exclusions are skipped. Raw norm, observable
+and normalized final-probability checks are distinct compatible optional metrics.
+These fields add no required keys to historical artifacts and rename no schemas.
