@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
 Last reviewed: 2026-11-27
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling, ablation, GPU, MWIS, solver and observable implementation/evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. All seven P0/P1 V2 implementation/evidence scopes are tracked in plan v2; representation exclusions, reference gaps and recurring acceptance remain explicit. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -167,6 +167,8 @@ The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) compl
 
 The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.md) completes 52 cost configurations through reduced N=20 (D=17711) and 12 small full/reduced state-path fixtures. All 260 measured SDK calls and 476 saved results/manifests pass value/order, round-trip and independent-reference gates; five-seed MCWF samples use explicit simultaneous uncertainty bounds. Two empty-observable history controls, cross-order equality, attributable worker memory, frozen source/runtime and matching companions are audited after relocation. Counts/grids/orders are separate workloads; duplicate physical declarations are labeled. Timings include SDK construction/collection/manifest and provide no incremental-overhead subtraction. This closes bounded local numerical/software characterization, separate from physical validation, expanded open-system costs/convergence, recurring RC and public-use approval.
 
+The [P1 open-system local campaign](evidence/p1-open-system-v2-2026-11-27/README.md) accounts for all 99 frozen rows: 85 pass and 14 resource exclusions remain explicit. All 375 eligible measured SDK calls, 916 first/warm/measured/statistical/correctness results and 63 separate tighter results are retained. Reduced N=20 (Rb=12.4 um, D=907) executes MCWF at 100/500/1000 trajectories with five separate seeds and target-size analytic decay controls. Independent small dense/analytic references, 67 raw-density histories, trace/positivity/coherence, seed uncertainty, runtime/throughput statistics, manifests and all companions pass original/relocated backend-free audits. Full N=20 Lindblad/full-space coverage and independent large interacting references remain open. This is bounded shared-workstation local evidence, separate from scientific validation, recurring RC and public-use approval.
+
 ### Artifact Types
 
 | Artifact | V2 purpose | Implementation boundary |
@@ -177,7 +179,7 @@ The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.
 | `run-manifest/v1` | Actual executed simulation configuration and requested/effective settings. | Pure matvec work has benchmark inputs/reference reports rather than fabricated simulation manifests. |
 | `result-artifact/v1` | Saved simulation results with metadata, diagnostics, manifest and shared payload. | Add actual AQC result provenance through the existing adapter boundary. |
 
-Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Ablation writes `ablation_bench_results_suite` and `ablation_repeats.json`. GPU writes `gpu_bench_results_suite` and `gpu_repeats.json`. MWIS writes `mwis_aqc_performance`, `mwis_aqc_performance_suite` and `mwis_repeats.json`. Planned additions include `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
+Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Ablation writes `ablation_bench_results_suite` and `ablation_repeats.json`. GPU writes `gpu_bench_results_suite` and `gpu_repeats.json`. MWIS writes `mwis_aqc_performance`, `mwis_aqc_performance_suite` and `mwis_repeats.json`. Solver, observables and open-system now write `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates and linked repeat/reference records. Historical stems and required schema meanings remain unchanged.
 
 Ablation retains one aggregate row per size/path and a validated structured row
 per measured batch in `ablation_repeats.json`. `metrics.measurements` retains
@@ -422,3 +424,30 @@ worker memory, real result/manifest/reference links and matching companions are
 recomputable by the backend-free audit. Correctness-only rows retain unavailable
 runtime statistics with reasons, and MCWF raw samples keep their own storage
 policy. Existing schema names and unsupported observable/backend scope remain.
+
+
+Open-system additionally retains `metrics.throughput_statistics` (per-repeat
+completed trajectories divided by seconds, summarized separately from runtime),
+`metrics.convergence`, five-seed raw membership and `convergence.json` with
+pooled absolute bounds and cross-count comparisons. Lindblad trajectory count/
+throughput are unavailable with reasons. `store_trajectories=False` costs and the
+one opt-in raw-storage workload have separate identities. Raw density histories,
+analytic/dense arrays and tighter controls are linked outside SDK timing;
+large interacting reference gaps are explicit. Requested/effective counts and
+seeds come from actual manifests; completion inference from successful ensemble
+return is labeled. The audit replays deterministic/stochastic/density checks,
+statistics, source/runtime hashes and all companions after relocation without
+Julia. `coverage.json` distinguishes every declared row accounted for, successful
+N=20 reduced MCWF coverage and still-excluded full/density scopes. These are
+optional compatible benchmark extensions, not new required historical fields.
+
+
+Final open-system acceptance additionally emits `lindblad_mcwf.json` and
+`acceptance.json` from `scripts/accept_open_system_campaign.py`. This backend-free
+review wraps the original measurement audit, directly compares every retained
+matching Lindblad/MCWF workload and preserves missing density-reference reasons.
+Individual/tighter calls and five-seed pooled comparisons use the predeclared
+simultaneous rule, with both deterministic numerical floors. Separate review
+source hashes/snapshots document analysis code without rewriting the frozen
+measurement source identity or numerical outputs. These review companions are
+compatible suite-specific additions; no required historical schema changes.

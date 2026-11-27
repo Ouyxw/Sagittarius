@@ -1,0 +1,26 @@
+{
+  "all_attempted_rows_passed": true,
+  "all_declared_rows_accounted": true,
+  "analytic_control_group_passed": true,
+  "classification": "local_only; software/numerical/statistical checks, large interacting reference gaps; no scientific validation or public/release approval",
+  "full_matrix_passed": false,
+  "missing_successful_scenarios": [
+    "performance-n10-full-chain-combined-scalar-lindblad",
+    "performance-n12-full-chain-combined-scalar-lindblad",
+    "performance-n12-full-chain-combined-scalar-mcwf-k100",
+    "performance-n12-full-chain-combined-scalar-mcwf-k500",
+    "performance-n12-full-chain-combined-scalar-mcwf-k1000",
+    "performance-n16-full-chain-combined-scalar-lindblad",
+    "performance-n16-full-chain-combined-scalar-mcwf-k100",
+    "performance-n16-full-chain-combined-scalar-mcwf-k500",
+    "performance-n16-full-chain-combined-scalar-mcwf-k1000",
+    "performance-n20-full-chain-combined-scalar-lindblad",
+    "performance-n20-full-chain-combined-scalar-mcwf-k100",
+    "performance-n20-full-chain-combined-scalar-mcwf-k500",
+    "performance-n20-full-chain-combined-scalar-mcwf-k1000",
+    "performance-n20-reduced-chain-combined-scalar-lindblad"
+  ],
+  "reduced_n20_mcwf_counts_passed": true,
+  "selected_campaign_passed": false,
+  "small_reference_group_passed": true
+}

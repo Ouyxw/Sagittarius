@@ -162,6 +162,8 @@ The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) compl
 
 The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.md) completes 52 cost configurations through reduced N=20 (D=17711) and 12 small full/reduced state-path fixtures. All 260 measured SDK calls and 476 saved results/manifests pass value/order, round-trip and independent-reference gates; five-seed MCWF samples use explicit simultaneous uncertainty bounds. Two empty-observable history controls, cross-order equality, attributable worker memory, frozen source/runtime and matching companions are audited after relocation. Counts/grids/orders are separate workloads; duplicate physical declarations are labeled. Timings include SDK construction/collection/manifest and provide no incremental-overhead subtraction. This closes bounded local numerical/software characterization, separate from physical validation, expanded open-system costs/convergence, recurring RC and public-use approval.
 
+The [P1 open-system local campaign](evidence/p1-open-system-v2-2026-11-27/README.md) accounts for all 99 frozen rows: 85 pass and 14 resource exclusions remain explicit. All 375 eligible measured SDK calls, 916 first/warm/measured/statistical/correctness results and 63 separate tighter results are retained. Reduced N=20 (Rb=12.4 um, D=907) executes MCWF at 100/500/1000 trajectories with five separate seeds and target-size analytic decay controls. Independent small dense/analytic references, 67 raw-density histories, trace/positivity/coherence, seed uncertainty, runtime/throughput statistics, manifests and all companions pass original/relocated backend-free audits. Full N=20 Lindblad/full-space coverage and independent large interacting references remain open. This is bounded shared-workstation local evidence, separate from scientific validation, recurring RC and public-use approval.
+
 ### Tier Summary
 
 | Tier | V2 purpose | Expected cost | CI policy |
@@ -176,7 +178,7 @@ The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.
 
 ### Runnable Commands and Outputs
 
-The V1 commands are retained as historical baseline. Scaling, ablation, GPU, MWIS/UDG, solver and observables now have V2 CLI support; other entries below remain implementation targets until their runners and smoke evidence exist.
+The V1 commands are retained as historical baseline. All seven P0/P1 suites now have V2 CLI support. Retained smoke/campaign evidence and representation-specific exclusions determine actual coverage.
 
 | Suite | Existing or planned entry point | V2 outputs and readiness |
 | :--- | :--- | :--- |
@@ -186,7 +188,7 @@ The V1 commands are retained as historical baseline. Scaling, ablation, GPU, MWI
 | MWIS/UDG | Implemented `benchmark_mwis_aqc.py --tier performance`; legacy tiers preserved. | `mwis_aqc_performance` and `_suite` JSON/CSV/Markdown, `mwis_repeats.json`, raw paths, saved AQC results/manifests, independent references, CBC logs/status and audit. |
 | Solver | Implemented `benchmark_solver_performance.py --tier sensitivity`; default correctness fixtures/stems retained. | `solver_sensitivity` and `_suite` JSON/CSV/Markdown error-versus-runtime summaries, `solver_repeats.json`, saved results/manifests, references, campaign/checkpoints, coverage and audit. |
 | Observables | Implemented `benchmark_observables.py --tier all`; correctness/performance can be selected separately. | `observable_performance` and `_suite` JSON/CSV/Markdown; `observable_repeats.json`, independent references, saved results/manifests, raw MCWF samples, empty-history controls and audit. |
-| Open-system | Planned `benchmark_open_system_performance.py`. | Planned `open_system_performance` and suite; preserve existing one-atom correctness runner. |
+| Open-system | Implemented `benchmark_open_system_performance.py --tier all`; bounded CPU local decay/dephasing only. | `open_system_performance` and `_suite` JSON/CSV/Markdown; `open_system_repeats.json`, `convergence.json`, raw density/reference controls, real results/manifests, resource boundaries and offline audit. Original one-atom runner preserved. |
 
 Run from `sagittarius_py` after source/editable installation:
 
@@ -362,6 +364,36 @@ end-to-end SDK collection, with output-policy caveats in the
 [observable boundaries](plans/v2.md#implemented-observable-matrix-and-measurement-boundaries).
 
 All V2 performance commands eventually expose or retain frozen scenarios, output location, warmup/independent-repeat policy and numerical resource limits. Do not assume a shared flag exists on current scripts. Public examples must retain source-checkout execution and GPU opt-in requirements.
+
+Open-system V2 (CPU local Markovian decay/dephasing; source/editable environment):
+
+```bash
+cd sagittarius_py
+uv run python tests/test_performance/benchmark_open_system_performance.py \
+  --tier all --output-dir benchmark-output/open-system-v2 \
+  --warmups 2 --repeat-count 5 --timeout-seconds 1800 \
+  --memory-limit-mb 4096 --max-density-dimension 256 --max-state-dimension 1024
+
+uv run python tests/test_performance/benchmark_open_system_performance.py \
+  --scenario performance-n2-reduced-chain-combined-scalar-mcwf-k500-raw \
+  --scenario correctness-n1-full-coherence-dephasing-scalar-lindblad \
+  --output-dir benchmark-output/open-system-v2-smoke
+
+uv run python ../scripts/accept_open_system_campaign.py benchmark-output/open-system-v2
+```
+
+The complete matrix has 99 rows: 89 cost configurations and ten correctness
+controls. Frozen default budgets exclude 14 representation/dimension rows;
+these stay skipped with reasons. The bounded acceptance audit requires every
+row accounted for and actual reduced N=20 MCWF execution, and reports excluded
+full/Lindblad coverage separately. For selected smoke or short pilots, use
+`audit_open_system_campaign.py <directory> --allow-partial`; full acceptance uses
+`accept_open_system_campaign.py`. Use a fresh output directory.
+Fixed seed20260811 timing and five statistical seeds20260811–20260815 are
+separate; seed-selected MCWF is serial. Rb=12.4 um gives D=907 at N=20. Primary
+SDK timing includes construction/collection/manifest; raw density/reference
+checks and writes are outside it. No scientific/model or public performance
+approval follows from these local measurements.
 
 <a id="v2-smoke-tier"></a>
 

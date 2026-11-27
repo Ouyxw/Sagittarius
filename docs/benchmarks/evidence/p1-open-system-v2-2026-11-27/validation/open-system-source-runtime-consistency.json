@@ -1,0 +1,29 @@
+{
+  "checked_manifests": 979,
+  "frozen_source_files": 23,
+  "git_source": {
+    "git_branch": "feature/benchmarking",
+    "git_commit": "3efa732027765e5522e1f516ca65a973682b8327",
+    "git_commit_short": "3efa732",
+    "git_dirty": true,
+    "root": "/home/oyxw/Sagittarius"
+  },
+  "julia_versions": [
+    "1.13.4"
+  ],
+  "python_packages": {
+    "docplex": "2.32.264",
+    "juliacall": "0.9.35",
+    "juliapkg": "0.1.24",
+    "matplotlib": "3.10.9",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "pulp": "3.3.2",
+    "sagittarius-py": "1.0.8",
+    "scipy": "1.17.1",
+    "seaborn": "0.13.2"
+  },
+  "runtime_project_manifest_identities": 1,
+  "source_identity_passed": true
+}

@@ -1,0 +1,22 @@
+F....                                                                    [100%]
+=================================== FAILURES ===================================
+_______________ test_real_small_density_storage_audit_corruption _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-oyxw/pytest-1/test_real_small_density_storag0')
+
+    @pytest.mark.requires_julia_backend
+    def test_real_small_density_storage_audit_corruption(tmp_path):
+        ids=[scenario(1,reduced=False,fixture="coherence",model="dephasing",kind="correctness")["scenario_id"],scenario(2,"mcwf",store=True)["scenario_id"]]
+        paths=benchmark_open_system(tmp_path,scenario_ids=ids)
+>       assert all(r["status"]=="passed" for r in paths["artifact"]["timings"]),[r["failure"] for r in paths["artifact"]["timings"]]
+E       AssertionError: [None, {'backend_probe': None, 'code': 'BENCHMARK_EXECUTION_FAILED', 'deterministic': True, 'exception_type': 'RuntimeError', ...}]
+E       assert False
+E        +  where False = all(<generator object test_real_small_density_storage_audit_corruption.<locals>.<genexpr> at 0x75b9f81b45f0>)
+
+tests/test_open_system_benchmark.py:112: AssertionError
+----------------------------- Captured stdout call -----------------------------
+performance-n2-reduced-chain-combined-scalar-mcwf-k500-raw: passed
+correctness-n1-full-coherence-dephasing-scalar-lindblad: failed
+=========================== short test summary info ============================
+FAILED tests/test_open_system_benchmark.py::test_real_small_density_storage_audit_corruption
+1 failed, 4 passed, 27 deselected in 40.80s

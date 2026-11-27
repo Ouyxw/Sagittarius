@@ -11,7 +11,7 @@ The initial suite was closed with [retained Phase 16 evidence](evidence/phase16-
 
 The initial protocol suite is done. `Mixed` reflects the implemented initial suite and planned full-plan extensions; see the [Phase 16 suite alignment matrix](../development/requirements.md#phase-16-alignment-with-spec-gov-004-benchmark-suites) and [cross-cutting requirements](../development/requirements.md#phase-16-alignment-with-spec-gov-004-cross-cutting-requirements) for per-suite status, remaining acceptance evidence, and Phase 14/18 dependencies.
 
-The [P0–P1 implementation plan v2](plans/v2.md) defines the seven-suite matrices, references, delivery batches and evidence gates. Scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate basis/resource limits. Scaling and the bounded GPU matrix have retained N=20 measurements; The 40-instance MWIS/UDG campaign also retains N=20 measurements; open-system extensions remain planned. CUDA remains experimental. P2 noise/cluster work remains outside that plan.
+The [P0–P1 implementation plan v2](plans/v2.md) defines the seven-suite matrices, references, delivery batches and evidence gates. Scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate basis/resource limits. Scaling and the bounded GPU matrix have retained N=20 measurements; The 40-instance MWIS/UDG campaign also retains N=20 measurements; open-system now implements a resource-guarded local-noise matrix and offline audit. CUDA remains experimental. P2 noise/cluster work remains outside that plan.
 
 The protocol, tier, family and artifact documents each contain parallel `Benchmarking V1` and `Benchmarking V2` parts. V1 preserves the full original content and its commands/evidence wording; V2 uses the same chapter organization for plan v2 acceptance work. The V1 metadata and future-scope statements belong to that initial baseline; V2 and the implementation plan track current scaling/ablation/GPU/MWIS support and remaining suite targets.
 
@@ -37,6 +37,8 @@ The [P1 solver local campaign](evidence/p1-solver-v2-2026-11-27/README.md) compl
 
 The [P1 observable local campaign](evidence/p1-observables-v2-2026-11-27/README.md) completes 52 cost configurations through reduced N=20 (D=17711) and 12 small full/reduced state-path fixtures. All 260 measured SDK calls and 476 saved results/manifests pass value/order, round-trip and independent-reference gates; five-seed MCWF samples use explicit simultaneous uncertainty bounds. Two empty-observable history controls, cross-order equality, attributable worker memory, frozen source/runtime and matching companions are audited after relocation. Counts/grids/orders are separate workloads; duplicate physical declarations are labeled. Timings include SDK construction/collection/manifest and provide no incremental-overhead subtraction. This closes bounded local numerical/software characterization, separate from physical validation, expanded open-system costs/convergence, recurring RC and public-use approval.
 
+The [P1 open-system local campaign](evidence/p1-open-system-v2-2026-11-27/README.md) accounts for all 99 frozen rows: 85 pass and 14 resource exclusions remain explicit. All 375 eligible measured SDK calls, 916 first/warm/measured/statistical/correctness results and 63 separate tighter results are retained. Reduced N=20 (Rb=12.4 um, D=907) executes MCWF at 100/500/1000 trajectories with five separate seeds and target-size analytic decay controls. Independent small dense/analytic references, 67 raw-density histories, trace/positivity/coherence, seed uncertainty, runtime/throughput statistics, manifests and all companions pass original/relocated backend-free audits. Full N=20 Lindblad/full-space coverage and independent large interacting references remain open. This is bounded shared-workstation local evidence, separate from scientific validation, recurring RC and public-use approval.
+
 ## Documents
 
 | Document | Purpose |
@@ -53,8 +55,7 @@ and suite-specific timer/output definitions. Default performance evidence uses
 two warmups and at least five independent measurements, with median/min/max/
 p25/p75, counts and raw membership. Scaling and ablation already retain these
 statistics; the linked report recomputes and presents them without modifying
-original archives or rerunning simulations. GPU distributions are retained in its own campaign. MWIS also retains separate per-graph AQC/ILP distributions. Solver now retains its per-configuration sensitivity distributions. The observable suite now implements its collection distributions and correctness controls; expanded open-system statistical outputs
-remain planned; correctness-only tests need no separate performance campaign.
+original archives or rerunning simulations. GPU distributions are retained in its own campaign. MWIS also retains separate per-graph AQC/ILP distributions. Solver now retains its per-configuration sensitivity distributions. Observable and open-system suites now implement their per-configuration distributions, reference controls and sampling reports; correctness-only tests need no separate performance campaign.
 
 ## Implemented CPU smoke
 
@@ -128,7 +129,7 @@ It records per-worker throughput rows, a `sweep-artifact/v1` checkpoint and fina
 
 Run every command in this section from `sagittarius_py`. Unless stated otherwise, each runner writes JSON, CSV, and Markdown companions under `benchmark-output`; suite-capable runners additionally write a `*_suite.json` aggregate that retains passed, failed, skipped, and incomplete rows.
 
-The [V2 scaling and ablation CLIs](tiers.md#v2-runnable-commands-and-outputs) provide frozen CPU matrices, references, independent repeats, resource supervision and suite companions. Ablation retains fixed-input batch semantics, saved numerical outputs and an acceptance audit; CUDA ODE remains separate diagnostic scope. This guide lists existing commands only. Remaining planned measurement flags, the observable/open-system performance runners and new artifact stems are tracked in [plan v2](plans/v2.md); add their runnable examples after implementation and smoke verification.
+The [V2 scaling and ablation CLIs](tiers.md#v2-runnable-commands-and-outputs) provide frozen CPU matrices, references, independent repeats, resource supervision and suite companions. Ablation retains fixed-input batch semantics, saved numerical outputs and an acceptance audit; CUDA ODE remains separate diagnostic scope. This guide lists existing commands only. The seven implemented runners, measurement controls and evidence milestones are tracked in [plan v2](plans/v2.md) and the [V2 command guide](tiers.md#v2-runnable-commands-and-outputs).
 
 | Tier | Runnable command | Expected output and boundary |
 | :--- | :--- | :--- |
