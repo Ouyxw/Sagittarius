@@ -4,7 +4,7 @@ Spec ID: `SPEC-GOV-001`
 Status: `Policy`
 Roadmap: Phase 10
 Version: `performance-claims-policy/v1`
-Last reviewed: 2026-08-12
+Last reviewed: 2026-11-26
 
 
 Sagittarius performance statements must be tied to reproducible benchmark artifacts. Use this page as the review checklist before publishing README text, reports, plots, release notes, or hardware-facing summaries.
@@ -42,11 +42,13 @@ Use capability wording for unmeasured paths:
 
 The retained [Phase 16 closure archive](../benchmarks/evidence/phase16-e171c584e8e67215f1e5fb00f6f908d2e434b10c/README.md) records local, reviewable execution evidence. It is not release-grade evidence and must not be cited publicly without the disclosure workflow below.
 
+The [v2 P0 scaling archive](../benchmarks/evidence/p0-scaling-v2-2026-11-26/README.md) retains a complete local matrix and automated evidence audit. It remains local-only; its exact timing/reference/memory boundaries and lack of independent governance approval must accompany interpretation.
+
 The repository scripts that produce claim-ready artifacts are:
 
 | Script | Artifact stem | Scope |
 | :--- | :--- | :--- |
-| `sagittarius_py/tests/test_performance/benchmark_scaling.py` | `scaling_results` | Reduced-basis CPU scaling rows. |
+| `sagittarius_py/tests/test_performance/benchmark_scaling.py` | `scaling_results`, `scaling_results_suite` | Frozen CPU geometry/radius/size matrix, numerical gates, independent repeats and resource evidence; exact scope and acceptance in the Phase 16 matrix. |
 | `sagittarius_py/tests/test_performance/benchmark_gpu.py` | `gpu_bench_results` | CPU vs CUDA timing with observable evaluation. |
 | `sagittarius_py/tests/test_performance/benchmark_cuda_mwis_protocol.py` | `cuda_parity`, `mwis_gpu_parity` | Opt-in, doctor-gated CPU/CUDA and weighted-MWIS parity with local-only disclosure. |
 | `sagittarius_py/tests/test_performance/benchmark_cluster.py` | `cluster_bench_results` | Parallel parameter-sweep timing. |

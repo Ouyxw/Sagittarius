@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-families/v1`
 Last reviewed: 2026-11-26
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 remains planned until its implementation and retained evidence pass acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling implementation and evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -159,7 +159,10 @@ Required evidence:
 
 ## Benchmarking V2
 
-Status: `Planned contract`
+Status: `Mixed`
+
+Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-11-26/README.md): 42 scenarios and 210 eligible repeats, including all six N=20 geometry/radius configurations. This is bounded local numerical/software evidence; other suite targets and release/public-use gates remain separate.
+
 
 This generation maps the seven suites in [plan v2](plans/v2.md) into the existing family taxonomy. Matrices, thresholds and delivery batches remain defined by that plan. Current V1 evidence is preserved separately; no V2 measurement is completed by this document.
 
@@ -245,7 +248,7 @@ Purpose: complete P0 scaling/ablation and P1 GPU/solver/observable characterizat
 
 | Suite | V2 matrix and implementation | Reference/interpretation gate |
 | :--- | :--- | :--- |
-| `scaling` | N=2,4,6,8,12,16,20; chain and declared rectangular shapes; Rb/a=1.1,1.5,2.1. | Small projected-dense and larger sensitivity checks; actual D/pruning, setup/solve/memory and resource rows. |
+| `scaling` | Implemented: N=2,4,6,8,12,16,20; chain and declared rectangular shapes; Rb/a=1.1,1.5,2.1. | Small projected-dense and larger sensitivity checks; actual D/pruning, setup/solve/memory and resource rows. |
 | `ablation` | Four CPU matvec paths at N=4,8,12; reduced extensions N=16,20; separate optional CUDA solve. | Fixed normalized inputs; initial full relative error 1e-12 and reduced absolute error 1e-10; retain dense construction intermediates and Python implementation identity. |
 | `gpu` | Chain parity N=2,4,8, 2x2 geometry, performance chain N=12,16,20 and existing small MWIS parity. | Initialized doctor/opt-in, same times/configuration, symmetric warmup, synchronization and per-size error initially <=1e-6. |
 | `solver` | Rabi, addressed chain and time-dependent ramp; Tsit5/Vern9 reltol=1e-6,1e-8,1e-10; RK4 dt=T/100,T/200,T/400; 21/101/501 output points. | Legal method/stepping combinations, verified tighter/independent references, common times and error target initially 1e-6. |

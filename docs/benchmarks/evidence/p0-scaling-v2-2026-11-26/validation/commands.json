@@ -1,0 +1,12 @@
+{
+  "cwd": "/home/oyxw/Sagittarius/sagittarius_py",
+  "campaign": "uv run python tests/test_performance/benchmark_scaling.py --output-dir benchmark-output/p0-scaling-v2-2026-11-26 --timeout-seconds 600 --memory-limit-mb 4096",
+  "final_tests": "uv run pytest tests/test_scaling_benchmark.py tests/test_benchmark_artifacts.py tests/test_benchmark_row_contract.py tests/test_benchmark_suite_artifact.py tests/test_benchmark_failures.py tests/test_cross_language_golden.py tests/test_solver_configuration.py tests/test_serialization.py tests/test_benchmark_documentation_consistency.py tests/test_documentation_governance.py tests/test_benchmark_suite_public_api.py -q",
+  "audit": ".venv/bin/python ../scripts/audit_scaling_campaign.py benchmark-output/p0-scaling-v2-2026-11-26",
+  "documentation": {
+    "cwd": "/home/oyxw/Sagittarius",
+    "command": "python3 scripts/validate_documentation.py"
+  },
+  "measurement_notes": "Shared workstation; final-validation (68-test set) overlapped initial chain group. Post-campaign 71-test validation ran after every scenario completed. No measurements excluded for duration.",
+  "pilot_scope": "Development numerical probes; metadata/failure handling refined during pilot-02. Main numerical reference and solver settings unchanged; pilots are not frozen timing evidence."
+}

@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-protocol/v1`
 Last reviewed: 2026-11-26
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 remains planned until its implementation and retained evidence pass acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling implementation and evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -99,9 +99,12 @@ Benchmark reports must use bounded wording. A valid report names artifact path, 
 
 ## Benchmarking V2
 
-Status: `Planned contract`
+Status: `Mixed`
 
-This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It defines acceptance discipline for planned campaigns; current runners still need the specified implementation work. GOV-004 remains the policy authority. Benchmarking V2 does not rename artifact schemas or reclassify the initial archive.
+Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-11-26/README.md): 42 scenarios and 210 eligible repeats, including all six N=20 geometry/radius configurations. This is bounded local numerical/software evidence; other suite targets and release/public-use gates remain separate.
+
+
+This generation applies the [P0–P1 implementation plan v2](plans/v2.md). It defines campaign acceptance discipline; scaling now implements the frozen matrix, supervised child processes, references and repeated measurements. Other runners still need the specified work. GOV-004 remains the policy authority. Benchmarking V2 does not rename artifact schemas or reclassify the initial archive.
 
 <a id="v2-scope"></a>
 
@@ -138,6 +141,8 @@ Plan defaults and matrix values require a retained freeze record before measurem
 <a id="v2-warmup-and-measurement-rules"></a>
 
 ### Warmup and Measurement Rules
+
+Scaling implements the [measurement boundaries](plans/v2.md#implemented-measurement-boundaries), including single-thread child execution, reset states, separate doctor/basis/first-solve/warmup timing, eligible repeats, sampled RSS limits and partial checkpoints. Its SDK timer includes operator construction, collection and manifest generation. Reference checks and artifact writes happen after timing.
 
 Use two warmups and at least five independent measured executions per frozen scenario/path by default. The default matvec batch is 50 operations, independently recorded; preserve legacy `repeats` semantics when adding controls. Reset initial state and fixed seeded input for every execution. V2 matvec uses fixed normalized H*psi input rather than growing H^k*psi and carries a distinct workload label.
 

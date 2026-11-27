@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-tiers/v1`
 Last reviewed: 2026-11-26
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 remains planned until its implementation and retained evidence pass acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling implementation and evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -141,7 +141,10 @@ A local RTX 5070 Ti can be used for Sagittarius CUDA benchmark development when 
 
 ## Benchmarking V2
 
-Status: `Planned contract`
+Status: `Mixed`
+
+Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-11-26/README.md): 42 scenarios and 210 eligible repeats, including all six N=20 geometry/radius configurations. This is bounded local numerical/software evidence; other suite targets and release/public-use gates remain separate.
+
 
 This generation applies the same five tiers to [plan v2](plans/v2.md). It distinguishes planned runner work from verified executable commands and keeps the initial V1 evidence complete. Long campaigns remain manual, RC or self-hosted work.
 
@@ -161,17 +164,55 @@ This generation applies the same five tiers to [plan v2](plans/v2.md). It distin
 
 ### Runnable Commands and Outputs
 
-The runnable V1 commands above remain the current guide. The entries below describe implementation work and output targets, not new executable CLI examples. Add full V2 commands only after the corresponding runner/flags and smoke evidence exist.
+The V1 commands are retained as historical baseline. Scaling now has verified V2 CLI support; other entries below remain implementation targets until their runners and smoke evidence exist.
 
 | Suite | Existing or planned entry point | V2 outputs and readiness |
 | :--- | :--- | :--- |
-| Scaling | Existing `benchmark_scaling.py` needs CLI/matrix/repeat/resource work. | Preserve `scaling_results`; planned `scaling_results_suite`. Current command uses its fixed default scan. |
+| Scaling | Implemented `benchmark_scaling.py` CLI; positional Python function retained. | `scaling_results` and `scaling_results_suite` JSON/CSV/Markdown; `scaling_repeats.json`, campaign/checkpoints and coverage. |
 | Ablation | Existing `benchmark_ablation.py` and helper need independent measurements and numerical/resource gates. | Preserve `ablation_bench_results`; optional suite. Existing `--repeats` counts batch operations. |
 | GPU | Existing `benchmark_gpu.py` adopts doctor/opt-in discipline from `benchmark_cuda_mwis_protocol.py`. | Preserve `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`; planned scan aggregate and repeated matched measurements. |
 | MWIS/UDG | Existing `benchmark_mwis_aqc.py` and adapter need expanded matrix/provenance. | Preserve initial tier outputs; planned `mwis_aqc_performance` and suite. |
 | Solver | Existing `benchmark_solver_performance.py` needs sensitivity and timer work. | Preserve correctness outputs; planned `solver_sensitivity` and suite. |
 | Observables | Planned `benchmark_observables.py`. | Planned `observable_performance` and suite; runner/flags not implemented. |
 | Open-system | Planned `benchmark_open_system_performance.py`. | Planned `open_system_performance` and suite; preserve existing one-atom correctness runner. |
+
+Run from `sagittarius_py` after source/editable installation:
+
+```bash
+# Full 42-scenario matrix, including N=20; unique output directory per campaign.
+uv run python tests/test_performance/benchmark_scaling.py \
+  --output-dir benchmark-output/scaling-v2 \
+  --timeout-seconds 600 --memory-limit-mb 4096
+
+# Bounded real-backend smoke with the same two warmups/five measured repeats.
+uv run python tests/test_performance/benchmark_scaling.py \
+  --sizes 2 --geometries chain --radii 1.1 \
+  --output-dir benchmark-output/scaling-v2-smoke
+```
+
+Scaling supports `--sizes`, `--geometries chain rectangle`, `--radii` (Rb/a),
+repeatable `--scenario ID`, `--warmups`, `--repeat-count`, `--timeout-seconds`,
+`--memory-limit-mb`, `--observable-atol` and `--output-dir`. Defaults are the
+plan matrix, two warmups, five repeats, 600 seconds, 4096 MiB and 1e-8.
+Changing the accuracy target must be a predeclared pilot decision. Short counts
+remain incomplete diagnostics; CLI exit 0 requires every selected row to pass.
+A subset smoke does not pass full-matrix coverage. RSS supervision currently
+requires Linux `/proc`; unsupported platforms retain failed setup rows.
+
+The Python function `benchmark_scaling(n_max=16, blockade_radius=5.0,
+output_dir=".")` retains consecutive chain N=2..n_max and absolute radius;
+zero radius retains full basis. New keyword controls select the v2 axes.
+Named runtime statistics are separate from the legacy single-call `time_s`.
+To audit the frozen source, configuration, companions and saved runs from the
+repository root:
+
+```bash
+sagittarius_py/.venv/bin/python scripts/audit_scaling_campaign.py \
+  sagittarius_py/benchmark-output/scaling-v2
+```
+
+Use `--allow-partial` only to audit diagnostic/subset artifacts; its report
+still records missing successful v2 scenarios.
 
 All V2 performance commands eventually expose or retain frozen scenarios, output location, warmup/independent-repeat policy and numerical resource limits. Do not assume a shared flag exists on current scripts. Public examples must retain source-checkout execution and GPU opt-in requirements.
 

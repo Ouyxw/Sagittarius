@@ -13,7 +13,7 @@ The initial protocol suite is done. `Mixed` reflects the implemented initial sui
 
 The [P0–P1 implementation plan v2](plans/v2.md) defines the seven-suite matrices, references, delivery batches and evidence gates. Scaling, MWIS/UDG and open-system campaigns target 20 atoms with separate basis/resource limits. These are planned campaign targets; existing retained measurements and CUDA maturity remain unchanged. P2 noise/cluster work remains outside that plan.
 
-The protocol, tier, family and artifact documents each contain parallel `Benchmarking V1` and `Benchmarking V2` parts. V1 preserves the full original content and its commands/evidence wording; V2 uses the same chapter organization for plan v2 acceptance work. The V1 metadata and future-scope statements belong to that initial baseline; current planned targets are described in V2 and the implementation plan.
+The protocol, tier, family and artifact documents each contain parallel `Benchmarking V1` and `Benchmarking V2` parts. V1 preserves the full original content and its commands/evidence wording; V2 uses the same chapter organization for plan v2 acceptance work. The V1 metadata and future-scope statements belong to that initial baseline; V2 and the implementation plan track current scaling support and remaining suite targets.
 
 These documents complement the governance pages:
 
@@ -21,6 +21,9 @@ These documents complement the governance pages:
 - [`SPEC-GOV-001-performance-claims.md`](../governance/SPEC-GOV-001-performance-claims.md) defines how measured performance may be stated publicly.
 - [`SPEC-GOV-002-disclosure-control.md`](../governance/SPEC-GOV-002-disclosure-control.md) defines disclosure review for public benchmark reports.
 - [`SPEC-GOV-003-prior-art-notes.md`](../governance/SPEC-GOV-003-prior-art-notes.md) defines wording boundaries for Rydberg, MWIS, and neutral-atom claims.
+
+
+Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-11-26/README.md): 42 scenarios and 210 eligible repeats, including all six N=20 geometry/radius configurations. This is bounded local numerical/software evidence; other suite targets and release/public-use gates remain separate.
 
 ## Documents
 
@@ -30,7 +33,7 @@ These documents complement the governance pages:
 | [`tiers.md`](tiers.md) | Parallel [V1](tiers.md#benchmarking-v1)/[V2](tiers.md#benchmarking-v2) tier summaries, command/output boundaries, and smoke/correctness/parity/scaling/stress requirements. |
 | [`families.md`](families.md) | Parallel [V1](families.md#benchmarking-v1)/[V2](families.md#benchmarking-v2) family summaries and physics/dynamics/open-system/optimization/backend/sweep protocols. |
 | [`artifact-contracts.md`](artifact-contracts.md) | Parallel [V1](artifact-contracts.md#benchmarking-v1)/[V2](artifact-contracts.md#benchmarking-v2) artifact types, aggregate/row contracts, failures, metrics, retention and compatibility. |
-| [`plans/v2.md`](plans/v2.md) | Planned P0–P1 implementation, matrices through declared 20-atom targets, numerical/statistical gates, resource policy and delivery/acceptance evidence. |
+| [`plans/v2.md`](plans/v2.md) | P0–P1 plan, implemented scaling matrix/controls, remaining targets, numerical/statistical gates, resource policy and delivery/acceptance evidence. |
 
 ## Implemented CPU smoke
 
@@ -94,7 +97,7 @@ It records per-worker throughput rows, a `sweep-artifact/v1` checkpoint and fina
 
 Run every command in this section from `sagittarius_py`. Unless stated otherwise, each runner writes JSON, CSV, and Markdown companions under `benchmark-output`; suite-capable runners additionally write a `*_suite.json` aggregate that retains passed, failed, skipped, and incomplete rows.
 
-This guide lists existing commands only. Planned measurement flags, the observable/open-system performance runners and new artifact stems are tracked in [plan v2](plans/v2.md); add their runnable examples after implementation and smoke verification.
+The [V2 scaling CLI](tiers.md#v2-runnable-commands-and-outputs) now provides the 42-scenario matrix, references, independent repeats, resource supervision and suite companions. This guide lists existing commands only. Remaining planned measurement flags, the observable/open-system performance runners and new artifact stems are tracked in [plan v2](plans/v2.md); add their runnable examples after implementation and smoke verification.
 
 | Tier | Runnable command | Expected output and boundary |
 | :--- | :--- | :--- |

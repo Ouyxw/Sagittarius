@@ -5,7 +5,7 @@ Roadmap: Phase 16
 Version: `benchmark-artifact-contracts/v1`
 Last reviewed: 2026-11-26
 
-This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 remains planned until its implementation and retained evidence pass acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
+This page has two parallel parts: [Benchmarking V1](#benchmarking-v1) preserves the complete original document with nested headings; [Benchmarking V2](#benchmarking-v2) follows the same chapter organization for the planned P0–P1 work in [plan v2](plans/v2.md). V1 retains its original metadata, commands and evidence wording as the initial baseline. V2 scaling implementation and evidence are tracked in plan v2; other suite targets remain planned until acceptance. GOV-004 remains the policy authority, and the generation names do not rename artifact schemas.
 
 ## Benchmarking V1
 
@@ -146,9 +146,12 @@ Compatible changes may add optional fields or new metric names. Incompatible cha
 
 ## Benchmarking V2
 
-Status: `Planned contract`
+Status: `Mixed`
 
-This generation defines the artifact work for the seven P0–P1 suites in [plan v2](plans/v2.md#artifact-and-compatibility-work). Its acceptance targets become executable contracts only when writers, validators, readers and tests are implemented together. The existing schema names and field responsibilities remain authoritative.
+Scaling has [retained local v2 acceptance evidence](evidence/p0-scaling-v2-2026-11-26/README.md): 42 scenarios and 210 eligible repeats, including all six N=20 geometry/radius configurations. This is bounded local numerical/software evidence; other suite targets and release/public-use gates remain separate.
+
+
+This generation defines the artifact work for the seven P0–P1 suites in [plan v2](plans/v2.md#artifact-and-compatibility-work). Scaling implements its compatible extensions with structured rows, suite validation, audit tooling and regression tests; other acceptance targets become executable contracts when their writers, readers and tests land together. The existing schema names and field responsibilities remain authoritative.
 
 <a id="v2-artifact-types"></a>
 
@@ -162,7 +165,7 @@ This generation defines the artifact work for the seven P0–P1 suites in [plan 
 | `run-manifest/v1` | Actual executed simulation configuration and requested/effective settings. | Pure matvec work has benchmark inputs/reference reports rather than fabricated simulation manifests. |
 | `result-artifact/v1` | Saved simulation results with metadata, diagnostics, manifest and shared payload. | Add actual AQC result provenance through the existing adapter boundary. |
 
-Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Planned additions include `scaling_results_suite`, optional ablation/GPU aggregates, and `mwis_aqc_performance`, `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
+Preserve current stems: `scaling_results`, `ablation_bench_results`, `gpu_bench_results`, `cuda_parity`, `mwis_gpu_parity`, and existing MWIS/solver/correctness outputs. Scaling now writes `scaling_results_suite` and `scaling_repeats.json`. Planned additions include optional ablation/GPU aggregates, and `mwis_aqc_performance`, `solver_sensitivity`, `observable_performance`, `open_system_performance` with suite aggregates. Their names are implementation targets; runnable documentation follows verified writers.
 
 <a id="v2-aggregate-shape"></a>
 
@@ -188,7 +191,27 @@ Use the existing validated `benchmark-suite-artifact/v1` envelope:
 }
 ```
 
-This illustrates the envelope, not completed evidence. Retain per-repeat rows and the ordered campaign configuration. Finalize compatible placement of measurement summaries with validators: each summary must identify its input rows, statistic convention, eligible counts and unavailable values. Do not reinterpret existing deterministic summary fields. A configuration hash links to retained replay inputs rather than replacing them.
+This illustrates the envelope; the scaling runner uses suite ID `phase16-p0-scaling-v2`. Retain per-repeat rows and the ordered campaign configuration. Finalize compatible placement of measurement summaries with validators: each summary must identify its input rows, statistic convention, eligible counts and unavailable values. Do not reinterpret existing deterministic summary fields. A configuration hash links to retained replay inputs rather than replacing them.
+
+Scaling stores one aggregate row per declared scenario in both `scaling_results`
+and its suite. `metrics.repeats` retains individual measurements and
+`metrics.statistics` identifies eligible input row IDs, counts and quantiles;
+`scaling_repeats.json` exposes those measurements as validated structured rows.
+`campaign.json` retains replay inputs/hash, source snapshots, commands, limits,
+reference policy and environment. Per-scenario checkpoints retain initialized
+doctor, partial measurements and runtime project manifests. `coverage.json`
+records missing successful matrix coverage. `scripts/audit_scaling_campaign.py`
+checks schema, configuration/source hashes, companions, result/manifest pairs,
+statistics and effective settings before evidence acceptance.
+
+Legacy flat `N`, `basis_size`, `full_dim`, `time_s`, `max_rss` and
+`max_rss_unit` are retained. `time_s` is the first measured SDK call;
+`median_time_s` has distinct summary semantics. `metrics.memory` normalizes
+kernel process HWM/RSS to bytes and keeps source units; the flat `max_rss`
+retains the existing resource-module source value and unit. Both represent
+scenario-process lifetime, including references, rather than solve-only memory.
+The artifact envelope's `memory` is the supervisor's own process and is not
+per-scenario memory. Absent child memory remains unavailable.
 
 <a id="v2-required-row-fields"></a>
 
